@@ -1,0 +1,25 @@
+# Descubrimiento automático (sin aprobación manual). La licencia se REGISTRA, no filtra.
+target_new_videos: 20          # detenerse al sumar 15–20 videos nuevos aceptados
+min_new_videos: 15
+search_per_query: 25
+min_duration_s: 180            # 3 min
+max_duration_s: 2400           # 40 min
+queries:
+  - "sustentacion de tesis ingenieria exposicion"
+  - "exposicion final de curso universidad"
+  - "debate oral estudiantes evaluacion"
+  - "disertacion presentacion oral proyecto"
+quality:
+  language: es
+  min_language_prob: 0.80
+  min_frontal_face_rate: 0.50
+  max_multi_face_rate: 0.30     # por segmento
+  min_speech_ratio: 0.50
+  max_face_gap_s: 1.0
+  min_segment_s: 20
+  max_segment_s: 300            # trozos de hasta 5 min
+  crop_scale: 2.6
+  crop_smooth_s: 1.0
+  jump_frac: 0.25               # cambio de caja > 25 % del ancho...
+  jump_window_s: 0.3            # ...en < 0.3 s => corte de cámara
+  out_min_side: 480

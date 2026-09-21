@@ -1,0 +1,62 @@
+# Segunda pasada de minería: HABLA ESPONTÁNEA NO GUIONADA
+#
+# Motivo del cambio de consultas
+# ------------------------------
+# El primer corpus (config/sources.yaml) buscaba sustentaciones y exposiciones
+# finales: discurso preparado, ensayado y a menudo leído. El resultado fue un
+# corpus de oradores fluidos — `block` apareció 8 veces en 161 minutos y sólo en
+# 3 de 18 hablantes, y el conjunto de prueba quedó con n=2. Una clase con ese
+# soporte no permite estimar nada.
+#
+# Las disfluencias de suspensión (bloqueos, prolongaciones, revisiones) aparecen
+# cuando el hablante PLANIFICA MIENTRAS HABLA. Estas consultas apuntan a esas
+# situaciones: rondas de preguntas, entrevistas sin guion, explicaciones
+# improvisadas. La ronda de preguntas del jurado en una sustentación es la
+# fuente más densa: el hablante está sin guion, bajo presión y con la cámara
+# encima.
+#
+# Uso (no destruye el corpus existente; data_mining es resumible vía state.json):
+#   python scripts/data_mining.py --stage discover --config config/sources_spontaneous.yaml
+#   python scripts/data_mining.py --stage extract --config config/sources_spontaneous.yaml
+
+# El contador compara contra el total acumulado de videos aceptados por
+# búsqueda, incluidos los de la primera pasada. Se sube el objetivo para que
+# esta pasada sume ~25 videos nuevos sobre los ~20 ya existentes.
+target_new_videos: 45
+min_new_videos: 35
+search_per_query: 30
+min_duration_s: 180
+max_duration_s: 2400
+
+queries:
+  # --- sin guion bajo presión: la fuente más densa en bloqueos
+  - "sustentacion de tesis preguntas del jurado"
+  - "defensa de tesis ronda de preguntas respuestas"
+  - "examen oral universidad preguntas del profesor"
+  - "entrevista de trabajo simulada en espanol respuestas"
+  # --- habla espontánea con cara visible
+  - "entrevista espontanea opinion camara"
+  - "podcast en espanol entrevista sin editar"
+  - "conversatorio universitario preguntas del publico"
+  - "testimonio personal experiencia camara"
+  # --- explicación improvisada (planificación en línea)
+  - "explicacion improvisada tema sin guion"
+  - "responde preguntas de sus seguidores en vivo"
+
+quality:
+  language: es
+  min_language_prob: 0.80
+  min_frontal_face_rate: 0.50
+  max_multi_face_rate: 0.30
+  # El habla espontánea tiene más silencio que una exposición leída: bajar el
+  # umbral evita descartar justamente el material que interesa. Un valor más
+  # bajo no relaja ningún criterio de etiquetado, sólo de admisión del video.
+  min_speech_ratio: 0.40
+  max_face_gap_s: 1.0
+  min_segment_s: 20
+  max_segment_s: 300
+  crop_scale: 2.6
+  crop_smooth_s: 1.0
+  jump_frac: 0.25
+  jump_window_s: 0.3
+  out_min_side: 480

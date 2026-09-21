@@ -1,0 +1,25 @@
+.env*
+.venv/
+data/
+results/
+run_log.txt
+__pycache__/
+.pytest_cache/
+models/
+models_stale/
+results_smoke_synthetic/
+
+# Local model and media artifacts
+*.mp4
+*.wav
+*.webm
+*.npz
+*.pt
+*.pth
+*.onnx
+*.task
+
+# Local credentials and runtime caches
+*.pem
+*.key
+*.jsonl
