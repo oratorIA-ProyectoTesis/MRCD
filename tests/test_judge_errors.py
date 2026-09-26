@@ -159,6 +159,15 @@ def test_escalation_succeeds_first_try_reports_ok():
     assert note == "ok" and n_used == 2 and v["classification"] == "fluent"
 
 
+def test_no_frames_first_try_reports_audio_text_only_fallback():
+    def caller(*args):
+        return '{"classification":"fluent","confidence":0.9}'
+
+    verdict, n_used, note = J.ask_judge(caller, "m", "p", [], "k", J.CLASSES)
+    assert verdict["classification"] == "fluent"
+    assert n_used == 0 and note == "sin_fotogramas"
+
+
 def test_escalation_reraises_when_everything_fails():
     def caller(*a, **k):
         raise J.JudgeRefusal("siempre no", "openai")

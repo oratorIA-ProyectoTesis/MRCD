@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import json
 import os
 import random
@@ -31,11 +32,15 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from core.constants import ACOUSTIC_HOP_S, BACKGROUND, RANDOM_SEED, TAXONOMY, WINDOW_S  # noqa: E402
+from core.contracts import validate_raw_features  # noqa: E402
+from core.dataset import (JUDGE_INTERVAL_VERSION, gold_windows, judgment_window_index,
+                          seconds_to_ms, window_starts)  # noqa: E402
 
 JUDGE_DIR = ROOT / "data/judge"
 CACHE = JUDGE_DIR / "judgments.jsonl"
 ERRORS = JUDGE_DIR / "errors.jsonl"
 CLASSES = list(TAXONOMY) + [BACKGROUND]
+JUDGE_INPUT_VERSION = "2"
 
 SYSTEM = """Eres un lingüista y fonoaudiólogo experto en análisis del discurso oral en español.
 Clasificas segmentos de presentaciones orales según una taxonomía cerrada de fluidez verbal.
@@ -269,7 +274,7 @@ def ask_judge(caller, model: str, prompt: str, images: list[bytes], api_key: str
         p = prompt if attempt == 0 else prompt + "\n\nRecuerda: responde SOLO el objeto JSON."
         try:
             return parse_verdict(caller(model, p, imgs, api_key), classes), len(imgs), (
-                "ok" if attempt == 0 else ("reintento_formato" if attempt == 1 else "sin_fotogramas"))
+                "sin_fotogramas" if not imgs else "ok" if attempt == 0 else "reintento_formato")
         except JudgeRefusal as exc:
             last = exc
             if attempt < 2:
@@ -309,22 +314,78 @@ def load_env_file() -> None:
         os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
 
 
-def pick_provider(model: str) -> tuple[str, str]:
+PROVIDER_CALLERS = {"anthropic": call_anthropic, "openai": call_openai,
+                    "gemini": call_gemini, "groq": call_groq, "ollama": call_ollama}
+PROVIDER_KEYS = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY",
+                 "gemini": "GEMINI_API_KEY", "groq": "GROQ_API_KEY"}
+
+
+def provider_for_model(model: str, provider: str = "auto") -> str:
+    """Resolve transport without requiring credentials (also used by dry-run/cache)."""
+    if provider == "auto":
+        provider = ("anthropic" if model.startswith("claude") else
+                    "gemini" if model.startswith("gemini") else
+                    "groq" if model.startswith(("llama-", "mixtral-", "gemma-")) else
+                    "openai")
+    if provider not in PROVIDER_CALLERS:
+        raise ValueError(f"proveedor no soportado: {provider}")
+    return provider
+
+
+def pick_provider(model: str, provider: str = "auto") -> tuple[str, str]:
+    """Bind a model to exactly one provider; never use another provider's key."""
     load_env_file()
-    if model.startswith("claude") and os.environ.get("ANTHROPIC_API_KEY"):
-        return "anthropic", os.environ["ANTHROPIC_API_KEY"]
-    if model.startswith("gemini") and os.environ.get("GEMINI_API_KEY"):
-        return "gemini", os.environ["GEMINI_API_KEY"]
-    if os.environ.get("OPENAI_API_KEY") and not model.startswith("claude"):
-        return "openai", os.environ["OPENAI_API_KEY"]
-    if os.environ.get("ANTHROPIC_API_KEY"):
-        return "anthropic", os.environ["ANTHROPIC_API_KEY"]
-    sys.exit(
-        "Falta la API key. Dos formas (elige una):\n"
-        "  A) Crea el archivo .env en esta carpeta con una línea:  OPENAI_API_KEY=sk-...\n"
-        "  B) En la misma consola donde lanzas el script:  $env:OPENAI_API_KEY=\"sk-...\"\n"
-        "Con OpenAI usa --model gpt-4o; con Gemini, GEMINI_API_KEY y --model gemini-2.0-flash; "
-        "con Anthropic, ANTHROPIC_API_KEY y --model claude-sonnet-4-5.")
+    provider = provider_for_model(model, provider)
+    if provider == "ollama":
+        return provider, "ollama"
+    key_name = PROVIDER_KEYS[provider]
+    key = os.environ.get(key_name)
+    if not key:
+        sys.exit(f"Falta {key_name} para el proveedor {provider}; configura la variable o .env local.")
+    return provider, key
+
+
+def caller_for(provider: str):
+    try:
+        return PROVIDER_CALLERS[provider]
+    except KeyError:
+        raise ValueError(f"proveedor no soportado: {provider}") from None
+
+
+def judgment_input_fingerprint(prompt: str, images: list[bytes], mp4: Path | None) -> str:
+    """Bind a verdict to the exact rubric, context, frame bytes, and media identity."""
+    media = None
+    if mp4 is not None:
+        media = {"path": str(mp4.resolve()), "exists": mp4.exists()}
+        if mp4.exists():
+            stat = mp4.stat()
+            media.update(size=stat.st_size, mtime_ns=stat.st_mtime_ns)
+    payload = {"version": JUDGE_INPUT_VERSION, "system": SYSTEM, "prompt": prompt,
+               "media": media, "frame_sha256": [hashlib.sha256(im).hexdigest() for im in images]}
+    return hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+
+
+def judgment_cache_key(row: dict, provider: str, model: str) -> tuple | None:
+    """Legacy rows without provider/fingerprint are intentionally not reusable."""
+    if (row.get("provider") != provider or row.get("model") != model
+            or not row.get("input_fingerprint")
+            or row.get("interval_identity_version") != JUDGE_INTERVAL_VERSION):
+        return None
+    return (provider, model, row["rid"], seconds_to_ms(row["start"]),
+            seconds_to_ms(row["end"]), row["input_fingerprint"])
+
+
+def load_judgment_cache(path: Path, provider: str, model: str) -> dict:
+    """Read only verdicts from the exact provider/model experiment."""
+    done = {}
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                row = json.loads(line)
+                key = judgment_cache_key(row, provider, model)
+                if key is not None:
+                    done[key] = row
+    return done
 
 
 # ------------------------------------------------------------------ contexto
@@ -378,9 +439,11 @@ def build_prompt(prev: str, seg: str, nxt: str, meas: dict) -> str:
 
 # ------------------------------------------------------------------ muestreo
 def sample_items(man: dict, per_class: int, low_conf: int, negatives: int, seed: int) -> list[dict]:
+    """Sample by class and speaker without assigning two calls to one test window."""
     rng = random.Random(seed)
     by_class: dict[str, list] = defaultdict(list)
     per_rec_events: dict[str, list] = {}
+    grids = {r["recording_id"]: window_starts(r["duration_s"]) for r in man["recordings"]}
     for r in man["recordings"]:
         ev = json.loads((ROOT / r["events_json"]).read_text(encoding="utf-8"))
         per_rec_events[r["recording_id"]] = ev
@@ -389,46 +452,96 @@ def sample_items(man: dict, per_class: int, low_conf: int, negatives: int, seed:
             by_class[key].append(dict(rid=r["recording_id"], idx=i, start=e["start_ms"] / 1000,
                                       end=e["end_ms"] / 1000, origin="candidate" if key != "_low" else "low_conf",
                                       heur=e["category"]))
+
+    occupied: set[tuple[str, int]] = set()
+
+    def reserve(item: dict) -> bool:
+        grid = grids[item["rid"]]
+        if not len(grid):
+            return False
+        # Mirror write_gold's milliseconds conversion and gold_windows' nearest-centre rule.
+        index = judgment_window_index(seconds_to_ms(item["start"]), seconds_to_ms(item["end"]), grid)
+        key = (item["rid"], index)
+        if key in occupied:
+            return False
+        occupied.add(key)
+        return True
+
+    def balanced_pick(pool: list[dict], limit: int) -> list[dict]:
+        groups: dict[str, list[dict]] = defaultdict(list)
+        for item in pool:
+            groups[item["rid"]].append(item)
+        speakers = sorted(groups)
+        rng.shuffle(speakers)
+        for items in groups.values():
+            rng.shuffle(items)
+        selected = []
+        while len(selected) < limit and speakers:
+            remaining = []
+            for rid in speakers:
+                candidates = groups[rid]
+                while candidates:
+                    item = candidates.pop()
+                    if reserve(item):
+                        selected.append(item)
+                        break
+                if candidates:
+                    remaining.append(rid)
+                if len(selected) >= limit:
+                    break
+            speakers = remaining
+        return selected
+
     items = []
-    for c in TAXONOMY:
-        pool = by_class.get(c, [])
-        rng.shuffle(pool)
-        # reparto equitativo entre oradores
-        pool.sort(key=lambda x: x["rid"])
-        seen: dict[str, int] = defaultdict(int)
-        picked = []
-        for it in sorted(pool, key=lambda x: (seen[x["rid"]], rng.random())):
-            if len(picked) >= per_class:
-                break
-            seen[it["rid"]] += 1
-            picked.append(it)
-        items += picked
-    lc = by_class.get("_low", [])
-    rng.shuffle(lc)
-    items += lc[:low_conf]
-    # negativos: ventanas de 3 s sin candidato
-    negs = []
+    def capacity(category: str) -> int:
+        return len({(item["rid"], judgment_window_index(seconds_to_ms(item["start"]),
+                                                         seconds_to_ms(item["end"]), grids[item["rid"]]))
+                    for item in by_class.get(category, []) if len(grids[item["rid"]])})
+
+    # Fill scarce classes first, so a class with one possible window is not
+    # displaced by another class that has a non-colliding alternative.
+    for category in sorted(TAXONOMY, key=capacity):
+        items += balanced_pick(by_class.get(category, []), per_class)
+    items += balanced_pick(by_class.get("_low", []), low_conf)
+
+    # Negative examples are actual 3 s dataset windows that overlap no heuristic
+    # event; this avoids random intervals mapping to an already selected window.
+    negative_pool = []
     for r in man["recordings"]:
-        ev = per_rec_events[r["recording_id"]]
-        spans = [(e["start_ms"] / 1000, e["end_ms"] / 1000) for e in ev]
-        for _ in range(6):
-            if r["duration_s"] < WINDOW_S + 1:
-                break
-            a = rng.uniform(0.5, max(0.6, r["duration_s"] - WINDOW_S - 0.5))
-            b = a + WINDOW_S
+        rid = r["recording_id"]
+        spans = [(e["start_ms"] / 1000, e["end_ms"] / 1000) for e in per_rec_events[rid]]
+        for start in grids[rid]:
+            a, b = float(start), float(start + WINDOW_S)
             if any(min(b, s2) - max(a, s1) > 0 for s1, s2 in spans):
                 continue
-            negs.append(dict(rid=r["recording_id"], idx=-1, start=a, end=b, origin="negative", heur=BACKGROUND))
-    rng.shuffle(negs)
-    items += negs[:negatives]
+            negative_pool.append(dict(rid=rid, idx=-1, start=a, end=b,
+                                      origin="negative", heur=BACKGROUND))
+    items += balanced_pick(negative_pool, negatives)
     rng.shuffle(items)
     return items
+
+
+def validate_sampled_windows(man: dict, items: list[dict]) -> None:
+    """Fail before provider calls if a future sampler change reintroduces collisions."""
+    by_recording: dict[str, list[dict]] = defaultdict(list)
+    for item in items:
+        by_recording[item["rid"]].append(dict(category=BACKGROUND,
+                                              start_ms=seconds_to_ms(item["start"]),
+                                              end_ms=seconds_to_ms(item["end"])))
+    for recording in man["recordings"]:
+        rid = recording["recording_id"]
+        try:
+            gold_windows(by_recording[rid], window_starts(recording["duration_s"]))
+        except ValueError as exc:
+            raise ValueError(f"{rid}: sampled judge intervals are not exportable: {exc}") from exc
 
 
 # ------------------------------------------------------------------ main
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="claude-sonnet-4-5")
+    ap.add_argument("--provider", choices=["auto", *PROVIDER_CALLERS], default="auto",
+                    help="proveedor explícito; usa ollama para un modelo de visión local")
     ap.add_argument("--per-class", type=int, default=60)
     ap.add_argument("--low-conf", type=int, default=60)
     ap.add_argument("--negatives", type=int, default=120)
@@ -443,52 +556,60 @@ def main():
     items = sample_items(man, a.per_class, a.low_conf, a.negatives, a.seed)
     if a.max_events:
         items = items[: a.max_events]
+    validate_sampled_windows(man, items)
     JUDGE_DIR.mkdir(parents=True, exist_ok=True)
-    done = {}
-    if CACHE.exists():
-        for line in CACHE.read_text(encoding="utf-8").splitlines():
-            if line.strip():
-                j = json.loads(line); done[(j["rid"], round(j["start"], 2), round(j["end"], 2))] = j
-    print(f"[judge] {len(items)} ítems muestreados | ya juzgados: {len(done)} | modelo {a.model}")
+    provider = provider_for_model(a.model, a.provider)
+    done = load_judgment_cache(CACHE, provider, a.model)
+    print(f"[judge] {len(items)} ítems muestreados | veredictos versionados en caché: {len(done)} | "
+          f"proveedor {provider} | modelo {a.model}")
     counts = defaultdict(int)
     for it in items:
         counts[it["origin"] + ":" + it["heur"]] += 1
     print("[judge] muestreo:", dict(sorted(counts.items())))
     if a.dry_run:
         it = items[0]; r = recs[it["rid"]]
-        z = np.load(ROOT / r["features_npz"]); w = json.loads((ROOT / r["words_json"]).read_text(encoding="utf-8"))
+        z = np.load(ROOT / r["features_npz"])
+        validate_raw_features(z, path=str(ROOT / r["features_npz"]))
+        w = json.loads((ROOT / r["words_json"]).read_text(encoding="utf-8"))
         p, s, n = context_text(w, it["start"], it["end"])
         print("\n--- PROMPT DE EJEMPLO ---\n" + build_prompt(p, s, n, acoustic_summary(z, it["start"], it["end"])))
         return
 
-    provider, key = pick_provider(a.model)
-    caller = call_anthropic if provider == "anthropic" else call_openai
+    provider, key = pick_provider(a.model, provider)
+    caller = caller_for(provider)
     npz_cache: dict[str, object] = {}
     words_cache: dict[str, list] = {}
     t0, n_new, errors = time.time(), 0, 0
     fail_kinds: Counter = Counter()
     notes: Counter = Counter()
+    current_done: dict[tuple, dict] = {}
     with CACHE.open("a", encoding="utf-8") as fh:
         for k, it in enumerate(items):
-            key_t = (it["rid"], round(it["start"], 2), round(it["end"], 2))
-            if key_t in done:
-                continue
             r = recs[it["rid"]]
             if it["rid"] not in npz_cache:
                 npz_cache[it["rid"]] = np.load(ROOT / r["features_npz"])
+                validate_raw_features(npz_cache[it["rid"]], path=str(ROOT / r["features_npz"]))
                 words_cache[it["rid"]] = json.loads((ROOT / r["words_json"]).read_text(encoding="utf-8"))
             z, words = npz_cache[it["rid"]], words_cache[it["rid"]]
             prev, seg, nxt = context_text(words, it["start"], it["end"])
             meas = acoustic_summary(z, it["start"], it["end"])
             mid = (it["start"] + it["end"]) / 2
-            imgs = frames_at(ROOT / r["mp4"], [it["start"], mid, max(it["end"] - 0.05, mid)]) if r.get("mp4") else []
+            mp4 = ROOT / r["mp4"] if r.get("mp4") else None
+            imgs = frames_at(mp4, [it["start"], mid, max(it["end"] - 0.05, mid)]) if mp4 else []
             prompt = build_prompt(prev, seg, nxt, meas)
+            fingerprint = judgment_input_fingerprint(prompt, imgs, mp4)
+            key_t = (provider, a.model, it["rid"], seconds_to_ms(it["start"]),
+                     seconds_to_ms(it["end"]), fingerprint)
+            if key_t in done:
+                current_done[key_t] = done[key_t]
+                continue
             try:
                 out, n_used, note = ask_judge(caller, a.model, prompt, imgs, key, CLASSES)
             except Exception as exc:
                 errors += 1
                 fail_kinds[type(exc).__name__] += 1
                 log_failure(ERRORS, rid=it["rid"], start=it["start"], end=it["end"],
+                            provider=provider, model=a.model,
                             kind=type(exc).__name__, reason=str(exc)[:300],
                             raw=getattr(exc, "raw", "")[:500], n_frames=len(imgs))
                 continue
@@ -497,13 +618,15 @@ def main():
             rec = dict(rid=it["rid"], speaker_id=r["speaker_id"], start=it["start"], end=it["end"],
                        origin=it["origin"], heuristic=it["heur"], judge=out["classification"],
                        confidence=float(out.get("confidence", 0.0)), rationale=out.get("rationale", "")[:200],
-                       model=a.model, n_frames=n_used, note=note, ts=time.strftime("%Y-%m-%dT%H:%M:%S"))
+                       provider=provider, model=a.model, n_frames=n_used, note=note,
+                       input_fingerprint=fingerprint, interval_identity_version=JUDGE_INTERVAL_VERSION,
+                       ts=time.strftime("%Y-%m-%dT%H:%M:%S"))
             fh.write(json.dumps(rec, ensure_ascii=False) + "\n"); fh.flush()
-            done[key_t] = rec; n_new += 1
+            done[key_t] = rec; current_done[key_t] = rec; n_new += 1
             if n_new % 20 == 0:
-                print(f"   {n_new} nuevos | {len(done)}/{len(items)} | {(time.time()-t0)/max(n_new,1):.1f} s/ítem")
+                print(f"   {n_new} nuevos | {len(current_done)}/{len(items)} | {(time.time()-t0)/max(n_new,1):.1f} s/ítem")
             time.sleep(a.sleep)
-    print(f"[judge] listo: {n_new} nuevos, {errors} errores, {len(done)} en caché")
+    print(f"[judge] listo: {n_new} nuevos, {errors} errores, {len(current_done)} actuales")
     if fail_kinds:
         print(f"[judge] errores por tipo: {dict(fail_kinds)}")
         print(f"[judge] detalle con la respuesta cruda en {ERRORS.relative_to(ROOT)}")
@@ -513,20 +636,37 @@ def main():
             print(f"[judge] AVISO: {notes['sin_fotogramas']} juicios se resolvieron SIN fotogramas "
                   "(el modelo rechazó las imágenes). Quedan marcados con n_frames=0 y note="
                   "'sin_fotogramas': no son equivalentes a un juicio multimodal.")
-    write_gold(man, done)
+    write_gold(man, current_done)
 
 
 def write_gold(man: dict, done: dict) -> None:
     """Escribe {id}.gold.json: SOLO los intervalos juzgados (el resto queda sin etiqueta)."""
     by_rec: dict[str, list] = defaultdict(list)
     for j in done.values():
+        if j.get("interval_identity_version") != JUDGE_INTERVAL_VERSION:
+            raise ValueError("legacy judgment uses obsolete interval identity; rerun llm_judge.py")
         if j["judge"] == BACKGROUND:
             cat = BACKGROUND
         else:
             cat = j["judge"]
-        by_rec[j["rid"]].append(dict(category=cat, start_ms=int(j["start"] * 1000), end_ms=int(j["end"] * 1000),
+        n_frames = j.get("n_frames")
+        by_rec[j["rid"]].append(dict(category=cat, start_ms=seconds_to_ms(j["start"]),
+                                     end_ms=seconds_to_ms(j["end"]),
                                      confidence=j["confidence"], source="gold_llm", model=j["model"],
+                                     provider=j.get("provider"), n_frames=n_frames,
+                                     input_fingerprint=j.get("input_fingerprint"),
+                                     interval_identity_version=j.get("interval_identity_version"),
+                                     visual_evidence_used=(n_frames > 0 if n_frames is not None else None),
+                                     fallback_note=j.get("note", "legacy_unknown"),
                                      heuristic=j["heuristic"], origin=j["origin"], rationale=j["rationale"]))
+    # Validate the entire export before touching any current GOLD file. Two
+    # judgments on one model window cannot both become independent test items.
+    for r in man["recordings"]:
+        rid = r["recording_id"]
+        try:
+            gold_windows(by_rec.get(rid, []), window_starts(r["duration_s"]))
+        except ValueError as exc:
+            raise ValueError(f"{rid}: {exc}") from exc
     n = 0
     for r in man["recordings"]:
         rid = r["recording_id"]

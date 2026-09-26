@@ -53,6 +53,7 @@ def main() -> None:
     meta = json.loads((CASE / f"{a.vid}.meta.json").read_text(encoding="utf-8"))
     words = json.loads((ROOT / meta["words_json"]).read_text(encoding="utf-8"))
     z = np.load(ROOT / meta["features_npz"], allow_pickle=False)
+    J.validate_raw_features(z, path=str(ROOT / meta["features_npz"]))
     mp4 = ROOT / meta["mp4"]
 
     output_name = "adjudication_ollama.jsonl" if a.backend == "ollama" else "adjudication.jsonl"

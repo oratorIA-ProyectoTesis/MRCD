@@ -28,9 +28,11 @@ from sklearn.metrics import f1_score  # noqa: E402
 from sklearn.model_selection import GroupKFold  # noqa: E402
 
 from core.constants import SMOKE_HEADER  # noqa: E402
+from core.contracts import validate_features  # noqa: E402
 from core.models.fusion import MODES, CrossModalFusion  # noqa: E402
+from core.normalization import apply_stats, fit_stats  # noqa: E402
 
-KEYS = ("ac", "pros", "ling", "lpos", "lmask", "kin", "kmask")
+KEYS = ("ac", "pros", "ling", "lpos", "lmask", "kin", "kmask", "has_video")
 NUM_KEYS = ("ac", "pros", "ling", "kin")   # tensores continuos a estandarizar
 
 
@@ -40,32 +42,24 @@ def to_batch(d, idx, dev):
         if k in b:
             b[k] = b[k].float()
     b["lmask"], b["kmask"] = b["lmask"].bool(), b["kmask"].bool()
+    if "has_video" in b:
+        b["has_video"] = b["has_video"].bool()
     return b
 
 
 def standardize(d, tr):
     """z-score con estadísticas SOLO del conjunto de entrenamiento."""
-    out = dict(d)
-    for k in NUM_KEYS:
-        if k not in d:
-            continue
-        x = d[k][tr].reshape(-1, d[k].shape[-1])
-        mu, sd = x.mean(0), x.std(0) + 1e-6
-        out[k] = ((d[k] - mu) / sd).astype(np.float32)
-    return out
+    return apply_stats(d, fit_stats(d, tr))
 
 
 def train_eval(d, tr, te, mode, n_cls, args, seed, test_d=None):
     """Entrena sobre `d[tr]`; evalúa sobre `test_d[te]` si se da, o `d[te]`."""
     torch.manual_seed(seed); np.random.seed(seed)
     dev = "cuda" if torch.cuda.is_available() else "cpu"
-    ds = standardize(d, tr)
+    fitted = fit_stats(d, tr)
+    ds = apply_stats(d, fitted)
     if test_d is not None:
-        mu_sd = {k: (d[k][tr].reshape(-1, d[k].shape[-1]).mean(0), d[k][tr].reshape(-1, d[k].shape[-1]).std(0) + 1e-6)
-                 for k in NUM_KEYS if k in d and k in test_d}
-        ts = dict(test_d)
-        for k, (mu, sd) in mu_sd.items():
-            ts[k] = ((test_d[k] - mu) / sd).astype(np.float32)
+        ts = apply_stats(test_d, fitted)
     else:
         ts = ds
     net = CrossModalFusion(n_cls, ac_dim=ds["ac"].shape[-1], ling_dim=ds["ling"].shape[-1], d=args.d,
@@ -94,6 +88,20 @@ def f1s(y, p, n_cls):
     present = [c for c in range(1, n_cls) if (y == c).any()]            # macro sobre clases de disfluencia presentes
     macro = float(np.mean(per[present])) if present else float("nan")
     return per, macro
+
+
+def judge_visual_summary(data: dict) -> dict:
+    """Describe whether GOLD labels actually used frames, not just a VLM API."""
+    n = len(data["y"])
+    if "judge_n_frames" not in data:
+        return {"status": "unknown", "n": n, "n_with_frames": None,
+                "n_without_frames": None, "fallback_rate": None}
+    counts = np.asarray(data["judge_n_frames"])
+    seen = int((counts > 0).sum())
+    fallback = int((counts == 0).sum())
+    status = "audio_text_only" if fallback == n else "mixed" if fallback else "visual"
+    return {"status": status, "n": n, "n_with_frames": seen,
+            "n_without_frames": fallback, "fallback_rate": round(fallback / max(n, 1), 4)}
 
 
 def bootstrap(y, preds, units, n_cls, B, rng):
@@ -138,8 +146,15 @@ def main():
     args = ap.parse_args()
 
     d = dict(np.load(args.data, allow_pickle=False))
+    validate_features(d, require_labels=True)
     src = str(d.get("label_source", "unknown"))
     test = dict(np.load(args.test_data, allow_pickle=False)) if args.test_data else None
+    if test is not None:
+        validate_features(test, require_labels=True)
+        train_labels = tuple(x.decode() if isinstance(x, bytes) else str(x) for x in d["labels"])
+        test_labels = tuple(x.decode() if isinstance(x, bytes) else str(x) for x in test["labels"])
+        if train_labels != test_labels:
+            sys.exit("Train/test ordered labels differ; class indices are not comparable across NPZ files")
     test_src = str(test.get("label_source", "unknown")) if test else src
 
     # --- guardia contra la circularidad, antes de gastar horas de cómputo.
@@ -164,7 +179,7 @@ def main():
         sys.exit(f"Etiquetas de test '{test_src}': evaluar sobre las mismas heurísticas que etiquetan es circular. "
                  "Usa --test-data data/windows_gold.npz (juez multimodal) o etiquetas humanas; "
                  "--allow-auto-labels solo para prueba de humo.")
-    labels = [str(x) for x in d["labels"]]; n_cls = len(labels)
+    labels = [x.decode() if isinstance(x, bytes) else str(x) for x in d["labels"]]; n_cls = len(labels)
     y_train_all, groups = d["y"], d["group"]
     y = test["y"] if test else d["y"]
     tgroups = test["group"] if test else groups
@@ -206,10 +221,14 @@ def main():
         units, unit_note = src_arr["rec"].astype(str) + ":" + (src_arr["start_ms"] // 6000).astype(str), "bootstrap por bloques de 6 s (pocos hablantes)"
     cis, diff_ci = bootstrap(y, preds, units, n_cls, args.bootstrap, rng)
 
+    judge_visual = judge_visual_summary(src_arr) if test_src == "gold_llm" else None
     header = (SMOKE_HEADER if test_src not in ("human", "gold_llm") else
               ("Etiquetas humanas" if test_src == "human" else
-               "Test con etiquetas de un juez multimodal (VLM); su acuerdo con anotación humana debe reportarse aparte"))
+               "Test con juez sin fotogramas (audio/texto; NO multimodal)" if judge_visual["status"] == "audio_text_only" else
+               "Test con juez de procedencia visual desconocida; NO afirmar multimodal" if judge_visual["status"] == "unknown" else
+               "Test con juez VLM; fallback visual explícito y acuerdo humano pendientes de evaluar"))
     res = dict(header=header, label_source=src, test_label_source=test_src, n_windows=int(len(y)), n_speakers=int(len(uniq)), split=split_note, ci_method=unit_note,
+               judge_visual_evidence=judge_visual,
                class_support={l: int((y == i).sum()) for i, l in enumerate(labels)},
                train_class_support={l: int((y_train_all == i).sum()) for i, l in enumerate(labels)}, modes={}, paired_macro_f1_diff_ci95=diff_ci,
                hyperparams=vars(args))
@@ -225,9 +244,18 @@ def main():
     if test_src not in ("human", "gold_llm"):
         lines += [f"# {SMOKE_HEADER}", ""]
     elif test_src == "gold_llm":
-        lines += ["# Ablación con test independiente (juez multimodal)", "",
+        lines += ["# Ablación con test independiente (juez GOLD)", "",
                   "> El conjunto de prueba fue etiquetado por un VLM a ciegas, sin acceso a las heurísticas. "
                   "El acuerdo juez–humano se reporta en `results/judge_agreement.md` y condiciona la lectura de esta tabla.", ""]
+        if judge_visual["status"] == "unknown":
+            lines += ["> **Evidencia visual desconocida**: el NPZ GOLD no conserva n_frames; "
+                      "no se puede presentar este test como multimodal.", ""]
+        else:
+            lines += [f"> Evidencia visual del juez: {judge_visual['n_with_frames']}/{judge_visual['n']} "
+                      f"juicios con fotogramas; fallback sin vídeo: {judge_visual['fallback_rate']:.1%}.", ""]
+            if judge_visual["status"] == "audio_text_only":
+                lines += ["> **NO es una evaluación de juez multimodal**: todos los juicios "
+                          "se resolvieron sin fotogramas.", ""]
     lines += [f"## Ablación multimodal — entrenamiento: **{src}** · test: **{test_src}**", ""]
     lines += [f"- {split_note}", f"- IC 95 %: {unit_note} (B={args.bootstrap})", f"- Ventanas: {len(y)}", "",
               "| Clase | Soporte | " + " | ".join(MODES) + " |", "|---|---|" + "---|" * len(MODES)]

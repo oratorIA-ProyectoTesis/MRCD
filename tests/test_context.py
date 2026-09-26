@@ -187,6 +187,7 @@ def _batch(B=4, ling_dim=12):
         lpos=torch.randint(0, int(CONTEXT_S * 10), (B, MAX_CONTEXT_WORDS)),
         lmask=torch.ones(B, MAX_CONTEXT_WORDS, dtype=torch.bool),
         kin=torch.randn(B, 30, 12), kmask=torch.ones(B, 30, dtype=torch.bool),
+        has_video=torch.ones(B, dtype=torch.bool),
     )
 
 

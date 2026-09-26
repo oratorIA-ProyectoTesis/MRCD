@@ -32,43 +32,25 @@ from core.constants import (BACKGROUND, KIDX, PROSODY_FIELDS, STRIDE_S, VIDEO_FP
 from core.dataset import (acoustic_windows, center_f0, kinesic_windows, linguistic_windows,
                           window_starts)  # noqa: E402
 from core.extractors.prosody import prosody_windows, speaker_f0_center  # noqa: E402
-from core.models.fusion import MODES, CrossModalFusion  # noqa: E402
+from core.models.fusion import MODES  # noqa: E402
+from core.inference import InferenceEngine, load_ckpt, predict  # noqa: E402, F401
+from core.contracts import validate_raw_features  # noqa: E402
 
 CASE = ROOT / "data/case"
 PIDX = {n: i for i, n in enumerate(PROSODY_FIELDS)}
-BATCH_KEYS = ("ac", "pros", "ling", "lpos", "lmask", "kin", "kmask")
-NUM_KEYS = ("ac", "pros", "ling", "kin")
 
 
-def load_ckpt(path: Path, dev: str):
-    ck = torch.load(path, map_location=dev, weights_only=False)
-    net = CrossModalFusion(len(ck["labels"]), ac_dim=ck["dims"]["ac"], ling_dim=ck["dims"]["ling"],
-                           d=ck["dims"]["d"], mode=ck["mode"],
-                           pros_dim=ck["dims"].get("pros", 0)).to(dev)
-    net.load_state_dict(ck["state_dict"]); net.eval()
-    norm = {k: (np.asarray(mu, np.float32), np.asarray(sd, np.float32))
-            for k, (mu, sd) in ck["norm"].items()}
-    return net, norm, ck["labels"], ck.get("provenance", {})
-
-
-@torch.no_grad()
-def predict(net, norm, d: dict, dev: str, bs: int = 128):
-    n = len(d["ac"])
-    probs = []
-    for s in range(0, n, bs):
-        sl = slice(s, min(s + bs, n))
-        b = {}
-        for k in BATCH_KEYS:
-            if k not in d:
-                continue
-            x = d[k][sl]
-            if k in norm:
-                mu, sd = norm[k]
-                x = ((x - mu) / sd).astype(np.float32)
-            t = torch.as_tensor(x).to(dev)
-            b[k] = t.bool() if k in ("lmask", "kmask") else (t.float() if k in NUM_KEYS else t)
-        probs.append(torch.softmax(net(b), -1).cpu().numpy())
-    return np.concatenate(probs, 0)
+def load_reporting_engine(path: Path, expected_mode: str, device: str,
+                          expected_labels: list[str] | None = None) -> InferenceEngine:
+    """Reject renamed or legacy checkpoints before composing a comparative report."""
+    engine = InferenceEngine.from_checkpoint(path, device)
+    if engine.net.mode != expected_mode:
+        raise ValueError(f"{path}: checkpoint mode {engine.net.mode!r} does not match requested {expected_mode!r}")
+    if engine.provenance.get("contract_status") != "versioned":
+        raise ValueError(f"{path}: unversioned checkpoint cannot be reported; retrain with train_checkpoints.py")
+    if expected_labels is not None and list(engine.labels) != list(expected_labels):
+        raise ValueError(f"{path}: checkpoint label order differs across modes")
+    return engine
 
 
 def mouth_press_peak(kin_w: np.ndarray, kmask_w: np.ndarray) -> float:
@@ -96,6 +78,14 @@ def gaze_stability(kin_w: np.ndarray, kmask_w: np.ndarray) -> float:
     g = kin_w[kmask_w][:, cols]
     g = g[np.isfinite(g).all(1)]
     return float(g.std(0).mean()) if len(g) >= 3 else float("nan")
+
+
+def visual_metrics(kin_w: np.ndarray, kmask_w: np.ndarray, has_video: bool) -> tuple[float | None, float | None]:
+    """Do not report visual measurements below the real-frame coverage gate."""
+    if not has_video:
+        return None, None
+    gaze = gaze_stability(kin_w, kmask_w)
+    return round(mouth_press_peak(kin_w, kmask_w), 4), (round(gaze, 4) if np.isfinite(gaze) else None)
 
 
 def window_text(words: list[dict], t0: float, t1: float) -> str:
@@ -135,6 +125,7 @@ def main() -> None:
         sys.exit(1)
     meta = json.loads(meta_p.read_text(encoding="utf-8"))
     feats = np.load(ROOT / meta["features_npz"], allow_pickle=False)
+    validate_raw_features(feats, path=str(ROOT / meta["features_npz"]))
     words = json.loads((ROOT / meta["words_json"]).read_text(encoding="utf-8"))
 
     mdir = Path(a.models)
@@ -152,27 +143,34 @@ def main() -> None:
     ac = acoustic_windows(center_f0(frames, f0c), starts)
     ling, lpos, lmask = linguistic_windows(words, feats["word_feats"], starts)
     kin, kmask, hv = kinesic_windows(feats["k_times"], feats["k_vectors"], starts)
-    d = dict(ac=ac, pros=pros, ling=ling, lpos=lpos, lmask=lmask, kin=kin, kmask=kmask)
+    d = dict(ac=ac, pros=pros, ling=ling, lpos=lpos, lmask=lmask, kin=kin, kmask=kmask,
+             has_video=hv)
     print(f"[infer] {len(starts)} ventanas · con rostro seguido: {hv.mean():.0%}")
 
     dev = "cuda" if torch.cuda.is_available() else "cpu"
-    out_pred, labels, prov = {}, None, {}
+    out_pred, labels, prov, provenance_by_mode = {}, None, {}, {}
+    engines = {}
     for mode in MODES:
-        net, norm, labels, prov = load_ckpt(mdir / f"ckpt_{mode}.pt", dev)
-        out_pred[mode] = predict(net, norm, d, dev)
+        engine = load_reporting_engine(mdir / f"ckpt_{mode}.pt", mode, dev, labels)
+        engines[mode] = engine
+        labels, prov = engine.labels, engine.provenance
+        provenance_by_mode[mode] = prov
+    for mode, engine in engines.items():
+        out_pred[mode] = engine.predict(d)
         print(f"[infer] {mode}: listo")
 
     dang_col = ling.shape[-1] - 1        # última columna del ramal lingüístico
     rows = []
     for i, t0 in enumerate(starts):
         t1 = t0 + WINDOW_S
+        mouth_peak, gaze = visual_metrics(kin[i], kmask[i], bool(hv[i]))
         rec = {
             "timestamp_start": round(float(t0), 3),
             "timestamp_end": round(float(t1), 3),
             "transcription": window_text(words, t0, t1),
             "features": {
                 "f0_reset": round(float(pros[i, PIDX["f0_reset"]]), 4),
-                "max_delta_mouth_press": round(mouth_press_peak(kin[i], kmask[i]), 4),
+                "max_delta_mouth_press": mouth_peak,
                 "is_dangling": bool(ling[i, :, dang_col].max() > 0.5),
             },
             "predictions": {m: {"class": labels[int(out_pred[m][i].argmax())],
@@ -182,8 +180,7 @@ def main() -> None:
         rec["features_extra"] = {
             "sil_dur": round(float(pros[i, PIDX["sil_dur"]]), 4),
             "f0_slope_pre": round(float(pros[i, PIDX["f0_slope_pre"]]), 4),
-            "gaze_stability": (None if not np.isfinite(gaze_stability(kin[i], kmask[i]))
-                               else round(gaze_stability(kin[i], kmask[i]), 4)),
+            "gaze_stability": gaze,
             "has_face": bool(hv[i]),
         }
         rows.append(rec)
@@ -200,6 +197,7 @@ def main() -> None:
         "face_tracking": {"coverage": meta.get("face_coverage"),
                           "dominance_margin": meta.get("dominance_margin")},
         "model_provenance": prov,
+        "model_provenance_by_mode": provenance_by_mode,
         "window_disagreement_rate": round(disagree / max(len(starts), 1), 4),
         "events": events,
         "windows": rows,

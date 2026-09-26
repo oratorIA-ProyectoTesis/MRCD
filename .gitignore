@@ -5,7 +5,7 @@ results/
 run_log.txt
 __pycache__/
 .pytest_cache/
-models/
+/models/
 models_stale/
 results_smoke_synthetic/
 

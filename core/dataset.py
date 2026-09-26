@@ -7,6 +7,8 @@ from pathlib import Path
 
 import numpy as np
 
+from core.contracts import validate_raw_features
+
 from core.constants import (ACOUSTIC_HOP_S, BACKGROUND, CONTEXT_PRE_S, CONTEXT_S, KINESIC_DIM,
                             KINESIC_STEPS, LABEL2ID, MAX_CONTEXT_WORDS, STRIDE_S, TAXONOMY,
                             VIDEO_FPS, WINDOW_S)
@@ -16,6 +18,12 @@ from core.sync.buffer import SyncBuffer
 AC_STEPS = int(round(WINDOW_S / ACOUSTIC_HOP_S))   # 300
 MAX_WORDS = 16
 CONTEXT_STEPS = int(round(CONTEXT_S * VIDEO_FPS))  # 100 posiciones del ramal lingüístico
+JUDGE_INTERVAL_VERSION = "ms-v1"
+
+
+def seconds_to_ms(seconds: float) -> int:
+    """Canonical judge interval identity, avoiding float truncation near millisecond boundaries."""
+    return int(round(float(seconds) * 1000))
 
 
 def kinesic_windows(k_times, k_vectors, starts_s, av_offset_ms: float = 0.0):
@@ -167,19 +175,64 @@ def gold_windows(events: list[dict], starts) -> tuple[np.ndarray, np.ndarray]:
     Devuelve (índices de ventana, etiqueta entera). Las ventanas no juzgadas quedan fuera del test."""
     idx, lab = [], []
     if len(starts) == 0:
+        if any(e["category"] in LABEL2ID for e in events):
+            raise ValueError("GOLD has judgments but recording has no dataset windows; check duration_s")
         return np.zeros(0, np.int64), np.zeros(0, np.int64)
-    centers = np.asarray(starts) + WINDOW_S / 2
+    occupied = {}
     for e in events:
         if e["category"] not in LABEL2ID:
             continue
-        c = (e["start_ms"] + e["end_ms"]) / 2000
-        i = int(np.argmin(np.abs(centers - c)))
+        i = judgment_window_index(e["start_ms"], e["end_ms"], starts)
+        if i in occupied:
+            prior = occupied[i]
+            raise ValueError(
+                f"GOLD judgments {prior['start_ms']}-{prior['end_ms']} and "
+                f"{e['start_ms']}-{e['end_ms']} collide on dataset window {i} "
+                f"(start_s={float(starts[i]):.3f}); adjudicate or remove one interval before export")
+        occupied[i] = e
         idx.append(i); lab.append(LABEL2ID[e["category"]])
     return np.asarray(idx, np.int64), np.asarray(lab, np.int64)
 
 
+def judgment_window_index(start_ms: int, end_ms: int, starts) -> int:
+    """The one dataset window to which a judge interval is assigned."""
+    if len(starts) == 0:
+        raise ValueError("recording has no dataset windows; check duration_s")
+    center_s = (start_ms + end_ms) / 2000
+    return int(np.argmin(np.abs(np.asarray(starts) + WINDOW_S / 2 - center_s)))
+
+
+def gold_window_metadata(events: list[dict], indices: np.ndarray, n: int) -> dict:
+    """Carry each judge's visual and experiment lineage to its selected window."""
+    valid = [event for event in events if event["category"] in LABEL2ID] if n else []
+    if len(valid) != len(indices):
+        raise ValueError("GOLD judgments do not align with selected windows")
+    required = ("n_frames", "provider", "model", "input_fingerprint", "interval_identity_version")
+    for event in valid:
+        if any(event.get(key) is None or event.get(key) == "" for key in required):
+            raise ValueError("GOLD lacks judge visual/experiment provenance; rerun llm_judge.py")
+        if event["interval_identity_version"] != JUDGE_INTERVAL_VERSION:
+            raise ValueError("GOLD uses an obsolete interval identity; rerun llm_judge.py")
+        if int(event["n_frames"]) < 0:
+            raise ValueError("GOLD n_frames must be nonnegative")
+    meta = {"judge_n_frames": np.full(n, -1, np.int16),
+            "judge_visual_evidence_used": np.zeros(n, bool)}
+    fields = {"judge_provider": "provider", "judge_model": "model",
+              "judge_input_fingerprint": "input_fingerprint", "judge_fallback_note": "fallback_note"}
+    for output, source in fields.items():
+        values = [str(event.get(source) or "") for event in valid]
+        meta[output] = np.full(n, "", dtype=f"<U{max([len(v) for v in values] + [1])}")
+    for index, event in zip(indices, valid):
+        meta["judge_n_frames"][index] = int(event["n_frames"])
+        meta["judge_visual_evidence_used"][index] = int(event["n_frames"]) > 0
+        for output, source in fields.items():
+            meta[output][index] = str(event.get(source) or "")
+    return meta
+
+
 def build_recording_windows(rec: dict, root: Path, label_source: str = "auto", av_offset_ms: float = 0.0) -> dict:
     feats = np.load(root / rec["features_npz"], allow_pickle=False)
+    validate_raw_features(feats, path=str(root / rec["features_npz"]))
     words = json.loads((root / rec["words_json"]).read_text(encoding="utf-8"))
     starts = window_starts(rec["duration_s"])
     frames = feats["ac_frames"]
@@ -196,6 +249,7 @@ def build_recording_windows(rec: dict, root: Path, label_source: str = "auto", a
         gp = root / rec["events_json"].replace(".events.json", ".gold.json")
         events = json.loads(gp.read_text(encoding="utf-8")) if gp.exists() else []
         keep, ylab = gold_windows(events, starts)
+        gold_meta = gold_window_metadata(events, keep, len(starts))
         y = np.full(len(starts), LABEL2ID[BACKGROUND], np.int64)
         multi = np.zeros((len(starts), len(TAXONOMY)), np.int8)
         y[keep] = ylab
@@ -206,6 +260,8 @@ def build_recording_windows(rec: dict, root: Path, label_source: str = "auto", a
     out = dict(ac=ac, pros=pros, ling=ling, lpos=lpos, lmask=lmask, kin=kin, kmask=kmask, has_video=hv, y=y, multi=multi,
                start_ms=(starts * 1000).astype(np.int64), group=np.array([rec["speaker_id"]] * n),
                rec=np.array([rec["recording_id"]] * n))
+    if label_source == "gold":
+        out.update(gold_meta)
     if keep is not None:      # solo las ventanas efectivamente juzgadas entran al test
         uniq = np.unique(keep)
         out = {k: v[uniq] for k, v in out.items()}

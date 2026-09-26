@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from core.constants import LABELS  # noqa: E402
+from core.contracts import FEATURE_SCHEMA_VERSION, validate_features  # noqa: E402
 from core.dataset import build_recording_windows  # noqa: E402
 
 
@@ -34,7 +35,10 @@ def main():
     data = {k: np.concatenate([p[k][..., :F] if k == "ling" else p[k] for p in parts]) for k in parts[0]}
     out = Path(args.out or ROOT / f"data/windows_{args.labels}.npz")
     src = {"auto": "auto", "human": "human", "gold": "gold_llm"}[args.labels]
-    np.savez_compressed(out, label_source=np.array(src), labels=np.array(LABELS), **data)
+    payload = dict(data, label_source=np.array(src), labels=np.array(LABELS),
+                   feature_schema=np.array(FEATURE_SCHEMA_VERSION))
+    validate_features(payload, require_labels=True)
+    np.savez_compressed(out, **payload)
     counts = {l: int((data["y"] == i).sum()) for i, l in enumerate(LABELS)}
     print(f"{out}: {len(data['y'])} ventanas | con video: {data['has_video'].mean():.0%} | por clase: {counts}")
 

@@ -19,7 +19,7 @@ from core.constants import CONTEXT_S, STRIDE_S, WINDOW_S
 from core.live.mic_stream import MicrophoneStream
 from core.live.streaming_asr import StreamingASR
 from core.live.window_builder import build_latest_contextual_window
-from scripts.infer_video import load_ckpt, predict
+from core.inference import InferenceEngine
 
 
 class LiveEngine:
@@ -28,7 +28,8 @@ class LiveEngine:
                  mic_device: int | str | None = None):
         import torch
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.net, self.norm, self.labels, _ = load_ckpt(checkpoint, self.device)
+        self.engine = InferenceEngine.from_checkpoint(checkpoint, self.device)
+        self.net, self.labels = self.engine.net, self.engine.labels
         self.ling_dim = self.net.ling.proj[0].in_features
         self.ling_context = self.ling_dim > 10
         self.include_pros = self.net.pros is not None
@@ -81,7 +82,7 @@ class LiveEngine:
                 tensors, timestamp, text = build_latest_contextual_window(
                     audio, begin, words, context=self.ling_context, include_pros=self.include_pros,
                     ling_dim=self.ling_dim)
-                probabilities = predict(self.net, self.norm, tensors, self.device)[0]
+                probabilities = self.engine.predict(tensors)[0]
                 idx = int(probabilities.argmax())
                 self._emit({"timestamp": timestamp, "texto_ventana": text, "clase": self.labels[idx],
                             "confianza": float(probabilities[idx]),

@@ -73,6 +73,7 @@ def test_websocket_emits_prediction_schema():
         def stop(self): pass
 
     with TestClient(create_app(FakeEngine())) as client:
+        client.post("/control/start")  # the producer does not start on websocket connect
         with client.websocket_connect("/ws") as ws:
             message = ws.receive_json()
     assert set(message) == {"timestamp", "texto_ventana", "clase", "confianza", "todas_las_probabilidades"}
@@ -92,7 +93,7 @@ def test_live_controls_start_and_stop_the_engine():
     with TestClient(create_app(engine)) as client:
         assert client.post("/control/start").json() == {"running": True}
         assert client.post("/control/stop").json() == {"running": False}
-    assert engine.starts == 1 and engine.stops == 1
+        assert engine.starts == 1 and engine.stops == 1
 
 
 def test_live_page_exposes_session_analysis_panels():

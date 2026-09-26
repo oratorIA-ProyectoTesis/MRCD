@@ -38,6 +38,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from core.constants import SAMPLE_RATE, VIDEO_FPS  # noqa: E402
+from core.contracts import (RAW_FEATURE_SCHEMA_VERSION, raw_feature_contract,
+                            validate_raw_features)  # noqa: E402
 from core.extractors.acoustic import extract_acoustic, load_wav  # noqa: E402
 from core.extractors.linguistic import VerbatimASR, word_features  # noqa: E402
 
@@ -150,6 +152,8 @@ def main() -> None:
 
     npz_path = CASE / f"{vid}.npz"
     if npz_path.exists() and not a.force:
+        with np.load(npz_path, allow_pickle=False) as existing:
+            validate_raw_features(existing, path=str(npz_path))
         print(f"[ingesta] {npz_path} ya existe (usa --force para rehacer)")
         return
 
@@ -201,6 +205,12 @@ def main() -> None:
 
     np.savez_compressed(
         npz_path,
+        raw_feature_schema=np.array(RAW_FEATURE_SCHEMA_VERSION),
+        raw_contract=np.array(json.dumps(raw_feature_contract(), sort_keys=True)),
+        raw_extractor=np.array("ingest_single_video"),
+        raw_extractor_config=np.array(json.dumps({"asr_model": a.whisper, "variety": a.variety,
+                                                  "vad_backend": ac.vad_backend,
+                                                  "face_tracking_method": "dominant_iou"}, sort_keys=True)),
         ac_frames=ac.frame_matrix(),
         ac_times=ac.times,
         f0=ac.f0,
@@ -250,6 +260,7 @@ def main() -> None:
             "wav": f"data/case/{vid}.wav",
             "mp4": f"data/case/{vid}_10fps.mp4",
             "speaker_id": f"case_{vid}",
+            "raw_feature_schema": RAW_FEATURE_SCHEMA_VERSION,
         }
     )
     (CASE / f"{vid}.meta.json").write_text(

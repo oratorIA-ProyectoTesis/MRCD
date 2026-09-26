@@ -21,6 +21,8 @@ sys.path.insert(0, str(ROOT))
 
 from core.annotation.auto_labeler import label_recording, window_labels, write_eaf  # noqa: E402
 from core.constants import (H, KINESIC_FIELDS, LABELS, STRIDE_S, TAXONOMY, WINDOW_S)  # noqa: E402
+from core.contracts import (RAW_FEATURE_SCHEMA_VERSION, feature_contract,
+                            raw_feature_contract, validate_raw_features)  # noqa: E402
 from core.extractors.acoustic import extract_acoustic, load_wav  # noqa: E402
 from core.extractors.linguistic import VerbatimASR, WORD_FEAT_NAMES, word_features  # noqa: E402
 
@@ -36,9 +38,13 @@ def signal_worker(rec: dict, with_video: bool) -> tuple:
     kin = None
     if with_video and rec.get("mp4") and (ROOT / rec["mp4"]).exists():
         from core.extractors.kinesic import KinesicExtractor
-        kx = KinesicExtractor()
-        s = time.time(); kin = kx.process_video(str(ROOT / rec["mp4"])); t["kinesic_s"] = round(time.time() - s, 2)
-        kx.close()
+        kx = KinesicExtractor(num_faces=3)
+        try:
+            s = time.time()
+            kin, t["face_tracking"] = kx.process_video_tracked(str(ROOT / rec["mp4"]))
+            t["kinesic_s"] = round(time.time() - s, 2)
+        finally:
+            kx.close()
     return rec["recording_id"], ac, kin, t
 
 
@@ -64,10 +70,12 @@ def process(rec: dict, asr, kx, variety: str, roberta=None, pre: tuple | None = 
     timings = {}
 
     if pre is not None:
-        ac, kin, pt = pre; timings.update(pt)
+        ac, kin, pt = pre; timings.update({k: v for k, v in pt.items() if k != "face_tracking"})
+        face_tracking = pt.get("face_tracking")
     else:
         s = time.time(); ac = extract_acoustic(audio, sr); timings["acoustic_s"] = round(time.time() - s, 2)
         kin = None
+        face_tracking = None
     s = time.time(); words = asr.transcribe(audio); timings["asr_s"] = round(time.time() - s, 2)
     # Control de coherencia VAD vs ASR: si el VAD marca como silencio > 50 % del tiempo
     # cubierto por palabras, se descarta y se recalcula con VAD por energía.
@@ -83,15 +91,27 @@ def process(rec: dict, asr, kx, variety: str, roberta=None, pre: tuple | None = 
     if roberta is not None and words:
         s = time.time(); wf = np.concatenate([wf, roberta.encode(words)], 1); timings["roberta_s"] = round(time.time() - s, 2)
     if pre is None and kx is not None and rec.get("mp4"):
-        s = time.time(); kin = kx.process_video(str(ROOT / rec["mp4"])); timings["kinesic_s"] = round(time.time() - s, 2)
+        s = time.time()
+        if hasattr(kx, "process_video_tracked"):
+            kin, face_tracking = kx.process_video_tracked(str(ROOT / rec["mp4"]))
+        else:  # injectable legacy test adapter
+            kin = kx.process_video(str(ROOT / rec["mp4"]))
+        timings["kinesic_s"] = round(time.time() - s, 2)
 
     cands = label_recording(ac, words, kin, variety, recall_mode=recall_mode)
     rows = window_labels(cands, dur)
 
     FEAT.mkdir(parents=True, exist_ok=True)
     npz = FEAT / f"{rid}.npz"
+    raw_config = {"asr_model": getattr(asr, "model_size", "n/a"), "variety": variety,
+                  "roberta": roberta is not None, "vad_backend": ac.vad_backend,
+                  "face_tracking_method": "dominant_iou" if face_tracking is not None else "none_or_external"}
     np.savez_compressed(
-        npz, ac_frames=ac.frame_matrix(), ac_times=ac.times, f0=ac.f0, rms=ac.rms, vad=ac.vad,
+        npz, raw_feature_schema=np.array(RAW_FEATURE_SCHEMA_VERSION),
+        raw_contract=np.array(json.dumps(raw_feature_contract(), sort_keys=True)),
+        raw_extractor=np.array("extract_and_label"),
+        raw_extractor_config=np.array(json.dumps(raw_config, sort_keys=True)),
+        ac_frames=ac.frame_matrix(), ac_times=ac.times, f0=ac.f0, rms=ac.rms, vad=ac.vad,
         hf_ratio=ac.hf_ratio if ac.hf_ratio is not None else np.zeros(0, np.float32),
         word_feats=wf.astype(np.float32) if len(wf) else np.zeros((0, len(WORD_FEAT_NAMES)), np.float32),
         k_times=kin.times if kin is not None else np.zeros(0), 
@@ -118,7 +138,10 @@ def process(rec: dict, asr, kx, variety: str, roberta=None, pre: tuple | None = 
                events_json=str((FEAT / f"{rid}.events.json").relative_to(ROOT)), eaf=str(eaf.relative_to(ROOT)),
                timings=timings, realtime_factor=round((time.time() - t0) / max(dur, 1e-6), 3),
                label_source="auto", asr_model=getattr(asr, "model_size", "n/a"),
-               asr_device=getattr(asr, "device", "n/a"))
+               asr_device=getattr(asr, "device", "n/a"),
+               face_tracking_method="dominant_iou" if face_tracking is not None else "none_or_external",
+               face_tracking=face_tracking, raw_feature_schema=RAW_FEATURE_SCHEMA_VERSION,
+               raw_extractor_config=raw_config)
     print(f"[{rid}] {dur:.0f}s | palabras={len(words)} | eventos={counts} | ventanas={len(rows)} | RTF={out['realtime_factor']}")
     return out
 
@@ -144,11 +167,20 @@ def main():
     recs = json.loads(Path(args.index).read_text(encoding="utf-8"))
     if args.only:
         recs = [r for r in recs if r["recording_id"] in set(args.only)]
+    recs = recs[: args.max] if args.max else recs
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8")) if MANIFEST.exists() else {"recordings": []}
     done = {r["recording_id"]: i for i, r in enumerate(manifest["recordings"])}
+    replacing = {r["recording_id"] for r in recs} if args.force else set()
+    for entry in manifest["recordings"]:
+        if entry["recording_id"] in replacing:
+            continue
+        path = ROOT / entry.get("features_npz", f"data/features/{entry['recording_id']}.npz")
+        if not path.exists():
+            raise ValueError(f"{path}: raw features referenced by manifest are missing; re-extract with --force")
+        with np.load(path, allow_pickle=False) as existing:
+            validate_raw_features(existing, path=str(path))
     if not args.force:   # reanudable
         recs = [r for r in recs if not ((FEAT / f"{r['recording_id']}.npz").exists() and r["recording_id"] in done)]
-    recs = recs[: args.max] if args.max else recs
     print(f"[extract_and_label] {len(recs)} segmentos pendientes | workers={args.workers}")
     if not recs:
         return
@@ -165,6 +197,7 @@ def main():
             version="0.2.0", window_s=WINDOW_S, stride_s=STRIDE_S, taxonomy=list(TAXONOMY), labels=list(LABELS),
             kinesic_fields=list(KINESIC_FIELDS), word_feature_names=list(WORD_FEAT_NAMES),
             heuristic_thresholds=H, whisper_model=args.whisper, variety=args.variety, recall_mode=args.recall_mode,
+            feature_contract=feature_contract(),
             note="Etiquetas 'auto' = candidatas heurísticas para revisión humana en ELAN; no son ground truth.")
         MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2, default=float), encoding="utf-8")
 

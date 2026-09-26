@@ -159,6 +159,17 @@ def test_kinesic_features_are_zero_without_face():
     assert not np.isfinite(gaze_stability(k, np.zeros(30, bool)))
 
 
+def test_reported_visual_metrics_obey_real_frame_coverage_gate():
+    from scripts.infer_video import visual_metrics
+
+    k = np.zeros((30, KINESIC_DIM), np.float32)
+    k[15, [KIDX["mouth_press_left"], KIDX["mouth_press_right"]]] = 0.8
+    mask = np.ones(30, bool)  # Interpolation can populate the whole grid.
+    assert visual_metrics(k, mask, False) == (None, None)
+    peak, gaze = visual_metrics(k, mask, True)
+    assert peak > 0.7 and gaze == 0.0
+
+
 # ------------------------------------------- checkpoints: la norma viaja dentro
 def test_checkpoint_roundtrip_preserves_predictions(tmp_path):
     """Si la normalización no viaja en el checkpoint, la inferencia da basura."""
@@ -173,7 +184,7 @@ def test_checkpoint_roundtrip_preserves_predictions(tmp_path):
              ling=rng.normal(0.0, 2.0, (n, 40, 12)).astype(np.float32),
              lpos=rng.integers(0, 100, (n, 40)), lmask=np.ones((n, 40), bool),
              kin=rng.normal(0.0, 1.0, (n, 30, 12)).astype(np.float32),
-             kmask=np.ones((n, 30), bool))
+             kmask=np.ones((n, 30), bool), has_video=np.ones(n, bool))
     st = stats(d)
     net = CrossModalFusion(len(LABELS), ac_dim=5, ling_dim=12, mode="trimodal", pros_dim=8).eval()
 
@@ -188,7 +199,7 @@ def test_checkpoint_roundtrip_preserves_predictions(tmp_path):
 
     ds = apply_stats(d, st)
     with torch.no_grad():
-        b = {k: torch.as_tensor(ds[k]) for k in ("ac", "pros", "ling", "lpos", "lmask", "kin", "kmask")}
+        b = {k: torch.as_tensor(ds[k]) for k in ("ac", "pros", "ling", "lpos", "lmask", "kin", "kmask", "has_video")}
         for k in ("ac", "pros", "ling", "kin"):
             b[k] = b[k].float()
         want = torch.softmax(net(b), -1).numpy()
@@ -209,12 +220,12 @@ def test_checkpoint_without_norm_changes_predictions():
              ling=rng.normal(0.0, 2.0, (n, 40, 12)).astype(np.float32),
              lpos=rng.integers(0, 100, (n, 40)), lmask=np.ones((n, 40), bool),
              kin=rng.normal(0.0, 1.0, (n, 30, 12)).astype(np.float32),
-             kmask=np.ones((n, 30), bool))
+             kmask=np.ones((n, 30), bool), has_video=np.ones(n, bool))
     net = CrossModalFusion(len(LABELS), ac_dim=5, ling_dim=12, mode="trimodal", pros_dim=8).eval()
 
     def fwd(x):
         with torch.no_grad():
-            b = {k: torch.as_tensor(x[k]) for k in ("ac", "pros", "ling", "lpos", "lmask", "kin", "kmask")}
+            b = {k: torch.as_tensor(x[k]) for k in ("ac", "pros", "ling", "lpos", "lmask", "kin", "kmask", "has_video")}
             for k in ("ac", "pros", "ling", "kin"):
                 b[k] = b[k].float()
             return torch.softmax(net(b), -1).numpy()

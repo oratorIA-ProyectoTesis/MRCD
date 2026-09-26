@@ -34,29 +34,21 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from core.constants import LABELS, SMOKE_HEADER  # noqa: E402
+from core.contracts import FUSION_IMPLEMENTATION, feature_contract, validate_features  # noqa: E402
 from core.models.fusion import MODES, CrossModalFusion, count_params  # noqa: E402
+from core.normalization import apply_stats as normalize, fit_stats  # noqa: E402
 
 NUM_KEYS = ("ac", "pros", "ling", "kin")
-BATCH_KEYS = ("ac", "pros", "ling", "lpos", "lmask", "kin", "kmask")
+BATCH_KEYS = ("ac", "pros", "ling", "lpos", "lmask", "kin", "kmask", "has_video")
 
 
 def stats(d: dict) -> dict:
-    """Media/desviación por columna de cada tensor continuo."""
-    out = {}
-    for k in NUM_KEYS:
-        if k not in d:
-            continue
-        x = d[k].reshape(-1, d[k].shape[-1])
-        out[k] = (x.mean(0).astype(np.float32), (x.std(0) + 1e-6).astype(np.float32))
-    return out
+    """Backward-compatible wrapper around the common mask-aware policy."""
+    return fit_stats(d)
 
 
 def apply_stats(d: dict, st: dict) -> dict:
-    out = dict(d)
-    for k, (mu, sd) in st.items():
-        if k in d:
-            out[k] = ((d[k] - mu) / sd).astype(np.float32)
-    return out
+    return normalize(d, st)
 
 
 def to_batch(d: dict, idx, dev: str) -> dict:
@@ -64,7 +56,7 @@ def to_batch(d: dict, idx, dev: str) -> dict:
     for k in NUM_KEYS:
         if k in b:
             b[k] = b[k].float()
-    for k in ("lmask", "kmask"):
+    for k in ("lmask", "kmask", "has_video"):
         if k in b:
             b[k] = b[k].bool()
     return b
@@ -116,8 +108,17 @@ def main() -> None:
         print(f"[train] no existe {dp}. Corre antes scripts/build_windows.py --labels auto")
         sys.exit(1)
     z = np.load(dp, allow_pickle=False)
-    d = {k: z[k] for k in z.files if k not in ("labels", "label_source")}
+    if "feature_schema" not in z.files:
+        sys.exit("[train] unversioned windows cannot be certified as the current feature contract; "
+                 "re-extract raw features with scripts/extract_and_label.py --force, then "
+                 "rebuild windows with scripts/build_windows.py before training")
+    validation_mode = "trimodal" if "trimodal" in a.modes else "audio_text" if "audio_text" in a.modes else "audio_only"
+    validate_features(z, require_labels=True, mode=validation_mode)
+    d = {k: z[k] for k in z.files if k not in ("labels", "label_source", "feature_schema")}
     labels = [s.decode() if isinstance(s, bytes) else str(s) for s in z["labels"]] if "labels" in z.files else list(LABELS)
+    if tuple(labels) != LABELS:
+        sys.exit("[train] ordered labels must match the canonical MRCD taxonomy; "
+                 "legacy subset/reordered labels cannot produce a versioned checkpoint")
     src = str(z["label_source"]) if "label_source" in z.files else "auto"
     n_cls = len(labels)
     dev = "cuda" if torch.cuda.is_available() else "cpu"
@@ -129,6 +130,7 @@ def main() -> None:
 
     manifest = {"created": dt.datetime.now().isoformat(timespec="seconds"),
                 "label_source": src, "n_windows": int(len(d["y"])), "labels": labels,
+                "feature_contract": feature_contract(),
                 "checkpoints": {}}
     if a.checkpoint_name and len(a.modes) != 1:
         ap.error("--checkpoint-name requiere exactamente un modo")
@@ -143,6 +145,8 @@ def main() -> None:
             "dims": {"ac": int(d["ac"].shape[-1]), "ling": int(d["ling"].shape[-1]),
                      "pros": int(d["pros"].shape[-1]) if "pros" in d else 0, "d": a.d},
             "norm": {k: (mu.tolist(), sd.tolist()) for k, (mu, sd) in st.items()},
+            "feature_contract": feature_contract(),
+            "fusion_implementation": FUSION_IMPLEMENTATION,
             "provenance": {
                 "label_source": src,
                 "n_windows": int(len(d["y"])),
@@ -153,7 +157,7 @@ def main() -> None:
                        "modality_dropout": a.modality_dropout, "seed": a.seed},
             "loss": {"name": "weighted_cross_entropy", "class_weights": class_weights},
         }, path)
-        manifest["checkpoints"][mode] = {"path": str(path.relative_to(ROOT.resolve())),
+        manifest["checkpoints"][mode] = {"path": str(path.relative_to(ROOT.resolve()) if path.is_relative_to(ROOT.resolve()) else path),
                                          "params": count_params(net)}
         print(f"  -> {path}  ({count_params(net):,} parámetros)")
 

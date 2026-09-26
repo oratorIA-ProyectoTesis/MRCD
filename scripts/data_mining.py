@@ -297,7 +297,10 @@ def extract_video(vid: str, st: dict, cfg: dict, whisper: str) -> bool:
         reject(st, vid, url, "language", f"{lang} p={prob:.2f}"); return False
     # (c)(d) rostro frontal y multi-rostro (pasada rápida 5 fps, hasta 2 rostros)
     kx = KinesicExtractor(num_faces=2)
-    track = kx.process_video(str(mp4), target_fps=5); kx.close()
+    try:
+        track, face_report = kx.process_video_tracked(str(mp4), target_fps=5)
+    finally:
+        kx.close()
     frontal_rate = float(track.frontal.mean()) if len(track.frontal) else 0.0
     if frontal_rate < q["min_frontal_face_rate"]:
         reject(st, vid, url, "face", f"tasa frontal {frontal_rate:.2f} < {q['min_frontal_face_rate']}"); return False
@@ -336,7 +339,10 @@ def extract_video(vid: str, st: dict, cfg: dict, whisper: str) -> bool:
                             wav=seg_wav.relative_to(ROOT).as_posix(), mp4=seg_mp4.relative_to(ROOT).as_posix(),
                             face_detection_rate=round(det, 3), frontal_rate=round(float(track.frontal[m].mean()), 3),
                             multi_face_rate=round(multi, 3), crop=crop_info, language=lang, language_prob=round(prob, 3),
-                            speech_ratio=round(speech, 3)))
+                            speech_ratio=round(speech, 3), face_tracking_method="dominant_iou",
+                            face_track_id=face_report["selected"],
+                            face_dominance_margin=round(face_report["dominance_margin"], 3),
+                            face_review_required=face_report["dominance_margin"] < 0.25))
     if not entries:
         reject(st, vid, url, "segments", "sin segmentos válidos" + (f" ({'; '.join(dropped)})" if dropped else "")); return False
     update_index(entries)

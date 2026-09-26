@@ -33,9 +33,6 @@ def main() -> None:
 
     queue = json.loads((CASE / f"{a.vid}.adjudication_queue.json").read_text(encoding="utf-8"))
     meta = json.loads((CASE / f"{a.vid}.meta.json").read_text(encoding="utf-8"))
-    words = json.loads((ROOT / meta["words_json"]).read_text(encoding="utf-8"))
-    z = np.load(ROOT / meta["features_npz"], allow_pickle=False)
-    mp4 = ROOT / meta["mp4"]
     provider_name = "groq" if is_groq else "gemini"
     out = CASE / f"{a.vid}.adjudication_{provider_name}.jsonl"
     previous = [json.loads(line) for line in out.read_text(encoding="utf-8").splitlines() if line.strip()] if out.exists() else []
@@ -44,6 +41,11 @@ def main() -> None:
     print(f"[gemini] {len(queue)} en cola · {len(done)} ya juzgadas · {len(todo)} pendientes · modelo {a.model}")
     if not todo:
         return
+
+    words = json.loads((ROOT / meta["words_json"]).read_text(encoding="utf-8"))
+    z = np.load(ROOT / meta["features_npz"], allow_pickle=False)
+    J.validate_raw_features(z, path=str(ROOT / meta["features_npz"]))
+    mp4 = ROOT / meta["mp4"]
 
     errors = ROOT / "data/judge/errors_gemini.jsonl"
     with out.open("a", encoding="utf-8") as fh:

@@ -147,7 +147,7 @@ def build_queue(W: list[dict], url: str | None, limit: int) -> list[dict]:
         if a["class"] == t["class"]:
             continue
         f = w["features"]
-        strength = abs(f.get("f0_reset", 0.0)) + 4.0 * f.get("max_delta_mouth_press", 0.0)
+        strength = abs(f.get("f0_reset", 0.0)) + 4.0 * (f.get("max_delta_mouth_press") or 0.0)
         cand.append({"window_index": i, "start": w["timestamp_start"], "end": w["timestamp_end"],
                      "transcription": w["transcription"], "features": f,
                      "link": yt_link(url, w["timestamp_start"]), "evidence_strength": round(strength, 4),
@@ -299,7 +299,8 @@ def main() -> None:
             rows.append([c["link"],
                          (c["transcription"][:44] + "…") if len(c["transcription"]) > 45 else (c["transcription"] or "—"),
                          f"{c['features']['f0_reset']:+.2f}",
-                         f"{c['features']['max_delta_mouth_press']:.3f}",
+                         (f"{c['features']['max_delta_mouth_press']:.3f}"
+                          if c['features']['max_delta_mouth_press'] is not None else "n/d"),
                          h["audio_text"]["class"], h["trimodal"]["class"]])
         L += md_table(["t", "transcripción", "f0_reset", "Δ tensión labial",
                        "audio_text", "trimodal"], rows) + [""]
@@ -415,7 +416,8 @@ def main() -> None:
                 rows.append([yt_link(url, w["timestamp_start"]),
                              (w["transcription"][:40] + "…") if len(w["transcription"]) > 41 else (w["transcription"] or "—"),
                              f"{w['features']['f0_reset']:+.2f}",
-                             f"{w['features']['max_delta_mouth_press']:.3f}",
+                             (f"{w['features']['max_delta_mouth_press']:.3f}"
+                              if w['features']['max_delta_mouth_press'] is not None else "n/d"),
                              w["predictions"]["audio_text"]["class"], r.get("label")])
             L += md_table(["t", "transcripción", "f0_reset", "Δ tensión labial",
                            "bimodal dijo", "juez dijo"], rows) + [""]

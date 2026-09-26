@@ -18,6 +18,7 @@ sys.path.insert(0, str(ROOT))
 
 from core.annotation.auto_labeler import label_recording, window_labels, write_eaf  # noqa: E402
 from core.constants import ACOUSTIC_HOP_S, LABELS, TAXONOMY  # noqa: E402
+from core.contracts import validate_raw_features  # noqa: E402
 from core.extractors.acoustic import AcousticTrack, _complement, _mask_to_segments  # noqa: E402
 from core.extractors.linguistic import Word  # noqa: E402
 
@@ -32,6 +33,7 @@ class _Kin:
 
 def rebuild(rid_npz: Path, duration_s: float, wav: Path | None = None) -> tuple[AcousticTrack, _Kin | None]:
     z = np.load(rid_npz, allow_pickle=False)
+    validate_raw_features(z, path=str(rid_npz))
     times, f0, rms, vad = z["ac_times"], z["f0"], z["rms"], z["vad"]
     frames = z["ac_frames"]
     if "hf_ratio" in z:
