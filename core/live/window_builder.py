@@ -4,14 +4,9 @@ from __future__ import annotations
 import numpy as np
 
 from core.constants import SAMPLE_RATE, WINDOW_S
-from core.dataset import acoustic_windows, center_f0, linguistic_windows
+from core.engine import window_tensors
 from core.extractors.acoustic import extract_acoustic
-from core.extractors.linguistic import Word, word_features
-from core.extractors.prosody import prosody_windows, speaker_f0_center
-
-
-def _word_dicts(words: list[Word], offset_s: float = 0.0) -> list[dict]:
-    return [{**word.to_dict(), "start": word.start - offset_s, "end": word.end - offset_s} for word in words]
+from core.extractors.linguistic import Word
 
 
 def window_text(words: list[Word], start_s: float) -> str:
@@ -21,23 +16,11 @@ def window_text(words: list[Word], start_s: float) -> str:
 def build_window(audio: np.ndarray, words: list[Word], start_s: float, *, word_offset_s: float = 0.0,
                  use_silero: bool = True, context: bool = True,
                  include_pros: bool = True, ling_dim: int | None = None) -> dict[str, np.ndarray]:
-    """Build one window in the identical offline ordering: pros, ac, ling, lpos, lmask."""
-    track = extract_acoustic(audio, use_silero=use_silero)
-    frames = track.frame_matrix()
-    center = speaker_f0_center(frames)
-    starts = np.asarray([start_s], np.float64)
-    local_words = _word_dicts(words, word_offset_s)
-    feats = word_features([Word(**word) for word in local_words])
-    ling, lpos, lmask = linguistic_windows(local_words, feats, starts, context=context)
-    if ling_dim is not None:
-        if ling_dim > ling.shape[-1]:
-            raise ValueError(f"El checkpoint espera ling={ling_dim}, pero el extractor produce {ling.shape[-1]}")
-        ling = ling[:, :, :ling_dim]
-    out = {"ac": acoustic_windows(center_f0(frames, center), starts),
-           "ling": ling, "lpos": lpos, "lmask": lmask}
-    if include_pros:
-        out["pros"] = prosody_windows(frames, starts, center)
-    return out
+    """One window over a fresh buffer; offline analysis uses core.engine to extract once."""
+    frames = extract_acoustic(audio, use_silero=use_silero).frame_matrix()
+    local = [Word(w.text, w.norm, w.start - word_offset_s, w.end - word_offset_s, w.prob, w.punct_after)
+             for w in words]
+    return window_tensors(frames, local, [start_s], context=context, include_pros=include_pros, ling_dim=ling_dim)
 
 
 def build_latest_contextual_window(audio: np.ndarray, buffer_start_s: float, words: list[Word],
