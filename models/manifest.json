@@ -1,0 +1,60 @@
+{
+  "created": "2026-09-28T15:41:41",
+  "label_source": "auto",
+  "n_windows": 18927,
+  "labels": [
+    "fluent",
+    "filler_word",
+    "prolongation",
+    "repetition",
+    "block",
+    "revision",
+    "rhetorical_pause",
+    "neutral_pause"
+  ],
+  "feature_contract": {
+    "version": "1.2.0",
+    "labels": [
+      "fluent",
+      "filler_word",
+      "prolongation",
+      "repetition",
+      "block",
+      "revision",
+      "rhetorical_pause",
+      "neutral_pause"
+    ],
+    "taxonomy": [
+      "filler_word",
+      "prolongation",
+      "repetition",
+      "block",
+      "revision",
+      "rhetorical_pause",
+      "neutral_pause"
+    ],
+    "window_s": 3.0,
+    "stride_s": 0.5,
+    "acoustic_hop_s": 0.01,
+    "video_fps": 10,
+    "kinesic_dim": 12,
+    "evidence_sources": [
+      "auto",
+      "human",
+      "gold_llm"
+    ],
+    "auto_labels_are_ground_truth": false,
+    "missingness": {
+      "linguistic": "lmask",
+      "visual": "kmask",
+      "visual_window": "has_video",
+      "prosodic_reset": "reset_valid"
+    }
+  },
+  "checkpoints": {
+    "audio_text": {
+      "path": "models\\ckpt_audio_text.pt",
+      "params": 33097
+    }
+  }
+}
