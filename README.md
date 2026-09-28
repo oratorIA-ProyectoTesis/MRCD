@@ -52,6 +52,20 @@ una cara de rasgos cero; las métricas visuales del JSON de inferencia son `null
 cuando la ventana no supera el umbral de cobertura real. Las etiquetas `auto` siguen siendo supervisión débil y
 la ablación mantiene el rechazo de train/test con el mismo origen de etiquetas.
 
+## Aplicación de revisión y prueba
+
+`app/` implementa el plan técnico: revisión humana ciega, asistida y adjudicada; snapshots
+inmutables; evaluación por eventos (`core/evaluation.py`); playground de grabación/carga con
+análisis en un worker separado; comparación de versiones. El motor prepara cada grabación una
+sola vez (`core/engine.py`). Puesta en marcha, roles, protocolo y estado:
+[`docs/protocolo-mrcd.md`](docs/protocolo-mrcd.md). Guía para anotadores:
+[`docs/guia-anotacion-v1.md`](docs/guia-anotacion-v1.md).
+
+```powershell
+uvicorn app.api:app --port 8000   # web en http://127.0.0.1:8000
+python -m app.worker              # otra terminal
+```
+
 ## Demo local limitada
 
 `python scripts/live_demo.py --ckpt models/ckpt_audio_text.pt` inicia una UI en
