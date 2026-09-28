@@ -16,5 +16,6 @@ sounddevice>=0.5
 fastapi>=0.115
 uvicorn>=0.30
 websockets>=12
+sqlalchemy>=2.0
 # opcional (rama sintáctica RoBERTa-BNE):
 # transformers>=4.40

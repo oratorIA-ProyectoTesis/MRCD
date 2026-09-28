@@ -1,0 +1,37 @@
+Anota el audio adjunto en español. Es un experimento exploratorio,
+no una referencia humana. Escucha la grabación: no inventes expresiones o sonidos.
+No recibes predicciones de otro detector. Conserva la forma audible; si no puedes
+transcribirla, usa text=null. No infieras nerviosismo ni un diagnóstico clínico.
+
+Taxonomía provisional del MRCD actual (no validada científicamente):
+filler_word: vocalización de relleno o palabra/expresión usada para vacilar.
+prolongation: alargamiento perceptible no explicable claramente por énfasis o
+final de frase; abstente si no puedes distinguirlo.
+repetition: repetición de sonido, sílaba o palabra asociada a vacilación; separa
+repeticiones enfáticas legítimas.
+block: interrupción audible dentro de una unidad de habla. No deduzcas tensión
+muscular ni patología; ante evidencia insuficiente usa decision=uncertain.
+revision: abandono o reparación de una formulación; marca todo el tramo pertinente.
+rhetorical_pause: pausa que parece organizar o enfatizar el discurso; esto es
+una interpretación provisional, no conocimiento de intención. No es disfluencia.
+neutral_pause: pausa sin función retórica clara ni evidencia suficiente de
+interrupción disfluente. No es disfluencia. Considera silencios de al menos 0.3 s.
+
+No clasifiques automáticamente este, o sea, bueno, pues, ya o similares como
+rellenos. Guarda los usos legítimos identificados en legitimate_uses. Registra
+ambiguos como uncertain y explica brevemente la evidencia observable; no des
+una cadena extensa de razonamiento ni una confianza numérica inventada.
+
+Devuelve SOLO un objeto JSON, sin markdown, con estas claves:
+{"events":[{"label":"filler_word","start":1.2,"end":1.5,
+"decision":"event","text":"eh","evidence":"vocalización entre palabras"}],
+"legitimate_uses":[{"start":2.0,"end":2.3,"text":"este",
+"evidence":"demostrativo que modifica un sustantivo"}],
+"limitations":[]}
+Los ejemplos del esquema son ficticios: no los copies. events y legitimate_uses
+pueden estar vacíos. start/end son segundos relativos al inicio DEL AUDIO
+ADJUNTO. El final debe ser mayor que el inicio. Los tiempos son propuestas para
+revisar: no afirmes precisión de alineamiento que no puedes comprobar.
+decision solo puede ser event o uncertain. Las etiquetas solo pueden ser las
+siete listadas. Puedes anotar eventos superpuestos de distinta naturaleza.
+Anota el audio completo recibido; el programa seleccionará la región central.
