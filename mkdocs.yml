@@ -1,0 +1,56 @@
+site_name: MRCD
+site_description: Motor de reconocimiento contextual de disfluencias del habla en español, con revisión humana y evaluación reproducible.
+site_url: https://oratoria-proyectotesis.github.io/MRCD/
+repo_url: https://github.com/oratorIA-ProyectoTesis/MRCD
+repo_name: oratorIA-ProyectoTesis/MRCD
+edit_uri: edit/refactor/mrcd-architecture/docs/
+copyright: Proyecto de tesis OratorIA · resultados preliminares, ver «Evidencia»
+
+theme:
+  name: material
+  language: es
+  palette:
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      primary: deep orange
+      accent: indigo
+      toggle: { icon: material/weather-night, name: Modo oscuro }
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      primary: deep orange
+      accent: indigo
+      toggle: { icon: material/weather-sunny, name: Modo claro }
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+
+nav:
+  - Inicio: index.md
+  - Probar la demo: demo.md
+  - Cómo funciona: como-funciona.md
+  - Evidencia y benchmark: evidencia.md
+  - Comparativa de capacidades: comparativa.md
+  - Instalación rápida: instalacion.md
+  - Integración: integracion.md
+  - Limitaciones: limitaciones.md
+  - Referencia:
+      - Guía de anotación v1: guia-anotacion-v1.md
+      - Protocolo técnico: protocolo-mrcd.md
+
+markdown_extensions:
+  - tables
+  - attr_list
+  - md_in_html
+  - toc: { permalink: true }
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
