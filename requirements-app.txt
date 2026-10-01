@@ -1,0 +1,14 @@
+# Dependencias de la aplicación (audio + texto), sin las de video ni minería de datos.
+# En Docker, torch se instala antes desde el índice CPU de PyTorch.
+numpy>=1.26
+scipy>=1.11
+scikit-learn>=1.4
+librosa>=0.10
+soundfile>=0.12
+silero-vad>=5.1
+onnxruntime>=1.17
+faster-whisper>=1.0
+torch>=2.2
+fastapi>=0.115
+uvicorn>=0.30
+sqlalchemy>=2.0

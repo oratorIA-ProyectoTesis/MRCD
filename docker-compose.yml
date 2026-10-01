@@ -1,0 +1,22 @@
+# docker compose up --build   →   http://127.0.0.1:8000
+# El token del admin aparece en: docker compose logs mrcd
+services:
+  mrcd:
+    build:
+      context: .
+      args:
+        MRCD_COMMIT: ${MRCD_COMMIT:-} # p. ej. MRCD_COMMIT=$(git rev-parse HEAD) docker compose build
+    image: mrcd:latest
+    ports:
+      - '8000:8000'
+    environment:
+      MRCD_ADMIN_TOKEN: ${MRCD_ADMIN_TOKEN:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    volumes:
+      - mrcd-data:/data # base de datos y audios
+      - mrcd-cache:/cache # modelo Whisper, se descarga una sola vez
+    restart: unless-stopped
+
+volumes:
+  mrcd-data:
+  mrcd-cache:
