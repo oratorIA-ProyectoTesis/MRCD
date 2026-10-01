@@ -62,9 +62,13 @@ sola vez (`core/engine.py`). Puesta en marcha, roles, protocolo y estado:
 [`docs/guia-anotacion-v1.md`](docs/guia-anotacion-v1.md).
 
 ```powershell
-uvicorn app.api:app --port 8000   # web en http://127.0.0.1:8000
-python -m app.worker              # otra terminal
+docker compose up --build          # sin instalar nada; token en: docker compose logs mrcd
+# o, con Python 3.12 y FFmpeg:
+pip install -r requirements-app.txt
+python -m app                      # API + worker; imprime el token del admin la primera vez
 ```
+
+Documentación publicada: https://oratoria-proyectotesis.github.io/MRCD/
 
 ## Demo local limitada
 
