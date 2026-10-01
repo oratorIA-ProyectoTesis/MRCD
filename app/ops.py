@@ -12,10 +12,10 @@ from app.store import Store
 ROLES = ("admin", "annotator", "adjudicator", "researcher", "user")
 
 
-def new_user(store: Store, name: str, role: str) -> tuple[dict, str]:
+def new_user(store: Store, name: str, role: str, token: str | None = None) -> tuple[dict, str]:
     if role not in ROLES or not name.strip():
         raise ValueError("nombre vacío o rol desconocido")
-    token = secrets.token_urlsafe(24)
+    token = token or secrets.token_urlsafe(24)
     doc = store.create(
         "user",
         {"name": name.strip(), "role": role, "token_sha256": hashlib.sha256(token.encode()).hexdigest()},

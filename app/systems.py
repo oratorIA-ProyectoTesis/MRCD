@@ -51,7 +51,13 @@ def _own(job, events: list[dict], prefix: str) -> list[dict]:
 
 
 def _commit() -> str | None:
-    run = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True)
+    """Code version for provenance: git when available, MRCD_COMMIT in images, else unknown."""
+    if os.environ.get("MRCD_COMMIT"):
+        return os.environ["MRCD_COMMIT"]
+    try:
+        run = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True)
+    except OSError:
+        return None
     return run.stdout.strip() or None
 
 
