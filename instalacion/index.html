@@ -455,10 +455,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#requisitos" class="md-nav__link">
+  <a href="#opcion-1-docker-recomendada" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Requisitos
+        Opción 1: Docker (recomendada)
       
     </span>
   </a>
@@ -466,10 +466,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-descargar" class="md-nav__link">
+  <a href="#opcion-2-python" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Descargar
+        Opción 2: Python
       
     </span>
   </a>
@@ -477,32 +477,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-crear-la-primera-cuenta" class="md-nav__link">
+  <a href="#cargar-el-piloto-de-ejemplo-opcional" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Crear la primera cuenta
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-levantar-la-aplicacion" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. Levantar la aplicación
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-opcional-cargar-el-piloto-de-ejemplo" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. (Opcional) Cargar el piloto de ejemplo
+        Cargar el piloto de ejemplo (opcional)
       
     </span>
   </a>
@@ -746,10 +724,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#requisitos" class="md-nav__link">
+  <a href="#opcion-1-docker-recomendada" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Requisitos
+        Opción 1: Docker (recomendada)
       
     </span>
   </a>
@@ -757,10 +735,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-descargar" class="md-nav__link">
+  <a href="#opcion-2-python" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Descargar
+        Opción 2: Python
       
     </span>
   </a>
@@ -768,32 +746,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-crear-la-primera-cuenta" class="md-nav__link">
+  <a href="#cargar-el-piloto-de-ejemplo-opcional" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Crear la primera cuenta
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-levantar-la-aplicacion" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. Levantar la aplicación
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-opcional-cargar-el-piloto-de-ejemplo" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. (Opcional) Cargar el piloto de ejemplo
+        Cargar el piloto de ejemplo (opcional)
       
     </span>
   </a>
@@ -854,31 +810,81 @@
 
 
 <h1 id="instalacion-rapida">Instalación rápida<a class="headerlink" href="#instalacion-rapida" title="Permanent link">&para;</a></h1>
-<h2 id="requisitos">Requisitos<a class="headerlink" href="#requisitos" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Python 3.12</li>
-<li>FFmpeg en el <code>PATH</code> (<code>ffmpeg -version</code> debe responder)</li>
-<li>Unos 2 GB libres: dependencias y el modelo Whisper <code>small</code>, que se descarga solo la primera vez</li>
-<li>GPU opcional: con CUDA el análisis es más rápido; en CPU funciona</li>
-</ul>
-<h2 id="1-descargar">1. Descargar<a class="headerlink" href="#1-descargar" title="Permanent link">&para;</a></h2>
+<p>Dos formas de levantar MRCD. Las dos dejan la misma aplicación en <code>http://127.0.0.1:8000</code>, con la API y el worker funcionando juntos.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Docker</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Necesitas</td>
+<td>Docker Desktop (o Docker Engine)</td>
+<td>Python 3.12 y FFmpeg</td>
+</tr>
+<tr>
+<td>Comando</td>
+<td><code>docker compose up --build</code></td>
+<td><code>python -m app</code></td>
+</tr>
+<tr>
+<td>Ideal para</td>
+<td>Probarlo sin instalar nada, o publicarlo en un servidor</td>
+<td>Desarrollar y modificar el código</td>
+</tr>
+</tbody>
+</table>
+<h2 id="opcion-1-docker-recomendada">Opción 1: Docker (recomendada)<a class="headerlink" href="#opcion-1-docker-recomendada" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>refactor/mrcd-architecture<span class="w"> </span>https://github.com/oratorIA-ProyectoTesis/MRCD.git
 <span class="nb">cd</span><span class="w"> </span>MRCD
-pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>--build
 </code></pre></div>
-<p>El repositorio ya incluye el modelo entrenado (<code>models/ckpt_audio_text.pt</code>).</p>
-<h2 id="2-crear-la-primera-cuenta">2. Crear la primera cuenta<a class="headerlink" href="#2-crear-la-primera-cuenta" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>app.cli<span class="w"> </span>add-user<span class="w"> </span>admin<span class="w"> </span>admin
+<p>La primera construcción tarda varios minutos. Cuando termine, busca el token del administrador en el registro:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>mrcd
 </code></pre></div>
-<p>Imprime un token <strong>una sola vez</strong>: guárdalo. Las demás cuentas se crean desde la web, en <strong>Administración → Personas</strong>.</p>
-<h2 id="3-levantar-la-aplicacion">3. Levantar la aplicación<a class="headerlink" href="#3-levantar-la-aplicacion" title="Permanent link">&para;</a></h2>
-<p>En dos terminales:</p>
-<div class="highlight"><pre><span></span><code>uvicorn<span class="w"> </span>app.api:app<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
+<p>Abre <code>http://127.0.0.1:8000</code> y entra con ese token.</p>
+<p>Para elegir tú el token en lugar de que se genere uno, créalo antes del primer arranque:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">MRCD_ADMIN_TOKEN</span><span class="o">=</span>mi-token-secreto<span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>--build
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>app.worker
+<p><strong>Datos persistentes:</strong> la base de datos y los audios viven en el volumen <code>mrcd-data</code>; el modelo Whisper se descarga una sola vez en <code>mrcd-cache</code>. Sobreviven a <code>docker compose down</code>; solo <code>docker compose down -v</code> los borra.</p>
+<p>La imagen usa CPU. El primer análisis tarda más porque descarga Whisper <code>small</code> (unos 500 MB).</p>
+<p><strong>Reproducibilidad:</strong> la imagen instala versiones exactas (<code>requirements-app.lock</code>), así que reconstruirla da el mismo entorno y los mismos resultados. Con <code>pip install -r requirements-app.txt</code> las versiones pueden variar y, con ellas, la transcripción y algunos eventos. Para comparar resultados entre máquinas, usa Docker o instala desde el lock.</p>
+<h2 id="opcion-2-python">Opción 2: Python<a class="headerlink" href="#opcion-2-python" title="Permanent link">&para;</a></h2>
+<p>Requisitos: Python 3.12, FFmpeg en el <code>PATH</code> (<code>ffmpeg -version</code> debe responder) y unos 2 GB libres.</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>refactor/mrcd-architecture<span class="w"> </span>https://github.com/oratorIA-ProyectoTesis/MRCD.git
+<span class="nb">cd</span><span class="w"> </span>MRCD
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements-app.txt
+python<span class="w"> </span>-m<span class="w"> </span>app
 </code></pre></div>
-<p>Abre <code>http://127.0.0.1:8000</code>, entra con el token y ve a <strong>Prueba del producto</strong>.</p>
-<h2 id="4-opcional-cargar-el-piloto-de-ejemplo">4. (Opcional) Cargar el piloto de ejemplo<a class="headerlink" href="#4-opcional-cargar-el-piloto-de-ejemplo" title="Permanent link">&para;</a></h2>
+<p>En el primer arranque imprime el token del administrador <strong>una sola vez</strong>: guárdalo. El repositorio ya incluye el modelo entrenado (<code>models/ckpt_audio_text.pt</code>).</p>
+<p>Opciones de <code>python -m app</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Opción</th>
+<th>Para qué</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--port 9000</code></td>
+<td>Otro puerto</td>
+</tr>
+<tr>
+<td><code>--host 0.0.0.0</code></td>
+<td>Aceptar conexiones de otras máquinas de tu red</td>
+</tr>
+<tr>
+<td><code>--no-worker</code></td>
+<td>Solo la API; el worker se levanta aparte con <code>python -m app.worker</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>requirements-app.txt</code> instala solo lo que usa la aplicación (audio y texto). Para el pipeline de investigación completo (extracción de video, minería de datos, entrenamiento), usa <code>requirements.txt</code>.</p>
+<h2 id="cargar-el-piloto-de-ejemplo-opcional">Cargar el piloto de ejemplo (opcional)<a class="headerlink" href="#cargar-el-piloto-de-ejemplo-opcional" title="Permanent link">&para;</a></h2>
 <p>Si tienes la carpeta del piloto con su <code>manifest.json</code>:</p>
 <div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>app.cli<span class="w"> </span>import-pilot<span class="w"> </span>RUTA/AL/PILOTO<span class="w"> </span>--speaker<span class="w"> </span>spk_piloto
 </code></pre></div>
@@ -893,9 +899,14 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 </thead>
 <tbody>
 <tr>
+<td><code>MRCD_ADMIN_TOKEN</code></td>
+<td>Token del primer administrador</td>
+<td>Se genera y se imprime</td>
+</tr>
+<tr>
 <td><code>MRCD_DATA</code></td>
 <td>Carpeta de la base de datos y los audios</td>
-<td><code>data/app</code></td>
+<td><code>data/app</code> (Docker: <code>/data</code>)</td>
 </tr>
 <tr>
 <td><code>DATABASE_URL</code></td>
@@ -920,7 +931,8 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 </code></pre></div>
 <p>Imprime una URL <code>https://….trycloudflare.com</code> que cambia en cada ejecución. Comparte solo tokens de rol «Usuario del producto» y cierra el túnel al terminar.</p>
 <h2 id="verificar-la-instalacion">Verificar la instalación<a class="headerlink" href="#verificar-la-instalacion" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/test_app.py<span class="w"> </span>tests/test_evaluation_engine.py
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>pytest
+python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/test_app.py<span class="w"> </span>tests/test_evaluation_engine.py
 </code></pre></div>
 
 
