@@ -23,3 +23,4 @@ results_smoke_synthetic/
 *.pem
 *.key
 *.jsonl
+site/
