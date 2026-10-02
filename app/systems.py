@@ -18,29 +18,39 @@ from pathlib import Path
 
 from app import media, media_dir
 from core.contracts import FEATURE_SCHEMA_VERSION, RAW_FEATURE_SCHEMA_VERSION
-from core.engine import MRCDEngine, cache_key, event_text, prepare
+from core.engine import ASR_DEFAULTS, MRCDEngine, cache_key, event_text, prepare
 
 ROOT = Path(__file__).resolve().parents[1]
 GPT_PROMPT = ROOT / "config" / "gpt_prompt_v1.txt"
 _loaded: dict = {}
 
 
-def _asr(size: str):
-    if ("asr", size) not in _loaded:
+def asr_config(config: dict) -> dict:
+    """Effective ASR settings; they change the words, so they are part of every cache key and record."""
+    return {
+        "whisper_size": config.get("whisper_size", "small"),
+        **{k: config.get(k, v) for k, v in ASR_DEFAULTS.items()},
+    }
+
+
+def _asr(cfg: dict):
+    key = ("asr", *cfg.values())
+    if key not in _loaded:
         from core.extractors.linguistic import VerbatimASR
 
-        _loaded[("asr", size)] = VerbatimASR(size)
-    return _loaded[("asr", size)]
+        _loaded[key] = VerbatimASR(cfg["whisper_size"], device=cfg["asr_device"], compute_type=cfg["asr_compute_type"])
+    return _loaded[key]
 
 
 def prepared(recording: dict, audio, config: dict, stage=lambda name: None):
     """ASR + acoustic track once per media/configuration, shared by MRCD, rules and window export."""
     cfg = {"asr_chunk_s": float(config.get("asr_chunk_s", 0.0)), "use_silero": config.get("use_silero", True)}
-    size = config.get("whisper_size", "small")
-    key = cache_key(media=recording["data"]["media"]["analysis"]["sha256"], whisper=size,
-                    raw_schema=RAW_FEATURE_SCHEMA_VERSION, **cfg)
+    asr = asr_config(config)
+    key = cache_key(
+        media=recording["data"]["media"]["analysis"]["sha256"], raw_schema=RAW_FEATURE_SCHEMA_VERSION, **asr, **cfg
+    )
     stage("prepare_features")
-    return prepare(audio, _asr(size), cache=media_dir(recording) / "prepared" / f"{key}.pkl", **cfg)
+    return prepare(audio, _asr(asr), cache=media_dir(recording) / "prepared" / f"{key}.pkl", **cfg)
 
 
 def _own(job, events: list[dict], prefix: str) -> list[dict]:
@@ -70,16 +80,16 @@ def mrcd(job) -> dict:
         for k in ("asr_chunk_s", "thresholds", "refine_boundaries", "use_silero", "temperature")
         if k in job.config
     }
-    size = job.config.get("whisper_size", "small")
-    key = ("mrcd", str(ckpt), size, json.dumps(cfg, sort_keys=True))
+    asr = asr_config(job.config)
+    key = ("mrcd", str(ckpt), json.dumps(asr, sort_keys=True), json.dumps(cfg, sort_keys=True))
     if key not in _loaded:
         import torch
 
         from core.inference import InferenceEngine
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        engine = MRCDEngine(InferenceEngine.from_checkpoint(ckpt, device), _asr(size), **cfg)
-        engine.config["whisper_size"] = size
+        engine = MRCDEngine(InferenceEngine.from_checkpoint(ckpt, device), _asr(asr), **cfg)
+        engine.config.update(asr)
         _loaded[key] = engine
     engine = _loaded[key]
     prep = prepared(job.recording, job.audio, job.config, job.stage)
@@ -127,7 +137,7 @@ def rules(job) -> dict:
         "timings": prep.timings,
         "segments": {s["id"]: "succeeded" for s in job.recording["data"]["segments"]},
         "warning": "Heurísticas con audio y ASR, sin video; referencia automática.",
-        "model_version": {"commit": _commit(), "config": job.config},
+        "model_version": {"commit": _commit(), "config": {**job.config, **asr_config(job.config)}},
     }
 
 

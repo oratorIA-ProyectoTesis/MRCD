@@ -28,6 +28,10 @@ ENGINE_VERSION = "engine-1.0.0"
 PAUSES = ("rhetorical_pause", "neutral_pause")
 LEXICAL = ("filler_word", "repetition", "revision")
 MIN_AUDIO_S = CONTEXT_S + WINDOW_S
+# Reproducible ASR. Decoding in int8 turns ~1e-5 platform differences in the log-mel
+# features (NumPy FFT) into different words on Windows and Linux; float32 on CPU gives
+# identical transcriptions on both (measured). GPU or int8 stay available but change results.
+ASR_DEFAULTS = {"asr_device": "cpu", "asr_compute_type": "float32"}
 
 
 @dataclass
@@ -220,7 +224,16 @@ class MRCDEngine:
         self.include_pros = net.pros is not None
 
     @classmethod
-    def load(cls, checkpoint: str | Path, *, whisper_size: str = "small", device: str | None = None, **config):
+    def load(
+        cls,
+        checkpoint: str | Path,
+        *,
+        whisper_size: str = "small",
+        device: str | None = None,
+        asr_device: str = ASR_DEFAULTS["asr_device"],
+        asr_compute_type: str = ASR_DEFAULTS["asr_compute_type"],
+        **config,
+    ):
         import torch
 
         from core.extractors.linguistic import VerbatimASR
@@ -230,10 +243,10 @@ class MRCDEngine:
         dev = device or ("cuda" if torch.cuda.is_available() else "cpu")
         engine = cls(
             InferenceEngine.from_checkpoint(Path(checkpoint), dev),
-            VerbatimASR(whisper_size, device="auto" if device is None else device),
+            VerbatimASR(whisper_size, device=asr_device, compute_type=asr_compute_type),
             **config,
         )
-        engine.config["whisper_size"] = whisper_size
+        engine.config.update(whisper_size=whisper_size, asr_device=asr_device, asr_compute_type=asr_compute_type)
         engine.init_s = time.perf_counter() - t
         return engine
 

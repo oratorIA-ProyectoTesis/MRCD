@@ -424,3 +424,21 @@ def test_web_administration_creates_people_tasks_and_cases(env):
     assert {t["owner"] for t in over["tasks"]} == {"ana", "dora"}
     assert call("admin", "POST", "/admin/cases", json={"adjudicator": users["carla"]}).json()["created"] == []
     assert {x["recording_id"] for x in call("rita", "GET", "/experiments").json()["runs"]} <= {rid}
+
+
+def test_asr_settings_are_part_of_cache_key_run_identity_and_record(env):
+    """int8 vs float32 ASR give different words across platforms, so a result computed
+    with other ASR settings must never be reused or returned as current."""
+    from app.systems import asr_config
+    from core.engine import ASR_DEFAULTS, cache_key
+
+    assert asr_config({}) == {"whisper_size": "small", "asr_device": "cpu", "asr_compute_type": "float32"}
+    assert cache_key(media="m", **asr_config({})) != cache_key(media="m", **asr_config({"asr_compute_type": "int8"}))
+    store, call, _, tmp = env
+    sf.write(tmp / "id.wav", (0.1 * np.sin(np.arange(16000 * 15) / 7)).astype(np.float32), 16000)
+    rid = upload(call, "rita", tmp / "id.wav")
+    run_worker(store)
+    default = call("rita", "POST", "/analysis-runs", json={"recording_id": rid}).json()["runs"][0]["id"]
+    assert store.get(default)["data"]["config"] == ASR_DEFAULTS  # effective settings are stored
+    int8 = call("rita", "POST", "/analysis-runs", json={"recording_id": rid, "config": {"asr_compute_type": "int8"}})
+    assert int8.json()["runs"][0]["id"] != default

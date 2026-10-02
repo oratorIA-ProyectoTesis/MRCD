@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from core.constants import LABELS, SAMPLE_RATE  # noqa: E402
 from core.dataset import window_starts  # noqa: E402
-from core.engine import MRCDEngine, window_tensors  # noqa: E402
+from core.engine import ASR_DEFAULTS, MRCDEngine, window_tensors  # noqa: E402
 from core.extractors.linguistic import VerbatimASR  # noqa: E402
 from core.inference import InferenceEngine  # noqa: E402
 from core.live.window_builder import build_window  # noqa: E402
@@ -60,7 +60,7 @@ def main() -> None:
     audio = audio.mean(1)
     t = time.perf_counter()
     inference = random_engine() if a.random_init else InferenceEngine.from_checkpoint(Path(a.ckpt), "cpu")
-    engine = MRCDEngine(inference, VerbatimASR(a.whisper, device="cpu"), init_s=time.perf_counter() - t)
+    engine = MRCDEngine(inference, VerbatimASR(a.whisper, device=ASR_DEFAULTS["asr_device"], compute_type=ASR_DEFAULTS["asr_compute_type"]), init_s=time.perf_counter() - t)
     cold = engine.analyze(audio)
     prep = engine.prepare(audio)
     warm = engine.analyze(audio, prepared=prep)

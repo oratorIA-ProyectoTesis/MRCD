@@ -27,6 +27,7 @@ from app.ops import ROLES, create_tasks, new_user, open_case, pair_cases
 from app.store import Conflict, Store
 from core import evaluation
 from core.constants import TAXONOMY
+from core.engine import ASR_DEFAULTS
 
 TERMINAL = {"succeeded", "partial", "failed", "cancelled"}
 TAXONOMY_VERSION = "mrcd-taxonomy-v1"
@@ -349,9 +350,10 @@ def create_app(store: Store | None = None) -> FastAPI:
             need(u, "researcher")
         comparison = f"cmp_{random.getrandbits(48):012x}"
         runs = []
+        config = {**ASR_DEFAULTS, **body.config}
         for system in body.systems:
             identity = hashlib.sha256(
-                json.dumps([rec["data"]["sha256"], system, body.config], sort_keys=True).encode()
+                json.dumps([rec["data"]["sha256"], system, config], sort_keys=True).encode()
             ).hexdigest()
             same = [
                 r
@@ -363,7 +365,7 @@ def create_app(store: Store | None = None) -> FastAPI:
                 if same
                 else store.create(
                     "run",
-                    {"system": system, "config": body.config, "identity": identity, "comparison": comparison},
+                    {"system": system, "config": config, "identity": identity, "comparison": comparison},
                     parent=rec["id"],
                     owner=u["id"],
                     status="queued",
@@ -991,7 +993,7 @@ def create_app(store: Store | None = None) -> FastAPI:
     app.include_router(api)
 
     # Cache-busting: browsers cache /app.js and /app.css aggressively across deploys.
-    # The index route stamps a version query string derived from each file's mtime,
+    # The index route stamps a version query string derived from the files' content,
     # so a new deploy is fetched automatically instead of needing a hard refresh.
     static_dir = Path(__file__).parent / "static"
     index_html = (static_dir / "index.html").read_text(encoding="utf-8")
