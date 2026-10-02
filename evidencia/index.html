@@ -423,6 +423,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#reproducibilidad-entre-plataformas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproducibilidad entre plataformas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#piloto-de-comparacion-automatica" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -746,6 +757,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#reproducibilidad-entre-plataformas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproducibilidad entre plataformas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#piloto-de-comparacion-automatica" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -888,6 +910,41 @@
 </table>
 <p>RTF es el tiempo de análisis dividido por la duración del audio: 0,21 significa que 40 s de audio se analizan en unos 8,6 s. La medición usó pesos aleatorios con la misma arquitectura (el tiempo no depende de los pesos) y VAD por energía. Se reproduce con <code>python scripts/profile_engine.py</code>.</p>
 <p>Como referencia histórica, la versión anterior del motor tardó 413,36 s en analizar los tres segmentos del piloto (90 s de audio evaluado).</p>
+<h2 id="reproducibilidad-entre-plataformas">Reproducibilidad entre plataformas<a class="headerlink" href="#reproducibilidad-entre-plataformas" title="Permanent link">&para;</a></h2>
+<p>El mismo audio analizado en Windows (Python local) y en Linux (Docker) daba <strong>30 y 24 eventos</strong>. Se aisló la causa etapa por etapa:</p>
+<table>
+<thead>
+<tr>
+<th>Etapa</th>
+<th>Windows frente a Linux</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Archivos del modelo Whisper</td>
+<td>Idénticos byte a byte</td>
+</tr>
+<tr>
+<td>Rasgos acústicos (VAD, F0, energía)</td>
+<td>Idénticos</td>
+</tr>
+<tr>
+<td>Espectrograma de entrada al ASR</td>
+<td>Diferencias de redondeo de ~10⁻⁵ (NumPy y plataforma)</td>
+</tr>
+<tr>
+<td>Transcripción con ASR <code>int8</code></td>
+<td><strong>Distinta</strong>: «eso sería entero» frente a «eso sería el feo»</td>
+</tr>
+<tr>
+<td>Transcripción con ASR <code>float32</code></td>
+<td><strong>Idéntica</strong>: «eso sería el problema»</td>
+</tr>
+</tbody>
+</table>
+<p>Cada entorno era determinista por sí mismo; ni el número de hilos ni la versión de CTranslate2 explicaban la diferencia. El modo cuantizado <code>int8</code> convierte diferencias mínimas del espectrograma en otras palabras, y la búsqueda en haz las amplifica. Esas palabras cambian la rama de texto del modelo: 17 de 75 ventanas cambiaban de clase.</p>
+<p><strong>Corrección:</strong> el ASR corre por defecto en CPU con <code>float32</code>. Con eso, Windows y Linux producen las mismas 52 palabras, las mismas probabilidades y los mismos 24 eventos, verificado a través de la aplicación completa. El costo es un ASR unas 1,45 veces más lento (13,7 s frente a 9,4 s para 40 s de audio). La configuración del ASR queda registrada en cada análisis y forma parte de la clave de caché, así que un resultado calculado con otra configuración nunca se reutiliza.</p>
+<p>Las mediciones de rendimiento de la sección anterior se tomaron con ASR <code>int8</code>.</p>
 <h2 id="piloto-de-comparacion-automatica">Piloto de comparación automática<a class="headerlink" href="#piloto-de-comparacion-automatica" title="Permanent link">&para;</a></h2>
 <p>Tres segmentos de 30 s de una entrevista (90 s evaluados), procesados por tres sistemas sin referencia humana.</p>
 <table>

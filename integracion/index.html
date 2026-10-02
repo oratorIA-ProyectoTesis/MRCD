@@ -818,7 +818,7 @@
 </tr>
 </tbody>
 </table>
-<p>Opciones al cargar: <code>whisper_size</code>, <code>device</code>, <code>asr_chunk_s</code>, <code>thresholds</code> (por clase), <code>refine_boundaries</code> y <code>temperature</code>.</p>
+<p>Opciones al cargar: <code>whisper_size</code>, <code>device</code>, <code>asr_device</code> y <code>asr_compute_type</code> (por defecto <code>cpu</code> y <code>float32</code>, reproducibles entre sistemas operativos), <code>asr_chunk_s</code>, <code>thresholds</code> (por clase), <code>refine_boundaries</code> y <code>temperature</code>.</p>
 <h2 id="2-api-rest">2. API REST<a class="headerlink" href="#2-api-rest" title="Permanent link">&para;</a></h2>
 <p>Para integrar desde cualquier lenguaje con la aplicación levantada. Todas las rutas van bajo <code>/api</code> y usan <code>Authorization: Bearer &lt;token&gt;</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 1. Subir el audio (cuerpo binario)</span>

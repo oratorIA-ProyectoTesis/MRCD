@@ -752,6 +752,7 @@
 <li><strong>Clases difíciles.</strong> <code>block</code> y <code>rhetorical_pause</code> dependen de interpretación. Si el acuerdo entre anotadores resulta bajo, se tratarán como exploratorias.</li>
 <li><strong>Sin video en el producto.</strong> El motor tiene una rama visual en investigación, pero la demo analiza solo audio y texto.</li>
 <li><strong>Dependencia del ASR.</strong> Whisper puede omitir muletillas o repeticiones; lo que el ASR no transcribe solo se detecta por vía acústica.</li>
+<li><strong>Configuración del ASR.</strong> Usar GPU o el modo <code>int8</code> acelera el ASR, pero cambia la transcripción y, con ella, los eventos. Los scripts de investigación (<code>extract_and_label.py</code>, <code>ingest_single_video.py</code>) siguen usando <code>int8</code> por defecto; el modelo publicado se entrenó con rasgos extraídos sin registrar esa configuración.</li>
 <li><strong>Corpus.</strong> Las grabaciones de entrenamiento provienen de charlas públicas; hablantes fluidos y ensayados, con pocos bloqueos y prolongaciones.</li>
 </ul>
 <h2 id="de-la-plataforma">De la plataforma<a class="headerlink" href="#de-la-plataforma" title="Permanent link">&para;</a></h2>
