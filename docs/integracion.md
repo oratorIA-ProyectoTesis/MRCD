@@ -33,7 +33,7 @@ print(result["timings"], result["rtf"], result["warning"])
 | `config`, `provenance`, `hardware` | Configuración, procedencia del checkpoint y equipo                                                                              |
 | `warning`                          | Aviso de procedencia (por ejemplo, etiquetas heurísticas). Muéstralo a tus usuarios                                             |
 
-Opciones al cargar: `whisper_size`, `device`, `asr_chunk_s`, `thresholds` (por clase), `refine_boundaries` y `temperature`.
+Opciones al cargar: `whisper_size`, `device`, `asr_device` y `asr_compute_type` (por defecto `cpu` y `float32`, reproducibles entre sistemas operativos), `asr_chunk_s`, `thresholds` (por clase), `refine_boundaries` y `temperature`.
 
 ## 2. API REST
 

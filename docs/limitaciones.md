@@ -9,6 +9,7 @@ Lo que MRCD **no** hace todavía, o hace con reservas. Esta lista se actualiza c
 - **Clases difíciles.** `block` y `rhetorical_pause` dependen de interpretación. Si el acuerdo entre anotadores resulta bajo, se tratarán como exploratorias.
 - **Sin video en el producto.** El motor tiene una rama visual en investigación, pero la demo analiza solo audio y texto.
 - **Dependencia del ASR.** Whisper puede omitir muletillas o repeticiones; lo que el ASR no transcribe solo se detecta por vía acústica.
+- **Configuración del ASR.** Usar GPU o el modo `int8` acelera el ASR, pero cambia la transcripción y, con ella, los eventos. Los scripts de investigación (`extract_and_label.py`, `ingest_single_video.py`) siguen usando `int8` por defecto; el modelo publicado se entrenó con rasgos extraídos sin registrar esa configuración.
 - **Corpus.** Las grabaciones de entrenamiento provienen de charlas públicas; hablantes fluidos y ensayados, con pocos bloqueos y prolongaciones.
 
 ## De la plataforma

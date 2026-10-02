@@ -34,7 +34,7 @@ MRCD_ADMIN_TOKEN=mi-token-secreto docker compose up --build
 
 La imagen usa CPU. El primer análisis tarda más porque descarga Whisper `small` (unos 500 MB).
 
-**Reproducibilidad:** la imagen instala versiones exactas (`requirements-app.lock`), así que reconstruirla da el mismo entorno y los mismos resultados. Con `pip install -r requirements-app.txt` las versiones pueden variar y, con ellas, la transcripción y algunos eventos. Para comparar resultados entre máquinas, usa Docker o instala desde el lock.
+**Reproducibilidad:** el ASR corre por defecto en CPU con precisión `float32`, que da la misma transcripción en Windows y Linux (ver [Evidencia](evidencia.md#reproducibilidad-entre-plataformas)). La imagen además instala versiones exactas (`requirements-app.lock`); con `pip install -r requirements-app.txt` las versiones pueden variar.
 
 ## Opción 2: Python
 

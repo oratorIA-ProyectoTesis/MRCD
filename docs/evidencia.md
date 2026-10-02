@@ -28,6 +28,24 @@ RTF es el tiempo de análisis dividido por la duración del audio: 0,21 signific
 
 Como referencia histórica, la versión anterior del motor tardó 413,36 s en analizar los tres segmentos del piloto (90 s de audio evaluado).
 
+## Reproducibilidad entre plataformas
+
+El mismo audio analizado en Windows (Python local) y en Linux (Docker) daba **30 y 24 eventos**. Se aisló la causa etapa por etapa:
+
+| Etapa | Windows frente a Linux |
+|---|---|
+| Archivos del modelo Whisper | Idénticos byte a byte |
+| Rasgos acústicos (VAD, F0, energía) | Idénticos |
+| Espectrograma de entrada al ASR | Diferencias de redondeo de ~10⁻⁵ (NumPy y plataforma) |
+| Transcripción con ASR `int8` | **Distinta**: «eso sería entero» frente a «eso sería el feo» |
+| Transcripción con ASR `float32` | **Idéntica**: «eso sería el problema» |
+
+Cada entorno era determinista por sí mismo; ni el número de hilos ni la versión de CTranslate2 explicaban la diferencia. El modo cuantizado `int8` convierte diferencias mínimas del espectrograma en otras palabras, y la búsqueda en haz las amplifica. Esas palabras cambian la rama de texto del modelo: 17 de 75 ventanas cambiaban de clase.
+
+**Corrección:** el ASR corre por defecto en CPU con `float32`. Con eso, Windows y Linux producen las mismas 52 palabras, las mismas probabilidades y los mismos 24 eventos, verificado a través de la aplicación completa. El costo es un ASR unas 1,45 veces más lento (13,7 s frente a 9,4 s para 40 s de audio). La configuración del ASR queda registrada en cada análisis y forma parte de la clave de caché, así que un resultado calculado con otra configuración nunca se reutiliza.
+
+Las mediciones de rendimiento de la sección anterior se tomaron con ASR `int8`.
+
 ## Piloto de comparación automática
 
 Tres segmentos de 30 s de una entrevista (90 s evaluados), procesados por tres sistemas sin referencia humana.
