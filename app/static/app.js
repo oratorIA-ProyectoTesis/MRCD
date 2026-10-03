@@ -364,6 +364,26 @@ async function inbox() {
 }
 
 // ------------------------------------------------ editor + adjudication view
+// Classic three-step editor: select a span, say what it is, press «Guardar evento».
+const EXAMPLES = {
+  filler_word: '«fui al… <b>eh</b>… al centro»',
+  prolongation: '«la <b>sss</b>emana»',
+  repetition: '«<b>pero pero</b> no sé»',
+  block: '«la c— (corte) casa»',
+  revision: '«estamos llevando… <b>llevamos</b> el curso»',
+  rhetorical_pause: 'silencio tras una idea completa, para enfatizar',
+  neutral_pause: 'silencio para respirar o pensar, sin interrumpir'
+}
+const KINDS = [
+  ['uncertain', 'Incierto', 'Hay algo, pero no sabes qué clase es o no puedes ubicar bien dónde empieza o termina.'],
+  [
+    'legit',
+    'Uso legítimo',
+    'Parece muletilla pero cumple una función (p. ej. «<b>este</b> libro», «bueno» como respuesta). No cuenta como disfluencia.'
+  ],
+  ['not_evaluable', 'No evaluable', 'Ruido, voces encimadas o audio cortado: ese tramo no se puede juzgar.']
+]
+
 async function workbench(kind, id) {
   const opened = performance.now()
   const isCase = kind === 'case'
@@ -372,69 +392,101 @@ async function workbench(kind, id) {
   const ann = d.annotation
   const locked = isCase ? t.status !== 'open' : ann.status === 'submitted'
   const useVideo = !isCase && d.video
-  const blank = { events: [], contextual: [], coverage: [], actions: [], active_ms: 0, asr_used: false, telemetry: {} }
+  const blank = {
+    events: [],
+    contextual: [],
+    coverage: [],
+    actions: [],
+    active_ms: 0,
+    asr_used: false,
+    telemetry: {}
+  }
   let state = isCase ? blank : { ...blank, ...ann.data, telemetry: ann.data.telemetry || {} }
   let rev = ann?.rev
   let extra = 0
   let offset = Math.max(0, t.start_ms - t.context_ms)
-  let sel = {}
-  let current = null
+  let sel = {} // span being prepared, in global ms
+  let editing = null // { type: 'event', id } | { type: 'ctx', index } | null
+  let fromSuggestion = null
   let op = null
   const reasons = {}
   const undo = []
   const pendingKey = ann && `pending:${ann.id}`
   const title = isCase ? 'Adjudicación' : t.mode === 'blind' ? 'Anotación independiente (ciega)' : 'Revisión asistida'
   const what = isCase
-    ? 'Decides la versión final de una región a partir de dos anotaciones independientes. Las pistas A y B aparecen como franjas tenues sobre la onda; su orden es aleatorio y no muestra quién las hizo. Tu decisión no reemplaza las anotaciones originales.'
+    ? 'Decides la versión final de una región a partir de dos anotaciones independientes. Las pistas A y B aparecen como franjas tenues sobre la onda; su orden es aleatorio y no muestra quién las hizo.'
     : t.mode === 'blind'
-      ? 'Anotas sin ver predicciones del modelo ni el trabajo de otras personas. La zona sombreada es la <b>región central</b> que debes cubrir; lo demás es contexto para escuchar. Todo cambio se guarda automáticamente.'
-      : 'Ves candidatos propuestos por el modelo (sin puntuación). Escucha cada uno antes de aceptarlo y, al terminar, recorre toda la región: los candidatos no muestran lo que el modelo omitió.'
+      ? 'Marcas lo que escuchas, sin ver predicciones del modelo ni el trabajo de otras personas. La zona sombreada de la onda es el <b>fragmento que debes revisar</b>; lo de los lados es contexto para entender. Todo lo que guardas queda en el servidor al instante.'
+      : 'Ves candidatos propuestos por el modelo (sin puntuación). Escucha cada uno antes de aceptarlo y, al terminar, recorre todo el fragmento: los candidatos no muestran lo que el modelo omitió.'
   const steps = isCase
     ? [
-        'Escucha la región (<kbd>Espacio</kbd>).',
-        'En «Diferencias A/B» pulsa <b>Usar A</b> o <b>Usar B</b>, o dibuja un evento nuevo.',
+        'Escucha la región.',
+        'En «Diferencias A/B» pulsa <b>Usar A</b> o <b>Usar B</b>, o crea un evento nuevo con los pasos 1–3.',
         'Escribe un motivo breve cuando haya desacuerdo.',
         'Pulsa <b>Guardar adjudicación</b>.'
       ]
     : [
-        'Escucha la región completa a velocidad normal.',
-        'Arrastra sobre la onda para seleccionar un tramo (o usa <kbd>I</kbd> y <kbd>O</kbd>).',
-        'Elige la clase con el panel derecho o las teclas <kbd>1</kbd>–<kbd>7</kbd>. Ajusta los bordes arrastrando o con ±10/±100 ms.',
-        'Si no hay más fenómenos, pulsa <b>Revisado: sin más eventos</b>.',
-        'Pulsa <b>Finalizar</b> (<kbd>Ctrl</kbd>+<kbd>Enter</kbd>).'
+        'Reproduce el fragmento completo una vez, a velocidad normal.',
+        '<b>Paso 1:</b> selecciona el tramo de cada fenómeno: arrástralo sobre la onda, o pulsa <b>Marcar inicio</b> y <b>Marcar fin</b> mientras se reproduce.',
+        '<b>Paso 2:</b> elige qué es. Cada opción explica cuándo usarla.',
+        '<b>Paso 3:</b> pulsa <b>Guardar evento</b>. Aparece en «Mis eventos», donde puedes escucharlo, editarlo o eliminarlo.',
+        'Cuando no quede nada por marcar, pulsa <b>Revisado: sin más eventos</b> y luego <b>Finalizar fragmento</b>.'
       ]
 
+  const option = (value, head, help) =>
+    `<label class="opt"><input type="radio" name="kind" value="${value}" ${locked ? 'disabled' : ''}><span>${head}<small>${help}</small></span></label>`
   view.innerHTML = `${intro(isCase ? 'case' : `task-${t.mode}`, title, what, steps)}
-    <div class="row meta"><span>Región central <b>${fmt(t.start_ms)}–${fmt(t.end_ms)}</b></span><span>Guía ${esc(t.guideline_version)}</span>
-      <span class="chip ${locked ? 'ok' : 'info'}" id="save">${locked ? 'Finalizada · solo lectura' : isCase ? 'Se guarda al confirmar' : 'Guardado'}</span></div>
+    <div class="row meta"><span>Fragmento <b>${fmt(t.start_ms)}–${fmt(t.end_ms)}</b></span><span>Guía ${esc(t.guideline_version)}</span>
+      <span class="chip ${locked ? 'ok' : 'info'}" id="save" title="Estado del guardado en el servidor">${locked ? 'Finalizado · solo lectura' : isCase ? 'Se guarda al confirmar' : 'Todo guardado'}</span></div>
     <div id="alert"></div>
     <div class="grid"><section>
       ${useVideo ? '<video id="vid" class="vid" playsinline preload="auto"></video>' : ''}
       <div id="wave"></div>
       <div class="row toolbar">
-        <button id="play" class="primary">▶ Reproducir / pausar</button>
+        <button id="play" class="primary">▶ Reproducir / pausar <kbd>Espacio</kbd></button>
+        <button id="back">⟲ −2 s</button>
         <label class="inline">Velocidad <select id="rate"><option value="0.75">0,75×</option><option value="1" selected>1×</option><option value="1.25">1,25×</option></select></label>
         <label class="inline">Zoom <input id="zoom" type="range" min="20" max="600" value="100"></label>
         <button id="ctx">Ampliar contexto +5 s</button><button id="spec">Espectrograma</button>
-        ${isCase ? '' : '<button id="asr" disabled title="Se habilita después de escuchar la región completa">Mostrar transcripción automática</button>'}
+        ${isCase ? '' : '<button id="asr" disabled title="Se habilita después de escuchar el fragmento completo">Mostrar transcripción automática</button>'}
       </div>
       <div class="words" id="words"></div>
       ${isCase ? '<h2>Diferencias A/B</h2><p class="muted">Cada fila compara un evento de A con el de B que más se superpone.</p><div class="scroll list"><table id="diff"></table></div>' : ''}
-      ${d.suggestions?.length ? '<h2>Candidatos del modelo</h2><p class="muted">Escucha cada candidato antes de decidir. «Falta otro evento» te lleva al lugar para marcar una omisión.</p><div class="scroll list"><table id="sugs"></table></div>' : ''}
+      ${d.suggestions?.length ? '<h2>Candidatos del modelo</h2><p class="muted">Escucha cada candidato antes de decidir. «Corregir» lo carga en el formulario para que ajustes tramo y clase.</p><div class="scroll list"><table id="sugs"></table></div>' : ''}
       <h2>${isCase ? 'Decisión final' : 'Mis eventos'}</h2><div class="scroll list"><table id="events"></table></div>
-      <h2>Usos legítimos</h2><p class="muted">Expresiones que parecen muletillas pero cumplen una función (por ejemplo «este» como demostrativo). No cuentan como disfluencias.</p><div class="scroll"><table id="ctxs"></table></div>
       <details><summary>Historial de versiones y guía completa</summary><div id="hist" class="muted"></div><pre id="guide"></pre></details>
     </section>
-    <aside class="card">
-      <h2>1. Clase del tramo</h2>
-      <div class="classes" id="classes">${CLASSES.map(([c], i) => `<button data-c="${c}" title="${esc(CLS[c].def)}" ${locked ? 'disabled' : ''}><kbd>${i + 1}</kbd>${badge(c)}</button>`).join('')}</div>
-      <div class="row"><button id="unc" ${locked ? 'disabled' : ''}>Incierto <kbd>U</kbd></button><button id="legit" ${locked ? 'disabled' : ''}>Uso legítimo</button><button id="noeval" ${locked ? 'disabled' : ''}>No evaluable</button></div>
-      <div id="panel"></div>
-      <h2>2. Cobertura</h2><div class="meter"><i id="covbar"></i></div><p id="cov" class="muted"></p>
-      <div class="row"><button id="cov-all" ${locked ? 'disabled' : ''}>Revisado: sin más eventos</button><button id="cov-cur" ${locked ? 'disabled' : ''}>Revisado hasta el cursor</button></div>
-      <h2>3. Terminar</h2>
-      <div class="row"><button id="submit" class="primary" ${locked ? 'disabled' : ''}>${isCase ? 'Guardar adjudicación' : 'Finalizar tarea'} <kbd>Ctrl+Enter</kbd></button><button id="undo" ${locked ? 'disabled' : ''}>Deshacer <kbd>Ctrl+Z</kbd></button></div>
-      <p class="muted small"><kbd>Espacio</kbd> reproducir · <kbd>←</kbd><kbd>→</kbd> ±1 s · <kbd>I</kbd>/<kbd>O</kbd> inicio/fin · <kbd>R</kbd> repetir selección · <kbd>Supr</kbd> borrar evento</p>
+    <aside class="card editor-panel">
+      <fieldset class="step" ${locked ? 'disabled' : ''}><legend>1 · Selecciona el tramo</legend>
+        <p class="muted small">Arrastra sobre la onda, o reproduce y pulsa los botones en el momento justo.</p>
+        <div class="row"><button id="mark-in">⟦ Marcar inicio <kbd>I</kbd></button><button id="mark-out">Marcar fin ⟧ <kbd>O</kbd></button></div>
+        <div id="selbox"></div>
+      </fieldset>
+      <fieldset class="step" ${locked ? 'disabled' : ''}><legend>2 · ¿Qué es? <span class="muted small">(teclas 1–7)</span></legend>
+        <div class="opts">${CLASSES.map(([c], i) => option(`cls:${c}`, `<kbd>${i + 1}</kbd>${badge(c)}`, `${esc(CLS[c].def)} Ej.: ${EXAMPLES[c]}`)).join('')}
+        ${KINDS.map(([k, name, help]) => option(k, `<b>${name}</b>${k === 'uncertain' ? ' <kbd>U</kbd>' : ''}`, help)).join('')}</div>
+        <div class="form extra">
+          <label data-for="event uncertain">Lo que se oye <small class="muted">opcional · solo lo que escuchaste, p. ej. «eh», «pero pero»</small><input id="f-text" maxlength="120"></label>
+          <label data-for="uncertain">¿Por qué no estás seguro? <select id="f-unc"><option value="class">No sé qué clase es</option><option value="boundaries">No puedo ubicar dónde empieza o termina</option><option value="audio">El audio no permite decidir</option></select></label>
+          <label data-for="uncertain">Clase más probable <small class="muted">opcional</small><select id="f-prob"><option value="">—</option>${CLASSES.map(([c, n]) => `<option value="${c}">${n}</option>`).join('')}</select></label>
+          <label data-for="legit">Expresión <small class="muted">p. ej. «este», «bueno»</small><input id="f-expr" maxlength="60"></label>
+          <label data-for="legit">¿Es disfluencia? <select id="f-dis"><option value="false">No, cumple una función</option><option value="null">No estoy seguro</option></select></label>
+          <label data-for="legit">Función <small class="muted">opcional · p. ej. demostrativo, respuesta</small><input id="f-func" maxlength="60"></label>
+          <label data-for="event uncertain not_evaluable">¿Quién habla? <select id="f-spk"><option value="">No especificar</option><option value="participant">Participante</option><option value="interviewer">Entrevistador/a</option><option value="other">Otra persona</option></select></label>
+          <label data-for="event uncertain not_evaluable legit">Nota <small class="muted">opcional, breve</small><input id="f-note" maxlength="200"></label>
+        </div>
+      </fieldset>
+      <fieldset class="step" ${locked ? 'disabled' : ''}><legend>3 · Guarda</legend>
+        <div class="row"><button id="save-ev" class="primary">💾 Guardar evento <kbd>Enter</kbd></button><button id="cancel-ev">Cancelar <kbd>Esc</kbd></button></div>
+        <div class="row" id="edit-tools" hidden><button id="del-ev" class="danger">🗑 Eliminar evento</button><button id="split-ev" title="Divide el evento en dos en la posición del cursor">Dividir en el cursor</button><button id="merge-ev" title="Une este evento con el siguiente de la misma clase">Unir con el siguiente</button></div>
+      </fieldset>
+      <fieldset class="step"><legend>Al terminar el fragmento</legend>
+        <div class="meter"><i id="covbar"></i></div><p id="cov" class="muted small"></p>
+        <p class="muted small">Pulsa «Revisado» cuando hayas escuchado todo el fragmento y no quede nada más por marcar (también si no tenía ningún fenómeno).</p>
+        <div class="row"><button id="cov-all" ${locked ? 'disabled' : ''}>✓ Revisado: sin más eventos</button><button id="cov-cur" ${locked ? 'disabled' : ''}>Revisado hasta el cursor</button></div>
+        <div class="row"><button id="submit" class="primary" ${locked ? 'disabled' : ''}>${isCase ? 'Guardar adjudicación' : 'Finalizar fragmento'} <kbd>Ctrl+Enter</kbd></button><button id="undo" ${locked ? 'disabled' : ''}>↶ Deshacer <kbd>Ctrl+Z</kbd></button></div>
+      </fieldset>
+      <p class="muted small"><kbd>Espacio</kbd> reproducir · <kbd>←</kbd><kbd>→</kbd> ±1 s · <kbd>R</kbd> escuchar selección · <kbd>Supr</kbd> eliminar el evento en edición</p>
     </aside></div>`
 
   const ws = WaveSurfer.create({
@@ -446,26 +498,33 @@ async function workbench(kind, id) {
     plugins: [Timeline.create({ formatTimeCallback: s => fmt(s * 1000 + offset) })]
   })
   const regions = ws.registerPlugin(Regions.create())
-  if (!locked) regions.enableDragSelection({ color: 'rgba(29,78,216,.22)' })
+  if (!locked) regions.enableDragSelection({ color: 'rgba(29,78,216,.25)' })
   let spec = null
   let drawing = false
   let heardUntil = 0
   const L = ms => (ms - offset) / 1000
   const G = s => Math.round(s * 1000) + offset
+  const now = () => G(ws.getCurrentTime())
   function audioUrl() {
     if (useVideo) return mediaUrl(`/review/tasks/${id}/video?extra_ms=${extra}`)
     return mediaUrl(isCase ? `/review/adjudication/${id}/audio?extra_ms=${extra}` : `/review/tasks/${id}/audio?extra_ms=${extra}`)
   }
-
-  // Reference tracks: A/B annotations when adjudicating, model candidates when assisted.
   const refs = isCase
     ? [...d.tracks.A.events.map(e => ({ ...e, side: 'A' })), ...d.tracks.B.events.map(e => ({ ...e, side: 'B' }))]
     : (d.suggestions || []).map(e => ({ ...e, side: 'S' }))
+  const editingEvent = () => (editing?.type === 'event' ? state.events.find(e => e.event_id === editing.id) : null)
 
   function draw() {
     drawing = true
     regions.clearRegions()
-    regions.addRegion({ id: 'central', start: L(t.start_ms), end: L(t.end_ms), color: 'rgba(120,130,150,.12)', drag: false, resize: false })
+    regions.addRegion({
+      id: 'central',
+      start: L(t.start_ms),
+      end: L(t.end_ms),
+      color: 'rgba(120,130,150,.12)',
+      drag: false,
+      resize: false
+    })
     for (const r of refs)
       if (r.label)
         regions.addRegion({
@@ -477,36 +536,247 @@ async function workbench(kind, id) {
           content: `${r.side}:${CLS[r.label].short}`
         })
     for (const e of state.events) {
+      if (editing?.type === 'event' && editing.id === e.event_id) continue // shown as the selection while editing
       const color = e.label ? CLS[e.label].color : '#6b7280'
       regions.addRegion({
         id: e.event_id,
         start: L(e.start_ms),
         end: L(e.end_ms),
-        color: color + (e.event_id === current ? '88' : '55'),
+        color: color + '55',
         drag: !locked,
         resize: !locked,
         content: e.decision === 'event' ? CLS[e.label].short : DECISIONS[e.decision]
       })
     }
+    state.contextual.forEach((c, i) => {
+      if (!(editing?.type === 'ctx' && editing.index === i))
+        regions.addRegion({
+          id: `ctx-${i}`,
+          start: L(c.start_ms),
+          end: L(c.end_ms),
+          color: 'rgba(43,138,62,.25)',
+          drag: false,
+          resize: false,
+          content: 'UL'
+        })
+    })
     if (sel.start_ms != null && sel.end_ms != null)
-      regions.addRegion({ id: 'sel', start: L(sel.start_ms), end: L(sel.end_ms), color: 'rgba(29,78,216,.22)' })
+      regions.addRegion({
+        id: 'sel',
+        start: L(sel.start_ms),
+        end: L(sel.end_ms),
+        color: 'rgba(29,78,216,.30)',
+        content: editing ? '✎' : '●'
+      })
     drawing = false
+    renderSel()
     renderLists()
   }
+
+  function renderSel() {
+    const box = $('#selbox')
+    if (sel.start_ms == null) return (box.innerHTML = '<p class="selnone">Ningún tramo seleccionado.</p>')
+    if (sel.end_ms == null)
+      return (box.innerHTML = `<p class="selnone">Inicio en <b>${fmt(sel.start_ms)}</b>. Sigue reproduciendo y pulsa «Marcar fin».</p>`)
+    const nudge = side =>
+      [-100, -10, 10, 100]
+        .map(
+          dx =>
+            `<button data-snudge="${side}:${dx}" title="${dx > 0 ? '+' : ''}${dx} ms">${dx > 0 ? '+' : '−'}${Math.abs(dx) / 1000 === 0.1 ? '0,1' : '0,01'}</button>`
+        )
+        .join('')
+    box.innerHTML = `<div class="selbox">
+      <div class="selrow"><span>Inicio <b>${fmt(sel.start_ms)}</b></span><span class="row nudge">${nudge('start_ms')}</span></div>
+      <div class="selrow"><span>Fin <b>${fmt(sel.end_ms)}</b></span><span class="row nudge">${nudge('end_ms')}</span></div>
+      <div class="selrow"><span>Duración <b>${((sel.end_ms - sel.start_ms) / 1000).toFixed(2).replace('.', ',')} s</b></span>
+        <span class="row"><button id="play-sel">▶ Escuchar selección <kbd>R</kbd></button></span></div></div>`
+  }
+
+  function renderLists() {
+    const rows = [
+      ...state.events.map(e => ({
+        start: e.start_ms,
+        end: e.end_ms,
+        what: e.decision === 'event' ? badge(e.label) : `<b>${DECISIONS[e.decision]}</b>${e.label ? ' · ' + badge(e.label) : ''}`,
+        text: e.verbatim_text,
+        key: `e:${e.event_id}`,
+        on: editing?.type === 'event' && editing.id === e.event_id
+      })),
+      ...state.contextual.map((c, i) => ({
+        start: c.start_ms,
+        end: c.end_ms,
+        what: '<b>Uso legítimo</b>',
+        text: c.expression,
+        key: `c:${i}`,
+        on: editing?.type === 'ctx' && editing.index === i
+      }))
+    ].sort((a, b) => a.start - b.start)
+    $('#events').innerHTML = rows.length
+      ? `<thead><tr><th>Tramo</th><th>Qué es</th><th>Lo que se oye</th><th></th></tr></thead>` +
+        rows
+          .map(
+            r => `<tr class="${r.on ? 'sel' : ''}"><td>${fmt(r.start)}–${fmt(r.end)}</td><td>${r.what}</td><td>${esc(r.text || '')}</td>
+          <td class="row"><button data-listen="${r.key}">▶ Escuchar</button>${locked ? '' : `<button data-edit="${r.key}">✎ Editar</button><button data-remove="${r.key}" class="danger">🗑 Eliminar</button>`}</td></tr>`
+          )
+          .join('')
+      : `<tr><td>${empty('Todavía no guardaste eventos. Selecciona un tramo, elige qué es y pulsa «Guardar evento». Si el fragmento no tiene fenómenos, pulsa «Revisado: sin más eventos».')}</td></tr>`
+    const covered = coverage()
+    $('#cov').textContent = `Fragmento revisado: ${Math.round(100 * covered)} %${covered < 1 ? '' : ' ✓'}`
+    $('#covbar').style.width = `${Math.round(100 * covered)}%`
+    $('#save-ev').innerHTML = editing ? '💾 Guardar cambios <kbd>Enter</kbd>' : '💾 Guardar evento <kbd>Enter</kbd>'
+    $('#edit-tools').hidden = !editing
+    $('#split-ev').hidden = $('#merge-ev').hidden = editing?.type !== 'event'
+    if (isCase) renderDiff()
+    if (d.suggestions?.length) renderSuggestions()
+  }
+
+  // Which optional fields apply to the chosen kind.
+  const chosen = () => $('input[name=kind]:checked')?.value || ''
+  const kindGroup = v => (v.startsWith('cls:') ? 'event' : v)
+  function showFields() {
+    const g = kindGroup(chosen())
+    view.querySelectorAll('.extra [data-for]').forEach(el => {
+      el.hidden = !g || !el.dataset.for.split(' ').includes(g)
+    })
+    view.querySelectorAll('.opt').forEach(el => el.classList.toggle('on', el.querySelector('input').checked))
+  }
+  function fillForm(v = {}) {
+    view.querySelectorAll('input[name=kind]').forEach(r => (r.checked = r.value === (v.kind || '')))
+    $('#f-text').value = v.verbatim_text || ''
+    $('#f-unc').value = v.uncertainty || 'class'
+    $('#f-prob').value = v.prob || ''
+    $('#f-expr').value = v.expression || ''
+    $('#f-dis').value = String(v.is_disfluent ?? false)
+    $('#f-func').value = v.function || ''
+    $('#f-spk').value = v.speaker_id || ''
+    $('#f-note').value = v.note || ''
+    showFields()
+  }
+  function resetForm() {
+    sel = {}
+    editing = null
+    fromSuggestion = null
+    fillForm()
+    draw()
+  }
+  function load(key) {
+    const [type, ref] = key.split(':')
+    if (type === 'e') {
+      const e = state.events.find(x => x.event_id === ref)
+      editing = { type: 'event', id: ref }
+      sel = { start_ms: e.start_ms, end_ms: e.end_ms }
+      fillForm({
+        ...e,
+        kind: e.decision === 'event' ? `cls:${e.label}` : e.decision,
+        prob: e.decision === 'event' ? '' : e.label
+      })
+    } else {
+      const c = state.contextual[+ref]
+      editing = { type: 'ctx', index: +ref }
+      sel = { start_ms: c.start_ms, end_ms: c.end_ms }
+      fillForm({ ...c, kind: 'legit' })
+    }
+    say(`Editando el tramo ${fmt(sel.start_ms)}–${fmt(sel.end_ms)}. Cambia lo que necesites y pulsa «Guardar cambios».`, 'info')
+    draw()
+  }
+
+  function saveDraft() {
+    if (locked) return
+    if (sel.start_ms == null || sel.end_ms == null || sel.end_ms <= sel.start_ms)
+      return say('Paso 1: primero selecciona el tramo, arrastrando sobre la onda o con «Marcar inicio» y «Marcar fin».')
+    const v = chosen()
+    if (!v) return say('Paso 2: elige qué es el tramo (una de las opciones del panel).')
+    const span = { start_ms: sel.start_ms, end_ms: sel.end_ms }
+    const note = $('#f-note').value.trim() || null
+    const wasEvent = editingEvent()
+    commit(
+      () => {
+        if (editing?.type === 'event' && v === 'legit') state.events = state.events.filter(e => e.event_id !== editing.id)
+        if (editing?.type === 'ctx' && v !== 'legit') state.contextual.splice(editing.index, 1)
+        if (v === 'legit') {
+          const item = {
+            ...span,
+            expression: $('#f-expr').value.trim(),
+            is_disfluent: JSON.parse($('#f-dis').value),
+            function: $('#f-func').value.trim(),
+            note
+          }
+          if (editing?.type === 'ctx') state.contextual[editing.index] = item
+          else state.contextual.push(item)
+          return
+        }
+        const decision = v.startsWith('cls:') ? 'event' : v
+        const ev = {
+          ...(wasEvent || {
+            event_id: uid(),
+            source_kind: isCase ? 'human_adjudicated' : 'human_independent'
+          }),
+          ...span,
+          label: v.startsWith('cls:') ? v.slice(4) : v === 'uncertain' ? $('#f-prob').value || null : null,
+          decision,
+          uncertainty: decision === 'uncertain' ? $('#f-unc').value : decision === 'not_evaluable' ? 'audio' : null,
+          verbatim_text: $('#f-text').value.trim() || null,
+          speaker_id: $('#f-spk').value || null,
+          note
+        }
+        if (fromSuggestion)
+          Object.assign(ev, {
+            suggestion_id: fromSuggestion.event_id,
+            source_kind: 'human_verified_model_suggestion'
+          })
+        if (wasEvent) state.events[state.events.indexOf(wasEvent)] = ev
+        else state.events.push(ev)
+        state.events.sort((a, b) => a.start_ms - b.start_ms)
+      },
+      fromSuggestion
+        ? {
+            type: 'correct',
+            suggestion_id: fromSuggestion.event_id,
+            before: fromSuggestion
+          }
+        : { type: editing ? 'edit' : 'add', kind: v }
+    )
+    toast(editing ? 'Cambios guardados.' : 'Evento guardado.')
+    say('')
+    resetForm()
+  }
+
+  function removeKey(key) {
+    const [type, ref] = key.split(':')
+    commit(
+      () => {
+        if (type === 'e') state.events = state.events.filter(e => e.event_id !== ref)
+        else state.contextual.splice(+ref, 1)
+      },
+      { type: 'delete', event_id: type === 'e' ? ref : undefined }
+    )
+    if (editing && ((type === 'e' && editing.id === ref) || (type === 'c' && editing.index === +ref))) resetForm()
+    toast('Evento eliminado. Puedes recuperarlo con «Deshacer».', 'warn')
+  }
+
+  function markIn() {
+    sel = { start_ms: now(), end_ms: sel.end_ms > now() ? sel.end_ms : null }
+    say('')
+    draw()
+  }
+  function markOut() {
+    if (sel.start_ms == null) return say('Primero pulsa «Marcar inicio» en el punto donde empieza el fenómeno.')
+    if (now() <= sel.start_ms) return say('El fin debe quedar después del inicio: avanza un poco y vuelve a pulsar «Marcar fin».')
+    sel.end_ms = now()
+    draw()
+  }
+  const playSel = () => sel.end_ms && ws.play(Math.max(0, L(sel.start_ms) - 0.5), L(sel.end_ms) + 0.5)
 
   regions.on('region-created', r => {
     if (drawing || locked) return
     sel = { start_ms: G(r.start), end_ms: G(r.end) }
-    current = null
-    say(
-      `Tramo seleccionado ${fmt(sel.start_ms)}–${fmt(sel.end_ms)}: elige una clase (1–7), «Incierto», «Uso legítimo» o «No evaluable».`,
-      'info'
-    )
+    say('')
     queueMicrotask(draw)
   })
   regions.on('region-updated', r => {
     if (r.id === 'sel') {
       sel = { start_ms: G(r.start), end_ms: G(r.end) }
+      renderSel()
       return
     }
     const e = state.events.find(x => x.event_id === r.id)
@@ -520,10 +790,13 @@ async function workbench(kind, id) {
       )
   })
   regions.on('region-clicked', (r, ev) => {
+    if (locked) return
     if (state.events.some(e => e.event_id === r.id)) {
       ev.stopPropagation()
-      current = r.id
-      draw()
+      load(`e:${r.id}`)
+    } else if (r.id.startsWith('ctx-')) {
+      ev.stopPropagation()
+      load(`c:${r.id.slice(4)}`)
     }
   })
   ws.on('decode', draw)
@@ -548,11 +821,10 @@ async function workbench(kind, id) {
   }
   let lastAct = Date.now()
   const activity = () => {
-    const now = Date.now()
-    if (now - lastAct < 30000) state.active_ms += now - lastAct
-    lastAct = now
+    const n = Date.now()
+    if (n - lastAct < 30000) state.active_ms += n - lastAct
+    lastAct = n
   }
-
   function commit(mutate, action) {
     if (locked) return
     undo.push(JSON.stringify(state))
@@ -561,116 +833,6 @@ async function workbench(kind, id) {
     activity()
     draw()
     scheduleSave()
-  }
-
-  function classify(label, decision = 'event') {
-    const e = state.events.find(x => x.event_id === current)
-    if (e)
-      return commit(
-        () => {
-          e.label = label ?? e.label
-          e.decision = decision
-          e.uncertainty = decision === 'uncertain' ? e.uncertainty || 'class' : decision === 'not_evaluable' ? 'audio' : null
-        },
-        { type: 'relabel', event_id: e.event_id }
-      )
-    if (sel.start_ms == null || sel.end_ms == null || sel.end_ms <= sel.start_ms)
-      return say(
-        'Primero selecciona un tramo: arrastra sobre la onda o marca <kbd>I</kbd> (inicio) y <kbd>O</kbd> (fin) mientras escuchas.'
-      )
-    const ev = {
-      event_id: uid(),
-      start_ms: sel.start_ms,
-      end_ms: sel.end_ms,
-      label,
-      decision,
-      uncertainty: decision === 'uncertain' ? 'class' : decision === 'not_evaluable' ? 'audio' : null,
-      source_kind: isCase ? 'human_adjudicated' : 'human_independent',
-      verbatim_text: null,
-      speaker_id: null,
-      note: null
-    }
-    commit(
-      () => {
-        state.events.push(ev)
-        state.events.sort((a, b) => a.start_ms - b.start_ms)
-      },
-      { type: 'add', event_id: ev.event_id }
-    )
-    sel = {}
-    current = ev.event_id
-    say('')
-    draw()
-  }
-
-  function renderLists() {
-    const e = state.events.find(x => x.event_id === current)
-    $('#events').innerHTML = state.events.length
-      ? `<thead><tr><th>Tramo</th><th>Clase / decisión</th><th>Forma audible</th><th></th></tr></thead>` +
-        state.events
-          .map(
-            x => `<tr data-id="${x.event_id}" class="${x.event_id === current ? 'sel' : ''}">
-      <td>${fmt(x.start_ms)}–${fmt(x.end_ms)}</td><td>${x.decision === 'event' ? badge(x.label) : DECISIONS[x.decision] + (x.label ? ' · ' + badge(x.label) : '')}</td>
-      <td>${esc(x.verbatim_text || '')}</td><td class="row"><button data-play="${x.event_id}" aria-label="Escuchar">▶</button><button data-pick="${x.event_id}">Editar</button>
-      ${locked ? '' : `<button data-split="${x.event_id}">Dividir en cursor</button><button data-merge="${x.event_id}">Unir con siguiente</button><button data-del="${x.event_id}" class="danger">Borrar</button>`}</td></tr>`
-          )
-          .join('')
-      : `<tr><td>${empty('Aún no hay eventos. Si la región no tiene fenómenos, márcala como revisada en el panel derecho.')}</td></tr>`
-    $('#ctxs').innerHTML =
-      state.contextual
-        .map(
-          (c, i) => `<tr><td>${fmt(c.start_ms)}–${fmt(c.end_ms)}</td>
-      <td><input data-ci="${i}" data-f="expression" value="${esc(c.expression)}" placeholder="expresión (p. ej. «este»)" ${locked ? 'disabled' : ''}></td>
-      <td><select data-ci="${i}" data-f="is_disfluent" ${locked ? 'disabled' : ''}>${[
-        ['false', 'No es disfluencia'],
-        ['true', 'Sí es disfluencia'],
-        ['null', 'Indeterminado']
-      ]
-        .map(([v, n]) => `<option value="${v}" ${String(c.is_disfluent) === v ? 'selected' : ''}>${n}</option>`)
-        .join('')}</select></td>
-      <td><input data-ci="${i}" data-f="function" value="${esc(c.function || '')}" placeholder="función (p. ej. demostrativo)" ${locked ? 'disabled' : ''}></td>
-      <td>${locked ? '' : `<button data-cdel="${i}" class="danger">Borrar</button>`}</td></tr>`
-        )
-        .join('') || `<tr><td class="muted">Sin usos registrados. Selecciona un tramo y pulsa «Uso legítimo».</td></tr>`
-    $('#panel').innerHTML = e
-      ? `<h2>Evento seleccionado</h2><div class="form">
-      <label>Decisión <select id="p-dec" ${locked ? 'disabled' : ''}>${Object.entries(DECISIONS)
-        .map(([k, v]) => `<option value="${k}" ${e.decision === k ? 'selected' : ''}>${v}</option>`)
-        .join('')}</select></label>
-      ${
-        e.decision === 'uncertain'
-          ? `<label>Motivo de la duda <select id="p-unc" ${locked ? 'disabled' : ''}>${[
-              ['class', 'no sé qué clase es'],
-              ['boundaries', 'no puedo delimitarlo'],
-              ['audio', 'el audio no permite decidir']
-            ]
-              .map(([k, v]) => `<option value="${k}" ${e.uncertainty === k ? 'selected' : ''}>${v}</option>`)
-              .join('')}</select></label>`
-          : ''
-      }
-      <label>Forma audible <input id="p-text" value="${esc(e.verbatim_text || '')}" placeholder="solo lo que escuchaste" ${locked ? 'disabled' : ''}></label>
-      <label>Hablante <select id="p-spk" ${locked ? 'disabled' : ''}>${[
-        ['', '—'],
-        ['participant', 'Participante'],
-        ['interviewer', 'Entrevistador/a'],
-        ['other', 'Otra persona']
-      ]
-        .map(([k, v]) => `<option value="${k}" ${(e.speaker_id || '') === k ? 'selected' : ''}>${v}</option>`)
-        .join('')}</select></label>
-      <label>Nota breve <input id="p-note" value="${esc(e.note || '')}" ${locked ? 'disabled' : ''}></label>
-      ${['start_ms', 'end_ms']
-        .map(
-          side => `<label>${side === 'start_ms' ? 'Inicio' : 'Fin'} (ms) <input type="number" data-side="${side}" value="${e[side]}" step="10" ${locked ? 'disabled' : ''}></label>
-        ${locked ? '' : `<div class="row nudge">${[-100, -10, 10, 100].map(dx => `<button data-nudge="${side}:${dx}">${dx > 0 ? '+' : ''}${dx}</button>`).join('')}</div>`}`
-        )
-        .join('')}</div>`
-      : ''
-    const covered = coverage()
-    $('#cov').textContent =
-      `Región central revisada: ${Math.round(100 * covered)} %${covered < 1 ? ' — escucha lo que falta y márcalo como revisado.' : ' ✓'}`
-    $('#covbar').style.width = `${Math.round(100 * covered)}%`
-    if (isCase) renderDiff()
-    if (d.suggestions?.length) renderSuggestions()
   }
 
   function coverage() {
@@ -720,8 +882,8 @@ async function workbench(kind, id) {
         rows
           .map(
             ([a, b, [k, tone]], i) => `<tr><td><span class="chip ${tone}">${k}</span></td><td>${cell(a)}</td><td>${cell(b)}</td>
-      <td class="row">${a ? `<button data-take="${i}:A">Usar A</button>` : ''}${b ? `<button data-take="${i}:B">Usar B</button>` : ''}
-      <input data-reason="${i}" placeholder="motivo breve" value="${esc(reasons[`row${i}`] || '')}"></td></tr>`
+          <td class="row">${a ? `<button data-take="${i}:A">Usar A</button>` : ''}${b ? `<button data-take="${i}:B">Usar B</button>` : ''}
+          <input data-reason="${i}" placeholder="motivo breve" value="${esc(reasons[`row${i}`] || '')}"></td></tr>`
           )
           .join('')
       : `<tr><td>${empty('A y B no marcaron eventos en esta región. Escúchala y confirma si falta algo.')}</td></tr>`
@@ -732,12 +894,24 @@ async function workbench(kind, id) {
     const done = new Set(state.actions.map(a => a.suggestion_id).filter(Boolean))
     $('#sugs').innerHTML = d.suggestions
       .map(
-        (s, i) => `<tr><td>${fmt(s.start_ms)}–${fmt(s.end_ms)}</td><td>${s.label ? badge(s.label) : ''}</td>
-      <td>${esc(s.text || '')}</td><td class="row">${done.has(s.event_id) ? '<span class="chip ok">Revisado</span>' : `<button data-sugplay="${i}">▶</button>` + ['Correcto', 'Cambiar', 'Uso legítimo', 'Descartar', 'Falta otro evento', 'Tengo dudas'].map(a => `<button data-sug="${i}:${a}">${a}</button>`).join('')}</td></tr>`
+        (s, i) => `<tr><td>${fmt(s.start_ms)}–${fmt(s.end_ms)}</td><td>${s.label ? badge(s.label) : ''}</td><td>${esc(s.text || '')}</td>
+        <td class="row">${
+          done.has(s.event_id)
+            ? '<span class="chip ok">Revisado</span>'
+            : `<button data-sugplay="${i}">▶</button>` +
+              [
+                ['Correcto', 'accept'],
+                ['Corregir', 'correct'],
+                ['Uso legítimo', 'legit'],
+                ['Descartar', 'reject'],
+                ['Tengo dudas', 'doubt']
+              ]
+                .map(([n, a]) => `<button data-sug="${i}:${a}">${n}</button>`)
+                .join('')
+        }</td></tr>`
       )
       .join('')
   }
-
   function suggestion(s, act) {
     const ev = {
       event_id: uid(),
@@ -753,130 +927,133 @@ async function workbench(kind, id) {
       note: null
     }
     const log = { suggestion_id: s.event_id, before: s }
-    if (act === 'Correcto') commit(() => state.events.push(ev), { ...log, type: 'accept', event_id: ev.event_id })
-    if (act === 'Cambiar') {
-      commit(() => state.events.push(ev), { ...log, type: 'correct', event_id: ev.event_id })
-      current = ev.event_id
-      draw()
-    }
-    if (act === 'Uso legítimo')
-      commit(
-        () =>
-          state.contextual.push({ start_ms: s.start_ms, end_ms: s.end_ms, expression: s.text || '', is_disfluent: false, function: '' }),
-        { ...log, type: 'reject', reason: 'legitimate_use' }
-      )
-    if (act === 'Descartar') commit(() => {}, { ...log, type: 'reject', reason: 'not_a_phenomenon' })
-    if (act === 'Falta otro evento') {
-      ws.setTime(L(s.start_ms))
-      commit(() => {}, { ...log, type: 'missing_nearby' })
-      say('Marca el evento omitido seleccionando su tramo y eligiendo la clase.', 'info')
-    }
-    if (act === 'Tengo dudas')
-      commit(() => state.events.push({ ...ev, decision: 'uncertain', uncertainty: 'class' }), {
+    if (act === 'accept')
+      commit(() => state.events.push(ev), {
         ...log,
-        type: 'doubt',
+        type: 'accept',
         event_id: ev.event_id
       })
+    if (act === 'correct') {
+      fromSuggestion = s
+      editing = null
+      sel = { start_ms: s.start_ms, end_ms: s.end_ms }
+      fillForm({ kind: s.label ? `cls:${s.label}` : '' })
+      say('Ajusta el tramo y la clase del candidato y pulsa «Guardar evento».', 'info')
+      draw()
+    }
+    if (act === 'legit')
+      commit(
+        () =>
+          state.contextual.push({
+            start_ms: s.start_ms,
+            end_ms: s.end_ms,
+            expression: s.text || '',
+            is_disfluent: false,
+            function: ''
+          }),
+        { ...log, type: 'reject', reason: 'legitimate_use' }
+      )
+    if (act === 'reject') commit(() => {}, { ...log, type: 'reject', reason: 'not_a_phenomenon' })
+    if (act === 'doubt')
+      commit(
+        () =>
+          state.events.push({
+            ...ev,
+            decision: 'uncertain',
+            uncertainty: 'class'
+          }),
+        { ...log, type: 'doubt', event_id: ev.event_id }
+      )
   }
 
   view.onclick = e => {
     const b = e.target.closest('button')
     if (!b) return
     const ds = b.dataset
-    const ev = id => state.events.find(x => x.event_id === id)
-    if (ds.c) classify(ds.c)
-    else if (ds.play) {
-      const x = ev(ds.play)
+    if (ds.listen) {
+      const [type, ref] = ds.listen.split(':')
+      const x = type === 'e' ? state.events.find(y => y.event_id === ref) : state.contextual[+ref]
       ws.play(Math.max(0, L(x.start_ms) - 1), L(x.end_ms) + 0.5)
-    } else if (ds.pick) {
-      current = ds.pick
+    } else if (ds.edit) load(ds.edit)
+    else if (ds.remove) removeKey(ds.remove)
+    else if (ds.snudge) {
+      const [side, dx] = ds.snudge.split(':')
+      sel[side] += +dx
+      if (sel.end_ms <= sel.start_ms) sel[side] -= +dx
       draw()
     } else if (ds.sugplay) {
       const s = d.suggestions[+ds.sugplay]
       ws.play(Math.max(0, L(s.start_ms) - 1), L(s.end_ms) + 0.5)
-    } else if (ds.del)
-      commit(
-        () => {
-          state.events = state.events.filter(x => x.event_id !== ds.del)
-        },
-        { type: 'delete', event_id: ds.del }
-      )
-    else if (ds.split) {
-      const x = ev(ds.split)
-      const at = G(ws.getCurrentTime())
-      if (at <= x.start_ms || at >= x.end_ms) return say('Coloca el cursor dentro del evento para dividirlo.')
-      const second = { ...x, event_id: uid(), start_ms: at, parent_event_id: x.event_id }
-      commit(
-        () => {
-          x.end_ms = at
-          state.events.push(second)
-          state.events.sort((a, b) => a.start_ms - b.start_ms)
-        },
-        { type: 'split', event_id: x.event_id }
-      )
-    } else if (ds.merge) {
-      const i = state.events.findIndex(x => x.event_id === ds.merge)
-      const x = state.events[i]
-      const y = state.events[i + 1]
-      if (!y || y.label !== x.label) return say('Solo se pueden unir eventos consecutivos de la misma clase.')
-      commit(
-        () => {
-          x.end_ms = Math.max(x.end_ms, y.end_ms)
-          state.events.splice(i + 1, 1)
-        },
-        { type: 'merge', event_id: x.event_id, merged: y.event_id }
-      )
-    } else if (ds.cdel) commit(() => state.contextual.splice(+ds.cdel, 1))
-    else if (ds.nudge) {
-      const [side, dx] = ds.nudge.split(':')
-      const x = ev(current)
-      commit(
-        () => {
-          x[side] += +dx
-        },
-        { type: 'adjust', event_id: x.event_id }
-      )
     } else if (ds.take) {
       const [i, side] = ds.take.split(':')
       const src = renderDiff.rows[+i][side === 'A' ? 0 : 1]
-      commit(() => state.events.push({ ...src, event_id: uid(), parent_event_id: src.event_id, source_kind: 'human_adjudicated' }))
+      commit(() =>
+        state.events.push({
+          ...src,
+          event_id: uid(),
+          parent_event_id: src.event_id,
+          source_kind: 'human_adjudicated'
+        })
+      )
       reasons[`row${i}`] = reasons[`row${i}`] || `usar ${side}`
       toast(`Evento de ${side} copiado a la decisión final.`)
     } else if (ds.sug) {
-      const [i, act] = ds.sug.split(/:(.+)/)
+      const [i, act] = ds.sug.split(':')
       suggestion(d.suggestions[+i], act)
-    }
+    } else if (b.id === 'play-sel') playSel()
   }
   view.onchange = e => {
-    const x = state.events.find(y => y.event_id === current)
-    const tgt = e.target
-    if (tgt.dataset.ci) {
-      const c = state.contextual[+tgt.dataset.ci]
-      commit(() => {
-        c[tgt.dataset.f] = tgt.dataset.f === 'is_disfluent' ? JSON.parse(tgt.value) : tgt.value
-      })
-    } else if (tgt.dataset.reason) reasons[`row${tgt.dataset.reason}`] = tgt.value
-    else if (tgt.dataset.side && x)
-      commit(
-        () => {
-          x[tgt.dataset.side] = Math.round(+tgt.value)
-        },
-        { type: 'adjust', event_id: x.event_id }
-      )
-    else if (x && tgt.id?.startsWith('p-')) {
-      const field = { 'p-dec': 'decision', 'p-unc': 'uncertainty', 'p-text': 'verbatim_text', 'p-spk': 'speaker_id', 'p-note': 'note' }[
-        tgt.id
-      ]
-      commit(() => {
-        x[field] = tgt.value || null
-        if (field === 'decision' && x.decision === 'event' && !x.label) x.decision = 'uncertain'
-      })
+    if (e.target.name === 'kind') showFields()
+    else if (e.target.dataset.reason) reasons[`row${e.target.dataset.reason}`] = e.target.value
+  }
+  $('#mark-in').onclick = markIn
+  $('#mark-out').onclick = markOut
+  $('#save-ev').onclick = saveDraft
+  $('#cancel-ev').onclick = () => {
+    say('')
+    resetForm()
+  }
+  $('#del-ev').onclick = () => editing && removeKey(editing.type === 'event' ? `e:${editing.id}` : `c:${editing.index}`)
+  $('#split-ev').onclick = () => {
+    const x = editingEvent()
+    const at = now()
+    if (!x || at <= x.start_ms || at >= x.end_ms) return say('Coloca el cursor dentro del evento para dividirlo en dos.')
+    const second = {
+      ...x,
+      event_id: uid(),
+      start_ms: at,
+      parent_event_id: x.event_id
     }
+    commit(
+      () => {
+        x.end_ms = at
+        state.events.push(second)
+        state.events.sort((a, b) => a.start_ms - b.start_ms)
+      },
+      { type: 'split', event_id: x.event_id }
+    )
+    resetForm()
+  }
+  $('#merge-ev').onclick = () => {
+    const x = editingEvent()
+    const i = state.events.indexOf(x)
+    const y = state.events[i + 1]
+    if (!y || y.label !== x.label || y.decision !== x.decision)
+      return say('Solo se puede unir con el evento siguiente si es de la misma clase.')
+    commit(
+      () => {
+        x.end_ms = Math.max(x.end_ms, y.end_ms)
+        state.events.splice(i + 1, 1)
+      },
+      { type: 'merge', event_id: x.event_id, merged: y.event_id }
+    )
+    resetForm()
   }
   $('#play').onclick = () => {
     playAsked = performance.now()
     ws.playPause()
   }
+  $('#back').onclick = () => ws.setTime(Math.max(0, ws.getCurrentTime() - 2))
   $('#rate').onchange = e => ws.setPlaybackRate(+e.target.value, true)
   $('#zoom').oninput = e => ws.zoom(+e.target.value)
   $('#ctx').onclick = () => {
@@ -890,21 +1067,20 @@ async function workbench(kind, id) {
       spec = null
     } else spec = ws.registerPlugin(Spectrogram.create({ labels: true, height: 140 }))
   }
-  $('#unc').onclick = () => classify(null, 'uncertain')
-  $('#noeval').onclick = () => classify(null, 'not_evaluable')
-  $('#legit').onclick = () => {
-    if (sel.start_ms == null || sel.end_ms == null) return say('Selecciona primero el tramo donde está la expresión.')
-    commit(() => state.contextual.push({ start_ms: sel.start_ms, end_ms: sel.end_ms, expression: '', is_disfluent: false, function: '' }))
-    sel = {}
-    draw()
-    toast('Uso legítimo agregado: completa la expresión y su función abajo.')
+  $('#cov-all').onclick = () => {
+    commit(() => state.coverage.push([t.start_ms, t.end_ms]), {
+      type: 'coverage'
+    })
+    toast('Fragmento marcado como revisado. Ya puedes finalizarlo.')
   }
-  $('#cov-all').onclick = () => commit(() => state.coverage.push([t.start_ms, t.end_ms]), { type: 'coverage' })
-  $('#cov-cur').onclick = () => commit(() => state.coverage.push([t.start_ms, G(ws.getCurrentTime())]), { type: 'coverage' })
+  $('#cov-cur').onclick = () =>
+    commit(() => state.coverage.push([t.start_ms, now()]), {
+      type: 'coverage'
+    })
   $('#undo').onclick = () => {
     if (undo.length && !locked) {
       state = JSON.parse(undo.pop())
-      draw()
+      resetForm()
       scheduleSave()
     }
   }
@@ -944,7 +1120,13 @@ async function workbench(kind, id) {
     })
 
   function onKey(e) {
-    if (e.target.closest('input,textarea,select')) return
+    if (e.target.closest('input,textarea,select')) {
+      if (e.key === 'Enter' && e.target.closest('.extra')) {
+        e.preventDefault()
+        saveDraft()
+      }
+      return
+    }
     const k = e.key.toLowerCase()
     const mod = e.ctrlKey || e.metaKey
     if (k === ' ') {
@@ -959,23 +1141,19 @@ async function workbench(kind, id) {
       e.preventDefault()
       $('#undo').click()
     } else if (mod || locked) return
-    else if (k === 'i') {
-      sel = { start_ms: G(ws.getCurrentTime()), end_ms: sel.end_ms > G(ws.getCurrentTime()) ? sel.end_ms : null }
-      current = null
-      say('Inicio marcado. Avanza y pulsa <kbd>O</kbd> para marcar el fin.', 'info')
-      draw()
-    } else if (k === 'o') {
-      if (sel.start_ms != null) {
-        sel.end_ms = G(ws.getCurrentTime())
-        current = null
-        say(`Tramo ${fmt(sel.start_ms)}–${fmt(sel.end_ms)}: elige una clase.`, 'info')
-        draw()
-      }
-    } else if (k === 'r') {
-      if (sel.end_ms) ws.play(Math.max(0, L(sel.start_ms) - 0.5), L(sel.end_ms) + 0.5)
-    } else if (/^[1-7]$/.test(k)) classify(CLASSES[+k - 1][0])
-    else if (k === 'u') classify(null, 'uncertain')
-    else if (k === 'delete' && current) $(`[data-del="${current}"]`)?.click()
+    else if (k === 'i') markIn()
+    else if (k === 'o') markOut()
+    else if (k === 'r') playSel()
+    else if (/^[1-7]$/.test(k) || k === 'u') {
+      const v = k === 'u' ? 'uncertain' : `cls:${CLASSES[+k - 1][0]}`
+      view.querySelector(`input[name=kind][value="${v}"]`).checked = true
+      showFields()
+    } else if (k === 'enter') {
+      if (e.target.closest('button')) return // let the focused button act
+      e.preventDefault()
+      saveDraft()
+    } else if (k === 'escape') resetForm()
+    else if (k === 'delete' && editing) $('#del-ev').click()
     else return
     activity()
   }
@@ -990,7 +1168,7 @@ async function workbench(kind, id) {
     if (isCase || locked) return
     op = uid()
     local.set(pendingKey, { rev, state, op })
-    status('Pendiente de sincronizar', 'warn')
+    status('Guardando…', 'warn')
     clearTimeout(timer)
     timer = setTimeout(save, 500)
   }
@@ -1014,13 +1192,13 @@ async function workbench(kind, id) {
       tel('save_ms', performance.now() - began)
       if (sentOp === op) {
         local.del(pendingKey)
-        status('Guardado ✓', 'ok')
+        status('Todo guardado ✓', 'ok')
       }
     } catch (e) {
       if (e.status === 409) {
         status('Conflicto', 'bad')
         say(
-          'Otra pestaña o sesión guardó cambios en esta tarea. <button id="c-reload">Usar la versión del servidor</button> <button id="c-keep">Conservar mis cambios</button>',
+          'Otra pestaña o sesión guardó cambios en este fragmento. <button id="c-reload">Usar la versión del servidor</button> <button id="c-keep">Conservar mis cambios</button>',
           'bad'
         )
         $('#c-reload').onclick = () => {
@@ -1070,6 +1248,8 @@ async function workbench(kind, id) {
 
   async function submit() {
     if (locked) return
+    if (sel.end_ms != null && !editing && chosen())
+      return say('Tienes un tramo seleccionado sin guardar: pulsa «Guardar evento» o «Cancelar» antes de finalizar.')
     activity()
     try {
       if (isCase) {
@@ -1088,16 +1268,16 @@ async function workbench(kind, id) {
         clearTimeout(timer)
         await save()
         if (local.get(pendingKey))
-          return say('Aún hay cambios sin confirmar por el servidor; espera a ver «Guardado ✓» y vuelve a intentarlo.')
+          return say('Aún hay cambios sin confirmar por el servidor; espera a ver «Todo guardado ✓» y vuelve a intentarlo.')
         await api(`/review/tasks/${id}/submit`, { method: 'POST' })
-        toast('Tarea finalizada. ¡Gracias!')
+        toast('Fragmento finalizado. ¡Gracias!')
       }
       location.hash = t.campaign ? `#/c/${t.campaign}` : '#/review'
     } catch (e) {
       const gaps = e.detail?.unreviewed_gaps_ms
       say(
         gaps
-          ? `Aún no se puede finalizar: faltan tramos de la región central por revisar (${gaps.map(([a, b]) => `${fmt(a)}–${fmt(b)}`).join(', ')}). Escúchalos y pulsa «Revisado: sin más eventos».${e.detail.outside_context.length ? ' También hay eventos fuera del audio de contexto.' : ''}`
+          ? `Aún no se puede finalizar: falta revisar parte del fragmento (${gaps.map(([a, b]) => `${fmt(a)}–${fmt(b)}`).join(', ')}). Escúchalo y pulsa «Revisado: sin más eventos».${e.detail.outside_context.length ? ' También hay eventos fuera del audio de contexto.' : ''}`
           : esc(e.message),
         'bad'
       )
@@ -1108,8 +1288,9 @@ async function workbench(kind, id) {
   if (!isCase && !locked)
     api('/review/tasks').then(x => {
       const n = x.tasks.find(y => y.id !== id && y.status !== 'submitted')
-      if (n) fetch(mediaUrl(`/review/tasks/${n.id}/audio`))
+      if (n) fetch(mediaUrl(`/review/tasks/${n.id}/${useVideo ? 'video' : 'audio'}`))
     })
+  fillForm()
   cleanup = () => {
     document.removeEventListener('keydown', onKey)
     clearTimeout(timer)
@@ -1858,19 +2039,31 @@ async function admin() {
     <section class="card"><h2>Todas las tareas</h2><label class="inline">Mostrar <select id="t-flt"><option value="">todas</option>${['assigned', 'in_progress', 'submitted', 'pool'].map(s => `<option value="${s}">${STATUS[s][0]}</option>`).join('')}</select></label>
       <div class="scroll list"><table><thead><tr><th>Persona</th><th>Región</th><th>Modo</th><th>Partición</th><th>Estado</th></tr></thead><tbody id="t-rows"></tbody></table></div></section>`
   Promise.all(o.campaigns.map(c => api(`/campaigns/${c.slug}/progress`))).then(list => {
-    $('#camps').innerHTML = list.map(p => {
-      const link = `${location.origin}/#/c/${p.campaign.slug}`
-      return `<section class="card"><h2>Campaña: ${esc(p.campaign.title)} ${chip(p.campaign.status)}</h2>
+    $('#camps').innerHTML = list
+      .map(p => {
+        const link = `${location.origin}/#/c/${p.campaign.slug}`
+        return `<section class="card"><h2>Campaña: ${esc(p.campaign.title)} ${chip(p.campaign.status)}</h2>
         <div class="row"><code>${esc(link)}</code><button data-copy="${esc(link)}">Copiar enlace</button></div>
         <p class="muted">${p.campaign.regions.length} fragmentos por persona · ${p.participants.length} de ${p.campaign.max_participants} participantes</p>
-        ${p.participants.length ? `<div class="scroll"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Avance</th><th>Min. activos</th></tr></thead><tbody>
-        ${p.participants.map(x => `<tr><td>${esc(x.name)}</td><td>${esc(x.email)}</td><td>${x.submitted}/${x.total}</td><td>${x.active_min}</td></tr>`).join('')}</tbody></table></div>` : empty('Aún nadie se unió. Comparte el enlace.')}
-        ${p.agreement.length ? `<h2>Acuerdo entre revisores</h2><p class="muted">Sobre los fragmentos que ambos finalizaron. Existencia: coinciden en que hay un evento (IoU ≥ 0,5). κ y acuerdo de clase incluyen las omisiones.</p>
+        ${
+          p.participants.length
+            ? `<div class="scroll"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Avance</th><th>Min. activos</th></tr></thead><tbody>
+        ${p.participants.map(x => `<tr><td>${esc(x.name)}</td><td>${esc(x.email)}</td><td>${x.submitted}/${x.total}</td><td>${x.active_min}</td></tr>`).join('')}</tbody></table></div>`
+            : empty('Aún nadie se unió. Comparte el enlace.')
+        }
+        ${
+          p.agreement.length
+            ? `<h2>Acuerdo entre revisores</h2><p class="muted">Sobre los fragmentos que ambos finalizaron. Existencia: coinciden en que hay un evento (IoU ≥ 0,5). κ y acuerdo de clase incluyen las omisiones.</p>
         <div class="scroll"><table><thead><tr><th>Par</th><th>Fragmentos</th><th>Existencia</th><th>κ de clase</th><th>Acuerdo de clase</th></tr></thead><tbody>
-        ${p.agreement.map(g => `<tr><td>${esc(g.a)} – ${esc(g.b)}</td><td>${g.regions}</td><td>${num(g.existence)}</td><td>${num(g.kappa)}</td><td>${num(g.raw)}</td></tr>`).join('')}</tbody></table></div>` : ''}
+        ${p.agreement.map(g => `<tr><td>${esc(g.a)} – ${esc(g.b)}</td><td>${g.regions}</td><td>${num(g.existence)}</td><td>${num(g.kappa)}</td><td>${num(g.raw)}</td></tr>`).join('')}</tbody></table></div>`
+            : ''
+        }
         </section>`
-    }).join('')
-    $('#camps').onclick = e => { if (e.target.dataset.copy) navigator.clipboard.writeText(e.target.dataset.copy).then(() => toast('Enlace copiado.')) }
+      })
+      .join('')
+    $('#camps').onclick = e => {
+      if (e.target.dataset.copy) navigator.clipboard.writeText(e.target.dataset.copy).then(() => toast('Enlace copiado.'))
+    }
   })
   const taskRows = f =>
     o.tasks
@@ -1944,7 +2137,8 @@ async function campaignJoin(slug) {
   try {
     c = await api(`/campaigns/${slug}`)
   } catch (e) {
-    view.innerHTML = '<div class="card narrow"><h1>Campaña no encontrada</h1><p class="muted">Revisa el enlace que te compartieron.</p></div>'
+    view.innerHTML =
+      '<div class="card narrow"><h1>Campaña no encontrada</h1><p class="muted">Revisa el enlace que te compartieron.</p></div>'
     return
   }
   view.innerHTML = `<div class="card narrow wide">
@@ -1956,17 +2150,24 @@ async function campaignJoin(slug) {
     <ol><li>Escribe tu nombre y tu correo.</li><li>Lee la guía breve que aparece al abrir cada fragmento.</li>
     <li>Marca cada fenómeno arrastrando sobre la onda y eligiendo su clase.</li><li>Finaliza cada fragmento; al terminar el último, listo.</li></ol>
     <p class="muted">Trabajas a ciegas: no verás lo que marcó el sistema ni otras personas. Así tus marcas sirven como referencia independiente.</p>
-    ${c.status === 'open' ? `<form id="join" class="form">
+    ${
+      c.status === 'open'
+        ? `<form id="join" class="form">
       <label>Nombre <input name="name" required minlength="2" maxlength="80" autocomplete="name"></label>
       <label>Correo <input name="email" type="email" required autocomplete="email"></label>
       <label class="inline consent"><input type="checkbox" name="consent" required> Acepto que mi nombre, correo y marcas se guarden para la investigación de tesis MRCD, y me comprometo a no grabar, descargar ni compartir el contenido.</label>
-      <button class="primary">Empezar</button><p id="join-err" class="error"></p></form>` : '<div class="banner warn">Esta campaña ya está cerrada.</div>'}</div>`
+      <button class="primary">Empezar</button><p id="join-err" class="error"></p></form>`
+        : '<div class="banner warn">Esta campaña ya está cerrada.</div>'
+    }</div>`
   if (!$('#join')) return
   $('#join').onsubmit = async e => {
     e.preventDefault()
     const f = new FormData(e.target)
     try {
-      const r = await api(`/campaigns/${slug}/join`, { method: 'POST', body: { name: f.get('name'), email: f.get('email'), consent: f.get('consent') === 'on' } })
+      const r = await api(`/campaigns/${slug}/join`, {
+        method: 'POST',
+        body: { name: f.get('name'), email: f.get('email'), consent: f.get('consent') === 'on' }
+      })
       local.set('token', r.token)
       me = null
       route()
@@ -1990,7 +2191,11 @@ async function campaign(slug) {
     <div class="scroll"><table><thead><tr><th>#</th><th>Tramo del ${c.video ? 'video' : 'audio'}</th><th>Estado</th><th></th></tr></thead><tbody>
     ${tasks.map((t, i) => `<tr><td>${i + 1}</td><td>${fmt(t.start_ms)}–${fmt(t.end_ms)}</td><td>${chip(t.status)}</td><td><a class="button" href="#/review/tasks/${t.id}">${t.status === 'submitted' ? 'Ver' : 'Abrir'}</a></td></tr>`).join('')}</tbody></table></div>
     <details><summary>Guía de anotación completa</summary><pre id="guide">Cargando…</pre></details>`
-  api(`/guideline/${c.guideline_version}`).then(g => { $('#guide').textContent = g.markdown }).catch(() => {})
+  api(`/guideline/${c.guideline_version}`)
+    .then(g => {
+      $('#guide').textContent = g.markdown
+    })
+    .catch(() => {})
 }
 
 // --------------------------------------------------------------- usability
