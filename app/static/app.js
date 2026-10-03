@@ -453,7 +453,7 @@ async function workbench(kind, id) {
       <div class="words" id="words"></div>
       ${isCase ? '<h2>Diferencias A/B</h2><p class="muted">Cada fila compara un evento de A con el de B que más se superpone.</p><div class="scroll list"><table id="diff"></table></div>' : ''}
       ${d.suggestions?.length ? '<h2>Candidatos del modelo</h2><p class="muted">Escucha cada candidato antes de decidir. «Corregir» lo carga en el formulario para que ajustes tramo y clase.</p><div class="scroll list"><table id="sugs"></table></div>' : ''}
-      <h2>${isCase ? 'Decisión final' : 'Mis eventos'}</h2><div class="scroll list"><table id="events"></table></div>
+      <h2>${isCase ? 'Decisión final' : 'Mis eventos'}</h2><div class="scroll"><table id="events"></table></div>
       <details><summary>Historial de versiones y guía completa</summary><div id="hist" class="muted"></div><pre id="guide"></pre></details>
     </section>
     <aside class="card editor-panel">
@@ -513,6 +513,8 @@ async function workbench(kind, id) {
     ? [...d.tracks.A.events.map(e => ({ ...e, side: 'A' })), ...d.tracks.B.events.map(e => ({ ...e, side: 'B' }))]
     : (d.suggestions || []).map(e => ({ ...e, side: 'S' }))
   const editingEvent = () => (editing?.type === 'event' ? state.events.find(e => e.event_id === editing.id) : null)
+  // A mark must touch the fragment under review; context-only marks belong to other fragments.
+  const outsideRegion = x => x.end_ms <= t.start_ms || x.start_ms >= t.end_ms
 
   function draw() {
     drawing = true
@@ -615,7 +617,7 @@ async function workbench(kind, id) {
       ? `<thead><tr><th>Tramo</th><th>Qué es</th><th>Lo que se oye</th><th></th></tr></thead>` +
         rows
           .map(
-            r => `<tr class="${r.on ? 'sel' : ''}"><td>${fmt(r.start)}–${fmt(r.end)}</td><td>${r.what}</td><td>${esc(r.text || '')}</td>
+            r => `<tr class="${r.on ? 'sel' : ''}"><td>${fmt(r.start)}–${fmt(r.end)}${outsideRegion({ start_ms: r.start, end_ms: r.end }) ? ' <span class="chip warn" title="Está solo en el contexto: elimínalo o ajústalo para poder finalizar">Fuera del fragmento</span>' : ''}</td><td>${r.what}</td><td>${esc(r.text || '')}</td>
           <td class="row"><button data-listen="${r.key}">▶ Escuchar</button>${locked ? '' : `<button data-edit="${r.key}">✎ Editar</button><button data-remove="${r.key}" class="danger">🗑 Eliminar</button>`}</td></tr>`
           )
           .join('')
@@ -687,6 +689,10 @@ async function workbench(kind, id) {
     const v = chosen()
     if (!v) return say('Paso 2: elige qué es el tramo (una de las opciones del panel).')
     const span = { start_ms: sel.start_ms, end_ms: sel.end_ms }
+    if (outsideRegion(span))
+      return say(
+        `Este tramo (${fmt(span.start_ms)}–${fmt(span.end_ms)}) está fuera del fragmento que revisas (${fmt(t.start_ms)}–${fmt(t.end_ms)}). Marca solo lo que ocurre dentro de la zona sombreada o cruza su borde; el contexto sirve para escuchar, no para anotar.`
+      )
     const note = $('#f-note').value.trim() || null
     const wasEvent = editingEvent()
     commit(
@@ -1274,13 +1280,37 @@ async function workbench(kind, id) {
       }
       location.hash = t.campaign ? `#/c/${t.campaign}` : '#/review'
     } catch (e) {
-      const gaps = e.detail?.unreviewed_gaps_ms
-      say(
-        gaps
-          ? `Aún no se puede finalizar: falta revisar parte del fragmento (${gaps.map(([a, b]) => `${fmt(a)}–${fmt(b)}`).join(', ')}). Escúchalo y pulsa «Revisado: sin más eventos».${e.detail.outside_context.length ? ' También hay eventos fuera del audio de contexto.' : ''}`
-          : esc(e.message),
-        'bad'
-      )
+      const gaps = e.detail?.unreviewed_gaps_ms || []
+      const out = e.detail?.outside_context || []
+      if (!gaps.length && !out.length) return say(esc(e.message), 'bad')
+      const msgs = []
+      if (out.length)
+        msgs.push(
+          `Hay ${out.length} marca(s) fuera del fragmento ${fmt(t.start_ms)}–${fmt(t.end_ms)}: ${out
+            .map(
+              x =>
+                `<b>${fmt(x.start_ms)}–${fmt(x.end_ms)}</b> (${x.label ? CLS[x.label].name : x.expression != null ? 'uso legítimo' : DECISIONS[x.decision]})`
+            )
+            .join(
+              ', '
+            )}. Solo cuenta lo que ocurre dentro de la zona sombreada o cruza su borde; lo que está solo en el contexto pertenece a otro fragmento. <button id="drop-out" class="danger">Eliminar las marcas fuera del fragmento</button>`
+        )
+      if (gaps.length)
+        msgs.push(
+          `Falta revisar parte del fragmento (${gaps.map(([a, b]) => `${fmt(a)}–${fmt(b)}`).join(', ')}). Escúchalo y pulsa «Revisado: sin más eventos».`
+        )
+      say(`<b>Aún no se puede finalizar.</b> ${msgs.join('<br>')}`, 'bad')
+      if ($('#drop-out'))
+        $('#drop-out').onclick = () => {
+          commit(
+            () => {
+              state.events = state.events.filter(x => !outsideRegion(x))
+              state.contextual = state.contextual.filter(x => !outsideRegion(x))
+            },
+            { type: 'delete_outside' }
+          )
+          say('Marcas fuera del fragmento eliminadas. Ya puedes pulsar «Finalizar fragmento». (Si te equivocaste, usa «Deshacer».)', 'info')
+        }
     }
   }
 

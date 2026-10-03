@@ -621,9 +621,15 @@ def create_app(store: Store | None = None) -> FastAPI:
     def submit(tid: str, u=Depends(user)):
         task = own_task(tid, u)
         ann, d = annotation_of(task), task["data"]
-        lo, hi = d["start_ms"] - d["context_ms"], d["end_ms"] + d["context_ms"]
         body = ann["data"]
-        outside = [e for e in body["events"] + body["contextual"] if e["start_ms"] < max(0, lo) or e["end_ms"] > hi]
+        # A task covers its central region: marks must touch it (crossing an edge is fine).
+        # Marks heard only in the context belong to neighbouring regions and would
+        # count as disagreement when comparing reviewers.
+        outside = [
+            e
+            for e in body["events"] + body["contextual"]
+            if e["end_ms"] <= d["start_ms"] or e["start_ms"] >= d["end_ms"]
+        ]
         gaps = covered(
             body["coverage"] + [(e["start_ms"], e["end_ms"]) for e in body["events"]], d["start_ms"], d["end_ms"]
         )

@@ -245,15 +245,22 @@ def campaign_progress(store: Store, slug: str) -> dict:
     for u in people:
         tasks = store.find("task", owner=u["id"])
         finished = [t for t in tasks if t["status"] == "submitted"]
-        anns = {f"{t['data']['start_ms']}": store.get(f"ann_{t['id']}") for t in finished}
-        done[u["id"]] = {k: [e for e in a["data"]["events"] if e["decision"] == "event"] for k, a in anns.items()}
+        anns = {f"{t['data']['start_ms']}": (t["data"], store.get(f"ann_{t['id']}")) for t in finished}
+        done[u["id"]] = {  # only marks touching the region, as the submit rule requires
+            k: [
+                e
+                for e in a["data"]["events"]
+                if e["decision"] == "event" and e["end_ms"] > td["start_ms"] and e["start_ms"] < td["end_ms"]
+            ]
+            for k, (td, a) in anns.items()
+        }
         rows.append(
             {
                 "name": u["data"]["name"],
                 "email": u["data"]["email"],
                 "submitted": len(finished),
                 "total": len(tasks),
-                "active_min": round(sum(a["data"].get("active_ms", 0) for a in anns.values()) / 60000, 1),
+                "active_min": round(sum(a["data"].get("active_ms", 0) for _, a in anns.values()) / 60000, 1),
             }
         )
     pairs = []

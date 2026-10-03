@@ -481,3 +481,24 @@ def test_public_campaign_join_resume_progress_and_video(env, tmp_path):
     prog = call("rita", "GET", "/campaigns/piloto-test/progress").json()
     assert [(p["name"], p["submitted"], p["total"]) for p in prog["participants"]] == [("Lucía", 1, 2), ("Max", 1, 2)]
     assert prog["agreement"][0]["existence"] == 1.0 and prog["agreement"][0]["raw"] == 0.0  # same span, other class
+
+
+def test_submit_requires_marks_to_touch_the_fragment(env):
+    store, call, users, tmp = env
+    sf.write(tmp / "edge.wav", (0.1 * np.sin(np.arange(16000 * 30) / 9)).astype(np.float32), 16000)
+    rid = upload(call, "rita", tmp / "edge.wav")
+    run_worker(store)
+    tid = call("rita", "POST", "/review/tasks", json={"recording_id": rid, "start_ms": 10_000, "end_ms": 20_000,
+                                                      "split": "dev", "assignee": users["ana"]}).json()["id"]
+    ann = call("ana", "GET", f"/review/tasks/{tid}").json()["annotation"]
+    marks = [{"start_ms": 6_000, "end_ms": 6_500, "label": "filler_word"},   # context only -> rejected
+             {"start_ms": 9_800, "end_ms": 10_300, "label": "repetition"},   # crosses the edge -> fine
+             {"start_ms": 21_000, "end_ms": 21_400, "label": "block"}]       # context only -> rejected
+    r = call("ana", "PATCH", f"/annotations/{ann['id']}", headers={"If-Match": str(ann["rev"])},
+             json={"events": marks, "coverage": [[10_000, 20_000]]})
+    bad = call("ana", "POST", f"/review/tasks/{tid}/submit")
+    assert bad.status_code == 422 and bad.json()["detail"]["unreviewed_gaps_ms"] == []
+    assert sorted(e["start_ms"] for e in bad.json()["detail"]["outside_context"]) == [6_000, 21_000]
+    call("ana", "PATCH", f"/annotations/{ann['id']}", headers={"If-Match": str(r.json()["rev"])},
+         json={"events": [marks[1]], "coverage": [[10_000, 20_000]]})
+    assert call("ana", "POST", f"/review/tasks/{tid}/submit").json() == {"status": "submitted"}
