@@ -2200,7 +2200,7 @@ async function campaignJoin(slug) {
     <h1>${esc(c.title)}</h1>
     ${c.description ? `<p class="lead">${esc(c.description)}</p>` : ''}
     <p>Vas a ${c.video ? 'ver y escuchar' : 'escuchar'} <b>${c.regions} fragmentos de unos 15 segundos</b> (${c.minutes} min de audio en total) y marcar
-    las disfluencias que notes: muletillas, prolongaciones, repeticiones, bloqueos, revisiones y pausas. Toma entre 15 y 30 minutos.
+    las disfluencias que notes: muletillas, prolongaciones, repeticiones, bloqueos, revisiones y pausas. Toma entre ${Math.ceil(c.minutes * 5)} y ${Math.ceil(c.minutes * 10)} minutos; puedes hacerlo en varias sesiones.
     Puedes pausar y volver con el mismo correo: tu avance se guarda solo.</p>
     <ol><li>Escribe tu nombre y tu correo.</li><li>Lee la guía breve que aparece al abrir cada fragmento.</li>
     <li>Marca cada fenómeno arrastrando sobre la onda y eligiendo su clase.</li><li>Finaliza cada fragmento; al terminar el último, listo.</li></ol>

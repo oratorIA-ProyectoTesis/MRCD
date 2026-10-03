@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 
 from app import data_dir, media, media_dir, open_store
-from app.ops import create_campaign, create_tasks, new_user, pair_cases
+from app.ops import create_campaign, create_tasks, extend_campaign, new_user, pair_cases
 from app.worker import prepare_recording
 from core import evaluation
 
@@ -330,12 +330,19 @@ def make_campaign(store, a):
         for s in segs
         for start in range(s["core_start_ms"], s["core_end_ms"], a.region_s * 1000)
     ]
+    if not (a.extend or a.title):
+        raise SystemExit("falta --title")
     try:
-        camp = create_campaign(
-            store, a.slug, a.recording, regions, title=a.title, description=a.description, max_participants=a.max
+        camp = (
+            extend_campaign(store, a.slug, regions)
+            if a.extend
+            else create_campaign(
+                store, a.slug, a.recording, regions, title=a.title, description=a.description, max_participants=a.max
+            )
         )
     except ValueError as exc:
         raise SystemExit(str(exc)) from None
+    regions = [tuple(r) for r in camp["data"]["regions"]]
     if camp["data"]["video"]:  # cut every clip now so reviewers never wait for ffmpeg
         orig = media_dir(rec) / rec["data"]["original_name"]
         dur = rec["data"]["media"]["analysis"]["duration_ms"]
@@ -453,9 +460,10 @@ def main(argv=None):
     p.add_argument("--recording", required=True)
     p.add_argument("--segments", required=True, help="p. ej. s001,s012,s024")
     p.add_argument("--region-s", type=int, default=15)
-    p.add_argument("--title", required=True)
+    p.add_argument("--title")
     p.add_argument("--description", default="")
     p.add_argument("--max", type=int, default=30)
+    p.add_argument("--extend", action="store_true", help="añade las regiones a una campaña existente")
     p = sub.add_parser("promote")
     p.add_argument("model")
     p.add_argument("--reason", required=True)

@@ -208,6 +208,26 @@ def join_campaign(store: Store, slug: str, name: str, email: str) -> tuple[dict,
         )
     else:
         user = store.update(user["id"], {**user["data"], "name": name, "token_sha256": digest})
+    campaign_tasks(store, camp, user)
+    return user, token
+
+
+def extend_campaign(store: Store, slug: str, regions: list[tuple[int, int]]) -> dict:
+    """Add regions to an open campaign (existing ones are kept) and assign them to everyone already in it."""
+    camp = store.get(slug, "campaign")
+    if camp is None:
+        raise ValueError("campaña no encontrada")
+    old = [tuple(r) for r in camp["data"]["regions"]]
+    camp = store.update(
+        slug, {**camp["data"], "regions": [list(r) for r in sorted(set(old) | set(map(tuple, regions)))]}
+    )
+    for user in store.find("user", parent=slug):
+        campaign_tasks(store, camp, user)
+    return camp
+
+
+def campaign_tasks(store: Store, camp: dict, user: dict) -> None:
+    """One blind task per campaign region the person does not have yet."""
     d, rec = camp["data"], store.get(camp["data"]["recording_id"])
     have = {(t["data"]["start_ms"], t["data"]["end_ms"]) for t in store.find("task", owner=user["id"])}
     for start, end in d["regions"]:
@@ -223,7 +243,7 @@ def join_campaign(store: Store, slug: str, name: str, email: str) -> tuple[dict,
                     "split": d["split"],
                     "assignee": user["id"],
                     "run_id": None,
-                    "campaign": slug,
+                    "campaign": camp["id"],
                     "speaker_id": rec["data"].get("speaker_id"),
                     "guideline_version": d["guideline_version"],
                 },
@@ -231,7 +251,6 @@ def join_campaign(store: Store, slug: str, name: str, email: str) -> tuple[dict,
                 owner=user["id"],
                 status="assigned",
             )
-    return user, token
 
 
 def campaign_progress(store: Store, slug: str) -> dict:

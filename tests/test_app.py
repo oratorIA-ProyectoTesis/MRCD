@@ -316,12 +316,16 @@ def test_cancel_and_crash_recovery(env):
     assert store.get(stuck["id"])["status"] == "queued" and store.get(stuck["id"])["data"]["attempts"] == 1
     assert call("ana", "POST", "/analysis-runs", json={"recording_id": rid}).status_code == 403
     # a run already claimed by the worker is only asked to stop, then ends cancelled (never finished)
-    claimed_id = call("uma", "POST", "/analysis-runs", json={"recording_id": rid, "config": {"v": 2}}).json()["runs"][0]["id"]
+    claimed_id = call("uma", "POST", "/analysis-runs", json={"recording_id": rid, "config": {"v": 2}}).json()["runs"][
+        0
+    ]["id"]
     claimed = store.update(claimed_id, status="running")  # as the worker's claim would
     assert call("uma", "POST", f"/analysis-runs/{claimed_id}/cancel").json()["status"] == "cancel_requested"
     worker.execute(store, claimed, SYSTEMS)
     assert store.get(claimed_id)["status"] == "cancelled"
-    assert call("uma", "GET", f"/recordings/{rid}/clip", params={"start_ms": 99_000_000, "end_ms": 0}).status_code == 422
+    assert (
+        call("uma", "GET", f"/recordings/{rid}/clip", params={"start_ms": 99_000_000, "end_ms": 0}).status_code == 422
+    )
     broken = store.create("run", {"system": "missing", "identity": "y"}, parent="rec_gone", status="queued")
     run_worker(store)  # a broken job is logged and left for recovery; the queue keeps draining
     assert store.get(broken["id"])["status"] == "running"
@@ -394,11 +398,24 @@ def test_snapshot_windows_only_use_reviewed_regions_and_mask_unknown(env, monkey
     spec = importlib.util.spec_from_file_location("sw", Path(__file__).parents[1] / "scripts" / "snapshot_windows.py")
     sw = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(sw)
-    monkeypatch.setattr(sw, "prepared", lambda rec, audio, cfg: PreparedRecording(
-        extract_acoustic(audio, use_silero=False), [], len(audio) / 16000, {}))
-    items = [{"start_ms": 0, "end_ms": 10_000, "speaker_id": "spk_w", "events": [
-        {"label": "filler_word", "decision": "event", "start_ms": 2000, "end_ms": 2500},
-        {"label": None, "decision": "uncertain", "start_ms": 6000, "end_ms": 6500}]}]
+    monkeypatch.setattr(
+        sw,
+        "prepared",
+        lambda rec, audio, cfg: PreparedRecording(
+            extract_acoustic(audio, use_silero=False), [], len(audio) / 16000, {}
+        ),
+    )
+    items = [
+        {
+            "start_ms": 0,
+            "end_ms": 10_000,
+            "speaker_id": "spk_w",
+            "events": [
+                {"label": "filler_word", "decision": "event", "start_ms": 2000, "end_ms": 2500},
+                {"label": None, "decision": "uncertain", "start_ms": 6000, "end_ms": 6500},
+            ],
+        }
+    ]
     out = sw.recording_windows(store.get(rid), items, "small")
     assert out["start_ms"].max() + 3000 <= 10_000
     assert not any(s < 6500 and s + 3000 > 6000 for s in out["start_ms"])
@@ -414,11 +431,19 @@ def test_web_administration_creates_people_tasks_and_cases(env):
     assert call("rita", "POST", "/admin/users", json={"name": "x", "role": "user"}).status_code == 403
     made = call("admin", "POST", "/admin/users", json={"name": "dora", "role": "annotator"}).json()
     assert call(made["token"], "GET", "/me").json()["role"] == "annotator"  # the shown token works
-    bad = call("admin", "POST", "/admin/tasks", json={"recording_id": rid, "annotators": [users["ana"]], "split": "test",
-                                                      "mode": "assisted"})
+    bad = call(
+        "admin",
+        "POST",
+        "/admin/tasks",
+        json={"recording_id": rid, "annotators": [users["ana"]], "split": "test", "mode": "assisted"},
+    )
     assert bad.status_code == 422 and "prueba" in bad.json()["detail"]
-    r = call("admin", "POST", "/admin/tasks", json={"recording_id": rid, "annotators": [users["ana"], made["id"]],
-                                                    "split": "dev", "region_s": 10})
+    r = call(
+        "admin",
+        "POST",
+        "/admin/tasks",
+        json={"recording_id": rid, "annotators": [users["ana"], made["id"]], "split": "dev", "region_s": 10},
+    )
     assert r.json()["created"] == 4  # 20 s / 10 s regions x 2 people
     over = call("admin", "GET", "/admin/overview").json()
     assert {t["owner"] for t in over["tasks"]} == {"ana", "dora"}
@@ -448,19 +473,53 @@ def test_public_campaign_join_resume_progress_and_video(env, tmp_path):
     from app.ops import create_campaign
 
     store, call, users, tmp = env
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "testsrc=size=320x240:rate=10:duration=20",
-                    "-f", "lavfi", "-i", "sine=frequency=220:duration=20", "-shortest", "-c:v", "libx264",
-                    "-c:a", "aac", str(tmp / "talk.mp4")], check=True)
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-v",
+            "error",
+            "-y",
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc=size=320x240:rate=10:duration=20",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=220:duration=20",
+            "-shortest",
+            "-c:v",
+            "libx264",
+            "-c:a",
+            "aac",
+            str(tmp / "talk.mp4"),
+        ],
+        check=True,
+    )
     rid = upload(call, "rita", tmp / "talk.mp4", speaker_id="spk_v")
     run_worker(store)
     create_campaign(store, "piloto-test", rid, [(0, 10_000), (10_000, 20_000)], title="Prueba", max_participants=2)
     anon = TestClient(create_app(store))  # no token: the campaign page is public
     info = anon.get("/api/campaigns/piloto-test").json()
     assert info["regions"] == 2 and info["video"] is True and info["minutes"] == 0.3
-    assert anon.post("/api/campaigns/piloto-test/join", json={"name": "Lu", "email": "lu@x.com", "consent": False}).status_code == 422
-    assert anon.post("/api/campaigns/piloto-test/join", json={"name": "Lu", "email": "no-email", "consent": True}).status_code == 422
-    first = anon.post("/api/campaigns/piloto-test/join", json={"name": "Lu", "email": "Lu@X.com", "consent": True}).json()
-    again = anon.post("/api/campaigns/piloto-test/join", json={"name": "Lucía", "email": "lu@x.com", "consent": True}).json()
+    assert (
+        anon.post(
+            "/api/campaigns/piloto-test/join", json={"name": "Lu", "email": "lu@x.com", "consent": False}
+        ).status_code
+        == 422
+    )
+    assert (
+        anon.post(
+            "/api/campaigns/piloto-test/join", json={"name": "Lu", "email": "no-email", "consent": True}
+        ).status_code
+        == 422
+    )
+    first = anon.post(
+        "/api/campaigns/piloto-test/join", json={"name": "Lu", "email": "Lu@X.com", "consent": True}
+    ).json()
+    again = anon.post(
+        "/api/campaigns/piloto-test/join", json={"name": "Lucía", "email": "lu@x.com", "consent": True}
+    ).json()
     assert call(first["token"], "GET", "/me").status_code == 401  # rejoining rotates the token
     tasks = call(again["token"], "GET", "/review/tasks").json()["tasks"]
     assert len(tasks) == 2 and all(t["campaign"] == "piloto-test" for t in tasks)  # resumed, not duplicated
@@ -468,19 +527,32 @@ def test_public_campaign_join_resume_progress_and_video(env, tmp_path):
     assert view["video"] is True and view["suggestions"] == []  # blind
     clip = call(again["token"], "GET", f"/review/tasks/{tasks[0]['id']}/video")
     assert clip.status_code == 200 and clip.headers["content-type"] == "video/mp4" and len(clip.content) > 1000
-    second = anon.post("/api/campaigns/piloto-test/join", json={"name": "Max", "email": "max@x.com", "consent": True}).json()
+    second = anon.post(
+        "/api/campaigns/piloto-test/join", json={"name": "Max", "email": "max@x.com", "consent": True}
+    ).json()
     full = anon.post("/api/campaigns/piloto-test/join", json={"name": "Zoe", "email": "zoe@x.com", "consent": True})
     assert full.status_code == 422  # max_participants
     for tok, label in ((again["token"], "filler_word"), (second["token"], "repetition")):
         t = call(tok, "GET", "/review/tasks").json()["tasks"][0]
         ann = call(tok, "GET", f"/review/tasks/{t['id']}").json()["annotation"]
-        call(tok, "PATCH", f"/annotations/{ann['id']}", headers={"If-Match": str(ann["rev"])},
-             json={"events": [{"start_ms": 2000, "end_ms": 2500, "label": label}], "coverage": [[0, 10_000]]})
+        call(
+            tok,
+            "PATCH",
+            f"/annotations/{ann['id']}",
+            headers={"If-Match": str(ann["rev"])},
+            json={"events": [{"start_ms": 2000, "end_ms": 2500, "label": label}], "coverage": [[0, 10_000]]},
+        )
         assert call(tok, "POST", f"/review/tasks/{t['id']}/submit").json() == {"status": "submitted"}
     assert call(again["token"], "GET", "/campaigns/piloto-test/progress").status_code == 403
     prog = call("rita", "GET", "/campaigns/piloto-test/progress").json()
     assert [(p["name"], p["submitted"], p["total"]) for p in prog["participants"]] == [("Lucía", 1, 2), ("Max", 1, 2)]
     assert prog["agreement"][0]["existence"] == 1.0 and prog["agreement"][0]["raw"] == 0.0  # same span, other class
+    from app.ops import extend_campaign
+
+    extend_campaign(store, "piloto-test", [(10_000, 20_000), (20_000, 30_000)])  # one repeated, one new
+    tasks = call(again["token"], "GET", "/review/tasks").json()["tasks"]  # same token keeps working
+    assert sorted(t["start_ms"] for t in tasks) == [0, 10_000, 20_000]
+    assert sum(t["status"] == "submitted" for t in tasks) == 1  # finished work is kept
 
 
 def test_submit_requires_marks_to_touch_the_fragment(env):
@@ -488,17 +560,33 @@ def test_submit_requires_marks_to_touch_the_fragment(env):
     sf.write(tmp / "edge.wav", (0.1 * np.sin(np.arange(16000 * 30) / 9)).astype(np.float32), 16000)
     rid = upload(call, "rita", tmp / "edge.wav")
     run_worker(store)
-    tid = call("rita", "POST", "/review/tasks", json={"recording_id": rid, "start_ms": 10_000, "end_ms": 20_000,
-                                                      "split": "dev", "assignee": users["ana"]}).json()["id"]
+    tid = call(
+        "rita",
+        "POST",
+        "/review/tasks",
+        json={"recording_id": rid, "start_ms": 10_000, "end_ms": 20_000, "split": "dev", "assignee": users["ana"]},
+    ).json()["id"]
     ann = call("ana", "GET", f"/review/tasks/{tid}").json()["annotation"]
-    marks = [{"start_ms": 6_000, "end_ms": 6_500, "label": "filler_word"},   # context only -> rejected
-             {"start_ms": 9_800, "end_ms": 10_300, "label": "repetition"},   # crosses the edge -> fine
-             {"start_ms": 21_000, "end_ms": 21_400, "label": "block"}]       # context only -> rejected
-    r = call("ana", "PATCH", f"/annotations/{ann['id']}", headers={"If-Match": str(ann["rev"])},
-             json={"events": marks, "coverage": [[10_000, 20_000]]})
+    marks = [
+        {"start_ms": 6_000, "end_ms": 6_500, "label": "filler_word"},  # context only -> rejected
+        {"start_ms": 9_800, "end_ms": 10_300, "label": "repetition"},  # crosses the edge -> fine
+        {"start_ms": 21_000, "end_ms": 21_400, "label": "block"},
+    ]  # context only -> rejected
+    r = call(
+        "ana",
+        "PATCH",
+        f"/annotations/{ann['id']}",
+        headers={"If-Match": str(ann["rev"])},
+        json={"events": marks, "coverage": [[10_000, 20_000]]},
+    )
     bad = call("ana", "POST", f"/review/tasks/{tid}/submit")
     assert bad.status_code == 422 and bad.json()["detail"]["unreviewed_gaps_ms"] == []
     assert sorted(e["start_ms"] for e in bad.json()["detail"]["outside_context"]) == [6_000, 21_000]
-    call("ana", "PATCH", f"/annotations/{ann['id']}", headers={"If-Match": str(r.json()["rev"])},
-         json={"events": [marks[1]], "coverage": [[10_000, 20_000]]})
+    call(
+        "ana",
+        "PATCH",
+        f"/annotations/{ann['id']}",
+        headers={"If-Match": str(r.json()["rev"])},
+        json={"events": [marks[1]], "coverage": [[10_000, 20_000]]},
+    )
     assert call("ana", "POST", f"/review/tasks/{tid}/submit").json() == {"status": "submitted"}
