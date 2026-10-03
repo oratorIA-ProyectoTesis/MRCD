@@ -635,3 +635,7 @@ pre {
 }
 .form label.inline, aside label.inline, fieldset label.inline { display: inline-flex; }
 .form select, .form input:not([type='checkbox']):not([type='radio']) { width: 100%; min-width: 0; }
+.vid { display: block; width: 100%; max-height: 380px; background: #000; border-radius: 8px; margin: 0.5rem 0; }
+.narrow.wide { max-width: 44rem; }
+.consent { align-items: flex-start; }
+.button.big { font-size: 1.1rem; padding: 0.6rem 1.2rem; }

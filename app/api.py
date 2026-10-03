@@ -23,7 +23,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, model_validator
 
 from app import ROOT, exports, media, media_dir, open_store
-from app.ops import ROLES, create_tasks, new_user, open_case, pair_cases
+from app.ops import ROLES, campaign_progress, create_tasks, join_campaign, new_user, open_case, pair_cases
 from app.store import Conflict, Store
 from core import evaluation
 from core.constants import TAXONOMY
@@ -160,6 +160,12 @@ class PairRequest(BaseModel):
     adjudicator: str
 
 
+class JoinRequest(BaseModel):
+    name: str
+    email: str
+    consent: bool
+
+
 # ----------------------------------------------------------------- helpers
 def need(user: dict, *roles: str) -> None:
     if user["data"]["role"] not in (*roles, "admin"):
@@ -235,7 +241,12 @@ def create_app(store: Store | None = None) -> FastAPI:
     # ------------------------------------------------------------ identity
     @api.get("/me")
     def me(u=Depends(user)):
-        return {"id": u["id"], "name": u["data"]["name"], "role": u["data"]["role"]}
+        return {
+            "id": u["id"],
+            "name": u["data"]["name"],
+            "role": u["data"]["role"],
+            "campaign": u["data"].get("campaign"),
+        }
 
     @api.get("/guideline/{version}")
     def guideline(version: str, u=Depends(user)):
@@ -490,6 +501,7 @@ def create_app(store: Store | None = None) -> FastAPI:
             "end_ms": d["end_ms"],
             "context_ms": d["context_ms"],
             "guideline_version": d["guideline_version"],
+            "campaign": d.get("campaign"),
         }
 
     @api.get("/review/tasks")
@@ -526,8 +538,10 @@ def create_app(store: Store | None = None) -> FastAPI:
                 for e in run["data"].get("result", {}).get("events", [])
                 if e["end_ms"] > d["start_ms"] - d["context_ms"] and e["start_ms"] < d["end_ms"] + d["context_ms"]
             ]
+        rec = store.get(d["recording_id"])
         return {
             "task": public_task(task),
+            "video": bool(rec["data"]["media"]["original"].get("has_video")),
             "annotation": annotation_of(task),
             "suggestions": suggestions,
             "taxonomy": list(TAXONOMY),
@@ -539,6 +553,20 @@ def create_app(store: Store | None = None) -> FastAPI:
         d = own_task(tid, u)["data"]
         ctx = d["context_ms"] + min(max(extra_ms, 0), 30_000)  # widen context without moving the region
         return clip(store.get(d["recording_id"]), d["start_ms"] - ctx, d["end_ms"] + ctx)
+
+    @api.get("/review/tasks/{tid}/video")
+    def task_video(tid: str, extra_ms: int = 0, u=Depends(user)):
+        d = own_task(tid, u)["data"]
+        rec = store.get(d["recording_id"])
+        if not rec["data"]["media"]["original"].get("has_video"):
+            raise HTTPException(404, "esta grabación no tiene video")
+        ctx = d["context_ms"] + min(max(extra_ms, 0), 30_000)
+        start = max(0, d["start_ms"] - ctx)
+        end = min(d["end_ms"] + ctx, rec["data"]["media"]["analysis"]["duration_ms"])
+        clip_path = media.video_clip(media_dir(rec) / rec["data"]["original_name"], media_dir(rec), start, end)
+        return FileResponse(
+            clip_path, media_type="video/mp4", headers={"X-Media-Offset-Ms": str(start), "Cache-Control": "private"}
+        )
 
     @api.get("/annotations/{aid}/history")
     def annotation_history(aid: str, u=Depends(user)):
@@ -878,6 +906,40 @@ def create_app(store: Store | None = None) -> FastAPI:
             headers=headers,
         )
 
+    # ------------------------------------------------ public annotation campaigns
+    @api.get("/campaigns/{slug}")
+    def campaign(slug: str):
+        camp = found(store.get(slug, "campaign"), "campaña")
+        d = camp["data"]
+        return {
+            "slug": slug,
+            "title": d["title"],
+            "description": d["description"],
+            "status": camp["status"],
+            "regions": len(d["regions"]),
+            "video": d["video"],
+            "guideline_version": d["guideline_version"],
+            "minutes": round(sum(b - a for a, b in d["regions"]) / 60000, 1),
+        }
+
+    @api.post("/campaigns/{slug}/join")
+    def join(slug: str, body: JoinRequest):
+        if not body.consent:
+            raise HTTPException(422, "debes aceptar las condiciones para participar")
+        try:
+            person, token = join_campaign(store, slug, body.name, body.email)
+        except LookupError as exc:
+            raise HTTPException(404, str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
+        return {"token": token, "name": person["data"]["name"]}
+
+    @api.get("/campaigns/{slug}/progress")
+    def progress(slug: str, u=Depends(user)):
+        need(u, "researcher")
+        found(store.get(slug, "campaign"), "campaña")
+        return campaign_progress(store, slug)
+
     # ------------------------------------------------ administration (data manager)
     def fail(fn, *args, **kw):
         try:
@@ -890,6 +952,9 @@ def create_app(store: Store | None = None) -> FastAPI:
         need(u)
         names = {x["id"]: x["data"]["name"] for x in store.find("user")}
         return {
+            "campaigns": [
+                {"slug": c["id"], "title": c["data"]["title"], "status": c["status"]} for c in store.find("campaign")
+            ],
             "users": [
                 {"id": x["id"], "name": x["data"]["name"], "role": x["data"]["role"], "status": x["status"]}
                 for x in store.find("user")

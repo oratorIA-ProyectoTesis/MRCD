@@ -105,6 +105,51 @@ def clip_wav(path: Path, start_ms: int, end_ms: int) -> bytes:
     return buf.getvalue()
 
 
+def video_clip(original: Path, out_dir: Path, start_ms: int, end_ms: int) -> Path:
+    """480p H.264/AAC excerpt of a video, cut exactly at start_ms (re-encoded, so frame
+    accurate) and cached; review pages play it in sync with the waveform."""
+    out = out_dir / "clips" / f"{start_ms}_{end_ms}.mp4"
+    if not out.exists():
+        out.parent.mkdir(parents=True, exist_ok=True)
+        tmp = out.with_suffix(".part.mp4")
+        run = subprocess.run(
+            [
+                "ffmpeg",
+                "-nostdin",
+                "-y",
+                "-v",
+                "error",
+                "-ss",
+                f"{start_ms / 1000:.3f}",
+                "-i",
+                str(original),
+                "-t",
+                f"{(end_ms - start_ms) / 1000:.3f}",
+                "-vf",
+                "scale=-2:480",
+                "-c:v",
+                "libx264",
+                "-preset",
+                "veryfast",
+                "-crf",
+                "28",
+                "-c:a",
+                "aac",
+                "-b:a",
+                "96k",
+                "-movflags",
+                "+faststart",
+                str(tmp),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        if run.returncode:
+            raise ValueError(f"no se pudo recortar el video: {run.stderr.strip()[-300:]}")
+        tmp.replace(out)
+    return out
+
+
 def segments(duration_ms: int, core_ms: int = 30_000, context_ms: int = 5_000) -> list[dict]:
     """Analysis regions: a central interval that owns events plus context on each side."""
     return [

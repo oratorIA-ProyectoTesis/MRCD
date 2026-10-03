@@ -159,7 +159,8 @@ const routes = [
   [/^#\/experiments$/, experiments],
   [/^#\/experiments\/runs\/([\w-]+)$/, comparison],
   [/^#\/admin$/, admin],
-  [/^#\/sus$/, sus]
+  [/^#\/sus$/, sus],
+  [/^#\/c\/([a-z0-9-]+)$/, campaign]
 ]
 const NAV = {
   user: [
@@ -189,13 +190,19 @@ async function route() {
   cleanup()
   cleanup = () => {}
   view.onclick = view.onchange = null
+  const joining = (location.hash || '').match(/^#\/c\/([a-z0-9-]+)$/)
   if (!me) {
-    if (!token()) return login('')
+    if (!token()) return joining ? campaignJoin(joining[1]) : login('')
     try {
       me = await api('/me')
     } catch (e) {
-      return login('El token no es válido o ya no está activo.')
+      local.del('token')
+      return joining ? campaignJoin(joining[1]) : login('El token no es válido o ya no está activo.')
     }
+  }
+  if (me.campaign && /^#\/?$/.test(location.hash || '#/')) {
+    location.hash = `#/c/${me.campaign}`
+    return
   }
   nav()
   const hit = routes.find(([re]) => re.test(location.hash || '#/'))
@@ -232,7 +239,7 @@ function login(msg) {
 function nav() {
   const here = (location.hash || '#/').split('/').slice(0, 2).join('/')
   $('#nav').innerHTML =
-    (NAV[me.role] || [])
+    (me.campaign ? [[`#/c/${me.campaign}`, 'Mi campaña']] : NAV[me.role] || [])
       .map(([h, t]) => `<a href="${h}" ${h === here || (h === '#/' && here === '#') ? 'aria-current="page"' : ''}>${t}</a>`)
       .join('') + `<span class="who">${esc(me.name)} · ${ROLE[me.role] || me.role}</span><button id="logout">Salir</button>`
   $('#logout').onclick = () => {
@@ -364,6 +371,7 @@ async function workbench(kind, id) {
   const t = isCase ? d.case : d.task
   const ann = d.annotation
   const locked = isCase ? t.status !== 'open' : ann.status === 'submitted'
+  const useVideo = !isCase && d.video
   const blank = { events: [], contextual: [], coverage: [], actions: [], active_ms: 0, asr_used: false, telemetry: {} }
   let state = isCase ? blank : { ...blank, ...ann.data, telemetry: ann.data.telemetry || {} }
   let rev = ann?.rev
@@ -401,6 +409,7 @@ async function workbench(kind, id) {
       <span class="chip ${locked ? 'ok' : 'info'}" id="save">${locked ? 'Finalizada · solo lectura' : isCase ? 'Se guarda al confirmar' : 'Guardado'}</span></div>
     <div id="alert"></div>
     <div class="grid"><section>
+      ${useVideo ? '<video id="vid" class="vid" playsinline preload="auto"></video>' : ''}
       <div id="wave"></div>
       <div class="row toolbar">
         <button id="play" class="primary">▶ Reproducir / pausar</button>
@@ -433,6 +442,7 @@ async function workbench(kind, id) {
     ...WAVE,
     minPxPerSec: 100,
     url: audioUrl(),
+    media: useVideo ? $('#vid') : undefined, // the video plays in sync with the waveform
     plugins: [Timeline.create({ formatTimeCallback: s => fmt(s * 1000 + offset) })]
   })
   const regions = ws.registerPlugin(Regions.create())
@@ -443,6 +453,7 @@ async function workbench(kind, id) {
   const L = ms => (ms - offset) / 1000
   const G = s => Math.round(s * 1000) + offset
   function audioUrl() {
+    if (useVideo) return mediaUrl(`/review/tasks/${id}/video?extra_ms=${extra}`)
     return mediaUrl(isCase ? `/review/adjudication/${id}/audio?extra_ms=${extra}` : `/review/tasks/${id}/audio?extra_ms=${extra}`)
   }
 
@@ -1081,7 +1092,7 @@ async function workbench(kind, id) {
         await api(`/review/tasks/${id}/submit`, { method: 'POST' })
         toast('Tarea finalizada. ¡Gracias!')
       }
-      location.hash = '#/review'
+      location.hash = t.campaign ? `#/c/${t.campaign}` : '#/review'
     } catch (e) {
       const gaps = e.detail?.unreviewed_gaps_ms
       say(
@@ -1811,6 +1822,7 @@ async function admin() {
       ['Tareas finalizadas', count('submitted')],
       ['Casos abiertos', o.cases.filter(c => c.status === 'open').length]
     ])}
+    <div id="camps"></div>
     <div class="cards two">
     <section class="card"><h2>1. Personas</h2>
       <form id="u-form" class="row"><input name="name" placeholder="Nombre" required><select name="role">${Object.entries(ROLE)
@@ -1845,6 +1857,21 @@ async function admin() {
       ${o.cases.length ? `<div class="scroll list"><table><thead><tr><th>Caso</th><th>Región</th><th>Adjudica</th><th>Estado</th></tr></thead><tbody>${o.cases.map(c => `<tr><td>${c.id}</td><td>${fmt(c.start_ms)}–${fmt(c.end_ms)}</td><td>${esc(c.adjudicator)}</td><td>${chip(c.status)}</td></tr>`).join('')}</tbody></table></div>` : ''}</section>
     <section class="card"><h2>Todas las tareas</h2><label class="inline">Mostrar <select id="t-flt"><option value="">todas</option>${['assigned', 'in_progress', 'submitted', 'pool'].map(s => `<option value="${s}">${STATUS[s][0]}</option>`).join('')}</select></label>
       <div class="scroll list"><table><thead><tr><th>Persona</th><th>Región</th><th>Modo</th><th>Partición</th><th>Estado</th></tr></thead><tbody id="t-rows"></tbody></table></div></section>`
+  Promise.all(o.campaigns.map(c => api(`/campaigns/${c.slug}/progress`))).then(list => {
+    $('#camps').innerHTML = list.map(p => {
+      const link = `${location.origin}/#/c/${p.campaign.slug}`
+      return `<section class="card"><h2>Campaña: ${esc(p.campaign.title)} ${chip(p.campaign.status)}</h2>
+        <div class="row"><code>${esc(link)}</code><button data-copy="${esc(link)}">Copiar enlace</button></div>
+        <p class="muted">${p.campaign.regions.length} fragmentos por persona · ${p.participants.length} de ${p.campaign.max_participants} participantes</p>
+        ${p.participants.length ? `<div class="scroll"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Avance</th><th>Min. activos</th></tr></thead><tbody>
+        ${p.participants.map(x => `<tr><td>${esc(x.name)}</td><td>${esc(x.email)}</td><td>${x.submitted}/${x.total}</td><td>${x.active_min}</td></tr>`).join('')}</tbody></table></div>` : empty('Aún nadie se unió. Comparte el enlace.')}
+        ${p.agreement.length ? `<h2>Acuerdo entre revisores</h2><p class="muted">Sobre los fragmentos que ambos finalizaron. Existencia: coinciden en que hay un evento (IoU ≥ 0,5). κ y acuerdo de clase incluyen las omisiones.</p>
+        <div class="scroll"><table><thead><tr><th>Par</th><th>Fragmentos</th><th>Existencia</th><th>κ de clase</th><th>Acuerdo de clase</th></tr></thead><tbody>
+        ${p.agreement.map(g => `<tr><td>${esc(g.a)} – ${esc(g.b)}</td><td>${g.regions}</td><td>${num(g.existence)}</td><td>${num(g.kappa)}</td><td>${num(g.raw)}</td></tr>`).join('')}</tbody></table></div>` : ''}
+        </section>`
+    }).join('')
+    $('#camps').onclick = e => { if (e.target.dataset.copy) navigator.clipboard.writeText(e.target.dataset.copy).then(() => toast('Enlace copiado.')) }
+  })
   const taskRows = f =>
     o.tasks
       .filter(t => !f || t.status === f)
@@ -1908,6 +1935,62 @@ async function admin() {
       toast(esc(err.message), 'bad')
     }
   }
+}
+
+// ------------------------------------------------------- annotation campaigns
+async function campaignJoin(slug) {
+  $('#nav').innerHTML = ''
+  let c
+  try {
+    c = await api(`/campaigns/${slug}`)
+  } catch (e) {
+    view.innerHTML = '<div class="card narrow"><h1>Campaña no encontrada</h1><p class="muted">Revisa el enlace que te compartieron.</p></div>'
+    return
+  }
+  view.innerHTML = `<div class="card narrow wide">
+    <h1>${esc(c.title)}</h1>
+    ${c.description ? `<p class="lead">${esc(c.description)}</p>` : ''}
+    <p>Vas a ${c.video ? 'ver y escuchar' : 'escuchar'} <b>${c.regions} fragmentos de unos 15 segundos</b> (${c.minutes} min de audio en total) y marcar
+    las disfluencias que notes: muletillas, prolongaciones, repeticiones, bloqueos, revisiones y pausas. Toma entre 15 y 30 minutos.
+    Puedes pausar y volver con el mismo correo: tu avance se guarda solo.</p>
+    <ol><li>Escribe tu nombre y tu correo.</li><li>Lee la guía breve que aparece al abrir cada fragmento.</li>
+    <li>Marca cada fenómeno arrastrando sobre la onda y eligiendo su clase.</li><li>Finaliza cada fragmento; al terminar el último, listo.</li></ol>
+    <p class="muted">Trabajas a ciegas: no verás lo que marcó el sistema ni otras personas. Así tus marcas sirven como referencia independiente.</p>
+    ${c.status === 'open' ? `<form id="join" class="form">
+      <label>Nombre <input name="name" required minlength="2" maxlength="80" autocomplete="name"></label>
+      <label>Correo <input name="email" type="email" required autocomplete="email"></label>
+      <label class="inline consent"><input type="checkbox" name="consent" required> Acepto que mi nombre, correo y marcas se guarden para la investigación de tesis MRCD, y me comprometo a no grabar, descargar ni compartir el contenido.</label>
+      <button class="primary">Empezar</button><p id="join-err" class="error"></p></form>` : '<div class="banner warn">Esta campaña ya está cerrada.</div>'}</div>`
+  if (!$('#join')) return
+  $('#join').onsubmit = async e => {
+    e.preventDefault()
+    const f = new FormData(e.target)
+    try {
+      const r = await api(`/campaigns/${slug}/join`, { method: 'POST', body: { name: f.get('name'), email: f.get('email'), consent: f.get('consent') === 'on' } })
+      local.set('token', r.token)
+      me = null
+      route()
+    } catch (err) {
+      $('#join-err').textContent = err.message
+    }
+  }
+}
+
+async function campaign(slug) {
+  const [c, d] = await Promise.all([api(`/campaigns/${slug}`), api('/review/tasks')])
+  const tasks = d.tasks.filter(t => t.campaign === slug).sort((a, b) => a.start_ms - b.start_ms)
+  const done = tasks.filter(t => t.status === 'submitted').length
+  const next = tasks.find(t => t.status !== 'submitted')
+  view.innerHTML = `<h1>${esc(c.title)}</h1>
+    <p class="lead">Hola, ${esc(me.name)}. ${next ? 'Cada fragmento se guarda solo mientras trabajas; puedes salir y volver con tu correo.' : '¡Terminaste todos los fragmentos! Muchas gracias por tu ayuda.'}</p>
+    <div class="meter big"><i style="width:${tasks.length ? Math.round((100 * done) / tasks.length) : 0}%"></i></div>
+    <p class="muted">${done} de ${tasks.length} fragmentos finalizados</p>
+    ${next ? `<p><a class="button primary big" href="#/review/tasks/${next.id}">${done ? 'Continuar' : 'Empezar'} con el fragmento ${tasks.indexOf(next) + 1}</a></p>` : '<div class="banner ok">Si tienes dos minutos más, responde la <a href="#/sus">encuesta de usabilidad</a>.</div>'}
+    <h2>Tus fragmentos</h2>
+    <div class="scroll"><table><thead><tr><th>#</th><th>Tramo del ${c.video ? 'video' : 'audio'}</th><th>Estado</th><th></th></tr></thead><tbody>
+    ${tasks.map((t, i) => `<tr><td>${i + 1}</td><td>${fmt(t.start_ms)}–${fmt(t.end_ms)}</td><td>${chip(t.status)}</td><td><a class="button" href="#/review/tasks/${t.id}">${t.status === 'submitted' ? 'Ver' : 'Abrir'}</a></td></tr>`).join('')}</tbody></table></div>
+    <details><summary>Guía de anotación completa</summary><pre id="guide">Cargando…</pre></details>`
+  api(`/guideline/${c.guideline_version}`).then(g => { $('#guide').textContent = g.markdown }).catch(() => {})
 }
 
 // --------------------------------------------------------------- usability

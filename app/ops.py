@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import random
+import re
 import secrets
 
 from app.store import Store
@@ -138,3 +139,146 @@ def pair_cases(store: Store, adjudicator: str, author: str) -> tuple[list[str], 
         except ValueError as exc:
             skipped.append(f"{first['id']}/{second['id']}: {exc}")
     return created, skipped
+
+
+# --------------------------------------------------------------- campaigns
+SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{2,39}$")
+EMAIL = re.compile(r"^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$")
+
+
+def create_campaign(
+    store: Store,
+    slug: str,
+    recording_id: str,
+    regions: list[tuple[int, int]],
+    *,
+    title: str,
+    description: str = "",
+    context_ms: int = 5000,
+    max_participants: int = 30,
+    guide: str = "guia-anotacion-v1",
+) -> dict:
+    """Same predefined regions for every participant, blind, so their annotations are independent."""
+    rec = store.get(recording_id, "recording")
+    if not SLUG.match(slug) or store.get(slug) is not None:
+        raise ValueError("identificador inválido o ya usado (minúsculas, números y guiones)")
+    if rec is None or rec["status"] != "ready" or not regions:
+        raise ValueError("la grabación no existe, no está preparada o no hay regiones")
+    video = bool(rec["data"]["media"]["original"].get("has_video"))
+    return store.create(
+        "campaign",
+        {
+            "title": title,
+            "description": description,
+            "recording_id": recording_id,
+            "regions": [list(r) for r in regions],
+            "context_ms": context_ms,
+            "mode": "blind",
+            "split": "pilot",
+            "guideline_version": guide,
+            "max_participants": max_participants,
+            "video": video,
+        },
+        id=slug,
+        status="open",
+    )
+
+
+def join_campaign(store: Store, slug: str, name: str, email: str) -> tuple[dict, str]:
+    """Name + email -> annotator account and one blind task per region. Joining again with
+    the same email resumes the same tasks with a new token (older sessions stop working)."""
+    camp = store.get(slug, "campaign")
+    if camp is None or camp["status"] != "open":
+        raise LookupError("campaña no disponible")
+    name, email = name.strip(), email.strip().lower()
+    if not 2 <= len(name) <= 80 or not EMAIL.match(email):
+        raise ValueError("escribe tu nombre y un correo válido")
+    people = [u for u in store.find("user", parent=slug)]
+    user = next((u for u in people if u["data"].get("email") == email), None)
+    token = secrets.token_urlsafe(24)
+    digest = hashlib.sha256(token.encode()).hexdigest()
+    if user is None:
+        if len(people) >= camp["data"]["max_participants"]:
+            raise ValueError("la campaña ya tiene todos sus participantes")
+        user = store.create(
+            "user",
+            {"name": name, "role": "annotator", "email": email, "token_sha256": digest, "campaign": slug},
+            parent=slug,
+            status="active",
+        )
+    else:
+        user = store.update(user["id"], {**user["data"], "name": name, "token_sha256": digest})
+    d, rec = camp["data"], store.get(camp["data"]["recording_id"])
+    have = {(t["data"]["start_ms"], t["data"]["end_ms"]) for t in store.find("task", owner=user["id"])}
+    for start, end in d["regions"]:
+        if (start, end) not in have:
+            store.create(
+                "task",
+                {
+                    "recording_id": d["recording_id"],
+                    "start_ms": start,
+                    "end_ms": end,
+                    "context_ms": d["context_ms"],
+                    "mode": "blind",
+                    "split": d["split"],
+                    "assignee": user["id"],
+                    "run_id": None,
+                    "campaign": slug,
+                    "speaker_id": rec["data"].get("speaker_id"),
+                    "guideline_version": d["guideline_version"],
+                },
+                parent=d["recording_id"],
+                owner=user["id"],
+                status="assigned",
+            )
+    return user, token
+
+
+def campaign_progress(store: Store, slug: str) -> dict:
+    """Per-participant progress and pairwise agreement on the regions both finished."""
+    from core.evaluation import agreement
+
+    camp = store.get(slug, "campaign")
+    people = store.find("user", parent=slug)
+    done: dict[str, dict] = {}
+    rows = []
+    for u in people:
+        tasks = store.find("task", owner=u["id"])
+        finished = [t for t in tasks if t["status"] == "submitted"]
+        anns = {f"{t['data']['start_ms']}": store.get(f"ann_{t['id']}") for t in finished}
+        done[u["id"]] = {k: [e for e in a["data"]["events"] if e["decision"] == "event"] for k, a in anns.items()}
+        rows.append(
+            {
+                "name": u["data"]["name"],
+                "email": u["data"]["email"],
+                "submitted": len(finished),
+                "total": len(tasks),
+                "active_min": round(sum(a["data"].get("active_ms", 0) for a in anns.values()) / 60000, 1),
+            }
+        )
+    pairs = []
+    for i, a in enumerate(people):
+        for b in people[i + 1 :]:
+            common = sorted(set(done[a["id"]]) & set(done[b["id"]]))
+            if common:
+                ev = lambda uid: [{**e, "recording_id": k} for k in common for e in done[uid][k]]  # noqa: E731
+                g = agreement(ev(a["id"]), ev(b["id"]))
+                pairs.append(
+                    {
+                        "a": a["data"]["name"],
+                        "b": b["data"]["name"],
+                        "regions": len(common),
+                        "existence": g["existence_agreement"],
+                        "kappa": g["class_kappa"],
+                        "raw": g["class_raw_agreement"],
+                    }
+                )
+    return {
+        "campaign": {
+            "slug": slug,
+            **{k: camp["data"][k] for k in ("title", "regions", "max_participants")},
+            "status": camp["status"],
+        },
+        "participants": rows,
+        "agreement": pairs,
+    }

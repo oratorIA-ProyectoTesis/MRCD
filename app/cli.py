@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 
 from app import data_dir, media, media_dir, open_store
-from app.ops import create_tasks, new_user, pair_cases
+from app.ops import create_campaign, create_tasks, new_user, pair_cases
 from app.worker import prepare_recording
 from core import evaluation
 
@@ -188,9 +188,19 @@ def import_pilot(store, a):
 
 def make_tasks(store, a):
     try:
-        tasks = create_tasks(store, a.recording, a.annotators.split(","), mode=a.mode, split=a.split,
-                             segments=a.segments.split(",") if a.segments else None, run_id=a.run,
-                             region_s=a.region_s, context_s=a.context_s, guide=a.guide, author="cli")
+        tasks = create_tasks(
+            store,
+            a.recording,
+            a.annotators.split(","),
+            mode=a.mode,
+            split=a.split,
+            segments=a.segments.split(",") if a.segments else None,
+            run_id=a.run,
+            region_s=a.region_s,
+            context_s=a.context_s,
+            guide=a.guide,
+            author="cli",
+        )
     except ValueError as exc:
         raise SystemExit(str(exc)) from None
     print(f"{len(tasks)} tareas")
@@ -275,6 +285,68 @@ def alias_speaker(store, a):
     print(f"{a.alias} -> {a.canonical}")
 
 
+def add_recording(store, a):
+    """Register an audio/video file and prepare it now (no worker needed)."""
+    src = Path(a.path)
+    sha = media.sha256(src)
+    existing = next((r for r in store.find("recording") if r["data"]["sha256"] == sha), None)
+    if existing:
+        print(f"ya existe: {existing['id']}")
+        return
+    target = media_dir({"data": {"sha256": sha}})
+    target.mkdir(parents=True, exist_ok=True)
+    name = "original" + src.suffix.lower()
+    shutil.copyfile(src, target / name)
+    provenance = {"source": src.name}
+    if a.align_to:
+        provenance["alignment"] = {
+            "recording_id": a.align_to,
+            "offset_ms": a.align_offset_ms,
+            "meaning": "evento en t de esta grabación = t + offset_ms en la otra",
+        }
+    rec = store.create(
+        "recording",
+        {
+            "sha256": sha,
+            "original_name": name,
+            "filename": a.label or src.name,
+            "speaker_id": a.speaker,
+            "project": a.project,
+            "provenance": provenance,
+        },
+        status="queued",
+    )
+    prepare_recording(store, rec)
+    rec = store.get(rec["id"])
+    print(f"{rec['id']} {rec['status']} {rec['data'].get('error', '')}")
+
+
+def make_campaign(store, a):
+    """Blind campaign over the chosen 30 s segments, split in regions of --region-s seconds."""
+    rec = store.get(a.recording, "recording")
+    segs = [s for s in rec["data"]["segments"] if s["id"] in a.segments.split(",")]
+    regions = [
+        (start, min(start + a.region_s * 1000, s["core_end_ms"]))
+        for s in segs
+        for start in range(s["core_start_ms"], s["core_end_ms"], a.region_s * 1000)
+    ]
+    try:
+        camp = create_campaign(
+            store, a.slug, a.recording, regions, title=a.title, description=a.description, max_participants=a.max
+        )
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from None
+    if camp["data"]["video"]:  # cut every clip now so reviewers never wait for ffmpeg
+        orig = media_dir(rec) / rec["data"]["original_name"]
+        dur = rec["data"]["media"]["analysis"]["duration_ms"]
+        for start, end in regions:
+            media.video_clip(orig, media_dir(rec), max(0, start - 5000), min(dur, end + 5000))
+    print(
+        f"campaña {a.slug}: {len(regions)} regiones, {sum(e - s for s, e in regions) / 1000:.0f} s por persona, "
+        f"video={camp['data']['video']}. Enlace: <URL>/#/c/{a.slug}"
+    )
+
+
 def promote(store, a):
     model = store.get(a.model, "model")
     store.update(model["id"], {**model["data"], "promotion": {"reason": a.reason}}, status="promoted", author="cli")
@@ -311,7 +383,9 @@ def quality_report(store, a):
         report[key] = {"n": len(values), "p95": float(np.percentile(values, 95)) if values else None, "target": target}
     done = [x for x in store.find("annotation", status="submitted")]
     audio_ms = sum(store.get(x["parent"])["data"]["end_ms"] - store.get(x["parent"])["data"]["start_ms"] for x in done)
-    report["effort_active_min_per_audio_min"] = sum(x["data"]["active_ms"] for x in done) / audio_ms if audio_ms else None
+    report["effort_active_min_per_audio_min"] = (
+        sum(x["data"]["active_ms"] for x in done) / audio_ms if audio_ms else None
+    )
     report["agents"] = sorted({x["data"]["telemetry"].get("agent") for x in anns} - {None})
     scores = [x["data"]["score"] for x in store.find("sus")]
     report["sus"] = {"n": len(scores), "mean": sum(scores) / len(scores) if scores else None, "target": 70}
@@ -367,6 +441,21 @@ def main(argv=None):
     p.add_argument("project")
     p.add_argument("alias")
     p.add_argument("canonical")
+    p = sub.add_parser("add-recording")
+    p.add_argument("path")
+    p.add_argument("--speaker")
+    p.add_argument("--project")
+    p.add_argument("--label", help="nombre visible")
+    p.add_argument("--align-to", help="otra grabación del mismo audio")
+    p.add_argument("--align-offset-ms", type=float, default=0.0)
+    p = sub.add_parser("make-campaign")
+    p.add_argument("slug")
+    p.add_argument("--recording", required=True)
+    p.add_argument("--segments", required=True, help="p. ej. s001,s012,s024")
+    p.add_argument("--region-s", type=int, default=15)
+    p.add_argument("--title", required=True)
+    p.add_argument("--description", default="")
+    p.add_argument("--max", type=int, default=30)
     p = sub.add_parser("promote")
     p.add_argument("model")
     p.add_argument("--reason", required=True)

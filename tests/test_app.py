@@ -442,3 +442,42 @@ def test_asr_settings_are_part_of_cache_key_run_identity_and_record(env):
     assert store.get(default)["data"]["config"] == ASR_DEFAULTS  # effective settings are stored
     int8 = call("rita", "POST", "/analysis-runs", json={"recording_id": rid, "config": {"asr_compute_type": "int8"}})
     assert int8.json()["runs"][0]["id"] != default
+
+
+def test_public_campaign_join_resume_progress_and_video(env, tmp_path):
+    from app.ops import create_campaign
+
+    store, call, users, tmp = env
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "testsrc=size=320x240:rate=10:duration=20",
+                    "-f", "lavfi", "-i", "sine=frequency=220:duration=20", "-shortest", "-c:v", "libx264",
+                    "-c:a", "aac", str(tmp / "talk.mp4")], check=True)
+    rid = upload(call, "rita", tmp / "talk.mp4", speaker_id="spk_v")
+    run_worker(store)
+    create_campaign(store, "piloto-test", rid, [(0, 10_000), (10_000, 20_000)], title="Prueba", max_participants=2)
+    anon = TestClient(create_app(store))  # no token: the campaign page is public
+    info = anon.get("/api/campaigns/piloto-test").json()
+    assert info["regions"] == 2 and info["video"] is True and info["minutes"] == 0.3
+    assert anon.post("/api/campaigns/piloto-test/join", json={"name": "Lu", "email": "lu@x.com", "consent": False}).status_code == 422
+    assert anon.post("/api/campaigns/piloto-test/join", json={"name": "Lu", "email": "no-email", "consent": True}).status_code == 422
+    first = anon.post("/api/campaigns/piloto-test/join", json={"name": "Lu", "email": "Lu@X.com", "consent": True}).json()
+    again = anon.post("/api/campaigns/piloto-test/join", json={"name": "Lucía", "email": "lu@x.com", "consent": True}).json()
+    assert call(first["token"], "GET", "/me").status_code == 401  # rejoining rotates the token
+    tasks = call(again["token"], "GET", "/review/tasks").json()["tasks"]
+    assert len(tasks) == 2 and all(t["campaign"] == "piloto-test" for t in tasks)  # resumed, not duplicated
+    view = call(again["token"], "GET", f"/review/tasks/{tasks[0]['id']}").json()
+    assert view["video"] is True and view["suggestions"] == []  # blind
+    clip = call(again["token"], "GET", f"/review/tasks/{tasks[0]['id']}/video")
+    assert clip.status_code == 200 and clip.headers["content-type"] == "video/mp4" and len(clip.content) > 1000
+    second = anon.post("/api/campaigns/piloto-test/join", json={"name": "Max", "email": "max@x.com", "consent": True}).json()
+    full = anon.post("/api/campaigns/piloto-test/join", json={"name": "Zoe", "email": "zoe@x.com", "consent": True})
+    assert full.status_code == 422  # max_participants
+    for tok, label in ((again["token"], "filler_word"), (second["token"], "repetition")):
+        t = call(tok, "GET", "/review/tasks").json()["tasks"][0]
+        ann = call(tok, "GET", f"/review/tasks/{t['id']}").json()["annotation"]
+        call(tok, "PATCH", f"/annotations/{ann['id']}", headers={"If-Match": str(ann["rev"])},
+             json={"events": [{"start_ms": 2000, "end_ms": 2500, "label": label}], "coverage": [[0, 10_000]]})
+        assert call(tok, "POST", f"/review/tasks/{t['id']}/submit").json() == {"status": "submitted"}
+    assert call(again["token"], "GET", "/campaigns/piloto-test/progress").status_code == 403
+    prog = call("rita", "GET", "/campaigns/piloto-test/progress").json()
+    assert [(p["name"], p["submitted"], p["total"]) for p in prog["participants"]] == [("Lucía", 1, 2), ("Max", 1, 2)]
+    assert prog["agreement"][0]["existence"] == 1.0 and prog["agreement"][0]["raw"] == 0.0  # same span, other class
