@@ -740,5 +740,29 @@ fieldset label.inline {
 }
 
 /* toasts top-right, never over the editor's save buttons */
-#toasts { top: 4.2rem; bottom: auto; }
-button.primary kbd, .button.primary kbd { background: rgba(255, 255, 255, 0.22); border-color: rgba(255, 255, 255, 0.55); color: inherit; }
+#toasts {
+  top: 4.2rem;
+  bottom: auto;
+}
+button.primary kbd,
+.button.primary kbd {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.55);
+  color: inherit;
+}
+
+.selbox.bad {
+  border-color: var(--bad);
+}
+.selwarn {
+  color: var(--bad);
+  font-weight: 600;
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+}
+.banner.outside p {
+  margin: 0 0 0.4rem;
+}
+button:disabled.primary {
+  filter: grayscale(0.6);
+}

@@ -439,6 +439,7 @@ async function workbench(kind, id) {
     <div class="row meta"><span>Fragmento <b>${fmt(t.start_ms)}–${fmt(t.end_ms)}</b></span><span>Guía ${esc(t.guideline_version)}</span>
       <span class="chip ${locked ? 'ok' : 'info'}" id="save" title="Estado del guardado en el servidor">${locked ? 'Finalizado · solo lectura' : isCase ? 'Se guarda al confirmar' : 'Todo guardado'}</span></div>
     <div id="alert"></div>
+    <div id="outside"></div>
     <div class="grid"><section>
       ${useVideo ? '<video id="vid" class="vid" playsinline preload="auto"></video>' : ''}
       <div id="wave"></div>
@@ -447,7 +448,7 @@ async function workbench(kind, id) {
         <button id="back">⟲ −2 s</button>
         <label class="inline">Velocidad <select id="rate"><option value="0.75">0,75×</option><option value="1" selected>1×</option><option value="1.25">1,25×</option></select></label>
         <label class="inline">Zoom <input id="zoom" type="range" min="20" max="600" value="100"></label>
-        <button id="ctx">Ampliar contexto +5 s</button><button id="spec">Espectrograma</button>
+        <button id="ctx" title="Solo para escuchar más; lo que se anota es la zona clara «Fragmento a anotar»">Escuchar más contexto (+5 s)</button><button id="spec">Espectrograma</button>
         ${isCase ? '' : '<button id="asr" disabled title="Se habilita después de escuchar el fragmento completo">Mostrar transcripción automática</button>'}
       </div>
       <div class="words" id="words"></div>
@@ -519,13 +520,18 @@ async function workbench(kind, id) {
   function draw() {
     drawing = true
     regions.clearRegions()
+    const dur = ws.getDuration()
+    const zone = { color: 'rgba(0,0,0,.42)', drag: false, resize: false, content: 'Solo contexto' }
+    if (L(t.start_ms) > 0) regions.addRegion({ ...zone, id: 'zone-before', start: 0, end: L(t.start_ms) })
+    if (dur > L(t.end_ms)) regions.addRegion({ ...zone, id: 'zone-after', start: L(t.end_ms), end: dur })
     regions.addRegion({
       id: 'central',
       start: L(t.start_ms),
       end: L(t.end_ms),
-      color: 'rgba(120,130,150,.12)',
+      color: 'rgba(120,130,150,.10)',
       drag: false,
-      resize: false
+      resize: false,
+      content: 'Fragmento a anotar'
     })
     for (const r of refs)
       if (r.label)
@@ -573,10 +579,44 @@ async function workbench(kind, id) {
     drawing = false
     renderSel()
     renderLists()
+    renderOutside()
+  }
+
+  // Marks left outside the fragment (e.g. made in the context): name them and fix in one click.
+  function renderOutside() {
+    const out = [
+      ...state.events.filter(outsideRegion).map(e => `<b>${fmt(e.start_ms)}</b> ${e.label ? CLS[e.label].name : DECISIONS[e.decision]}`),
+      ...state.contextual.filter(outsideRegion).map(c => `<b>${fmt(c.start_ms)}</b> uso legítimo`)
+    ]
+    if (locked || !out.length) return ($('#outside').innerHTML = '')
+    const n = out.length
+    $('#outside').innerHTML = `<div class="banner bad outside">
+      <p><b>⚠ ${n === 1 ? 'Hay 1 marca' : `Hay ${n} marcas`} fuera de tu fragmento (${fmt(t.start_ms)}–${fmt(t.end_ms)}).</b>
+      Están en la <b>zona oscura «Solo contexto»</b>, que pertenece a otros fragmentos, así que no se pueden guardar en esta tarea:
+      ${out.join(' · ')}.</p>
+      <div class="row"><button id="drop-out" class="danger">🗑 Eliminar ${n === 1 ? 'esa marca' : `esas ${n} marcas`}</button>
+      <span class="muted small">¿Alguna ocurre en realidad dentro del fragmento? Pulsa «Editar» en su fila y arrastra su tramo a la zona clara.</span></div></div>`
+    $('#drop-out').onclick = dropOutside
+  }
+  function dropOutside() {
+    const n = state.events.filter(outsideRegion).length + state.contextual.filter(outsideRegion).length
+    commit(
+      () => {
+        state.events = state.events.filter(x => !outsideRegion(x))
+        state.contextual = state.contextual.filter(x => !outsideRegion(x))
+      },
+      { type: 'delete_outside' }
+    )
+    if (editing) resetForm()
+    say('')
+    toast(
+      `${n === 1 ? 'Se eliminó 1 marca' : `Se eliminaron ${n} marcas`} fuera del fragmento. Ya puedes finalizar. (Si te equivocaste: «Deshacer».)`
+    )
   }
 
   function renderSel() {
     const box = $('#selbox')
+    $('#save-ev').disabled = false
     if (sel.start_ms == null) return (box.innerHTML = '<p class="selnone">Ningún tramo seleccionado.</p>')
     if (sel.end_ms == null)
       return (box.innerHTML = `<p class="selnone">Inicio en <b>${fmt(sel.start_ms)}</b>. Sigue reproduciendo y pulsa «Marcar fin».</p>`)
@@ -587,7 +627,13 @@ async function workbench(kind, id) {
             `<button data-snudge="${side}:${dx}" title="${dx > 0 ? '+' : ''}${dx} ms">${dx > 0 ? '+' : '−'}${Math.abs(dx) / 1000 === 0.1 ? '0,1' : '0,01'}</button>`
         )
         .join('')
-    box.innerHTML = `<div class="selbox">
+    const out = outsideRegion(sel)
+    $('#save-ev').disabled = out
+    box.innerHTML = `<div class="selbox ${out ? 'bad' : ''}">${
+      out
+        ? `<p class="selwarn">⚠ Este tramo está en la zona oscura «Solo contexto». Arrástralo a la zona clara «Fragmento a anotar» (${fmt(t.start_ms)}–${fmt(t.end_ms)}) para poder guardarlo${editing ? ', o pulsa «Eliminar evento»' : ', o pulsa «Cancelar»'}.</p>`
+        : ''
+    }
       <div class="selrow"><span>Inicio <b>${fmt(sel.start_ms)}</b></span><span class="row nudge">${nudge('start_ms')}</span></div>
       <div class="selrow"><span>Fin <b>${fmt(sel.end_ms)}</b></span><span class="row nudge">${nudge('end_ms')}</span></div>
       <div class="selrow"><span>Duración <b>${((sel.end_ms - sel.start_ms) / 1000).toFixed(2).replace('.', ',')} s</b></span>
@@ -689,10 +735,7 @@ async function workbench(kind, id) {
     const v = chosen()
     if (!v) return say('Paso 2: elige qué es el tramo (una de las opciones del panel).')
     const span = { start_ms: sel.start_ms, end_ms: sel.end_ms }
-    if (outsideRegion(span))
-      return say(
-        `Este tramo (${fmt(span.start_ms)}–${fmt(span.end_ms)}) está fuera del fragmento que revisas (${fmt(t.start_ms)}–${fmt(t.end_ms)}). Marca solo lo que ocurre dentro de la zona sombreada o cruza su borde; el contexto sirve para escuchar, no para anotar.`
-      )
+    if (outsideRegion(span)) return renderSel() // the selection box already explains what to do
     const note = $('#f-note').value.trim() || null
     const wasEvent = editingEvent()
     commit(
@@ -1283,34 +1326,16 @@ async function workbench(kind, id) {
       const gaps = e.detail?.unreviewed_gaps_ms || []
       const out = e.detail?.outside_context || []
       if (!gaps.length && !out.length) return say(esc(e.message), 'bad')
-      const msgs = []
-      if (out.length)
-        msgs.push(
-          `Hay ${out.length} marca(s) fuera del fragmento ${fmt(t.start_ms)}–${fmt(t.end_ms)}: ${out
-            .map(
-              x =>
-                `<b>${fmt(x.start_ms)}–${fmt(x.end_ms)}</b> (${x.label ? CLS[x.label].name : x.expression != null ? 'uso legítimo' : DECISIONS[x.decision]})`
-            )
-            .join(
-              ', '
-            )}. Solo cuenta lo que ocurre dentro de la zona sombreada o cruza su borde; lo que está solo en el contexto pertenece a otro fragmento. <button id="drop-out" class="danger">Eliminar las marcas fuera del fragmento</button>`
-        )
-      if (gaps.length)
-        msgs.push(
-          `Falta revisar parte del fragmento (${gaps.map(([a, b]) => `${fmt(a)}–${fmt(b)}`).join(', ')}). Escúchalo y pulsa «Revisado: sin más eventos».`
-        )
-      say(`<b>Aún no se puede finalizar.</b> ${msgs.join('<br>')}`, 'bad')
-      if ($('#drop-out'))
-        $('#drop-out').onclick = () => {
-          commit(
-            () => {
-              state.events = state.events.filter(x => !outsideRegion(x))
-              state.contextual = state.contextual.filter(x => !outsideRegion(x))
-            },
-            { type: 'delete_outside' }
-          )
-          say('Marcas fuera del fragmento eliminadas. Ya puedes pulsar «Finalizar fragmento». (Si te equivocaste, usa «Deshacer».)', 'info')
-        }
+      say(
+        `<b>Aún no se puede finalizar.</b> ${out.length ? 'Primero resuelve las marcas fuera del fragmento (aviso rojo de arriba). ' : ''}${
+          gaps.length
+            ? `Falta escuchar parte del fragmento (${gaps.map(([a, b]) => `${fmt(a)}–${fmt(b)}`).join(', ')}): escúchalo y pulsa «Revisado: sin más eventos».`
+            : ''
+        }`,
+        'bad'
+      )
+      renderOutside()
+      $('#outside').scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
   }
 
