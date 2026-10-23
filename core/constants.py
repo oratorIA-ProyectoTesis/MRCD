@@ -38,6 +38,7 @@ assert KINESIC_DIM == 12
 KIDX = {name: i for i, name in enumerate(KINESIC_FIELDS)}
 
 # ------------------------------------------------------------ taxonomía
+TAXONOMY_VERSION = "mrcd-taxonomy-v1"
 TAXONOMY: tuple[str, ...] = (
     "filler_word",
     "prolongation",

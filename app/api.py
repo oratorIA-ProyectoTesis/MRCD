@@ -20,17 +20,19 @@ from typing import Literal
 from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, StrictInt, model_validator
 
 from app import ROOT, exports, media, media_dir, open_store
-from app.ops import ROLES, campaign_progress, create_tasks, join_campaign, new_user, open_case, pair_cases
+from app.ops import (CONSENT_TEXT, CONSENT_VERSION, ROLES, campaign_progress, create_tasks,
+                     join_campaign, new_user, open_case, pair_cases, require_generic_annotator,
+                     reset_campaign_access, resume_campaign)
 from app.store import Conflict, Store
+from app.references import effective_adjudications, finalize_adjudication, freeze_snapshot, review_legacy_provenance
 from core import evaluation
-from core.constants import TAXONOMY
+from core.constants import TAXONOMY, TAXONOMY_VERSION
 from core.engine import ASR_DEFAULTS
 
 TERMINAL = {"succeeded", "partial", "failed", "cancelled"}
-TAXONOMY_VERSION = "mrcd-taxonomy-v1"
 GUIDES = ROOT / "docs"
 
 
@@ -109,16 +111,39 @@ class CaseRequest(BaseModel):
 
 class AdjudicationRequest(BaseModel):
     case_id: str
+    case_revision: int = Field(ge=1)
     events: list[Event]
     contextual: list[Contextual] = []
     reasons: dict[str, str] = {}
     based_on: dict[str, int]
+    supersedes: str | None = None
+    revision_reason: str | None = Field(default=None, max_length=500)
 
 
 class SnapshotRequest(BaseModel):
     name: str
     include: Literal["adjudicated", "submitted"] = "adjudicated"
     splits: list[str] = ["train", "dev", "test"]
+
+
+class ProvenanceReviewRequest(BaseModel):
+    expected_case_revision: int = Field(ge=1, strict=True)
+    expected_annotation_revisions: dict[str, StrictInt]
+    expected_task_revisions: dict[str, StrictInt]
+    media_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    guideline_version: str
+    taxonomy_version: str
+    current_source_reviewed: bool = Field(strict=True)
+    reason: str = Field(min_length=10, max_length=500)
+
+    @model_validator(mode="after")
+    def explicit_review(self):
+        if not self.current_source_reviewed or len(self.reason.strip()) < 10:
+            raise ValueError("Confirm actual current-source review and provide a meaningful reason.")
+        for revisions in (self.expected_annotation_revisions, self.expected_task_revisions):
+            if set(revisions) != {"A", "B"} or any(r < 1 for r in revisions.values()):
+                raise ValueError("Expected revisions must identify both A and B with positive integers.")
+        return self
 
 
 class EvaluationRequest(BaseModel):
@@ -163,7 +188,13 @@ class PairRequest(BaseModel):
 class JoinRequest(BaseModel):
     name: str
     email: str
-    consent: bool
+    consent: bool = Field(strict=True)
+    consent_version: str
+
+
+class ResetAccessRequest(BaseModel):
+    identity_verified: Literal[True]
+    reason: str = Field(min_length=10, max_length=500)
 
 
 # ----------------------------------------------------------------- helpers
@@ -179,6 +210,8 @@ def found(doc: dict | None, what: str = "recurso") -> dict:
 
 
 def can_see_recording(user: dict, rec: dict) -> None:
+    if user["data"].get("campaign"):
+        need(user)  # campaign participants receive only their authorized task clips
     if rec["owner"] != user["id"] and not rec["data"].get("example"):
         need(user, "researcher")
 
@@ -213,6 +246,8 @@ def create_app(store: Store | None = None) -> FastAPI:
     def own_task(task_id: str, u: dict) -> dict:
         task = found(store.get(task_id, "task"), "tarea")
         if task["owner"] != u["id"]:
+            need(u)
+        if u["data"].get("campaign") and task["data"].get("campaign") != u["data"]["campaign"]:
             need(u)
         return task
 
@@ -302,6 +337,8 @@ def create_app(store: Store | None = None) -> FastAPI:
 
     @api.get("/recordings")
     def recordings(u=Depends(user)):
+        if u["data"].get("campaign"):
+            need(u)
         docs = (
             store.find("recording")
             if u["data"]["role"] in ("researcher", "admin")
@@ -447,28 +484,33 @@ def create_app(store: Store | None = None) -> FastAPI:
         done = [r for r in runs if r["status"] in ("succeeded", "partial")]
         segments = store.get(runs[0]["parent"])["data"]["segments"]
 
-        def common(a: dict, b: dict) -> dict:  # compare only segments both systems completed
-            ok = [
-                s for s in segments if all(r["data"]["result"]["segments"].get(s["id"]) == "succeeded" for r in (a, b))
-            ]
-            return {None: [(s["core_start_ms"], s["core_end_ms"]) for s in ok]}
-
-        pairs = {
-            f"{a['data']['system']}~{b['data']['system']}": {
-                c: v["f1"]
-                for c, v in evaluation.evaluate(
-                    a["data"]["result"]["events"], b["data"]["result"]["events"], coverage=common(a, b)
-                )["per_class"].items()
-            }
-            for i, a in enumerate(done)
-            for b in done[i + 1 :]
-        }
-        reference = [
+        pairs, symmetric_coverage = {}, {}
+        try:
+            for i, a in enumerate(done):
+                for b in done[i + 1:]:
+                    if a["parent"] != b["parent"]:
+                        raise ValueError("comparison: systems must share a recording")
+                    coverage = evaluation.intersect_coverage(evaluation.run_coverage(a, segments)["coverage"],
+                                                              evaluation.run_coverage(b, segments)["coverage"])
+                    tagged = lambda r: [{**e, "recording_id": r["parent"]} for e in r["data"]["result"]["events"]]
+                    scored = evaluation.system_agreement(tagged(a), tagged(b), coverage=coverage)
+                    key = f"{a['data']['system']}~{b['data']['system']}"
+                    pairs[key] = {c: value["f1"] for c, value in scored["per_class"].items()}
+                    symmetric_coverage[key] = {"coverage": scored["coverage"], "evaluable_ms": scored["evaluable_ms"], "reason": scored["reason"]}
+        except (ValueError, KeyError, TypeError) as exc:
+            raise HTTPException(422, str(exc)) from None
+        sources = [
             a
-            for a in store.find("adjudication")
+            for a in store.find("adjudication", status="final")
             if a["data"]["recording_id"] == runs[0]["parent"] and a["data"]["split"] != "test"
         ]
-        return {"runs": runs, "symmetric_agreement": pairs, "reference": reference}
+        try:
+            reference = effective_adjudications(store, sources)
+            reference_reason = None if reference else "No validated human reference is available for this recording."
+        except (Conflict, ValueError) as exc:
+            reference, reference_reason = [], str(exc)
+        return {"runs": runs, "symmetric_agreement": pairs, "symmetric_coverage": symmetric_coverage, "reference": reference,
+                "reference_status": "available" if reference else "unavailable", "reference_reason": reference_reason}
 
     # ------------------------------------------------------------ review
     @api.post("/review/tasks")
@@ -481,6 +523,11 @@ def create_app(store: Store | None = None) -> FastAPI:
         rec = found(store.get(body.recording_id, "recording"), "grabación")
         if rec["status"] != "ready":
             raise HTTPException(409, "la grabación aún no está preparada")
+        if body.assignee is not None:
+            try:
+                require_generic_annotator(store, body.assignee)
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from None
         task = store.create(
             "task",
             {**body.model_dump(), "speaker_id": rec["data"].get("speaker_id")},
@@ -506,16 +553,20 @@ def create_app(store: Store | None = None) -> FastAPI:
 
     @api.get("/review/tasks")
     def inbox(u=Depends(user)):
-        tasks = [public_task(t) for t in store.find("task", owner=u["id"])]
-        cases = [{"id": c["id"], "status": c["status"]} for c in store.find("case", owner=u["id"])]
+        campaign = u["data"].get("campaign")
+        tasks = [public_task(t) for t in store.find("task", owner=u["id"])
+                 if not campaign or t["data"].get("campaign") == campaign]
+        cases = [] if campaign else [{"id": c["id"], "status": c["status"]} for c in store.find("case", owner=u["id"])]
         pending = sum(t["end_ms"] - t["start_ms"] for t in tasks if t["status"] != "submitted")
         return {"tasks": tasks, "cases": cases, "pending_minutes": round(pending / 60000, 2)}
 
     @api.get("/review/tasks/next")
     def next_task(u=Depends(user)):
         need(u, "annotator")
-        mine = [t for t in store.find("task", owner=u["id"]) if t["status"] in ("assigned", "in_progress")]
-        if not mine:  # development pool: assisted cases sent from the product or comparison view
+        campaign = u["data"].get("campaign")
+        mine = [t for t in store.find("task", owner=u["id"]) if t["status"] in ("assigned", "in_progress")
+                and (not campaign or t["data"].get("campaign") == campaign)]
+        if not mine and not campaign:  # campaign accounts must never drain the global development pool
             for t in store.find("task", status="pool"):
                 try:
                     mine = [
@@ -657,6 +708,8 @@ def create_app(store: Store | None = None) -> FastAPI:
             raise HTTPException(422, str(exc)) from None
 
     def own_case(cid: str, u: dict) -> dict:
+        if u["data"].get("campaign"):
+            need(u)
         case = found(store.get(cid, "case"), "caso")
         if case["owner"] != u["id"]:
             need(u)
@@ -672,11 +725,13 @@ def create_app(store: Store | None = None) -> FastAPI:
         return {
             "case": {
                 "id": cid,
+                "rev": case["rev"],
                 "status": case["status"],
                 **{k: case["data"][k] for k in ("start_ms", "end_ms", "context_ms", "guideline_version")},
             },
             "tracks": tracks,
             "taxonomy": list(TAXONOMY),
+            "decision": store.get(case["data"].get("current_adjudication", ""), "adjudication"),
         }
 
     @api.get("/review/adjudication/{cid}/audio")
@@ -687,145 +742,60 @@ def create_app(store: Store | None = None) -> FastAPI:
 
     @api.post("/adjudications")
     def adjudicate(body: AdjudicationRequest, u=Depends(user)):
-        case = own_case(body.case_id, u)
-        current = {side: store.get(f"ann_{tid}")["rev"] for side, tid in zip("AB", case["data"]["tasks"])}
-        if current != body.based_on:
-            raise HTTPException(409, "las anotaciones A/B cambiaron; recarga el caso")
-        adj = store.create(
-            "adjudication",
-            {
-                **{
-                    k: case["data"][k]
-                    for k in ("recording_id", "start_ms", "end_ms", "split", "speaker_id", "guideline_version", "mode")
-                },
-                "case_id": case["id"],
-                "events": [e.model_dump() for e in body.events],
-                "contextual": [c.model_dump() for c in body.contextual],
-                "reasons": body.reasons,
-                "based_on": {
-                    side: {"task": tid, "rev": current[side]} for side, tid in zip("AB", case["data"]["tasks"])
-                },
-            },
-            parent=case["id"],
-            owner=u["id"],
-            status="final",
-            author=u["id"],
-        )
-        store.update(case["id"], status="closed", author=u["id"])
-        return {"id": adj["id"]}
+        own_case(body.case_id, u)
+        try:
+            return finalize_adjudication(store, body.model_dump(), u)
+        except Conflict as exc:
+            raise HTTPException(409, str(exc)) from None
+        except PermissionError as exc:
+            raise HTTPException(403, str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
+
+    @api.get("/admin/adjudication-cases/{cid}/review-provenance")
+    def provenance_review_context(cid: str, u=Depends(user)):
+        need(u)
+        case = found(store.get(cid, "case"), "caso")
+        rec = found(store.get(case["data"]["recording_id"], "recording"), "grabación")
+        return {"case": case, "recording": rec, "tracks": {
+            side: {"task": store.get(tid, "task"), "annotation": store.get(f"ann_{tid}", "annotation")}
+            for side, tid in zip("AB", case["data"]["tasks"])}}
+
+    @api.post("/admin/adjudication-cases/{cid}/review-provenance")
+    def review_case_provenance(cid: str, body: ProvenanceReviewRequest, u=Depends(user)):
+        need(u)
+        found(store.get(cid, "case"), "caso")
+        try:
+            return review_legacy_provenance(store, cid, body.model_dump(), u)
+        except Conflict as exc:
+            raise HTTPException(409, str(exc)) from None
+        except PermissionError as exc:
+            raise HTTPException(403, str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
 
     # ---------------------------------------------------- data snapshots
     @api.post("/dataset-snapshots")
     def snapshot(body: SnapshotRequest, u=Depends(user)):
         need(u)
-        if body.include == "adjudicated":
-            items = [
-                a["data"] | {"source": a["id"], "source_kind": "human_adjudicated"}
-                for a in store.find("adjudication", status="final")
-            ]
-        else:  # single submitted annotations, e.g. assisted training material
-            items = []
-            for t in store.find("task", status="submitted"):
-                ann = store.get(f"ann_{t['id']}")
-                items.append(
-                    {
-                        **{
-                            k: t["data"][k]
-                            for k in (
-                                "recording_id",
-                                "start_ms",
-                                "end_ms",
-                                "split",
-                                "guideline_version",
-                                "mode",
-                                "speaker_id",
-                            )
-                        },
-                        "events": ann["data"]["events"],
-                        "contextual": ann["data"]["contextual"],
-                        "source": f"{ann['id']}@{ann['rev']}",
-                        "source_kind": "human_single_annotation",
-                    }
-                )
-        items = [i for i in items if i["split"] in body.splits]
-        splits_of: dict[str, set] = {}
-        for i in items:
-            rec = store.get(i["recording_id"])
-            project = store.get(rec["data"].get("project") or "", "project") or {"data": {}}
-            speaker = project["data"].get("speaker_aliases", {}).get(i["speaker_id"], i["speaker_id"])
-            i["media_sha256"] = rec["data"]["media"]["analysis"]["sha256"]
-            for key in (f"speaker:{speaker}", f"media:{i['media_sha256']}"):
-                splits_of.setdefault(key, set()).add(i["split"])
-        leaks = {k: sorted(v) for k, v in splits_of.items() if len(v) > 1 and not k.endswith(":None")}
-        if leaks:
-            raise HTTPException(409, {"leakage": leaks})
-        missing_speaker = [i["recording_id"] for i in items if not i["speaker_id"]]
-        if "test" in body.splits and missing_speaker:
-            raise HTTPException(422, {"speaker_id_required": sorted(set(missing_speaker))})
-        content = {
-            "name": body.name,
-            "include": body.include,
-            "taxonomy_version": TAXONOMY_VERSION,
-            "items": sorted(items, key=lambda i: (i["recording_id"], i["start_ms"])),
-        }
-        digest = hashlib.sha256(json.dumps(content, sort_keys=True).encode()).hexdigest()
-        existing = store.get(f"snp_{digest[:16]}")
-        return existing or store.create(
-            "snapshot",
-            {**content, "sha256": digest},
-            id=f"snp_{digest[:16]}",
-            owner=u["id"],
-            status="frozen",
-            author=u["id"],
-        )
+        try:
+            return freeze_snapshot(store, body.model_dump(), u["id"])
+        except Conflict as exc:
+            raise HTTPException(409, exc.args[0]) from None
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
 
     @api.post("/evaluation-runs")
     def evaluate(body: EvaluationRequest, u=Depends(user)):
         need(u, "researcher")
         snap = found(store.get(body.snapshot_id, "snapshot"), "snapshot")
-        items = snap["data"]["items"]
-        coverage: dict = {}
-        ref = []
-        for i in items:
-            coverage.setdefault(i["recording_id"], []).append((i["start_ms"], i["end_ms"]))
-            ref += [{**e, "recording_id": i["recording_id"], "speaker_id": i["speaker_id"]} for e in i["events"]]
-        legit = [
-            {**c, "recording_id": i["recording_id"]}
-            for i in items
-            for c in i["contextual"]
-            if c.get("is_disfluent") is False
-        ]
-        evaluable = sum(b - a for spans in coverage.values() for a, b in spans)
-        protocol = {"iou_threshold": 0.5, "sensitivity": (0.3, 0.7), "tolerance_ms": 100, **body.protocol}
-        hyps, results, missing = {}, {}, {}
-        for name, run_ids in body.systems.items():
-            runs = [found(store.get(r, "run"), "ejecución") for r in run_ids]
-            speaker = {r["id"]: store.get(r["parent"])["data"].get("speaker_id") for r in runs}
-            hyps[name] = [
-                {**e, "recording_id": r["parent"], "speaker_id": speaker[r["id"]]}
-                for r in runs
-                for e in r["data"].get("result", {}).get("events", [])
-                if evaluation.in_coverage({**e, "recording_id": r["parent"]}, coverage)
-            ]
-            missing[name] = sorted(
-                set(coverage) - {r["parent"] for r in runs if r["status"] in ("succeeded", "partial")}
-            )
-            results[name] = evaluation.evaluate(
-                ref, hyps[name], coverage=coverage, evaluable_ms=evaluable, legitimate=legit, **protocol
-            )
-
-        def f1(r, *h):
-            return evaluation.evaluate(r, h[0], coverage=None, **protocol)["micro"]["disfluency"]["f1"]
-
-        cis = {n: evaluation.bootstrap_ci(ref, [hyps[n]], f1, n=body.bootstrap) for n in hyps}
-        names = list(hyps)
-        if len(names) == 2:
-            cis[f"{names[1]}-{names[0]}"] = evaluation.bootstrap_ci(
-                ref,
-                [hyps[names[1]], hyps[names[0]]],
-                lambda r, a, b: None if f1(r, a) is None or f1(r, b) is None else f1(r, a) - f1(r, b),
-                n=body.bootstrap,
-            )
+        runs = {name: [found(store.get(r, "run"), "ejecución") for r in run_ids] for name, run_ids in body.systems.items()}
+        recording_ids = {item["recording_id"] for item in snap["data"]["items"]} | {r["parent"] for selected in runs.values() for r in selected}
+        recordings = {rid: found(store.get(rid, "recording"), "grabación") for rid in recording_ids}
+        try:
+            computed = evaluation.evaluate_runs(snap["data"], runs, recordings, protocol=body.protocol, bootstrap=body.bootstrap)
+        except (ValueError, KeyError, TypeError) as exc:
+            raise HTTPException(422, f"evaluation: {exc}") from None
         prior = [e for e in store.find("evaluation") if e["data"]["snapshot_id"] == snap["id"]]
         doc = store.create(
             "evaluation",
@@ -833,10 +803,7 @@ def create_app(store: Store | None = None) -> FastAPI:
                 "snapshot_id": snap["id"],
                 "snapshot_sha256": snap["data"]["sha256"],
                 "systems": body.systems,
-                "protocol": protocol,
-                "results": results,
-                "missing_runs": missing,
-                "bootstrap_ci": cis,
+                **computed,
                 "prior_evaluations_on_snapshot": len(prior),
             },
             owner=u["id"],
@@ -926,19 +893,52 @@ def create_app(store: Store | None = None) -> FastAPI:
             "video": d["video"],
             "guideline_version": d["guideline_version"],
             "minutes": round(sum(b - a for a, b in d["regions"]) / 60000, 1),
+            "consent_version": CONSENT_VERSION,
+            "consent_text": CONSENT_TEXT,
         }
 
     @api.post("/campaigns/{slug}/join")
-    def join(slug: str, body: JoinRequest):
+    def join(slug: str, body: JoinRequest, response: Response):
         if not body.consent:
             raise HTTPException(422, "debes aceptar las condiciones para participar")
         try:
-            person, token = join_campaign(store, slug, body.name, body.email)
+            person, token = join_campaign(store, slug, body.name, body.email, consent_version=body.consent_version)
+        except Conflict as exc:
+            raise HTTPException(409, str(exc)) from None
         except LookupError as exc:
             raise HTTPException(404, str(exc)) from None
         except ValueError as exc:
             raise HTTPException(422, str(exc)) from None
+        response.headers["Cache-Control"] = "no-store"
         return {"token": token, "name": person["data"]["name"]}
+
+    @api.post("/campaigns/{slug}/resume")
+    def resume(slug: str, request: Request, response: Response):
+        # Possession is checked inside the campaign transaction; never accept email
+        # or query-string credentials for account recovery.
+        token = request.headers.get("authorization", "").removeprefix("Bearer ").strip()
+        try:
+            person = resume_campaign(store, slug, token)
+        except LookupError as exc:
+            raise HTTPException(404, str(exc)) from None
+        except PermissionError as exc:
+            raise HTTPException(401, str(exc)) from None
+        except Conflict as exc:
+            raise HTTPException(403, str(exc)) from None
+        response.headers["Cache-Control"] = "no-store"
+        return {"campaign": slug, "name": person["data"]["name"]}
+
+    @api.post("/admin/campaigns/{slug}/participants/{participant_id}/reset-access")
+    def reset_access(slug: str, participant_id: str, body: ResetAccessRequest, response: Response, u=Depends(user)):
+        need(u)
+        try:
+            person, token = reset_campaign_access(store, slug, participant_id, u, reason=body.reason)
+        except PermissionError as exc:
+            raise HTTPException(403, str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
+        response.headers["Cache-Control"] = "no-store"
+        return {"id": person["id"], "token": token}
 
     @api.get("/campaigns/{slug}/progress")
     def progress(slug: str, u=Depends(user)):
@@ -962,7 +962,8 @@ def create_app(store: Store | None = None) -> FastAPI:
                 {"slug": c["id"], "title": c["data"]["title"], "status": c["status"]} for c in store.find("campaign")
             ],
             "users": [
-                {"id": x["id"], "name": x["data"]["name"], "role": x["data"]["role"], "status": x["status"]}
+                {"id": x["id"], "name": x["data"]["name"], "role": x["data"]["role"], "status": x["status"],
+                 "campaign": x["data"].get("campaign") or (x["parent"] if store.get(x["parent"] or "", "campaign") else None)}
                 for x in store.find("user")
             ],
             "tasks": [
@@ -1016,7 +1017,7 @@ def create_app(store: Store | None = None) -> FastAPI:
     @api.post("/admin/cases")
     def add_cases(body: PairRequest, u=Depends(user)):
         need(u)
-        created, skipped = pair_cases(store, body.adjudicator, u["id"])
+        created, skipped = fail(pair_cases, store, body.adjudicator, u["id"])
         return {"created": created, "skipped": skipped}
 
     # ------------------------------------------------------ experiments
@@ -1056,6 +1057,10 @@ def create_app(store: Store | None = None) -> FastAPI:
                     "results": x["data"]["results"],
                     "bootstrap_ci": x["data"]["bootstrap_ci"],
                     "prior": x["data"]["prior_evaluations_on_snapshot"],
+                    **{key: x["data"][key] for key in (
+                        "protocol", "paired_results", "availability", "missing_runs", "reference_view",
+                        "snapshot_sha256", "paired_ci_aliases_omitted",
+                    ) if key in x["data"]},
                 }
                 for x in store.find("evaluation")
             ],

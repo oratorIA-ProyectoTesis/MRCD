@@ -9,11 +9,12 @@ from __future__ import annotations
 
 import json
 import uuid
+from contextlib import contextmanager, nullcontext
 from datetime import datetime, timezone
 
 from sqlalchemy import create_engine, text
 
-IMMUTABLE = {"snapshot", "evaluation"}
+IMMUTABLE = {"snapshot", "evaluation", "adjudication", "provenance_review"}
 COLUMNS = ("parent", "owner", "status")
 
 
@@ -31,6 +32,7 @@ def now() -> str:
 
 class Store:
     def __init__(self, url: str):
+        self._connection = None
         sqlite = url.startswith("sqlite")
         self.engine = create_engine(url, connect_args={"timeout": 30} if sqlite else {})
         with self.engine.begin() as c:
@@ -51,6 +53,28 @@ class Store:
                 )
             )
 
+    def _scope(self, *, write=False):
+        return nullcontext(self._connection) if self._connection is not None else (
+            self.engine.begin() if write else self.engine.connect()
+        )
+
+    @contextmanager
+    def serialized(self, document_id: str, *other_ids: str):
+        """One transaction for a document-scoped operation across processes.
+
+        Acquire the row's write lock before any reads (also avoids SQLite WAL
+        read-to-write promotion races). The no-op UPDATE changes no document
+        revision/history. Call all operation methods on the yielded store.
+        """
+        if self._connection is not None:
+            raise RuntimeError("nested serialized operations are not supported")
+        with self.engine.begin() as connection:
+            for locked_id in sorted({document_id, *other_ids}):
+                connection.execute(text("UPDATE docs SET rev = rev WHERE id = :id"), {"id": locked_id})
+            transaction = object.__new__(Store)
+            transaction.engine, transaction._connection = self.engine, connection
+            yield transaction
+
     @staticmethod
     def _doc(row) -> dict | None:
         return None if row is None else {**row._mapping, "data": json.loads(row.data)}
@@ -64,7 +88,7 @@ class Store:
             "updated": now(),
             **{k: cols.get(k) for k in COLUMNS},
         }
-        with self.engine.begin() as c:
+        with self._scope(write=True) as c:
             c.execute(
                 text("INSERT INTO docs VALUES (:id, :kind, :parent, :owner, :status, :rev, :data, :created, :updated)"),
                 {**doc, "data": json.dumps(data)},
@@ -74,13 +98,13 @@ class Store:
         return {**doc, "data": data}
 
     def get(self, id: str, kind: str | None = None) -> dict | None:
-        with self.engine.connect() as c:
+        with self._scope() as c:
             doc = self._doc(c.execute(text("SELECT * FROM docs WHERE id = :id"), {"id": id}).first())
         return doc if doc and (kind is None or doc["kind"] == kind) else None
 
     def find(self, kind: str, **filters) -> list[dict]:
         where = "".join(f" AND {k} = :{k}" for k in filters if k in COLUMNS)
-        with self.engine.connect() as c:
+        with self._scope() as c:
             rows = c.execute(
                 text(f"SELECT * FROM docs WHERE kind = :kind{where} ORDER BY created"), {"kind": kind, **filters}
             )
@@ -99,7 +123,7 @@ class Store:
         raise Conflict("escritura concurrente")
 
     def _update(self, id, data, expected_rev, author, cols) -> dict:
-        with self.engine.begin() as c:
+        with self._scope(write=True) as c:
             doc = self._doc(c.execute(text("SELECT * FROM docs WHERE id = :id"), {"id": id}).first())
             if doc is None:
                 raise KeyError(id)
@@ -141,7 +165,7 @@ class Store:
         return None
 
     def history(self, id: str) -> list[dict]:
-        with self.engine.connect() as c:
+        with self._scope() as c:
             rows = c.execute(text("SELECT * FROM history WHERE id = :id ORDER BY rev"), {"id": id})
             return [{**r._mapping, "data": json.loads(r.data)} for r in rows]
 

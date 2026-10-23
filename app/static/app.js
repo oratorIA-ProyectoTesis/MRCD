@@ -401,7 +401,7 @@ async function workbench(kind, id) {
     asr_used: false,
     telemetry: {}
   }
-  let state = isCase ? blank : { ...blank, ...ann.data, telemetry: ann.data.telemetry || {} }
+  let state = isCase ? { ...blank, ...(d.decision?.data || {}) } : { ...blank, ...ann.data, telemetry: ann.data.telemetry || {} }
   let rev = ann?.rev
   let extra = 0
   let offset = Math.max(0, t.start_ms - t.context_ms)
@@ -1306,6 +1306,7 @@ async function workbench(kind, id) {
           method: 'POST',
           body: {
             case_id: id,
+            case_revision: t.rev,
             events: state.events,
             contextual: state.contextual,
             reasons,
@@ -1922,22 +1923,28 @@ async function experiments() {
 }
 
 function evalTable(x) {
+  const count = value => value == null ? '—' : String(value)
+  const ciNote = ci => ci ? `${count(ci.valid ?? ci.n_boot)}/${count(ci.requested)} réplicas válidas · omitidas ${count(ci.omitted)} · hablantes ${count(ci.n_speakers)}` : ''
   const rows = Object.entries(x.results)
     .map(([name, r]) => {
       const dis = r.micro.disfluency || {}
       const ci = x.bootstrap_ci?.[name]
-      return `<tr><td><b>${SYSTEM[name] || name}</b></td><td>${pct(dis.precision)}</td><td>${pct(dis.recall)}</td><td>${num(dis.f1)}${ci?.low != null ? ` <span class="muted small">[${num(ci.low)}–${num(ci.high)}]</span>` : ''}</td>
-      <td>${num(r.micro.pause?.f1)}</td><td>${r.n_ref}</td><td>${r.n_hyp}</td><td>${r.n_uncertain}</td><td>${r.false_alarms_per_min == null ? '—' : r.false_alarms_per_min.toFixed(1)}</td></tr>`
+      const reason = r.reason || dis.reasons?.f1
+      return `<tr><td><b>${esc(SYSTEM[name] || name)}</b>${reason ? `<div class="muted small">${esc(reason)}</div>` : ''}<div class="muted small">${esc(ciNote(ci))}</div></td><td>${pct(dis.precision)}</td><td>${pct(dis.recall)}</td><td>${num(dis.f1)}${ci?.low != null ? ` <span class="muted small">[${num(ci.low)}–${num(ci.high)}]</span>` : ''}</td>
+      <td>${num(r.micro.pause?.f1)}</td><td>${count(r.n_ref)}</td><td>${count(r.n_hyp)}</td><td>${count(r.n_uncertain)}</td><td>${r.false_alarms_per_min == null ? '—' : r.false_alarms_per_min.toFixed(1)}</td><td>${r.evaluable_ms == null ? '—' : (r.evaluable_ms / 1000).toFixed(2)} s</td></tr>`
     })
     .join('')
   const perClass = Object.entries(x.results)
     .map(
       ([name, r]) =>
-        `<tr><td>${SYSTEM[name] || name}</td>${CLASSES.map(([c]) => `<td>${num(r.per_class[c]?.f1)} <span class="muted small">n=${r.per_class[c]?.support ?? 0}</span></td>`).join('')}</tr>`
+        `<tr><td>${esc(SYSTEM[name] || name)}</td>${CLASSES.map(([c]) => `<td>${num(r.per_class[c]?.f1)} <span class="muted small">n=${count(r.per_class[c]?.support)}</span></td>`).join('')}</tr>`
     )
     .join('')
-  return `<div class="card"><p class="muted">${new Date(x.created).toLocaleString()} · conjunto ${esc(x.snapshot_id)}${x.prior ? ` · <span class="warn">este conjunto ya tenía ${x.prior} evaluación(es) previas</span>` : ''}</p>
-    <div class="scroll"><table><thead><tr><th>Sistema</th><th>Precisión disfl.</th><th>Exhaustividad disfl.</th><th>F1 disfl. [IC 95 %]</th><th>F1 pausas</th><th>Eventos ref.</th><th>Eventos sistema</th><th>Inciertos</th><th>Falsas alarmas/min</th></tr></thead><tbody>${rows}</tbody></table></div>
+  const paired = Object.entries(x.paired_results || {}).map(([key, pair]) => `<tr><td>${esc(key)}${pair.reason ? `<div class="muted small">${esc(pair.reason)}</div>` : ''}</td><td>${(pair.evaluable_ms / 1000).toFixed(2)} s</td><td>${num(pair.results?.[pair.systems[0]]?.micro?.disfluency?.f1)}</td><td>${num(pair.results?.[pair.systems[1]]?.micro?.disfluency?.f1)}</td><td>${num(pair.delta_f1)}${pair.bootstrap_ci?.low != null ? ` [${num(pair.bootstrap_ci.low)}–${num(pair.bootstrap_ci.high)}]` : ''}<div class="muted small">${esc(ciNote(pair.bootstrap_ci))}</div></td></tr>`).join('')
+  return `<div class="card"><p class="muted">${new Date(x.created).toLocaleString()} · conjunto ${esc(x.snapshot_id)} · ${esc(x.protocol?.version || 'protocolo histórico, sin recalcular')}${x.prior ? ` · <span class="warn">este conjunto ya tenía ${x.prior} evaluación(es) previas</span>` : ''}</p>
+    <p class="muted">Cada sistema usa su propia cobertura evaluable. Sin cobertura, conteos y métricas no están disponibles (—); silencio revisado sin eventos sí puede tener conteos cero. Las diferencias pareadas se recalculan por separado sobre la cobertura común.</p>
+    <div class="scroll"><table><thead><tr><th>Sistema</th><th>Precisión disfl.</th><th>Exhaustividad disfl.</th><th>F1 disfl. [IC 95 %]</th><th>F1 pausas</th><th>Eventos ref.</th><th>Eventos sistema</th><th>Inciertos</th><th>Falsas alarmas/min</th><th>Audio evaluable</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${paired ? `<h3>Diferencias pareadas · cobertura común</h3><table><thead><tr><th>Par (segundo − primero)</th><th>Audio común</th><th>F1 primero</th><th>F1 segundo</th><th>Δ F1 [IC 95 %]</th></tr></thead><tbody>${paired}</tbody></table>` : ''}
     <details><summary>F1 por clase</summary><div class="scroll"><table><thead><tr><th></th>${CLASSES.map(([c]) => `<th>${badge(c)}</th>`).join('')}</tr></thead><tbody>${perClass}</tbody></table></div></details></div>`
 }
 
@@ -1952,7 +1959,7 @@ async function comparison(cid) {
       events: r.data.result?.events || [],
       run: r
     })),
-    ...c.reference.map(a => ({ name: 'Referencia humana', status: 'closed', events: a.data.events }))
+    ...c.reference.map(a => ({ name: `Referencia humana · revisión ${a.data.decision_revision}`, status: 'closed', events: a.data.events }))
   ]
   const dur = rec.data.media.analysis.duration_ms
   const counts = lanes.map(l =>
@@ -1968,6 +1975,7 @@ async function comparison(cid) {
       'Si un caso es interesante, envíalo a revisión asistida de desarrollo.'
     ]
   )}
+    ${c.reference_status === 'unavailable' ? `<div class="notice">Referencia humana no disponible: ${esc(c.reference_reason)} No se muestran decisiones históricas como referencia vigente.</div>` : ''}
     ${legend()}<div id="wave"></div>
     <div class="row"><label class="inline">Desde <input id="t0" type="range" min="0" max="${Math.max(0, dur - 30000)}" step="1000" value="${rec.data.segments.find(s => s.pilot)?.core_start_ms ?? 0}"></label><b id="t0v"></b>
     <label class="inline">Ventana <select id="len"><option value="15000">15 s</option><option value="30000" selected>30 s</option><option value="120000">2 min</option></select></label></div>
@@ -1986,7 +1994,7 @@ async function comparison(cid) {
       <td class="muted small">${esc(JSON.stringify(r.data.result?.model_version || {}).slice(0, 160))}</td></tr>`
       )
       .join('')}</tbody></table></div>
-    <h2>Acuerdo entre sistemas por clase</h2><p class="muted">F1 simétrico (misma clase, IoU ≥ 0,5), solo en segmentos que ambos completaron. 1 = coinciden en todo; — = ninguno marcó esa clase.</p>
+    <h2>Acuerdo entre sistemas por clase</h2><p class="muted">F1 simétrico (misma clase, IoU ≥ 0,5), solo en cobertura de inferencia completada por ambos. 1 = coinciden en todo; — = indefinido por falta de cobertura común o de eventos de esa clase. No mide exactitud.</p>
     <div class="scroll"><table><thead><tr><th>Par</th>${CLASSES.map(([k]) => `<th>${badge(k)}</th>`).join('')}</tr></thead><tbody>
     ${Object.entries(c.symmetric_agreement)
       .map(
@@ -1994,7 +2002,7 @@ async function comparison(cid) {
           `<tr><td>${pair
             .split('~')
             .map(s => SYSTEM[s] || s)
-            .join(' vs. ')}</td>${CLASSES.map(([k]) => `<td>${num(v[k])}</td>`).join('')}</tr>`
+            .join(' vs. ')}<div class="muted small">${c.symmetric_coverage?.[pair] ? `${(c.symmetric_coverage[pair].evaluable_ms / 1000).toFixed(2)} s comunes · ${esc(c.symmetric_coverage[pair].reason || 'cobertura disponible')}` : 'cobertura histórica no registrada'}</div></td>${CLASSES.map(([k]) => `<td>${num(v[k])}</td>`).join('')}</tr>`
       )
       .join('')}</tbody></table></div>`
   const { ws } = await player(recId, rec)
@@ -2038,7 +2046,7 @@ async function comparison(cid) {
 // ---------------------------------------------------------- administration
 async function admin() {
   const [o, recs] = await Promise.all([api('/admin/overview'), api('/recordings')])
-  const people = role => o.users.filter(u => u.role === role || u.role === 'admin').sort((a, b) => (a.role !== role) - (b.role !== role))
+  const people = role => o.users.filter(u => !u.campaign && u.status === 'active' && (u.role === role || u.role === 'admin')).sort((a, b) => (a.role !== role) - (b.role !== role))
   const ready = recs.filter(r => r.status === 'ready')
   const count = s => o.tasks.filter(t => t.status === s).length
   view.innerHTML = `${intro(
@@ -2102,8 +2110,10 @@ async function admin() {
         <p class="muted">${p.campaign.regions.length} fragmentos por persona · ${p.participants.length} de ${p.campaign.max_participants} participantes</p>
         ${
           p.participants.length
-            ? `<div class="scroll"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Avance</th><th>Min. activos</th></tr></thead><tbody>
-        ${p.participants.map(x => `<tr><td>${esc(x.name)}</td><td>${esc(x.email)}</td><td>${x.submitted}/${x.total}</td><td>${x.active_min}</td></tr>`).join('')}</tbody></table></div>`
+            ? `<div class="scroll"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Avance</th><th>Min. activos</th><th>Consent</th><th>Recovery</th></tr></thead><tbody>
+        ${p.participants.map(x => `<tr><td>${esc(x.name)}</td><td>${esc(x.email)}</td><td>${x.submitted}/${x.total}</td><td>${x.active_min}</td>
+          <td>${x.consent ? `Consent: ${esc(x.consent.version)}` : 'Consent evidence unavailable (legacy)'}</td>
+          <td><button data-reset="${esc(x.id)}" data-slug="${esc(p.campaign.slug)}" data-name="${esc(x.name)}" ${x.status !== 'active' ? 'disabled' : ''}>Reset access</button></td></tr>`).join('')}</tbody></table></div>`
             : empty('Aún nadie se unió. Comparte el enlace.')
         }
         ${
@@ -2113,11 +2123,35 @@ async function admin() {
         ${p.agreement.map(g => `<tr><td>${esc(g.a)} – ${esc(g.b)}</td><td>${g.regions}</td><td>${num(g.existence)}</td><td>${num(g.kappa)}</td><td>${num(g.raw)}</td></tr>`).join('')}</tbody></table></div>`
             : ''
         }
-        </section>`
+        <div id="reset-${esc(p.campaign.slug)}"></div></section>`
       })
       .join('')
-    $('#camps').onclick = e => {
+    $('#camps').onclick = async e => {
       if (e.target.dataset.copy) navigator.clipboard.writeText(e.target.dataset.copy).then(() => toast('Enlace copiado.'))
+      const b = e.target.closest('[data-reset]')
+      if (!b) return
+      const panel = $(`#reset-${b.dataset.slug}`)
+      panel.innerHTML = `<form class="card form"><h3>Recover access: ${esc(b.dataset.name)}</h3>
+        <p>Verify this person's identity through your team's existing trusted contact channel before resetting. Email alone is not proof. This revokes the old token but preserves progress.</p>
+        <label class="inline"><input name="verified" type="checkbox" required> I manually verified the participant's identity.</label>
+        <label>Audit reason (do not include tokens or sensitive identity documents)<textarea name="reason" required minlength="10" maxlength="500"></textarea></label>
+        <button class="primary">Confirm access reset</button><p class="error" data-error></p></form>`
+      $('form', panel).onsubmit = async event => {
+        event.preventDefault()
+        const form = event.target, data = new FormData(form), submit = $('button', form)
+        submit.disabled = true
+        try {
+          const result = await api(`/admin/campaigns/${b.dataset.slug}/participants/${b.dataset.reset}/reset-access`, {
+            method: 'POST', body: { identity_verified: data.get('verified') === 'on', reason: data.get('reason') }
+          })
+          panel.innerHTML = `<div class="banner ok">Deliver this replacement privately to the verified participant. It is shown only now.
+            <p><code>${esc(result.token)}</code></p><button data-copy-token>Copy replacement token</button></div>`
+          $('[data-copy-token]', panel).onclick = () => navigator.clipboard.writeText(result.token).then(() => toast('Token copied.'))
+        } catch (err) {
+          $('[data-error]', form).textContent = err.message
+          submit.disabled = false
+        }
+      }
     }
   })
   const taskRows = f =>
@@ -2201,7 +2235,7 @@ async function campaignJoin(slug) {
     ${c.description ? `<p class="lead">${esc(c.description)}</p>` : ''}
     <p>Vas a ${c.video ? 'ver y escuchar' : 'escuchar'} <b>${c.regions} fragmentos de unos 15 segundos</b> (${c.minutes} min de audio en total) y marcar
     las disfluencias que notes: muletillas, prolongaciones, repeticiones, bloqueos, revisiones y pausas. Toma entre ${Math.ceil(c.minutes * 5)} y ${Math.ceil(c.minutes * 10)} minutos; puedes hacerlo en varias sesiones.
-    Puedes pausar y volver con el mismo correo: tu avance se guarda solo.</p>
+    Your progress is saved. Keep your personal access token: email alone cannot recover access.</p>
     <ol><li>Escribe tu nombre y tu correo.</li><li>Lee la guía breve que aparece al abrir cada fragmento.</li>
     <li>Marca cada fenómeno arrastrando sobre la onda y eligiendo su clase.</li><li>Finaliza cada fragmento; al terminar el último, listo.</li></ol>
     <p class="muted">Trabajas a ciegas: no verás lo que marcó el sistema ni otras personas. Así tus marcas sirven como referencia independiente.</p>
@@ -2210,35 +2244,63 @@ async function campaignJoin(slug) {
         ? `<form id="join" class="form">
       <label>Nombre <input name="name" required minlength="2" maxlength="80" autocomplete="name"></label>
       <label>Correo <input name="email" type="email" required autocomplete="email"></label>
-      <label class="inline consent"><input type="checkbox" name="consent" required> Acepto que mi nombre, correo y marcas se guarden para la investigación de tesis MRCD, y me comprometo a no grabar, descargar ni compartir el contenido.</label>
-      <button class="primary">Empezar</button><p id="join-err" class="error"></p></form>`
+      <label class="inline consent"><input type="checkbox" name="consent" required> ${esc(c.consent_text)}</label>
+      <small>Consent version: ${esc(c.consent_version)}</small>
+      <button class="primary">Register for the first time</button><p id="join-err" class="error"></p></form>`
         : '<div class="banner warn">Esta campaña ya está cerrada.</div>'
-    }</div>`
-  if (!$('#join')) return
-  $('#join').onsubmit = async e => {
+    }
+    <form id="resume" class="form"><h2>Already participated?</h2>
+      <label>Personal access token <input name="access" type="password" autocomplete="off" required></label>
+      <button class="primary">Return with my token</button><p id="resume-err" class="error"></p>
+      <p class="muted">This browser remembers your token until you sign out. On another device, paste the saved token. If it is lost, contact the campaign administrator for a manual identity check and replacement. No recovery email is sent.</p></form></div>`
+  $('#resume').onsubmit = async e => {
     e.preventDefault()
+    const button = $('button', e.target)
+    button.disabled = true
+    const access = new FormData(e.target).get('access').trim()
+    try {
+      await api(`/campaigns/${slug}/resume`, { method: 'POST', headers: { Authorization: `Bearer ${access}` } })
+      local.set('token', access)
+      me = null
+      route()
+    } catch (err) {
+      $('#resume-err').textContent = err.message
+      button.disabled = false
+    }
+  }
+  if ($('#join')) $('#join').onsubmit = async e => {
+    e.preventDefault()
+    const button = $('button', e.target)
+    button.disabled = true
     const f = new FormData(e.target)
     try {
       const r = await api(`/campaigns/${slug}/join`, {
         method: 'POST',
-        body: { name: f.get('name'), email: f.get('email'), consent: f.get('consent') === 'on' }
+        body: { name: f.get('name'), email: f.get('email'), consent: f.get('consent') === 'on', consent_version: c.consent_version }
       })
       local.set('token', r.token)
       me = null
-      route()
+      view.innerHTML = `<div class="card narrow"><h1>Save your personal token</h1>
+        <p>Treat this like a password. Save it privately before continuing; it is needed after signing out or on another device. Your email cannot replace it.</p>
+        <p><code>${esc(r.token)}</code></p><button id="save-token">Copy token</button>
+        <button id="continue-campaign" class="primary">I saved it — continue</button></div>`
+      $('#save-token').onclick = () => navigator.clipboard.writeText(r.token).then(() => toast('Token copied.'))
+      $('#continue-campaign').onclick = () => route()
     } catch (err) {
       $('#join-err').textContent = err.message
+      button.disabled = false
     }
   }
 }
 
 async function campaign(slug) {
+  await api(`/campaigns/${slug}/resume`, { method: 'POST' })
   const [c, d] = await Promise.all([api(`/campaigns/${slug}`), api('/review/tasks')])
   const tasks = d.tasks.filter(t => t.campaign === slug).sort((a, b) => a.start_ms - b.start_ms)
   const done = tasks.filter(t => t.status === 'submitted').length
   const next = tasks.find(t => t.status !== 'submitted')
   view.innerHTML = `<h1>${esc(c.title)}</h1>
-    <p class="lead">Hola, ${esc(me.name)}. ${next ? 'Cada fragmento se guarda solo mientras trabajas; puedes salir y volver con tu correo.' : '¡Terminaste todos los fragmentos! Muchas gracias por tu ayuda.'}</p>
+    <p class="lead">Hola, ${esc(me.name)}. ${next ? 'Each fragment saves automatically. Return with your saved personal token; if it is lost, ask the administrator for a manual identity check and replacement.' : '¡Terminaste todos los fragmentos! Muchas gracias por tu ayuda.'}</p>
     <div class="meter big"><i style="width:${tasks.length ? Math.round((100 * done) / tasks.length) : 0}%"></i></div>
     <p class="muted">${done} de ${tasks.length} fragmentos finalizados</p>
     ${next ? `<p><a class="button primary big" href="#/review/tasks/${next.id}">${done ? 'Continuar' : 'Empezar'} con el fragmento ${tasks.indexOf(next) + 1}</a></p>` : '<div class="banner ok">Si tienes dos minutos más, responde la <a href="#/sus">encuesta de usabilidad</a>.</div>'}
