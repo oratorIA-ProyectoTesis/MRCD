@@ -1,0 +1,5 @@
+# Local application/regression tests; research/video tools stay in requirements.txt.
+# Existing environments: install only a missing requirement, not this entire stack.
+-r requirements-app.txt
+pytest>=8.0
+httpx>=0.28

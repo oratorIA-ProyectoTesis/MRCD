@@ -176,6 +176,9 @@ def test_batch_and_live_adapters_use_the_same_inference_class(tmp_path):
 def test_provider_dispatch_never_crosses_credentials(monkeypatch):
     import scripts.llm_judge as judge
 
+    # Routing is under test, not local secret-file ingestion. In particular the
+    # missing-key assertion must not be replenished by a developer's real .env.
+    monkeypatch.setattr(judge, "load_env_file", lambda: None)
     for key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "GROQ_API_KEY"):
         monkeypatch.setenv(key, key)
     cases = (("claude-test", "anthropic", judge.call_anthropic),
