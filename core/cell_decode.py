@@ -132,6 +132,10 @@ def validate_cell_result(result):
             raise ValueError(f"cell {i}: invalid identity/status/effective availability")
         if cell.get("capabilities") != capabilities:
             raise ValueError("per-cell capabilities disagree with loaded model")
+        if "evidence" in cell:
+            from core.cell_evidence import EVIDENCE_SCHEMA
+            if cell["evidence"].get("schema") != EVIDENCE_SCHEMA or cell.get("quality") != cell["evidence"].get("quality"):
+                raise ValueError("cell acquisition/effective-input/quality contract mismatch")
         support = cell.get("support_refs", {})
         if support.get("evidence_start_ms") != cell["observed_start_ms"] or support.get("evidence_end_ms") != cell["observed_end_ms"]:
             raise ValueError("observable support and real evidence bounds disagree")
@@ -214,7 +218,8 @@ def decode_cells(cells, *, recording_id):
         for cell in cells:
             eligible = cell["available"] and cell["type_decisions"][k] in ("positive", "abstained")
             sig = (cell["type_decisions"][k], cell["contextual_states"][k], cell["context_reasons"][k],
-                   json.dumps(cell["quality"], sort_keys=True), json.dumps(cell["capabilities"], sort_keys=True))
+                   json.dumps(cell["quality"], sort_keys=True), json.dumps(cell["capabilities"], sort_keys=True),
+                   tuple((key, value["available"], value["owned_available"]) for key, value in sorted(cell.get("evidence", {}).get("effective", {}).items())))
             adjacent = previous is not None and previous["index"] + 1 == cell["index"] and previous["owned_end_ms"] == cell["owned_start_ms"]
             if active and (not eligible or sig != signature or not adjacent):
                 flush()

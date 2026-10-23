@@ -66,7 +66,7 @@ Adjudication and reference integrity: [`docs/reference-integrity.md`](docs/refer
 Evaluable masks, partial availability, and paired metrics: [`docs/evaluation-v2.md`](docs/evaluation-v2.md).
 Pure temporal/target contracts (not trained v2 inference): [`docs/temporal-v2.md`](docs/temporal-v2.md).
 Additive offline v2 features/model/training (synthetic software evidence): [`docs/cell-model-v2.md`](docs/cell-model-v2.md).
-Versioned product cell ledger/decoder and honest legacy support (U4c awaiting review): [`docs/cell-product-v2.md`](docs/cell-product-v2.md). New cell/window results deliberately reject legacy CSV/EAF, assisted-review and reference-evaluation consumers until U5; full JSON and safe Markdown remain available.
+Versioned product cell ledger/decoder and honest legacy support: [`docs/cell-product-v2.md`](docs/cell-product-v2.md). Explicit human type/context confirmation and review lineage are documented in [`docs/human-semantics-v1.md`](docs/human-semantics-v1.md). Task-aware evaluation remains incomplete; new cell/window results still reject incompatible legacy CSV/EAF and reference-evaluation consumers. Full JSON and safe Markdown remain available.
 Full implementation/evidence tracking: [`docs/tp2-closure-plan.md`](docs/tp2-closure-plan.md).
 
 ```powershell

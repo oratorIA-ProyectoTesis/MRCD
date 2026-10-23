@@ -20,7 +20,7 @@ from typing import Literal
 from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field, StrictInt, model_validator
+from pydantic import BaseModel, Field, StrictInt, StrictBool, model_validator
 
 from app import ROOT, exports, media, media_dir, open_store
 from app.ops import (CONSENT_TEXT, CONSENT_VERSION, ROLES, campaign_progress, create_tasks,
@@ -32,13 +32,26 @@ from core import evaluation
 from core.constants import TAXONOMY, TAXONOMY_VERSION
 from core.engine import ASR_DEFAULTS
 from core.cell_decode import require_legacy_consumer
+from core.human_events import HUMAN_ANNOTATION_SCHEMA
+from app.human_review import proposals, save_annotation, upgrade_annotation, annotation_for_review
 
 TERMINAL = {"succeeded", "partial", "failed", "cancelled"}
 GUIDES = ROOT / "docs"
 
 
 # ------------------------------------------------------------------ contracts
-class Event(BaseModel):
+class HumanSemanticFields(BaseModel):
+    human_event_schema: str | None = None
+    type_known: StrictBool | None = None
+    is_disfluent: StrictBool | None = None
+    contextual_state: Literal["disfluent", "functional"] | None = None
+    proposal_ref: dict | None = None
+    provenance: dict | None = None
+    legacy_original: dict | None = None
+    source_lineage: dict | None = None
+
+
+class Event(HumanSemanticFields):
     event_id: str | None = None
     start_ms: int = Field(ge=0)
     end_ms: int
@@ -52,6 +65,8 @@ class Event(BaseModel):
     source_kind: str = "human_independent"
     suggestion_id: str | None = None
     note: str | None = None
+    expression: str | None = None
+    function: str | None = None
 
     @model_validator(mode="after")
     def valid(self):
@@ -64,18 +79,27 @@ class Event(BaseModel):
         return self
 
 
-class Contextual(BaseModel):
+class Contextual(HumanSemanticFields):
     """Legitimate/contextual use of an expression, kept apart from disfluent events."""
 
     start_ms: int = Field(ge=0)
     end_ms: int
     expression: str
+    event_id: str | None = None
+    label: str | None = None
+    type_known: StrictBool | None = None
+    decision: Literal["event", "uncertain", "not_evaluable"] = "event"
+    uncertainty: Literal["class", "boundaries", "audio"] | None = None
+    suggestion_id: str | None = None
+    note: str | None = None
+    source_kind: str = "human_independent"
     context_text: str | None = None
     is_disfluent: bool | None = None
     function: str | None = None
 
 
 class AnnotationBody(BaseModel):
+    semantic_schema: Literal["mrcd-human-annotation-v1"] | None = None
     events: list[Event] = []
     contextual: list[Contextual] = []
     coverage: list[tuple[int, int]] = []
@@ -84,6 +108,19 @@ class AnnotationBody(BaseModel):
     asr_used: bool = False
     telemetry: dict = {}
     client_op: str | None = None
+    lineage_restore: list[dict] | None = None
+
+
+class SemanticUpgradeRequest(BaseModel):
+    expected_annotation_revision: StrictInt = Field(ge=1)
+    confirm_upgrade: StrictBool
+    reason: str = Field(min_length=10, max_length=500)
+
+    @model_validator(mode="after")
+    def explicit_upgrade(self):
+        if not self.confirm_upgrade or len(self.reason.strip()) < 10:
+            raise ValueError("Explicit transition confirmation and meaningful reason required")
+        return self
 
 
 class RunRequest(BaseModel):
@@ -111,6 +148,8 @@ class CaseRequest(BaseModel):
 
 
 class AdjudicationRequest(BaseModel):
+    semantic_schema: Literal["mrcd-human-annotation-v1"] | None = None
+    actions: list[dict] = []
     case_id: str
     case_revision: int = Field(ge=1)
     events: list[Event]
@@ -594,20 +633,14 @@ def create_app(store: Store | None = None) -> FastAPI:
         suggestions = []
         if d["mode"] == "assisted" and d.get("run_id"):
             try:
-                require_task_source(store, d["run_id"], d["recording_id"])
+                suggestions = proposals(store, task)
             except ValueError as exc:
                 raise HTTPException(422, str(exc)) from None
-            run = store.get(d["run_id"], "run") or {"data": {}}
-            suggestions = [
-                {k: e.get(k) for k in ("event_id", "start_ms", "end_ms", "label", "text", "decision")}
-                for e in run["data"].get("result", {}).get("events", [])
-                if e["end_ms"] > d["start_ms"] - d["context_ms"] and e["start_ms"] < d["end_ms"] + d["context_ms"]
-            ]
         rec = store.get(d["recording_id"])
         return {
             "task": public_task(task),
             "video": bool(rec["data"]["media"]["original"].get("has_video")),
-            "annotation": annotation_of(task),
+            "annotation": annotation_for_review(annotation_of(task)),
             "suggestions": suggestions,
             "taxonomy": list(TAXONOMY),
             "taxonomy_version": TAXONOMY_VERSION,
@@ -668,19 +701,23 @@ def create_app(store: Store | None = None) -> FastAPI:
         task = own_task(ann["parent"], u)
         if ann["status"] == "submitted":
             raise HTTPException(409, "anotación finalizada; reabrir crea otra revisión")
-        if body.client_op and body.client_op == ann["data"].get("client_op"):
-            return ann  # idempotent retry of an already applied edit
-        if task["data"]["mode"] == "assisted":
-            for e in body.events:
-                if e.suggestion_id:
-                    e.source_kind = "human_verified_model_suggestion"
         try:
-            new = store.update(aid, body.model_dump(), expected_rev=if_match, author=u["id"])
+            return save_annotation(store, aid, task, body.model_dump(), if_match, u["id"])
         except Conflict as exc:
             raise HTTPException(409, str(exc)) from None
-        if task["status"] == "assigned":
-            store.update(task["id"], status="in_progress")
-        return new
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
+
+    @api.post("/annotations/{aid}/upgrade-semantics")
+    def upgrade_semantics(aid: str, body: SemanticUpgradeRequest, u=Depends(user)):
+        ann = found(store.get(aid, "annotation"), "anotación")
+        task = own_task(ann["parent"], u)
+        try:
+            return upgrade_annotation(store, aid, task, body.model_dump(), u["id"])
+        except Conflict as exc:
+            raise HTTPException(409, str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
 
     @api.post("/review/tasks/{tid}/submit")
     def submit(tid: str, u=Depends(user)):
@@ -734,7 +771,7 @@ def create_app(store: Store | None = None) -> FastAPI:
         case = own_case(cid, u)
         tracks = {}
         for side, tid in zip("AB", case["data"]["tasks"]):
-            ann = store.get(f"ann_{tid}")
+            ann = annotation_for_review(store.get(f"ann_{tid}"))
             tracks[side] = {"rev": ann["rev"], "events": ann["data"]["events"], "contextual": ann["data"]["contextual"]}
         return {
             "case": {
@@ -880,6 +917,8 @@ def create_app(store: Store | None = None) -> FastAPI:
                 require_legacy_consumer(doc["data"].get("result", {}))
             except ValueError as exc:
                 raise HTTPException(422, str(exc)) from None
+        if doc["kind"] == "snapshot" and format in ("csv", "eaf") and any(i.get("semantic_schema") for i in doc["data"].get("items", [])):
+            raise HTTPException(422, "Task-aware human interchange not integrated (U5d); use full JSON")
         if format == "csv":
             return Response(exports.events_csv(events), media_type="text/csv", headers=headers)
         if format == "md":

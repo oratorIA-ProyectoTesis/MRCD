@@ -37,12 +37,15 @@ def require_generic_annotator(store: Store, user_id: str) -> None:
 
 def require_task_source(store: Store, run_id: str | None, recording_id: str):
     if run_id:
-        from core.cell_decode import require_legacy_consumer
+        from app.human_review import task_run
 
         run = store.get(run_id, "run")
         if not run or run["parent"] != recording_id:
             raise ValueError("task source run must belong to its recording")
-        require_legacy_consumer(run["data"].get("result", {}))
+        try:
+            task_run(store, {"data":dict(run_id=run_id,recording_id=recording_id)})
+        except ValueError as exc:
+            raise ValueError(f"task proposal adapter rejected result: {exc}") from exc
 
 
 def create_tasks(

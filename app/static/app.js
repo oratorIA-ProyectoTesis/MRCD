@@ -37,6 +37,73 @@ function resultSemantics(res) {
   }
 }
 // END RESULT SEMANTICS
+
+function humanProposal(s, id) {
+  return {event_id: id, start_ms: s.start_ms, end_ms: s.end_ms, label: s.label,
+    decision: s.label ? 'event' : 'uncertain', uncertainty: s.label ? null : 'class', type_known: false, is_disfluent: null,
+    contextual_state: null, suggestion_id: s.event_id, proposal_ref: s.proposal_ref,
+    source_kind: 'model_proposal_copy'}
+}
+function humanConfirmation(event) {
+  const fields = ['start_ms','end_ms','label','decision','uncertainty','type_known','is_disfluent']
+  return {type: 'confirm_human_event', event_id: event.event_id,
+    confirmation_id: crypto.randomUUID(),
+    reviewed_event: Object.fromEntries(fields.map(key => [key, event[key] ?? null])),
+    reviewed_proposal: {suggestion_id: event.suggestion_id ?? null, proposal_ref: event.proposal_ref ?? null}}
+}
+function humanSaveEnvelope(state, clientOp) {
+  const body = JSON.parse(JSON.stringify(state))
+  body.client_op = clientOp
+  const cache = body._lineage_cache
+  delete body._lineage_cache
+  delete body.lineage_restore // server-owned registry, never client authority
+  if (cache) {
+    applyHumanLineages(body, cache.sources)
+    for (const event of [...body.events, ...body.contextual]) {
+      const source = cache.sources.find(s => s.event_id === event.event_id)
+      const last = body.actions.filter(a => a.event_id === event.event_id && ['confirm_human_event','revoke_human_confirmation'].includes(a.type)).at(-1)
+      const pending = event.source_lineage?.schema === 'mrcd-human-restore-v1' || source?.pending_restore && (!last || last.type !== 'confirm_human_event' || !last.confirmation_id || cache.confirmations.includes(last.confirmation_id))
+      if (pending) {
+        event.type_known = false
+        event.is_disfluent = event.contextual_state = null
+        body.actions.push({type:'revoke_human_confirmation', event_id:event.event_id, reason:'undo_restore_pending_review'})
+      }
+    }
+  }
+  if (body.semantic_schema == null) delete body.semantic_schema
+  return body
+}
+function historicalMark(mark, contextual) {
+  const copy = {...mark}
+  for (const key of ['human_event_schema','type_known','contextual_state','proposal_ref','provenance','legacy_original','source_lineage']) delete copy[key]
+  if (!contextual) delete copy.is_disfluent
+  return copy
+}
+function humanSourceFields(source) {
+  const fields = {}
+  if (source?.proposal_ref && source.event_id) Object.assign(fields, {suggestion_id:source.event_id, proposal_ref:source.proposal_ref})
+  if (source?.legacy_original != null) Object.assign(fields, {legacy_original:source.legacy_original, source_lineage:source.source_lineage})
+  return fields
+}
+function applyHumanLineages(state, sources) {
+  for (const event of [...state.events, ...state.contextual]) {
+    if (!event.legacy_original) continue
+    const source = sources.find(s => s.event_id === event.event_id) || sources.find(s => s.event_id === event.source_lineage?.event_id)
+    if (source?.source_lineage && JSON.stringify(source.legacy_original) === JSON.stringify(event.legacy_original))
+      event.source_lineage = source.source_lineage // references only, never actor/confirmation
+  }
+}
+function refreshHumanLineages(state, saved) {
+  if (!saved) return
+  const sources = [...saved.events, ...saved.contextual].filter(e => e.legacy_original).map(e => ({
+    event_id:e.event_id, legacy_original:e.legacy_original, source_lineage:e.source_lineage,
+    pending_restore:e.provenance?.action === 'restored_pending_human_review'}))
+  for (const entry of saved.lineage_restore || []) sources.push({
+    event_id:entry.source_lineage.event_id, legacy_original:entry.legacy_original, source_lineage:entry.source_lineage, pending_restore:true})
+  state._lineage_cache = {sources, confirmations:(saved.actions || []).filter(a => a.type === 'confirm_human_event').map(a => a.confirmation_id).filter(Boolean)}
+  applyHumanLineages(state, sources)
+}
+// END HUMAN SEMANTICS
 const STATUS = {
   queued: ['En cola', 'info'],
   preparing: ['Preparando', 'info'],
@@ -421,6 +488,10 @@ async function workbench(kind, id) {
     telemetry: {}
   }
   let state = isCase ? { ...blank, ...(d.decision?.data || {}) } : { ...blank, ...ann.data, telemetry: ann.data.telemetry || {} }
+  // Only a genuinely new, empty annotation opts in automatically. Existing
+  // historical drafts require an explicit revision-bound transition.
+  if (isCase || ann.rev === 1 && !state.events.length && !state.contextual.length && !state.coverage.length && !state.actions.length)
+    state.semantic_schema = 'mrcd-human-annotation-v1'
   let rev = ann?.rev
   let extra = 0
   let offset = Math.max(0, t.start_ms - t.context_ms)
@@ -458,6 +529,7 @@ async function workbench(kind, id) {
     <div class="row meta"><span>Fragmento <b>${fmt(t.start_ms)}–${fmt(t.end_ms)}</b></span><span>Guía ${esc(t.guideline_version)}</span>
       <span class="chip ${locked ? 'ok' : 'info'}" id="save" title="Estado del guardado en el servidor">${locked ? 'Finalizado · solo lectura' : isCase ? 'Se guarda al confirmar' : 'Todo guardado'}</span></div>
     <div id="alert"></div>
+    ${!isCase && !locked && !state.semantic_schema ? '<p class="muted">Borrador histórico: guardar no confirma tipos ni contexto con el contrato nuevo. <button id="upgrade-semantics">Actualizar explícitamente el contrato conservando el original</button></p>' : ''}
     <div id="outside"></div>
     <div class="grid"><section>
       ${useVideo ? '<video id="vid" class="vid" playsinline preload="auto"></video>' : ''}
@@ -491,13 +563,16 @@ async function workbench(kind, id) {
           <label data-for="uncertain">Clase más probable <small class="muted">opcional</small><select id="f-prob"><option value="">—</option>${CLASSES.map(([c, n]) => `<option value="${c}">${n}</option>`).join('')}</select></label>
           <label data-for="legit">Expresión <small class="muted">p. ej. «este», «bueno»</small><input id="f-expr" maxlength="60"></label>
           <label data-for="legit">¿Es disfluencia? <select id="f-dis"><option value="false">No, cumple una función</option><option value="null">No estoy seguro</option></select></label>
+          <label data-for="legit">Tipo observable <select id="f-phenotype"><option value="">No determinado</option>${CLASSES.map(([c,n]) => `<option value="${c}">${n}</option>`).join('')}</select></label>
+          <label data-for="event uncertain legit"><input type="checkbox" id="f-known"> Confirmo personalmente el tipo observable seleccionado (independiente de su función).</label>
+          <label data-for="event uncertain">Juicio contextual humano <select id="f-context"><option value="null">No determinado</option><option value="true">Disfluente</option><option value="false">Funcional</option></select></label>
           <label data-for="legit">Función <small class="muted">opcional · p. ej. demostrativo, respuesta</small><input id="f-func" maxlength="60"></label>
           <label data-for="event uncertain not_evaluable">¿Quién habla? <select id="f-spk"><option value="">No especificar</option><option value="participant">Participante</option><option value="interviewer">Entrevistador/a</option><option value="other">Otra persona</option></select></label>
           <label data-for="event uncertain not_evaluable legit">Nota <small class="muted">opcional, breve</small><input id="f-note" maxlength="200"></label>
         </div>
       </fieldset>
       <fieldset class="step" ${locked ? 'disabled' : ''}><legend>3 · Guarda</legend>
-        <div class="row"><button id="save-ev" class="primary">💾 Guardar evento <kbd>Enter</kbd></button><button id="cancel-ev">Cancelar <kbd>Esc</kbd></button></div>
+        <div class="row"><button id="save-ev" class="primary">💾 Confirmar juicio humano y guardar <kbd>Enter</kbd></button><button id="cancel-ev">Cancelar <kbd>Esc</kbd></button></div>
         <div class="row" id="edit-tools" hidden><button id="del-ev" class="danger">🗑 Eliminar evento</button><button id="split-ev" title="Divide el evento en dos en la posición del cursor">Dividir en el cursor</button><button id="merge-ev" title="Une este evento con el siguiente de la misma clase">Unir con el siguiente</button></div>
       </fieldset>
       <fieldset class="step"><legend>Al terminar el fragmento</legend>
@@ -690,7 +765,8 @@ async function workbench(kind, id) {
     const covered = coverage()
     $('#cov').textContent = `Fragmento revisado: ${Math.round(100 * covered)} %${covered < 1 ? '' : ' ✓'}`
     $('#covbar').style.width = `${Math.round(100 * covered)}%`
-    $('#save-ev').innerHTML = editing ? '💾 Guardar cambios <kbd>Enter</kbd>' : '💾 Guardar evento <kbd>Enter</kbd>'
+    $('#save-ev').innerHTML = state.semantic_schema === 'mrcd-human-annotation-v1' || isCase
+      ? '💾 Confirmar juicio humano y guardar <kbd>Enter</kbd>' : '💾 Guardar marca histórica (sin nueva confirmación) <kbd>Enter</kbd>'
     $('#edit-tools').hidden = !editing
     $('#split-ev').hidden = $('#merge-ev').hidden = editing?.type !== 'event'
     if (isCase) renderDiff()
@@ -711,9 +787,12 @@ async function workbench(kind, id) {
     view.querySelectorAll('input[name=kind]').forEach(r => (r.checked = r.value === (v.kind || '')))
     $('#f-text').value = v.verbatim_text || ''
     $('#f-unc').value = v.uncertainty || 'class'
-    $('#f-prob').value = v.prob || ''
+    $('#f-prob').value = v.prob || (v.decision === 'uncertain' ? v.label : '') || ''
     $('#f-expr').value = v.expression || ''
-    $('#f-dis').value = String(v.is_disfluent ?? false)
+    $('#f-dis').value = String(v.is_disfluent ?? null)
+    $('#f-context').value = String(v.is_disfluent ?? null)
+    $('#f-known').checked = v.type_known === true
+    $('#f-phenotype').value = v.label || ''
     $('#f-func').value = v.function || ''
     $('#f-spk').value = v.speaker_id || ''
     $('#f-note').value = v.note || ''
@@ -757,43 +836,53 @@ async function workbench(kind, id) {
     if (outsideRegion(span)) return renderSel() // the selection box already explains what to do
     const note = $('#f-note').value.trim() || null
     const wasEvent = editingEvent()
+    const wasContext = editing?.type === 'ctx' ? state.contextual[editing.index] : null
+    const semantic = isCase || state.semantic_schema === 'mrcd-human-annotation-v1'
     commit(
       () => {
         if (editing?.type === 'event' && v === 'legit') state.events = state.events.filter(e => e.event_id !== editing.id)
         if (editing?.type === 'ctx' && v !== 'legit') state.contextual.splice(editing.index, 1)
         if (v === 'legit') {
-          const item = {
+          let item = {
+            ...(wasContext || wasEvent || {}),
             ...span,
+            event_id: wasContext?.event_id || wasEvent?.event_id || uid(),
+            label: $('#f-phenotype').value || null, type_known: $('#f-known').checked,
+            decision: 'event', uncertainty: null,
             expression: $('#f-expr').value.trim(),
             is_disfluent: JSON.parse($('#f-dis').value),
             function: $('#f-func').value.trim(),
             note
           }
+          if (fromSuggestion) Object.assign(item, humanSourceFields(fromSuggestion))
+          if (semantic) state.actions.push(humanConfirmation(item))
+          else item = historicalMark(item, true)
           if (editing?.type === 'ctx') state.contextual[editing.index] = item
           else state.contextual.push(item)
           return
         }
         const decision = v.startsWith('cls:') ? 'event' : v
-        const ev = {
-          ...(wasEvent || {
+        let ev = {
+          ...(wasEvent || wasContext || {
             event_id: uid(),
             source_kind: isCase ? 'human_adjudicated' : 'human_independent'
           }),
+          event_id: wasEvent?.event_id || wasContext?.event_id || uid(),
           ...span,
           label: v.startsWith('cls:') ? v.slice(4) : v === 'uncertain' ? $('#f-prob').value || null : null,
           decision,
+          type_known: decision !== 'not_evaluable' && $('#f-known').checked,
+          is_disfluent: decision === 'not_evaluable' ? null : JSON.parse($('#f-context').value),
           uncertainty: decision === 'uncertain' ? $('#f-unc').value : decision === 'not_evaluable' ? 'audio' : null,
           verbatim_text: $('#f-text').value.trim() || null,
           speaker_id: $('#f-spk').value || null,
           note
         }
-        if (fromSuggestion)
-          Object.assign(ev, {
-            suggestion_id: fromSuggestion.event_id,
-            source_kind: 'human_verified_model_suggestion'
-          })
+        if (fromSuggestion) Object.assign(ev, humanSourceFields(fromSuggestion))
+        if (!semantic) ev = historicalMark(ev, false)
         if (wasEvent) state.events[state.events.indexOf(wasEvent)] = ev
         else state.events.push(ev)
+        if (semantic) state.actions.push(humanConfirmation(ev))
         state.events.sort((a, b) => a.start_ms - b.start_ms)
       },
       fromSuggestion
@@ -835,6 +924,13 @@ async function workbench(kind, id) {
   }
   const playSel = () => sel.end_ms && ws.play(Math.max(0, L(sel.start_ms) - 0.5), L(sel.end_ms) + 0.5)
 
+  function invalidateHuman(mark) {
+    if (!isCase && state.semantic_schema !== 'mrcd-human-annotation-v1') return
+    mark.type_known = false
+    mark.is_disfluent = mark.contextual_state = null
+    state.actions.push({type: 'revoke_human_confirmation', event_id: mark.event_id})
+  }
+
   regions.on('region-created', r => {
     if (drawing || locked) return
     sel = { start_ms: G(r.start), end_ms: G(r.end) }
@@ -853,6 +949,7 @@ async function workbench(kind, id) {
         () => {
           e.start_ms = G(r.start)
           e.end_ms = G(r.end)
+          invalidateHuman(e)
         },
         { type: 'adjust', event_id: e.event_id }
       )
@@ -968,9 +1065,9 @@ async function workbench(kind, id) {
             ? '<span class="chip ok">Revisado</span>'
             : `<button data-sugplay="${i}">▶</button>` +
               [
-                ['Correcto', 'accept'],
-                ['Corregir', 'correct'],
-                ['Uso legítimo', 'legit'],
+                ['Copiar sin confirmar', 'accept'],
+                ['Revisar y confirmar', 'correct'],
+                ['Revisar uso funcional', 'legit'],
                 ['Descartar', 'reject'],
                 ['Tengo dudas', 'doubt']
               ]
@@ -981,19 +1078,9 @@ async function workbench(kind, id) {
       .join('')
   }
   function suggestion(s, act) {
-    const ev = {
-      event_id: uid(),
-      start_ms: s.start_ms,
-      end_ms: s.end_ms,
-      label: s.label,
-      decision: 'event',
-      uncertainty: null,
-      suggestion_id: s.event_id,
-      source_kind: 'human_verified_model_suggestion',
-      verbatim_text: null,
-      speaker_id: null,
-      note: null
-    }
+    if (!isCase && state.semantic_schema !== 'mrcd-human-annotation-v1')
+      return say('Actualiza explícitamente este borrador histórico antes de revisar propuestas con el contrato nuevo.', 'warn')
+    const ev = humanProposal(s, uid())
     const log = { suggestion_id: s.event_id, before: s }
     if (act === 'accept')
       commit(() => state.events.push(ev), {
@@ -1001,26 +1088,14 @@ async function workbench(kind, id) {
         type: 'accept',
         event_id: ev.event_id
       })
-    if (act === 'correct') {
+    if (act === 'correct' || act === 'legit') {
       fromSuggestion = s
       editing = null
       sel = { start_ms: s.start_ms, end_ms: s.end_ms }
-      fillForm({ kind: s.label ? `cls:${s.label}` : '' })
+      fillForm({ kind: act === 'legit' ? 'legit' : s.label ? `cls:${s.label}` : '', label: s.label, type_known: false, is_disfluent: null, expression: s.text || '' })
       say('Ajusta el tramo y la clase del candidato y pulsa «Guardar evento».', 'info')
       draw()
     }
-    if (act === 'legit')
-      commit(
-        () =>
-          state.contextual.push({
-            start_ms: s.start_ms,
-            end_ms: s.end_ms,
-            expression: s.text || '',
-            is_disfluent: false,
-            function: ''
-          }),
-        { ...log, type: 'reject', reason: 'legitimate_use' }
-      )
     if (act === 'reject') commit(() => {}, { ...log, type: 'reject', reason: 'not_a_phenomenon' })
     if (act === 'doubt')
       commit(
@@ -1055,14 +1130,14 @@ async function workbench(kind, id) {
     } else if (ds.take) {
       const [i, side] = ds.take.split(':')
       const src = renderDiff.rows[+i][side === 'A' ? 0 : 1]
-      commit(() =>
-        state.events.push({
-          ...src,
-          event_id: uid(),
-          parent_event_id: src.event_id,
-          source_kind: 'human_adjudicated'
-        })
-      )
+      fromSuggestion = src.human_event_schema === 'mrcd-human-event-v1' && (src.legacy_original || src.suggestion_id && src.proposal_ref)
+        ? {...src, event_id: src.suggestion_id || null} : null
+      editing = null
+      sel = {start_ms: src.start_ms, end_ms: src.end_ms}
+      fillForm({...src, kind: src.decision === 'event' ? (src.label ? `cls:${src.label}` : 'uncertain') : src.decision,
+        prob: src.label, type_known: false, is_disfluent: null})
+      say('Revisa el tipo y el contexto personalmente; copiar A/B no los confirma.', 'info')
+      draw()
       reasons[`row${i}`] = reasons[`row${i}`] || `usar ${side}`
       toast(`Evento de ${side} copiado a la decisión final.`)
     } else if (ds.sug) {
@@ -1095,6 +1170,8 @@ async function workbench(kind, id) {
     commit(
       () => {
         x.end_ms = at
+        invalidateHuman(x)
+        invalidateHuman(second)
         state.events.push(second)
         state.events.sort((a, b) => a.start_ms - b.start_ms)
       },
@@ -1111,6 +1188,7 @@ async function workbench(kind, id) {
     commit(
       () => {
         x.end_ms = Math.max(x.end_ms, y.end_ms)
+        invalidateHuman(x)
         state.events.splice(i + 1, 1)
       },
       { type: 'merge', event_id: x.event_id, merged: y.event_id }
@@ -1147,7 +1225,9 @@ async function workbench(kind, id) {
     })
   $('#undo').onclick = () => {
     if (undo.length && !locked) {
+      const cache = state._lineage_cache
       state = JSON.parse(undo.pop())
+      if (cache) state._lineage_cache = cache // keep snapshots/decisions untouched; rebase transport only
       resetForm()
       scheduleSave()
     }
@@ -1253,10 +1333,11 @@ async function workbench(kind, id) {
     try {
       const r = await api(`/annotations/${ann.id}`, {
         method: 'PATCH',
-        body: { ...state, client_op: op },
+        body: humanSaveEnvelope(state, op),
         headers: { 'If-Match': String(rev) }
       })
       rev = r.rev
+      refreshHumanLineages(state, r.data)
       tel('save_ms', performance.now() - began)
       if (sentOp === op) {
         local.del(pendingKey)
@@ -1278,6 +1359,9 @@ async function workbench(kind, id) {
           say('')
           save()
         }
+      } else if (e.status >= 400 && e.status < 500) {
+        status('Cambios rechazados; revisa el borrador', 'bad')
+        say(esc(e.message), 'bad') // validation is not a connectivity failure
       } else {
         status('Sin conexión: reintentando', 'warn')
         retry = setTimeout(save, 5000)
@@ -1288,6 +1372,18 @@ async function workbench(kind, id) {
       again = false
       save()
     }
+  }
+  if ($('#upgrade-semantics')) $('#upgrade-semantics').onclick = async () => {
+    const reason = prompt('Motivo de la actualización explícita (mínimo 10 caracteres). Se conservará la revisión original; no se confirmará automáticamente ningún juicio.')
+    if (!reason || reason.trim().length < 10) return
+    clearTimeout(timer)
+    await save()
+    if (saving || local.get(pendingKey)) return say('Guarda o resuelve los cambios pendientes antes de actualizar.', 'warn')
+    try {
+      await api(`/annotations/${ann.id}/upgrade-semantics`, {method:'POST', body:{
+        expected_annotation_revision:rev, confirm_upgrade:true, reason:reason.trim()}})
+      route()
+    } catch (e) { say(esc(e.message), 'bad') }
   }
   const pending = ann && local.get(pendingKey)
   if (pending && !locked) {
@@ -1327,6 +1423,7 @@ async function workbench(kind, id) {
             case_id: id,
             case_revision: t.rev,
             events: state.events,
+            semantic_schema: 'mrcd-human-annotation-v1', actions: state.actions,
             contextual: state.contextual,
             reasons,
             based_on: { A: d.tracks.A.rev, B: d.tracks.B.rev }

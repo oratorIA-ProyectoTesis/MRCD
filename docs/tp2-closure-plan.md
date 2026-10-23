@@ -10,7 +10,7 @@ This public summary describes the delivered software scope. Synthetic regression
 | Temporal cells and target projection (U4a) | Delivered software slice; synthetic verification recorded. |
 | Offline cell features/model/training (U4b) | Delivered software slice; synthetic verification recorded. |
 | Versioned product results and legacy guards (U4c) | Delivered software slice; synthetic verification recorded. |
-| Explicit human semantics and review lineage (U5a) | Not included at this commit. |
+| Explicit human semantics and review lineage (U5a) | Delivered software slice; synthetic verification recorded. |
 
 ## Limits and deferred work
 

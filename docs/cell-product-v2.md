@@ -1,6 +1,6 @@
 # Analyze whole recordings with explicit cell decisions
 
-**U4c is awaiting fresh fix review.** The additive offline product adapter now
+**U4c software semantics passed scoped independent fix review.** The additive offline product adapter now
 uses the reviewed U4a grid/targets and U4b feature/checkpoint contracts. Local
 synthetic tests exercise HTTP queue → actual worker dispatch → a tiny newly
 trained temporary checkpoint → strict JSON result. This is software evidence,
@@ -16,8 +16,10 @@ not real-human accuracy, calibration, visual benefit or production acceptance.
    V2 requires an explicit, existing, safely loadable **trained v2** checkpoint;
    it never guesses from dimensions or falls back to legacy/random weights.
 3. Use full JSON or the safe Markdown report. Reference-relative evaluation,
-   system agreement, assisted-review projection, CSV and EAF for new cell/window
-   results fail clearly until their task-aware U5 adapters exist. A lossless JSON
+   system agreement, CSV and EAF for new cell/window results fail clearly until
+   their task-aware U5 adapters exist. The bounded [U5a human confirmation
+   adapter](human-semantics-v1.md) is awaiting review; proposals never establish
+   human type/context knowledge. A lossless JSON
    roundtrip is not proof of CSV/EAF interchange or a usable browser workflow.
 4. Operational commands have one source: the U4c saved isolation wrapper in
    `fuente-informacion/comandos-ejecutar/COMANDOS.MD`. No new ASR/model download,

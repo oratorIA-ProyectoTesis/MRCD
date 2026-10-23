@@ -103,5 +103,5 @@ def eaf(events: list[dict], media_url: str, author: str) -> bytes:
 
 
 def _legacy_events(events):
-    if any(e.get("event_schema") == "mrcd-cell-event-v2" or e.get("prediction_kind") == "window_classification" for e in events):
+    if any(e.get("human_event_schema") or e.get("event_schema") == "mrcd-cell-event-v2" or e.get("prediction_kind") == "window_classification" for e in events):
         raise ValueError("task-aware CSV/EAF not integrated (U5); use full versioned JSON or safe Markdown, not a human_disfluency tier")

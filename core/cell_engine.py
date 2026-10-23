@@ -9,6 +9,7 @@ from core.cell_contracts import cell_feature_contract
 from core.cell_decode import (CELL_RESULT_SCHEMA, SCORE_KIND, threshold_policy, partition,
                               decode_cells, ledger_coverage, validate_cell_result)
 from core.features_v2 import build_cell_features
+from core.cell_evidence import cell_evidence
 from core.temporal import decision_cells, evidence_windows, integer_ms, TEMPORAL_CONTRACT
 
 
@@ -49,6 +50,7 @@ class CellAnalysisEngine:
         stage("cell_features_global")
         features = build_cell_features(source["raw"], source["words"], duration)
         capabilities = deepcopy(self.inference.capabilities)
+        evidence = cell_evidence(features, mode=self.inference.mode, capabilities=capabilities, stats=getattr(self.inference, "stats", None))
         owners = {i: sid for sid, indices in assignments.items() for i in indices}
         cells = []
         for i, owned in enumerate(grid):
@@ -63,7 +65,7 @@ class CellAnalysisEngine:
                               type_decisions=["unavailable"] * 7, contextual_states=[None] * 7,
                               type_reasons=["not_executed"] * 7, context_reasons=["not_executed"] * 7,
                               capabilities=deepcopy(capabilities), support_refs=support,
-                              quality=dict(acoustic=bool(features["ac_mask"][i].any()), linguistic=bool(features["lmask"][i].any()), visual=False)))
+                              evidence=evidence[i], quality=evidence[i]["quality"]))
         # Segment ownership only schedules batches; context never changes with batching.
         for sid, indices in assignments.items():
             for offset in range(0, len(indices), batch_size):

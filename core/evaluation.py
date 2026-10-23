@@ -79,6 +79,8 @@ def reference_view(snapshot: dict, recording_speakers: dict) -> dict:
     items = snapshot.get("items")
     if not isinstance(items, list) or not items:
         raise ValueError("snapshot.items: reviewed regions are required")
+    if any(item.get("semantic_schema") for item in items) or any(e.get("human_event_schema") for item in items for kind in ("events","contextual") for e in item.get(kind, [])):
+        raise ValueError("task-aware human semantic evaluation not integrated (U5b)")
     schema = snapshot.get("snapshot_schema")
     if schema not in (None, "mrcd-snapshot-v2"):
         raise ValueError("snapshot_schema: unsupported reference adapter")

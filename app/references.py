@@ -15,6 +15,7 @@ from app import media, media_dir
 from app.ops import require_global_adjudicator
 from app.store import Conflict, Store, now
 from core.constants import TAXONOMY, TAXONOMY_VERSION
+from core.human_events import HUMAN_ANNOTATION_SCHEMA, annotation_semantics, validate_human_event
 
 REFERENCE_FIELDS = ("recording_id", "start_ms", "end_ms", "split", "speaker_id", "guideline_version", "mode")
 
@@ -174,6 +175,7 @@ def speaker_key(store: Store, rec: dict, speaker: str | None) -> str | None:
 
 
 def validate_region(store: Store, item: dict) -> dict:
+    annotation_semantics(item)
     rec = store.get(item.get("recording_id", ""), "recording")
     if not rec or rec["status"] != "ready":
         raise ValueError("recording_id: a ready source recording is required")
@@ -213,6 +215,8 @@ def validate_region(store: Store, item: dict) -> dict:
         for event in item[kind]:
             if not isinstance(event, dict):
                 raise ValueError(f"{kind}: expected event objects")
+            if event.get("human_event_schema"):
+                validate_human_event(event)
             x, y = event.get("start_ms"), event.get("end_ms")
             if type(x) is not int or type(y) is not int or not 0 <= x < y <= duration or y <= a or x >= b:
                 raise ValueError(f"{kind}.start_ms/end_ms: invalid media bounds or event outside reviewed region")
@@ -231,6 +235,7 @@ def validate_region(store: Store, item: dict) -> dict:
 
 
 def finalize_adjudication(store: Store, payload: dict, actor: dict) -> dict:
+    semantic_family = annotation_semantics(payload)
     initial = store.get(payload["case_id"], "case")
     if not initial:
         raise ValueError("case_id: case not found")
@@ -268,9 +273,20 @@ def finalize_adjudication(store: Store, payload: dict, actor: dict) -> dict:
         validate_provenance_review(tx, case, current, task_revisions)
         if payload["based_on"] != current:
             raise Conflict("A/B revisions changed; reload the case")
+        annotations = [tx.get(f"ann_{tid}", "annotation") for tid in tasks]
+        source_families = [annotation_semantics(ann["data"]) for ann in annotations]
+        if "explicit_v1" in source_families and semantic_family != "explicit_v1":
+            raise ValueError("Explicit human semantic schema is required to adjudicate versioned source evidence")
+        semantic = payload
+        if payload.get("semantic_schema") == HUMAN_ANNOTATION_SCHEMA:
+            from app.human_review import normalize_annotation
+
+            semantic = normalize_annotation(tx, case, payload, actor["id"], adjudication_sources=annotations)
         data = {k: case["data"][k] for k in REFERENCE_FIELDS}
-        data.update(events=payload["events"], contextual=payload["contextual"], taxonomy_version=TAXONOMY_VERSION,
+        data.update(events=semantic["events"], contextual=semantic["contextual"], taxonomy_version=TAXONOMY_VERSION,
                     media_sha256=case["data"].get("media_sha256"), source_modes=modes)
+        if payload.get("semantic_schema"):
+            data["semantic_schema"] = payload["semantic_schema"]
         if case["data"].get("provenance_review"):
             data["provenance_review"] = case["data"]["provenance_review"]
         validate_region(tx, data)
@@ -416,6 +432,8 @@ def freeze_snapshot(store: Store, request: dict, actor_id: str) -> dict:
                 data = {k: source["data"].get(k) for k in REFERENCE_FIELDS}
                 data.update(events=ann["data"]["events"], contextual=ann["data"]["contextual"],
                             source=f"{ann['id']}@{ann['rev']}", source_kind="human_single_annotation")
+                if ann["data"].get("semantic_schema"):
+                    data["semantic_schema"] = ann["data"]["semantic_schema"]
             rec = validate_region(tx, data)
             data["media_sha256"] = rec["data"]["media"]["analysis"]["sha256"]
             recording_speakers[data["recording_id"]] = speaker_key(tx, rec, data["speaker_id"])
