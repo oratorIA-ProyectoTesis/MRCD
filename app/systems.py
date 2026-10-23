@@ -72,6 +72,11 @@ def _commit() -> str | None:
 
 
 def mrcd(job) -> dict:
+    kind = job.config.get("engine_kind", "legacy_window_v1")
+    if kind not in ("legacy_window_v1", "cell_v2"):
+        raise ValueError("unknown persisted engine_kind")
+    if kind == "cell_v2":
+        return _cell_mrcd(job)
     ckpt = Path(
         job.config.get("checkpoint") or os.environ.get("MRCD_CHECKPOINT", ROOT / "models" / "ckpt_audio_text.pt")
     )
@@ -81,7 +86,8 @@ def mrcd(job) -> dict:
         if k in job.config
     }
     asr = asr_config(job.config)
-    key = ("mrcd", str(ckpt), json.dumps(asr, sort_keys=True), json.dumps(cfg, sort_keys=True))
+    loaded_hash = media.sha256(ckpt)
+    key = ("mrcd-legacy-v1", loaded_hash, json.dumps(asr, sort_keys=True), json.dumps(cfg, sort_keys=True), FEATURE_SCHEMA_VERSION)
     if key not in _loaded:
         import torch
 
@@ -90,6 +96,8 @@ def mrcd(job) -> dict:
         device = "cuda" if torch.cuda.is_available() else "cpu"
         engine = MRCDEngine(InferenceEngine.from_checkpoint(ckpt, device), _asr(asr), **cfg)
         engine.config.update(asr)
+        if media.sha256(ckpt) != loaded_hash:
+            raise ValueError("checkpoint changed while loading; retry with stable bytes")
         _loaded[key] = engine
     engine = _loaded[key]
     prep = prepared(job.recording, job.audio, job.config, job.stage)
@@ -99,12 +107,48 @@ def mrcd(job) -> dict:
     result["segments"] = {s["id"]: "succeeded" for s in job.recording["data"]["segments"]}
     result["model_version"] = {
         "checkpoint": ckpt.name,
-        "checkpoint_sha256": media.sha256(ckpt),
+        "checkpoint_sha256": loaded_hash,
         "commit": _commit(),
         "config": engine.config,
         "feature_schema": FEATURE_SCHEMA_VERSION,
         "training": engine.inference.provenance,
     }
+    return result
+
+
+def _cell_mrcd(job):
+    from core.cell_engine import CellAnalysisEngine
+    from core.cell_inference import CellInference
+    from core.cell_contracts import CELL_MODEL_IMPLEMENTATION, CELL_FEATURE_VERSION
+    from core.temporal import TEMPORAL_CONTRACT
+
+    if job.config.get("live"):
+        raise ValueError("live v2 unsupported until centered lookahead/tail flush implemented")
+    if job.config.get("refine_boundaries") or job.config.get("temperature", 1.) != 1. or "thresholds" in job.config:
+        raise ValueError("v2 requires its versioned threshold_policy; legacy temperature/refinement unsupported")
+    if not job.config.get("checkpoint"):
+        raise ValueError("cell_v2 requires an explicit trained v2 checkpoint; no legacy/random fallback")
+    ckpt = Path(job.config["checkpoint"])
+    loaded_hash = media.sha256(ckpt)
+    key = ("cell_v2", loaded_hash, CELL_MODEL_IMPLEMENTATION, CELL_FEATURE_VERSION, TEMPORAL_CONTRACT,
+           json.dumps(job.config, sort_keys=True))
+    if key not in _loaded:
+        inference = CellInference.from_checkpoint(ckpt)
+        engine = CellAnalysisEngine(inference, threshold_policy=job.config.get("threshold_policy"))
+        if media.sha256(ckpt) != loaded_hash:
+            raise ValueError("checkpoint changed while loading; retry with stable bytes")
+        _loaded[key] = engine
+    engine = _loaded[key]
+    analysis = job.recording["data"]["media"]["analysis"]
+    if job.audio.ndim != 1 or len(job.audio) != analysis["samples"]:
+        raise ValueError("loaded whole-recording audio disagrees with analysis sample identity")
+    prep = prepared(job.recording, job.audio, job.config, job.stage)
+    result = engine.analyze(prep, analysis=analysis, recording_id=job.recording["id"],
+                            segments=job.recording["data"]["segments"], batch_size=job.config.get("batch_size", 128), stage=job.stage)
+    result["model_version"] = dict(engine_kind="cell_v2", checkpoint=ckpt.name, checkpoint_sha256=loaded_hash,
+                                   commit=_commit(), config=job.config, implementation=CELL_MODEL_IMPLEMENTATION,
+                                   feature_schema=CELL_FEATURE_VERSION, temporal_contract=TEMPORAL_CONTRACT,
+                                   training=engine.inference.provenance)
     return result
 
 

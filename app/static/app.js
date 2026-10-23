@@ -18,6 +18,25 @@ const CLASSES = [
 const CLS = Object.fromEntries(CLASSES.map(([id, name, short, color, def]) => [id, { name, short, color, def }]))
 const PAUSES = new Set(['rhetorical_pause', 'neutral_pause'])
 const DECISIONS = { event: 'Evento', uncertain: 'Incierto', not_evaluable: 'No evaluable' }
+
+function resultSemantics(res) {
+  const events = res.events || []
+  const cell = res.result_schema === 'mrcd-cell-result-v2'
+  const legacy = res.prediction_kind === 'window_classification'
+  const isUncertain = e => cell ? e.type_decision === 'abstained' || e.contextual_state === 'uncertain' : e.decision === 'uncertain'
+  return {
+    cell, legacy, guarded: cell || legacy,
+    dis: legacy ? null : events.filter(e => cell ? e.type_decision === 'positive' && e.is_disfluent === true && !PAUSES.has(e.label) : e.decision === 'event' && !PAUSES.has(e.label)).length,
+    pau: legacy ? null : events.filter(e => PAUSES.has(e.label) && (cell ? e.type_decision === 'positive' : e.decision === 'event')).length,
+    unc: events.filter(isUncertain).length,
+    isUncertain,
+    unavailable: events.filter(e => cell && e.contextual_state == null).length,
+    candidates: legacy ? events.length : null,
+    unavailable_types: cell && res.capabilities?.type_discrimination ? res.capabilities.type_discrimination.filter(v => !v).length : null,
+    unavailable_contexts: cell && res.capabilities?.context_discrimination ? res.capabilities.context_discrimination.filter(v => !v).length : null
+  }
+}
+// END RESULT SEMANTICS
 const STATUS = {
   queued: ['En cola', 'info'],
   preparing: ['Preparando', 'info'],
@@ -1619,6 +1638,7 @@ async function results(recId) {
     shown = run
     const res = run.data.result || {}
     const events = res.events || []
+    const semantics = resultSemantics(res)
     const f = { label: $('#f-label')?.value || '', kind: $('#f-kind')?.value || '' }
     const visible = events.filter(
       e =>
@@ -1627,15 +1647,11 @@ async function results(recId) {
           (f.kind === 'pause'
             ? PAUSES.has(e.label)
             : f.kind === 'uncertain'
-              ? e.decision === 'uncertain'
-              : !PAUSES.has(e.label) && e.decision === 'event'))
+              ? semantics.isUncertain(e)
+              : !PAUSES.has(e.label) && (semantics.guarded ? e.is_disfluent === true && e.type_decision === 'positive' : e.decision === 'event')))
     )
     const words = res.words || []
-    const n = {
-      dis: events.filter(e => e.decision === 'event' && !PAUSES.has(e.label)).length,
-      pau: events.filter(e => e.decision === 'event' && PAUSES.has(e.label)).length,
-      unc: events.filter(e => e.decision === 'uncertain').length
-    }
+    const n = semantics
     regions.clearRegions()
     visible.forEach(
       e =>
@@ -1656,13 +1672,14 @@ async function results(recId) {
           `<button data-show="${r.id}" class="${r.id === run.id ? 'active' : ''}">${SYSTEM[r.data.system] || r.data.system} ${chip(r.status)}</button>`
       )
       .join('')}
-      ${researcher ? `<a class="button" href="#/experiments/runs/${run.data.comparison}">Comparar sistemas →</a>` : ''}</div>
+      ${researcher && !semantics.guarded ? `<a class="button" href="#/experiments/runs/${run.data.comparison}">Comparar sistemas →</a>` : ''}</div>
+      ${semantics.guarded ? `<div class="banner info">${semantics.legacy ? 'Clasificación de ventanas: los tramos muestran soporte de 3 s, no localización de disfluencias. ' + semantics.candidates + ' grupos candidatos.' : 'Proyección por celdas de 500 ms, sin refinamiento; contexto no disponible en ' + semantics.unavailable + ' grupo(s). Cabezas sin entrenamiento discriminativo: tipo ' + (semantics.unavailable_types ?? 'no disponible') + ', contexto ' + (semantics.unavailable_contexts ?? 'no disponible') + '. Un tipo conocido no confirma una disfluencia si su contexto no está disponible. Video: ' + esc(res.visual_reason || 'no disponible') + '. Cobertura de entrada: ' + esc(JSON.stringify(res.coverage || [])) + ' ms.'} Comparación, revisión asistida y CSV/EAF pendientes del contrato por tarea (U5); JSON conserva el resultado íntegro.</div>` : ''}
       ${run.data.importer ? `<div class="banner info">Resultado precalculado e importado (${esc(run.data.importer)}, ${new Date(run.created).toLocaleString()}); no es inferencia en vivo.</div>` : ''}
       ${res.warning ? `<div class="banner warn">${esc(res.warning)}</div>` : ''}
       ${run.data.error ? `<div class="banner bad"><b>El análisis falló</b> en la etapa «${esc(STAGES[run.data.error.stage] || run.data.error.stage)}»: ${esc(run.data.error.message)}</div>` : ''}
       ${tiles([
-        ['Disfluencias', n.dis, 'muletillas, repeticiones, etc.'],
-        ['Pausas', n.pau, 'no son disfluencias'],
+        ['Disfluencias', n.dis == null ? 'No disponible' : n.dis, semantics.guarded ? 'solo tipo positivo + contexto disfluente conocido; sin tasa' : 'muletillas, repeticiones, etc.'],
+        ['Pausas', n.pau == null ? 'No disponible' : n.pau, 'fenómeno separado, no disfluencia'],
         ['Inciertos', n.unc, 'pendientes de revisión'],
         [
           'Tiempo de análisis',
@@ -1680,7 +1697,7 @@ async function results(recId) {
           .map(([k, v]) => `<option value="${k}" ${f.kind === k ? 'selected' : ''}>${v}</option>`)
           .join('')}</select></label>
         <span class="spacer"></span><span class="muted">Descargar:</span>
-        <a class="button" href="${mediaUrl(`/exports/${run.id}?format=json`)}" download>JSON</a><a class="button" href="${mediaUrl(`/exports/${run.id}?format=csv`)}" download>CSV</a><a class="button" href="${mediaUrl(`/exports/${run.id}?format=md`)}" download>Reporte</a></div>
+        <a class="button" href="${mediaUrl(`/exports/${run.id}?format=json`)}" download>JSON</a>${semantics.guarded ? '' : `<a class="button" href="${mediaUrl(`/exports/${run.id}?format=csv`)}" download>CSV</a>`}<a class="button" href="${mediaUrl(`/exports/${run.id}?format=md`)}" download>Reporte</a></div>
       ${
         words.length
           ? `<details open><summary>Transcripción automática (ASR, no verificada)</summary><p class="words">${words
@@ -1697,7 +1714,7 @@ async function results(recId) {
           ? `<div class="scroll list"><table><thead><tr><th>Tramo</th><th>Clase</th><th>Decisión</th><th>Texto disponible</th><th></th></tr></thead><tbody>
       ${visible
         .map(
-          e => `<tr><td>${fmt(e.start_ms)}–${fmt(e.end_ms)}</td><td>${e.label ? badge(e.label) : '—'}</td><td>${DECISIONS[e.decision] || e.decision}</td>
+          e => `<tr><td>${fmt(e.start_ms)}–${fmt(e.end_ms)} ${e.boundary_resolution_ms ? '(celdas 500 ms)' : semantics.legacy ? '(soporte)' : ''}</td><td>${e.label ? badge(e.label) : '—'}</td><td>${semantics.cell ? esc(e.type_decision) + ' · contexto: ' + esc(e.contextual_state ?? 'no disponible') + (e.context_reason ? ' · ' + esc(e.context_reason) : '') : semantics.legacy ? 'candidato, contexto no evaluado' : DECISIONS[e.decision] || e.decision}</td>
         <td>${esc(e.text || '')} <span class="muted">${e.text_scope === 'window_context' ? '(texto de la ventana)' : e.text_scope === 'model_proposal' ? '(propuesta del modelo)' : ''}</span></td>
         <td class="row"><button data-ev="${e.event_id}">▶ Detalle</button><button data-fb="${e.event_id}:ok">Está bien</button><button data-fb="${e.event_id}:wrong">No corresponde</button></td></tr>`
         )
@@ -1706,7 +1723,7 @@ async function results(recId) {
               events.length
                 ? 'Ningún evento coincide con el filtro.'
                 : run.status === 'succeeded'
-                  ? 'El sistema no detectó eventos en este audio.'
+                  ? semantics.guarded ? 'Sin grupos positivos/inciertos disponibles; consulta capacidades y cobertura. Esto no demuestra ausencia de disfluencias.' : 'El sistema no detectó eventos en este audio.'
                   : 'Sin eventos para mostrar.'
             )
       }
@@ -1724,13 +1741,14 @@ async function results(recId) {
       ws.play(Math.max(0, x.start_ms / 1000 - 1), x.end_ms / 1000 + 0.5)
       $('#detail').innerHTML = `<div class="card"><h2>${x.label ? badge(x.label) : ''} ${fmt(x.start_ms)}–${fmt(x.end_ms)}</h2>
         <dl><dt>Evidencia observable</dt><dd>${esc(x.evidence == null ? 'sin detalle' : typeof x.evidence === 'object' ? JSON.stringify(x.evidence) : x.evidence)}</dd>
-        <dt>Ventanas de 3 s que lo sustentan</dt><dd>${x.n_windows ?? '—'}</dd><dt>Puntuación</dt><dd>${x.score?.toFixed?.(2) ?? '—'} (${esc(x.score_kind || 'sin puntuación')})</dd><dt>Segmento</dt><dd>${esc(x.segment_id)}</dd></dl>
+        <dt>Soporte / límites</dt><dd>${esc(x.boundary_source || 'histórico')} · ${x.cell_ids?.length ?? x.n_windows ?? '—'} celdas/ventanas · ${esc(x.contextual_state ?? 'contexto no disponible')} · ${esc(x.context_reason || '')}</dd><dt>Puntuación</dt><dd>${x.score?.toFixed?.(2) ?? '—'} (${esc(x.score_kind || 'sin puntuación')})</dd><dt>Segmento(s)</dt><dd>${esc(x.segment_ids?.join(', ') || x.segment_id)}</dd></dl>
         <p class="muted">Se describe evidencia acústica o textual, no intención ni estado psicológico.</p>
-        ${researcher ? `<button data-send="${x.event_id}">Enviar este caso a revisión (desarrollo)</button>` : ''}</div>`
+        ${researcher && !resultSemantics(shown.data.result).guarded ? `<button data-send="${x.event_id}">Enviar este caso a revisión (desarrollo)</button>` : ''}</div>`
       $('#detail').scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     }
     if (ds.fb) {
-      const [eid, kind] = ds.fb.split(':')
+      const separator = ds.fb.lastIndexOf(':')
+      const eid = ds.fb.slice(0, separator), kind = ds.fb.slice(separator + 1)
       await api('/feedback', { method: 'POST', body: { run_id: shown.id, event_id: eid, kind } })
       toast('Comentario registrado para revisión.')
     }

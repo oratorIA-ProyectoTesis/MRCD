@@ -4,8 +4,10 @@
 signals plus original interval evidence can run through build → masked training →
 new checkpoint → strict safe load → per-cell probabilities. Synthetic tests prove
 software behavior, not detection accuracy, human validity, calibration or visual
-benefit. The application, legacy ablations, decoder and export adapters are not
-connected to this path; that remains U4c/U8 work.
+benefit. The [U4c product ledger/decoder adapter](cell-product-v2.md) now connects
+this strict loader through the worker/API with synthetic fixtures and is awaiting
+independent review. Task-aware interchange/evaluation, human-snapshot adapters and
+legacy ablations remain U5/U8 work; this does not certify real-human weights.
 
 ## Review and use
 

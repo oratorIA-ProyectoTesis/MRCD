@@ -25,12 +25,13 @@ from pydantic import BaseModel, Field, StrictInt, model_validator
 from app import ROOT, exports, media, media_dir, open_store
 from app.ops import (CONSENT_TEXT, CONSENT_VERSION, ROLES, campaign_progress, create_tasks,
                      join_campaign, new_user, open_case, pair_cases, require_generic_annotator,
-                     reset_campaign_access, resume_campaign)
+                     reset_campaign_access, resume_campaign, require_task_source)
 from app.store import Conflict, Store
 from app.references import effective_adjudications, finalize_adjudication, freeze_snapshot, review_legacy_provenance
 from core import evaluation
 from core.constants import TAXONOMY, TAXONOMY_VERSION
 from core.engine import ASR_DEFAULTS
+from core.cell_decode import require_legacy_consumer
 
 TERMINAL = {"succeeded", "partial", "failed", "cancelled"}
 GUIDES = ROOT / "docs"
@@ -398,7 +399,9 @@ def create_app(store: Store | None = None) -> FastAPI:
             need(u, "researcher")
         comparison = f"cmp_{random.getrandbits(48):012x}"
         runs = []
-        config = {**ASR_DEFAULTS, **body.config}
+        config = {**ASR_DEFAULTS, "engine_kind": "legacy_window_v1", **body.config}
+        if config["engine_kind"] not in ("legacy_window_v1", "cell_v2"):
+            raise HTTPException(422, "engine_kind must be legacy_window_v1 or cell_v2")
         for system in body.systems:
             identity = hashlib.sha256(
                 json.dumps([rec["data"]["sha256"], system, config], sort_keys=True).encode()
@@ -486,6 +489,8 @@ def create_app(store: Store | None = None) -> FastAPI:
 
         pairs, symmetric_coverage = {}, {}
         try:
+            for run in done:
+                require_legacy_consumer(run["data"].get("result", {}))
             for i, a in enumerate(done):
                 for b in done[i + 1:]:
                     if a["parent"] != b["parent"]:
@@ -523,6 +528,11 @@ def create_app(store: Store | None = None) -> FastAPI:
         rec = found(store.get(body.recording_id, "recording"), "grabación")
         if rec["status"] != "ready":
             raise HTTPException(409, "la grabación aún no está preparada")
+        if body.mode == "assisted":
+            try:
+                require_task_source(store, body.run_id, body.recording_id)
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from None
         if body.assignee is not None:
             try:
                 require_generic_annotator(store, body.assignee)
@@ -583,6 +593,10 @@ def create_app(store: Store | None = None) -> FastAPI:
         d = task["data"]
         suggestions = []
         if d["mode"] == "assisted" and d.get("run_id"):
+            try:
+                require_task_source(store, d["run_id"], d["recording_id"])
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from None
             run = store.get(d["run_id"], "run") or {"data": {}}
             suggestions = [
                 {k: e.get(k) for k in ("event_id", "start_ms", "end_ms", "label", "text", "decision")}
@@ -861,6 +875,11 @@ def create_app(store: Store | None = None) -> FastAPI:
             raise HTTPException(400, "exportación no disponible para este tipo")
         name = f"{doc_id}.{format}"
         headers = {"Content-Disposition": f'attachment; filename="{name}"'}
+        if doc["kind"] == "run" and format in ("csv", "eaf"):
+            try:
+                require_legacy_consumer(doc["data"].get("result", {}))
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from None
         if format == "csv":
             return Response(exports.events_csv(events), media_type="text/csv", headers=headers)
         if format == "md":
@@ -874,7 +893,7 @@ def create_app(store: Store | None = None) -> FastAPI:
                 headers=headers,
             )
         return Response(
-            json.dumps({**doc, "export_version": "mrcd-export-v1"}, ensure_ascii=False, indent=1),
+            json.dumps({**doc, "export_version": "mrcd-export-cell-v2" if doc["data"].get("result", {}).get("result_schema") == "mrcd-cell-result-v2" else "mrcd-export-v1"}, ensure_ascii=False, indent=1, allow_nan=False),
             media_type="application/json",
             headers=headers,
         )

@@ -94,22 +94,18 @@ def window_text(words: list[dict], t0: float, t1: float) -> str:
 
 
 def merge_events(starts: np.ndarray, cls: np.ndarray, probs: np.ndarray,
-                 labels: list[str]) -> list[dict]:
-    """Funde ventanas contiguas de la misma clase en un solo evento."""
-    ev, i, n = [], 0, len(cls)
-    while i < n:
-        if labels[cls[i]] == BACKGROUND:
-            i += 1
-            continue
-        j = i
-        while j + 1 < n and cls[j + 1] == cls[i] and starts[j + 1] - starts[j] <= STRIDE_S * 1.5:
-            j += 1
-        ev.append({"class": labels[cls[i]],
-                   "start": float(starts[i]), "end": float(starts[j] + WINDOW_S),
-                   "n_windows": j - i + 1,
-                   "peak_prob": float(probs[i:j + 1, cls[i]].max())})
-        i = j + 1
-    return ev
+                 labels: list[str], *, duration_ms: int | None = None) -> list[dict]:
+    """Shared v1 evidence support, not precise temporal disfluency events.
+
+    The optional duration preserves historical helper calls only. Product/main
+    callers always supply actual media duration; no inferred tail is certified.
+    """
+    from core.legacy_windows import legacy_window_predictions
+
+    if not np.array_equal(cls, np.asarray(probs).argmax(1)):
+        raise ValueError("legacy class indices disagree with original probabilities")
+    actual_duration = duration_ms if duration_ms is not None else round((float(starts[-1]) + WINDOW_S) * 1000) if len(starts) else 0
+    return legacy_window_predictions(probs, starts, labels, duration_ms=actual_duration)
 
 
 def main() -> None:
@@ -185,11 +181,13 @@ def main() -> None:
         }
         rows.append(rec)
 
-    events = {m: merge_events(starts, out_pred[m].argmax(1), out_pred[m], labels) for m in MODES}
+    events = {m: merge_events(starts, out_pred[m].argmax(1), out_pred[m], labels, duration_ms=round(meta["duration_s"] * 1000)) for m in MODES}
     disagree = int(sum(1 for i in range(len(starts))
                        if len({out_pred[m][i].argmax() for m in MODES}) > 1))
 
     art = {
+        "prediction_kind": "window_classification", "window_contract": "legacy-forward3000-stride500-v1",
+        "temporal_evaluation_reason": "legacy_window_support_not_temporal_events",
         "video_id": a.vid, "url": meta.get("url"), "title": meta.get("title"),
         "duration_s": meta.get("duration_s"), "n_windows": len(starts),
         "window_s": WINDOW_S, "stride_s": STRIDE_S, "video_fps": VIDEO_FPS,
@@ -208,7 +206,7 @@ def main() -> None:
     print(f"\n[infer] artefacto -> {out}  ({out.stat().st_size / 1e6:.1f} MB)")
     print(f"[infer] ventanas en que los tres modos NO coinciden: {disagree} "
           f"({disagree / max(len(starts), 1):.1%})")
-    print("\nEVENTOS POR MODO (ventanas contiguas fundidas)")
+    print("\nCANDIDATE SUPPORT GROUPS BY MODE (3 s windows; context unavailable, not confirmed disfluencies)")
     allc = sorted({e["class"] for m in MODES for e in events[m]})
     w = max([len(c) for c in allc] + [10])
     print(f"  {'clase'.ljust(w)} {'audio_only':>11} {'audio_text':>11} {'trimodal':>11}")

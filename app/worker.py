@@ -9,6 +9,7 @@ database is the queue, so a crash leaves recoverable state instead of lost jobs.
 from __future__ import annotations
 
 import time
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -80,8 +81,16 @@ def execute(store: Store, run: dict, systems: dict) -> None:
         )
         result = systems[run["data"]["system"]](job)
         stage("save")
-        ok = [s == "succeeded" for s in result["segments"].values()]
-        status = "succeeded" if ok and all(ok) else "partial" if any(ok) else "failed"
+        if result.get("result_schema") == "mrcd-cell-result-v2":
+            from core.cell_decode import validate_cell_result
+
+            validate_cell_result(result)
+            ok = [cell["status"] == "succeeded" for cell in result["cells"]]
+            status = "succeeded" if all(ok) else "partial" if any(ok) else "failed"
+            json.dumps(result, allow_nan=False)  # never persist JSON NaN as an unavailable score
+        else:
+            ok = [s == "succeeded" for s in result["segments"].values()]
+            status = "succeeded" if ok and all(ok) else "partial" if any(ok) else "failed"
         doc = store.get(run["id"])
         store.update(
             run["id"], {**doc["data"], "result": result, "stage": "done", "finished": time.time()}, status=status

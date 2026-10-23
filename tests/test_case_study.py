@@ -114,7 +114,7 @@ def test_merge_events_collapses_overlapping_windows():
     fid, bid = labels.index(BACKGROUND), labels.index("filler_word")
     starts = np.arange(10) * STRIDE_S
     cls = np.array([fid, fid, bid, bid, bid, bid, fid, fid, bid, fid])
-    probs = np.zeros((10, len(labels)), np.float32)
+    probs = np.full((10, len(labels)), 0.2 / (len(labels) - 1), np.float32)
     probs[np.arange(10), cls] = 0.8
     ev = merge_events(starts, cls, probs, labels)
     assert len(ev) == 2, "cuatro ventanas contiguas son UN evento, no cuatro"
@@ -132,7 +132,7 @@ def test_merge_events_splits_on_a_time_gap():
     bid = labels.index("block")
     starts = np.array([0.0, 0.5, 8.0, 8.5])      # salto temporal en medio
     cls = np.array([bid, bid, bid, bid])
-    probs = np.zeros((4, len(labels)), np.float32); probs[:, bid] = 0.7
+    probs = np.full((4, len(labels)), 0.3 / (len(labels) - 1), np.float32); probs[:, bid] = 0.7
     assert len(merge_events(starts, cls, probs, labels)) == 2
 
 
@@ -311,14 +311,31 @@ def test_binary_confusion_collapses_fine_taxonomy_without_changing_truth():
 
 
 # --------------------------------------------------------------- CLI sensato
-@pytest.mark.parametrize("script,args", [
-    ("scripts/infer_video.py", ["--vid", "no_existe"]),
-    ("scripts/qa_report.py", ["--vid", "no_existe"]),
-    ("scripts/adjudicate.py", ["--vid", "no_existe"]),
+@pytest.mark.parametrize("module_name,missing_name", [
+    ("scripts.infer_video", "missing.meta.json"),
+    ("scripts.qa_report", "missing-results.json"),
+    ("scripts.adjudicate", "missing.adjudication_queue.json"),
 ])
-def test_scripts_fail_with_a_message_not_a_traceback(script, args):
-    r = subprocess.run([sys.executable, str(ROOT / script), *args],
-                       capture_output=True, text=True, cwd=ROOT)
-    assert r.returncode != 0
-    assert "Traceback" not in r.stderr, f"{script} debe explicar el problema, no reventar"
+def test_scripts_fail_with_a_message_not_a_traceback(module_name, missing_name, tmp_path):
+    case = tmp_path / "case"
+    case.mkdir()
+    missing = (tmp_path / missing_name) if module_name == "scripts.qa_report" else (case / missing_name)
+    assert not missing.exists()
+    args = ["--vid", "missing"]
+    if module_name == "scripts.qa_report":
+        args += ["--results", str(missing)]
+    # Keep a real subprocess, parser and exit path, but point the scripts' fixed
+    # CASE boundary at this test's empty directory rather than repository data.
+    bootstrap = (
+        "import importlib, sys; from pathlib import Path; "
+        f"sys.path.insert(0, {str(ROOT)!r}); "
+        f"module = importlib.import_module({module_name!r}); "
+        f"module.CASE = Path({str(case)!r}); module.main()"
+    )
+    r = subprocess.run([sys.executable, "-c", bootstrap, *args],
+                       capture_output=True, text=True, cwd=tmp_path, timeout=30)
+    assert r.returncode == 1
+    assert "Traceback" not in r.stderr, f"{module_name} must explain the missing input"
+    assert str(missing) in r.stdout
     assert "Corre antes" in r.stdout or "falta" in r.stdout.lower()
+    assert not missing.exists() and list(case.iterdir()) == []

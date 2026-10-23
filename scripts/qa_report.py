@@ -37,6 +37,7 @@ sys.path.insert(0, str(ROOT))
 
 from core.constants import BACKGROUND, SMOKE_HEADER, TAXONOMY  # noqa: E402
 from core.models.fusion import MODES  # noqa: E402
+from core.cell_decode import result_family  # noqa: E402
 
 CASE = ROOT / "data/case"
 PAUSE_CLASSES = {"rhetorical_pause", "neutral_pause"}
@@ -72,6 +73,30 @@ def md_table(header: list[str], rows: list[list]) -> list[str]:
     out = ["| " + " | ".join(header) + " |", "|" + "---|" * len(header)]
     out += ["| " + " | ".join(str(c) for c in r) + " |" for r in rows]
     return out
+
+
+def window_candidate_report(result, title):
+    """Bounded new-contract report: classifier support groups, no event metrics.
+
+    Never send these proposed types into historical event-rate/accuracy or judge
+    queues. Task-aware evaluation and contextual interchange remain U5 work.
+    """
+    groups = result.get("events", {})
+    if not isinstance(groups, dict) or any(not isinstance(groups.get(mode), list) for mode in MODES):
+        raise ValueError("window report requires candidate groups for each declared mode")
+    lines = [f"# Window candidate support — {title}", "",
+             "These are classifier candidate groups, NOT confirmed disfluencies or localized events.",
+             "Contextual decisions: unavailable. Type proposals alone do not establish contextual disfluency.",
+             "Scores are uncalibrated. No event rate, reference accuracy, or visual benefit is inferred.",
+             f"- Window contract: `{result['window_contract']}`",
+             f"- Actual duration (s): {result.get('duration_s', 'unavailable')}",
+             "", "## Candidate support groups by proposed type", ""]
+    rows = [[label] + [sum(e.get("label", e.get("class")) == label for e in groups[mode]) for mode in MODES] for label in TAXONOMY]
+    rows.append(["total candidate groups"] + [len(groups[mode]) for mode in MODES])
+    lines += md_table(["proposed type"] + list(MODES), rows)
+    lines += ["", "Intervals describe overlapping 3 s evidence support (capped by media duration), not precise event boundaries.",
+              "Historical judge/adjudication queues are not consumed or generated for this contract. U5 task-aware reporting remains unavailable.", ""]
+    return "\n".join(lines)
 
 
 def mcnemar(rows: list[dict], W: list[dict], a: str, b: str) -> tuple[int, int, float]:
@@ -187,6 +212,18 @@ def main() -> None:
         print(f"[qa] falta {rp}. Corre antes scripts/infer_video.py --vid {a.vid}")
         sys.exit(1)
     R = json.loads(rp.read_text(encoding="utf-8"))
+    try:
+        family = result_family(R)
+        if family == "cell_v2":
+            raise ValueError("task-aware cell report not integrated (U5); use product JSON/Markdown")
+        if family == "legacy_window_v1":
+            out = Path(a.out) if a.out else ROOT / "case_study_interview.md"
+            out.write_text(window_candidate_report(R, R.get("title") or a.vid), encoding="utf-8")
+            print(f"[qa] candidate support report -> {out}; contextual decision unavailable; no confirmed-event rate")
+            return
+    except ValueError as exc:
+        print(f"[qa] unsupported result contract: {exc}")
+        sys.exit(2)
     W, EV, labels, url = R["windows"], R["events"], R["labels"], R.get("url")
     n = len(W)
 

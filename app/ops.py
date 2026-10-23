@@ -35,6 +35,16 @@ def require_generic_annotator(store: Store, user_id: str) -> None:
         raise ValueError("Campaign participants cannot receive generic tasks; use their authorized campaign extension.")
 
 
+def require_task_source(store: Store, run_id: str | None, recording_id: str):
+    if run_id:
+        from core.cell_decode import require_legacy_consumer
+
+        run = store.get(run_id, "run")
+        if not run or run["parent"] != recording_id:
+            raise ValueError("task source run must belong to its recording")
+        require_legacy_consumer(run["data"].get("result", {}))
+
+
 def create_tasks(
     store: Store,
     recording_id: str,
@@ -53,6 +63,8 @@ def create_tasks(
     rec = store.get(recording_id, "recording")
     if rec is None or rec["status"] != "ready":
         raise ValueError("la grabación no existe o aún no está preparada")
+    if mode == "assisted":
+        require_task_source(store, run_id, recording_id)
     if not annotators:
         raise ValueError("elige personas con rol de anotación")
     for user_id in annotators:  # validate the whole batch before creating any tasks

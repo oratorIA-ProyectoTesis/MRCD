@@ -288,15 +288,17 @@ class MRCDEngine:
             probs /= probs.sum(1, keepdims=True)
         timings["inference_s"] = time.perf_counter() - t
         t = time.perf_counter()
-        events = decode(
+        from core.legacy_windows import legacy_window_predictions, LEGACY_WINDOW_CONTRACT
+
+        if self.config["refine_boundaries"]:
+            raise ValueError("legacy window support cannot be refined as localized events; HU059 is not implemented")
+        events = legacy_window_predictions(
             probs,
             starts,
             list(self.inference.labels),
-            self.config["thresholds"],
-            "softmax_uncalibrated" if temperature == 1.0 else "softmax_temperature_dev",
+            duration_ms=round(duration * 1000), thresholds=self.config["thresholds"],
+            score_kind="softmax_uncalibrated" if temperature == 1.0 else "softmax_temperature_dev",
         )
-        if self.config["refine_boundaries"]:
-            events = refine(events, prep)
         for ev in events:
             ev["text"] = event_text(prep.words, ev["start_ms"], ev["end_ms"])
         timings["decode_s"] = time.perf_counter() - t
@@ -306,6 +308,9 @@ class MRCDEngine:
         timings["cold"], self.calls = self.calls == 0, self.calls + 1
         provenance = self.inference.provenance
         return {
+            "prediction_kind": "window_classification",
+            "window_contract": LEGACY_WINDOW_CONTRACT,
+            "temporal_evaluation_reason": "legacy_window_support_not_temporal_events",
             "events": events,
             "words": [w.to_dict() for w in prep.words],
             "duration_ms": round(duration * 1000),

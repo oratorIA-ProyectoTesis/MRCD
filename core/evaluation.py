@@ -139,6 +139,32 @@ def reference_view(snapshot: dict, recording_speakers: dict) -> dict:
 def run_coverage(run: dict, segments: list[dict]) -> dict:
     """Availability comes from exact successful cores, not status or context windows."""
     rid, result = run["parent"], run["data"].get("result", {})
+    from core.cell_decode import result_family
+
+    family = result_family(result)
+    if family == "cell_v2":
+        from core.cell_decode import validate_cell_result, partition
+
+        validate_cell_result(result)
+        if result["recording_id"] != rid:
+            raise ValueError("cell ledger and run recording identities disagree")
+        # Validate recording-side cores too: never certify another segmentation.
+        partition(result["cells"], segments, result["duration_ms"])
+        fields = ("id", "core_start_ms", "core_end_ms")
+        if [{k: s[k] for k in fields} for s in segments] != [{k: s[k] for k in fields} for s in result["execution_cores"]]:
+            raise ValueError("execution and recording cores disagree")
+        complete = run["status"] in ("succeeded", "partial")
+        spans = result["coverage"] if complete else []
+        reasons = sorted({c["failure_reason"] for c in result["cells"] if c["status"] == "failed"})
+        if not complete:
+            reasons.append("run_not_completed")
+        if any(c["status"] == "succeeded" and not c["input_evaluable"] for c in result["cells"]):
+            reasons.append("no_owned_input_for_some_cells")
+        return dict(coverage={rid: spans}, available_ms=sum(b-a for a, b in spans),
+                    completed_segments=[s for s, value in result["segments"].items() if value == "succeeded"] if complete else [],
+                    reasons=reasons, coverage_protocol="successful_owned_input_cells_v2")
+    if family == "legacy_window_v1":
+        return dict(coverage={rid: []}, available_ms=None, completed_segments=[], reasons=["legacy_window_support_not_temporal_events"])
     reasons, spans, completed = [], [], []
     if run["status"] not in ("succeeded", "partial"):
         return {"coverage": {rid: []}, "available_ms": 0, "completed_segments": [], "reasons": ["run_not_completed"]}
@@ -260,6 +286,8 @@ def evaluate(
     unreviewed audio never counts as negative. Pauses are reported apart from
     disfluencies. Uncertain decisions are counted, never scored as events.
     """
+    if any(e.get("event_schema") == "mrcd-cell-event-v2" or e.get("prediction_kind") == "window_classification" for e in list(ref) + list(hyp) + list(legitimate)):
+        raise ValueError("task-aware event evaluation not integrated (U5)")
     inputs = {"reference": len(ref), "prediction": len(hyp), "legitimate": len(legitimate)}
     if coverage is not None:
         coverage = normalize_coverage(coverage)
@@ -372,6 +400,9 @@ def system_agreement(a: list[dict], b: list[dict], *, coverage: dict, **protocol
     side. They cannot become human exclusion holes simply because A is passed in
     the reference argument of the underlying one-to-one matcher.
     """
+    for event in a + b:
+        if event.get("event_schema") == "mrcd-cell-event-v2" or event.get("prediction_kind") == "window_classification":
+            raise ValueError("task-aware agreement not integrated (U5)")
     decided = lambda events: [e for e in events if e.get("decision", "event") == "event" and e.get("is_disfluent") is not False]
     result = evaluate(decided(a), decided(b), coverage=normalize_coverage(coverage), **protocol)
     result["protocol"]["comparison_kind"] = "symmetric_model_agreement_not_accuracy"
@@ -507,6 +538,10 @@ def evaluate_runs(snapshot: dict, systems: dict, recordings: dict, *, protocol=N
     """Pure own/paired evaluation on distinct, explicit eligibility universes."""
     if not systems or any(not runs for runs in systems.values()):
         raise ValueError("systems: select at least one run per named system")
+    from core.cell_decode import require_legacy_consumer
+    for runs in systems.values():
+        for run in runs:
+            require_legacy_consumer(run["data"].get("result", {}))
     parameters = {"iou_threshold": 0.5, "sensitivity": (0.3, 0.7), "tolerance_ms": 100, **(protocol or {})}
     if set(parameters) - {"iou_threshold", "sensitivity", "tolerance_ms", "classes"}:
         raise ValueError("protocol: unknown or protected protocol fields")

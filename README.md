@@ -61,6 +61,14 @@ sola vez (`core/engine.py`). Puesta en marcha, roles, protocolo y estado:
 [`docs/protocolo-mrcd.md`](docs/protocolo-mrcd.md). Guía para anotadores:
 [`docs/guia-anotacion-v1.md`](docs/guia-anotacion-v1.md).
 
+Campaign access and recovery: [`docs/campaign-access.md`](docs/campaign-access.md).
+Adjudication and reference integrity: [`docs/reference-integrity.md`](docs/reference-integrity.md).
+Evaluable masks, partial availability, and paired metrics: [`docs/evaluation-v2.md`](docs/evaluation-v2.md).
+Pure temporal/target contracts (not trained v2 inference): [`docs/temporal-v2.md`](docs/temporal-v2.md).
+Additive offline v2 features/model/training (synthetic software evidence): [`docs/cell-model-v2.md`](docs/cell-model-v2.md).
+Versioned product cell ledger/decoder and honest legacy support (U4c awaiting review): [`docs/cell-product-v2.md`](docs/cell-product-v2.md). New cell/window results deliberately reject legacy CSV/EAF, assisted-review and reference-evaluation consumers until U5; full JSON and safe Markdown remain available.
+Full implementation/evidence tracking: [`docs/tp2-closure-plan.md`](docs/tp2-closure-plan.md).
+
 ```powershell
 docker compose up --build          # sin instalar nada; token en: docker compose logs mrcd
 # o, con Python 3.12 y FFmpeg:

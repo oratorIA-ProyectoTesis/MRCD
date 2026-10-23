@@ -462,7 +462,7 @@ def test_asr_settings_are_part_of_cache_key_run_identity_and_record(env):
     rid = upload(call, "rita", tmp / "id.wav")
     run_worker(store)
     default = call("rita", "POST", "/analysis-runs", json={"recording_id": rid}).json()["runs"][0]["id"]
-    assert store.get(default)["data"]["config"] == ASR_DEFAULTS  # effective settings are stored
+    assert store.get(default)["data"]["config"] == {**ASR_DEFAULTS, "engine_kind": "legacy_window_v1"}  # exact effective settings
     int8 = call("rita", "POST", "/analysis-runs", json={"recording_id": rid, "config": {"asr_compute_type": "int8"}})
     assert int8.json()["runs"][0]["id"] != default
 

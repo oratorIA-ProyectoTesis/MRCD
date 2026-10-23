@@ -9,7 +9,7 @@ This public summary describes the delivered software scope. Synthetic regression
 | Campaign access, reference integrity and evaluable masks (U1–U3) | Delivered software slice; synthetic verification recorded. |
 | Temporal cells and target projection (U4a) | Delivered software slice; synthetic verification recorded. |
 | Offline cell features/model/training (U4b) | Delivered software slice; synthetic verification recorded. |
-| Versioned product results and legacy guards (U4c) | Not included at this commit. |
+| Versioned product results and legacy guards (U4c) | Delivered software slice; synthetic verification recorded. |
 | Explicit human semantics and review lineage (U5a) | Not included at this commit. |
 
 ## Limits and deferred work
