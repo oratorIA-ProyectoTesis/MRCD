@@ -1,0 +1,723 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:mrcd:service:analysis:v1",
+  "title": "MRCD service contract v1 (analysis result and job status)",
+  "description": "Events are window-level decisions of an uncalibrated engine trained with weak supervision. Intervals are the decision stride of the window, not human-annotated boundaries.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/analysis"
+    },
+    {
+      "$ref": "#/$defs/job"
+    }
+  ],
+  "$defs": {
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "generated_at",
+        "error",
+        "request",
+        "events",
+        "summary",
+        "modalities",
+        "provenance",
+        "experimental",
+        "head_decision",
+        "transcript",
+        "warnings"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "mrcd.analysis/v1"
+        },
+        "status": {
+          "enum": [
+            "completed",
+            "failed"
+          ]
+        },
+        "generated_at": {
+          "type": "string",
+          "minLength": 20
+        },
+        "error": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/error"
+            }
+          ]
+        },
+        "request": {
+          "$ref": "#/$defs/request"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event"
+          }
+        },
+        "summary": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/summary"
+            }
+          ]
+        },
+        "modalities": {
+          "$ref": "#/$defs/modalities"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "experimental": {
+          "$ref": "#/$defs/experimental"
+        },
+        "head_decision": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "transcript": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/warning"
+          }
+        }
+      }
+    },
+    "job": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "job_id",
+        "status",
+        "created_at",
+        "result"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "mrcd.job/v1"
+        },
+        "job_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "status": {
+          "enum": [
+            "queued",
+            "running",
+            "completed",
+            "failed"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 20
+        },
+        "result": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/analysis"
+            }
+          ]
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message",
+        "retryable",
+        "details"
+      ],
+      "properties": {
+        "code": {
+          "enum": [
+            "analysis_failed",
+            "asr_unavailable",
+            "audio_not_finite",
+            "audio_not_mono",
+            "audio_too_long",
+            "audio_too_short",
+            "checkpoint_unavailable",
+            "engine_load_failed",
+            "head_unavailable",
+            "invalid_audio_file",
+            "invalid_request",
+            "job_not_found",
+            "payload_too_large",
+            "queue_full",
+            "unsupported_audio_format",
+            "unsupported_sample_rate"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "details": {
+          "type": "object"
+        }
+      }
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "audio_sha256",
+        "audio_duration_s",
+        "sample_rate_hz",
+        "channels",
+        "asr_profile",
+        "head",
+        "include_text"
+      ],
+      "properties": {
+        "audio_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "audio_duration_s": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "value",
+                "unavailable_reason"
+              ],
+              "properties": {
+                "available": {
+                  "const": true
+                },
+                "value": {
+                  "type": "number"
+                },
+                "unavailable_reason": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "value",
+                "unavailable_reason"
+              ],
+              "properties": {
+                "available": {
+                  "const": false
+                },
+                "value": {
+                  "type": "null"
+                },
+                "unavailable_reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          ]
+        },
+        "sample_rate_hz": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "value",
+                "unavailable_reason"
+              ],
+              "properties": {
+                "available": {
+                  "const": true
+                },
+                "value": {
+                  "type": "integer"
+                },
+                "unavailable_reason": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "value",
+                "unavailable_reason"
+              ],
+              "properties": {
+                "available": {
+                  "const": false
+                },
+                "value": {
+                  "type": "null"
+                },
+                "unavailable_reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          ]
+        },
+        "channels": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "value",
+                "unavailable_reason"
+              ],
+              "properties": {
+                "available": {
+                  "const": true
+                },
+                "value": {
+                  "type": "integer"
+                },
+                "unavailable_reason": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "value",
+                "unavailable_reason"
+              ],
+              "properties": {
+                "available": {
+                  "const": false
+                },
+                "value": {
+                  "type": "null"
+                },
+                "unavailable_reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          ]
+        },
+        "asr_profile": {
+          "type": "string"
+        },
+        "head": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "include_text": {
+          "type": "boolean"
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "class",
+        "start_s",
+        "end_s",
+        "interval_semantics",
+        "score",
+        "n_windows",
+        "modalities_used",
+        "text",
+        "validation",
+        "experimental"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^ev-[0-9]{4,}$"
+        },
+        "class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "start_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "end_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "interval_semantics": {
+          "const": "decision_stride_not_human_boundary"
+        },
+        "score": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "value",
+            "kind",
+            "calibrated",
+            "label"
+          ],
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "kind": {
+              "enum": [
+                "max_window_softmax_score",
+                "max_window_class_probability"
+              ]
+            },
+            "calibrated": {
+              "const": false
+            },
+            "label": {
+              "const": "uncalibrated"
+            }
+          }
+        },
+        "n_windows": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "modalities_used": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "validation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "experimental": {
+          "type": "boolean"
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "n_events",
+        "events_per_minute",
+        "counts_by_class"
+      ],
+      "properties": {
+        "n_events": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "events_per_minute": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "value",
+                "unavailable_reason"
+              ],
+              "properties": {
+                "available": {
+                  "const": true
+                },
+                "value": {
+                  "type": "number"
+                },
+                "unavailable_reason": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "value",
+                "unavailable_reason"
+              ],
+              "properties": {
+                "available": {
+                  "const": false
+                },
+                "value": {
+                  "type": "null"
+                },
+                "unavailable_reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          ]
+        },
+        "counts_by_class": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "modalities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "acoustic",
+        "linguistic",
+        "kinesic_video"
+      ],
+      "properties": {
+        "acoustic": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "reason"
+              ],
+              "properties": {
+                "available": {
+                  "const": true
+                },
+                "reason": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "reason"
+              ],
+              "properties": {
+                "available": {
+                  "const": false
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          ]
+        },
+        "linguistic": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "reason"
+              ],
+              "properties": {
+                "available": {
+                  "const": true
+                },
+                "reason": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "reason"
+              ],
+              "properties": {
+                "available": {
+                  "const": false
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          ]
+        },
+        "kinesic_video": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "reason"
+              ],
+              "properties": {
+                "available": {
+                  "const": true
+                },
+                "reason": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "reason"
+              ],
+              "properties": {
+                "available": {
+                  "const": false
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "service",
+        "checkpoint",
+        "asr",
+        "head",
+        "config",
+        "environment"
+      ],
+      "properties": {
+        "service": {
+          "type": "object"
+        },
+        "checkpoint": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "asr": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "head": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "config": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "environment": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      }
+    },
+    "experimental": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "active",
+        "components"
+      ],
+      "properties": {
+        "active": {
+          "type": "boolean"
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "warning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

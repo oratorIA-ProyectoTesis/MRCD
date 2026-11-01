@@ -1,0 +1,40 @@
+{
+  "_comment": "Settings for mic_check.py. Every value can be overridden on the command line. Change nothing here to run the standard check.",
+  "duration_s": 120,
+  "min_duration_s": 30,
+  "device": null,
+  "out_root": "results/microphone_check",
+  "checkpoint": "models/ckpt_audio_text.pt",
+  "whisper_size": "small",
+  "live_config": "live_cfg_v2",
+  "keep_audio": false,
+  "keep_text": false,
+  "consent_text": "CONSENT AND PRIVACY: you are about to record from your microphone. Continue only if (1) you are the only person who can be heard, (2) nothing private or confidential will be said, (3) you understand that by default NO audio and NO transcript text are saved (only level statistics and window classes), and (4) you read CHECKLIST.md. The classes the engine prints are an uncalibrated smoke signal about the pipeline, not a measurement of your speech.",
+  "prompts": [
+    {
+      "at_s": 0,
+      "say": "STAY SILENT for 5 s (this measures the room noise and the leading silence)."
+    },
+    {
+      "at_s": 5,
+      "say": "SPEAK NOW at your normal volume and distance. Read the neutral text in README.md section 'Text to read', or talk about a neutral topic (no names, no private matters)."
+    },
+    {
+      "at_s": -5,
+      "say": "STOP TALKING. Stay silent until the run ends (trailing silence)."
+    }
+  ],
+  "thresholds": {
+    "clip_fail_fraction": 0.001,
+    "peak_min_dbfs": -30.0,
+    "noise_floor_warn_dbfs": -50.0,
+    "noise_floor_fail_dbfs": -40.0,
+    "active_above_floor_db": 12.0,
+    "active_min_dbfs": -45.0,
+    "edge_silence_min_s": 2.0,
+    "dc_offset_warn": 0.02,
+    "dropped_blocks_fail": 5,
+    "duration_drift_warn_s": 1.5
+  },
+  "thresholds_note": "Operational smoke-check heuristics chosen by the author of the kit. They are NOT calibrated acoustic standards and were not validated; a WARN is a prompt to look, not a verdict about your microphone or your speech."
+}
