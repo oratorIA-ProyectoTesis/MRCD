@@ -3,7 +3,7 @@
 **STATE: NO REALIZADA**
 
 > This file stays "NO REALIZADA" until YOU run `mic_check.py` on a physical microphone and complete every
-> field below. The agent that prepared this kit did not access any microphone. A run made with
+> field below. The authors did not access any physical microphone when preparing this kit. A run made with
 > `--simulate-wav` is not a microphone result, whatever its numbers say.
 
 Change the state line above only when all "Required" fields are filled, to exactly one of:

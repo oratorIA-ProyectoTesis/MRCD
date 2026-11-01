@@ -1,6 +1,6 @@
 # Microphone check kit (Windows)
 
-**Status of the physical microphone test: NO REALIZADA.** This kit was prepared by an agent that never opened a
+**Status of the physical microphone test: NO REALIZADA.** This kit has never been run on a physical
 microphone. It was exercised only with `--simulate-wav` (an existing WAV replayed through the same code). You run it;
 nothing here may be reported as a microphone result until you complete `RESULTS.md`.
 
@@ -90,6 +90,6 @@ timestamps only). Never `session.wav`.
 
 - The thresholds in `config.json` are author-chosen smoke heuristics, not calibrated standards.
 - Only mono 16 kHz is requested from PortAudio (the engine contract); the first-time Windows behaviour for each device (shared
-  mode resampling, exclusive mode) is unverified by the agent.
+  mode resampling, exclusive mode) is unverified.
 - Run on CPU the Whisper step can be slower than real time on a busy machine; dropped blocks may then appear. Compare with a
   `--simulate-wav` run to separate software from driver issues.

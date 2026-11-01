@@ -1,6 +1,6 @@
 # Kit de usabilidad SUS (OE4): listo para aplicar, **NO REALIZADO**
 
-**ESTADO: NO REALIZADO.** Nadie ha respondido este cuestionario. No existe ningún valor SUS, ni parcial ni estimado. El indicador original de OE4 ("SUS >= 70 con >= 10 usuarios reales") sigue **sin cumplirse**. Este kit solo prepara la aplicación. Autorrevisión de un agente; sin revisión independiente. Fecha de preparación: 2026-11-01.
+**ESTADO: NO REALIZADO.** Nadie ha respondido este cuestionario. No existe ningún valor SUS, ni parcial ni estimado. El indicador original de OE4 ("SUS >= 70 con >= 10 usuarios reales") sigue **sin cumplirse**. Este kit solo prepara la aplicación. Autorrevisión de los autores; sin revisión independiente. Fecha de preparación: 2026-11-01.
 
 ## Contenido
 

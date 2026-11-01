@@ -23,7 +23,7 @@
   "system_cpu_pct": 5.19,
   "heaviest_cpu_s_delta": [
    {
-    "Name": "ChatGPT",
+    "Name": "other_user_process",
     "Delta": 0.11
    },
    {
@@ -35,11 +35,11 @@
     "Delta": 0.08
    },
    {
-    "Name": "claude",
+    "Name": "other_user_process",
     "Delta": 0.03
    },
    {
-    "Name": "ChatGPT",
+    "Name": "other_user_process",
     "Delta": 0.03
    }
   ]

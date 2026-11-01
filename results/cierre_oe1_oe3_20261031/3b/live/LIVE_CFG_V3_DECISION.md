@@ -1,6 +1,6 @@
 # live_cfg_v3 decision (Task 3.3)
 
-Self-review by the executing agent; no independent review. All numbers come from synthetic stress sessions (real AMERESCO clips interleaved with silence, noise, hum, clicks; Spanish) driven through `LiveScorer` with a stub score and empty ASR words: they test the acoustic/scheduling path, not ASR or classification quality. They are not a rate for real microphone sessions. Exploratory; no class tuning; DIHANA fold 5 not involved.
+Self-reviewed by the author; no independent review. All numbers come from synthetic stress sessions (real AMERESCO clips interleaved with silence, noise, hum, clicks; Spanish) driven through `LiveScorer` with a stub score and empty ASR words: they test the acoustic/scheduling path, not ASR or classification quality. They are not a rate for real microphone sessions. Exploratory; no class tuning; DIHANA fold 5 not involved.
 
 **Pre-registered rule:** `docs/LIVE_CFG_V3_DECISION_RULE.md`, commit `16ab5fd` (before any run), sha256 `f3ac6e6b9326cd01ba2bd2351d023467c4aef4d1d167a550a0be583917642a6c`.
 Runs: seeds 501-506 (fixed in the rule), 10.5 min each, 0.5 s ticks, one run per config (v1, v2, v3), serial, OMP=4, machine otherwise idle (system CPU 1.8-16.5 % before the runs). Raw data: `runs.jsonl`, `config.json`; tables: `live_tables.md`, `criteria.json`.

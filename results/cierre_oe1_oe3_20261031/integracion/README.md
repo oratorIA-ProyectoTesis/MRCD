@@ -1,6 +1,6 @@
 # MRCD service surface (task 3.1a) - run book, examples, dependencies
 
-Self-review by the author agent; no independent review yet. Code: `mrcd/service/` (commit `955d27c`), tests
+Self-reviewed by the author; no independent review yet. Code: `mrcd/service/` (commit `955d27c`), tests
 `tests/test_service_*.py`. Contract owner doc: `docs/contracts/APP_INTEGRATION_CONTRACT.md` (written by another task; it adopts
 this contract). Schema: `mrcd/service/schemas/mrcd.analysis.v1.schema.json` (generated from `mrcd/service/contract.py`).
 

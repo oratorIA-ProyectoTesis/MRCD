@@ -1,6 +1,6 @@
 # Resumen ejecutivo: OE4 reducido (propuesta)
 
-**Versión 1.0, 2026-10-31. Estado: PENDIENTE de ratificación del asesor.** Documento preparado por un agente de software; es una autorrevisión, sin revisión independiente. Nada se ha firmado, enviado ni aprobado.
+**Versión 1.0, 2026-10-31. Estado: PENDIENTE de ratificación del asesor.** Documento preparado por los autores; es una autorrevisión, sin revisión independiente. Nada se ha firmado, enviado ni aprobado.
 
 ## Declaración de cumplimiento
 
@@ -8,7 +8,7 @@
 
 ## Qué se propone
 
-El 2026-10-31 el equipo decidió retirar del alcance evaluado de OE4 las clases sin referencia humana compatible (`block`, `rhetorical_pause`, `neutral_pause`) y completar OE4 con la evidencia disponible. **Es una reducción de alcance y requiere la ratificación del asesor**; el agente no puede afirmar que fue aprobada. El código de esas clases no se borra: quedan como "fuera del alcance evaluado, sin referencia, salida técnica no validada".
+El 2026-10-31 el equipo decidió retirar del alcance evaluado de OE4 las clases sin referencia humana compatible (`block`, `rhetorical_pause`, `neutral_pause`) y completar OE4 con la evidencia disponible. **Es una reducción de alcance y requiere la ratificación del asesor**; los autores no pueden afirmar que fue aprobada. El código de esas clases no se borra: quedan como "fuera del alcance evaluado, sin referencia, salida técnica no validada".
 
 Clases evaluadas: pausa llena (`filler_word`); alargamiento observable (`prolongation`, sin demostrar que sea disfluencia); repetición literal; revisión solo como aproximación NO confirmada, sin métricas de exactitud afirmadas. Unidad: turno o segmento, no eventos con fronteras humanas. Sin anotación humana nueva.
 

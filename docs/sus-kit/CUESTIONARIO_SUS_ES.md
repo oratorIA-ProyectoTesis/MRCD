@@ -6,7 +6,7 @@
 
 - **Instrumento original:** Brooke, J. (1996). SUS: a "quick and dirty" usability scale. En P. W. Jordan et al. (Eds.), *Usability Evaluation in Industry* (pp. 189-194). Taylor & Francis. **No verificada localmente** (no hay copia en el espacio de trabajo).
 - **Versión validada en español (candidata):** Sevilla-Gonzalez, M. D. R., et al. (2020). Spanish version of the System Usability Scale for the assessment of electronic tools: development and validation. *JMIR Human Factors*, 7(4), e21161. **Cita NO VERIFICADA**: se recuerda de memoria, sin acceso local al artículo ni a su DOI en esta sesión. Antes de aplicar, verifique autores, año, país de validación y el texto exacto de los ítems.
-- **Texto de los ítems de abajo:** traducción de trabajo en español neutro redactada por un agente a partir de los diez ítems clásicos de Brooke; **no es el texto de la versión validada ni se verificó contra ella**. Si se verifica la versión validada, reemplace estos ítems por su texto exacto y cite esa fuente; si no, declare que se usa una traducción no validada, lo que es una limitación.
+- **Texto de los ítems de abajo:** traducción de trabajo en español neutro redactada por los autores a partir de los diez ítems clásicos de Brooke; **no es el texto de la versión validada ni se verificó contra ella**. Si se verifica la versión validada, reemplace estos ítems por su texto exacto y cite esa fuente; si no, declare que se usa una traducción no validada, lo que es una limitación.
 - La fórmula de puntuación (ver `sus_score.py`) es la estándar y no depende de la redacción.
 
 ## Instrucciones al participante

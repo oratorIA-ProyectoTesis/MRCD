@@ -1,6 +1,6 @@
 # Phase 3b summary (2026-10-31/11-01)
 
-**Everything here is self-review by the executing agent; no independent review.** Exploratory. Defaults unchanged: V0, P0, `live_cfg_v2`; P1, Vc, `live_cfg_v3` and the new chunk-aligned streaming mode are experimental/opt-in; scores uncalibrated; DIHANA fold 5 never used; microphone check NOT run.
+**Everything here is self-reviewed by the author; no independent review.** Exploratory. Defaults unchanged: V0, P0, `live_cfg_v2`; P1, Vc, `live_cfg_v3` and the new chunk-aligned streaming mode are experimental/opt-in; scores uncalibrated; DIHANA fold 5 never used; microphone check NOT run.
 
 ## Task 0 (committed `51cbaab`)
 * `score.kind` is now `max_window_softmax_score` (contract revision 1.1, `provenance.service.contract_revision`); `max_window_class_probability` stays as a deprecated alias accepted by the schema (historical fixtures keep the old value on purpose). Schema file regenerated, tests added, contract docs and the unapplied app patch (`z.enum` accepting both) updated; real app untouched.

@@ -2,7 +2,7 @@
 
 Alcance: fase 2 del plan (2.1 contratos, 2.2 criterio de desambiguación, 2.3 C4, 2.4 captura de la aplicación, 2.5 paquete de aprobación). Escribió solo en `mrcd\docs\architecture\`, `mrcd\docs\contracts\` y esta carpeta. No tocó `mrcd\service\`, `mrcd\docs\microphone-check\`, documentos de tesis OE1 ni la aplicación (lectura únicamente). Sin push. Idioma: documentos técnicos en inglés; portada y resumen del paquete de aprobación en español neutro.
 
-Hash = SHA-256 del contenido con LF (los PNG, en bruto). Estado de aprobación: **PENDIENTE** (ver the advisor approval sheet (kept local, not published)); el agente no simuló ninguna aprobación.
+Hash = SHA-256 del contenido con LF (los PNG, en bruto). Estado de aprobación: **PENDIENTE** (ver the advisor approval sheet (kept local, not published)); no se simuló ninguna aprobación.
 
 ## Commits locales (no subidos)
 

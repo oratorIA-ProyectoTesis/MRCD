@@ -1,6 +1,6 @@
 # OE4 reduced: evidence package for a proposed reduction of scope (2026-10-31)
 
-**Status of this document.** Technical evidence package prepared by a software agent. It is a SELF-REVIEW product: written by one agent, numbers transcribed from existing reports in `results/` (nothing was re-run for this document; heavy runs were forbidden while phase 3b measures CPU time), and not checked by an independent reviewer. Nothing here is signed, sent or approved.
+**Status of this document.** Technical evidence package prepared by the authors. It is a SELF-REVIEW product: written by one author, numbers transcribed from existing reports in `results/` (nothing was re-run for this document; heavy runs were forbidden while phase 3b measures CPU time), and not checked by an independent reviewer. Nothing here is signed, sent or approved.
 
 ## 0. Compliance statement (verbatim)
 
@@ -8,10 +8,10 @@
 
 What that means, without softening:
 
-- The scope reduction (section 1) is a **proposal**. The agent cannot state that the advisor approved it. The user decided on 2026-10-31 to drop the three classes without a compatible reference; that decision still requires the advisor's ratification (`APROBACION_ASESOR_OE4.md`, status PENDING).
+- The scope reduction (section 1) is a **proposal**. The authors cannot state that the advisor approved it. The user decided on 2026-10-31 to drop the three classes without a compatible reference; that decision still requires the advisor's ratification (`APROBACION_ASESOR_OE4.md`, status PENDING).
 - None of the original OE4 indicators is met (section 9). The measured F1 values are far below the 0.80 / 0.65 / 0.60 thresholds; several indicators cannot be measured at all under the "no new human annotation" restriction.
 - Every number below is EXPLORATORY. No result is confirmatory. The checkpoint under test is a weakly supervised smoke-test checkpoint evaluated zero-shot on a telephone domain; nothing validates it as a trained model.
-- Usability (SUS >= 70 with >= 10 real users) was **not measured**. It requires an operable web application, consent and real participants. No local SUS protocol exists in the workspace (searched `mrcd/`, `mrcd-codex/`, `paper/`, `Documentos/`; the only SUS text found is the target itself in OBJETIVOS/INFORME_OBJETIVO_4/TASKS).
+- Usability (SUS >= 70 with >= 10 real users) was **not measured**. It requires an operable web application, consent and real participants. No local SUS protocol exists in the workspace (searched `mrcd/`, `<plan-package>/`, `paper/`, `Documentos/`; the only SUS text found is the target itself in OBJETIVOS/INFORME_OBJETIVO_4/TASKS).
 
 ## 1. Reduced scope (PROPOSAL, requires advisor ratification)
 
@@ -174,7 +174,7 @@ Source: `results/cierre_oe1_oe3_20261031/3b/cost/COST_REPORT_tables.md` and `vid
 
 ## 10. Uncertainty and abstention
 
-What was done: a three-state decision module (`mrcd/decision.py`: present / absent / uncertain; NaN score maps to uncertain; per-class thresholds by speaker-grouped CV), a selective-policy prototype in the Codex plan (null abstention; nested grouped validation on 102 segments / 16 ids: benefit insufficient for promotion), reliability tables and Platt/quantile calibration of ctx_LR (ECE about 0.002-0.009 for rare positives; gain not demonstrated), and an engine contract that labels every score `max_window_softmax_score`, **not calibrated** (deprecated alias retained).
+What was done: a three-state decision module (`mrcd/decision.py`: present / absent / uncertain; NaN score maps to uncertain; per-class thresholds by speaker-grouped CV), a selective-policy prototype in the earlier plan package (null abstention; nested grouped validation on 102 segments / 16 ids: benefit insufficient for promotion), reliability tables and Platt/quantile calibration of ctx_LR (ECE about 0.002-0.009 for rare positives; gain not demonstrated), and an engine contract that labels every score `max_window_softmax_score`, **not calibrated** (deprecated alias retained).
 
 What was NOT done: no calibrated abstention in the engine; no calibration set; no coverage/risk curve. The experiment that added abstention (`audio_text_v2`) was rejected. Requirement RF-09 ("uncertain" state with calibrated abstention) is **not implemented** (`REQUISITOS_MOTOR_OE1.md`). The pause and block classes have no threshold at all.
 
@@ -199,7 +199,7 @@ One reference corpus family for the audio classes (telephone, peninsular Spanish
 | (no original counterpart) Cost of processing | - | Per-stage time, RTF, memory on stated hardware | Section 8 | Cumplido for offline; streaming and ASR-streaming pending 3b |
 | Excluded classes `block`, `rhetorical_pause`, `neutral_pause` (inside the F1 indicators) | No reference | Declared out of evaluated scope: "no reference, technical output not validated" | Sections 1 and 7.3 | No medible (by design of the reduction) |
 
-## 13. Criteria proposed for ratification (PROPOSED, to be decided with the advisor; the agent sets no thresholds)
+## 13. Criteria proposed for ratification (PROPOSED, to be decided with the advisor; the authors set no thresholds)
 
 1. A class may be called "evaluated" only if the report gives support, number of speakers, TP/FP/FN, P/R/F1 with a speaker-bootstrap interval and at least one non-trivial comparator.
 2. A class may be called "improved over a comparator" only if the paired interval excludes 0 after the correction declared for its family; otherwise it is "not demonstrated".
@@ -212,4 +212,4 @@ Reports and raw JSON live under `results/` (git-ignored; the PDF-ready approval 
 
 ## 15. Sources read for this document
 
-`Documentos/OBJETIVOS.MD`; `results/ejecucion_material4_20261030/{INFORME_FINAL.md, experimentos/TABLES.md, pausas/PAUSAS.md}`; `results/baselines_20261030/BASELINES.md`; `results/mejoras_20261030/{MEJORAS.md, final/FINAL_TABLES.md}`; `results/asr_recovery_20261031/{EXPERIMENTO_ASR.md, PERFIL_P1.md}`; `results/revision*_*/` (findings as quoted in the addenda); `results/paridad_20261030/PARIDAD.md`; `results/paridad_live_20261030/PARIDAD_LIVE.md`; `results/auditoria_corpus_20261030/MATRIZ_CORPUS.md`; `mrcd-codex/MRCD_Plan_Avance_20261030/docs/MATRIZ_OE1_OE4.md`; `results/ablation_table.md`, `results/judge_agreement.md`, `results/sync_verification/REPORT.md`, `results/rejected/README.md`; `results/cierre_oe1_oe3_20261031/{APROBACION_ASESOR_OE1.md, REQUISITOS_MOTOR_OE1.md, 3b/cost/*, 3b/live/*, 3b/logs/*}`; `results/oe4_fuentes_20261031/FUENTES_OE4.md`.
+`Documentos/OBJETIVOS.MD`; `results/ejecucion_material4_20261030/{INFORME_FINAL.md, experimentos/TABLES.md, pausas/PAUSAS.md}`; `results/baselines_20261030/BASELINES.md`; `results/mejoras_20261030/{MEJORAS.md, final/FINAL_TABLES.md}`; `results/asr_recovery_20261031/{EXPERIMENTO_ASR.md, PERFIL_P1.md}`; `results/revision*_*/` (findings as quoted in the addenda); `results/paridad_20261030/PARIDAD.md`; `results/paridad_live_20261030/PARIDAD_LIVE.md`; `results/auditoria_corpus_20261030/MATRIZ_CORPUS.md`; `<plan-package>/MRCD_Plan_Avance_20261030/docs/MATRIZ_OE1_OE4.md`; `results/ablation_table.md`, `results/judge_agreement.md`, `results/sync_verification/REPORT.md`, `results/rejected/README.md`; `results/cierre_oe1_oe3_20261031/{APROBACION_ASESOR_OE1.md, REQUISITOS_MOTOR_OE1.md, 3b/cost/*, 3b/live/*, 3b/logs/*}`; `results/oe4_fuentes_20261031/FUENTES_OE4.md`.

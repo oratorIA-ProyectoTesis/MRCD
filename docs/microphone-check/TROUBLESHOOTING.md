@@ -1,6 +1,6 @@
 # Microphone check - troubleshooting
 
-Every item below is a diagnosis procedure, not a claim that it was observed. The agent never ran a physical microphone.
+Every item below is a diagnosis procedure, not a claim that it was observed. No physical microphone has been run by the authors.
 
 | Symptom                                                                              | Likely cause                                                                                                    | What to do                                                                                                                                                                                                                                                                                                                                       |
 | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

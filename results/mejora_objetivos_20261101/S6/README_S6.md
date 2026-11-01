@@ -1,6 +1,6 @@
 # S6: video evaluable on EPIC v2 (2026-11-01)
 
-**Self-review only (the executing agent); no independent review.** EXPLORATORY: all 39 EPIC speakers were seen in earlier development. Defaults unchanged (V0, P0, `live_cfg_v2`); nothing was wired into the service or the app.
+**Self-reviewed by the author; an independent adversarial review was run on 2026-11-01 (`results/mejora_objetivos_20261101/REVISION_S/fix_logs/`), findings applied.** EXPLORATORY: all 39 EPIC speakers were seen in earlier development. Defaults unchanged (V0, P0, `live_cfg_v2`); nothing was wired into the service or the app.
 
 ## Conclusion (explicit)
 

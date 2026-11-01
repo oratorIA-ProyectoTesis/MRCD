@@ -1,6 +1,6 @@
 # S1 - OE3: end-to-end run and optional GPU ASR profile (2026-11-01)
 
-**Self-review by the executing agent; no independent review yet.** Exploratory. Defaults unchanged: V0, P0 (CPU int8), `live_cfg_v2`. The real app (`ORATORIA-PROYECTO`, HEAD `f46a2b8`, its own dirty `frontend/.gitignore` pre-existing) was not modified. No models or corpora were downloaded (`HF_HUB_OFFLINE=1`). Historical evidence stays on CPU.
+**Self-reviewed by the author; an independent adversarial review was run on 2026-11-01 (`results/mejora_objetivos_20261101/REVISION_S/fix_logs/`), findings applied.** Exploratory. Defaults unchanged: V0, P0 (CPU int8), `live_cfg_v2`. The real app (`ORATORIA-PROYECTO`, HEAD `f46a2b8`, its own dirty `frontend/.gitignore` pre-existing) was not modified. No models or corpora were downloaded (`HF_HUB_OFFLINE=1`). Historical evidence stays on CPU.
 
 ## 1. E2E in a temporary clone (`e2e/`)
 Commands (clone and `node_modules` were created OUTSIDE both repos, in the session scratchpad):
@@ -32,7 +32,7 @@ Finding: the panel footnote says the score is "el maximo de la probabilidad de c
 - `p0_cuda`, `p1_cuda` registered (commit `4af76d4`): same decoding parameters/prompts as p0/p1, `device="cuda"`, `compute_type="float16"`, `experimental=True`. New optional fields `device`/`compute_type` on `ASRProfile`; `describe()` adds them only when set. **p0/p1 are bit-identical**: namespace, `asr_cache_key` and `describe()` hash compared before/after the change (pinned in `tests/test_asr_profiles_cuda.py`). A GPU profile demands CUDA: no device -> `ASRDeviceUnavailable` (model never loaded), failed probe -> `ASRDeviceUnavailable`, no silent CPU fallback; conflicting `device=` -> `ValueError`. 8 tests (registered/experimental/defaults, fingerprints, rejection, request cuda+float16, CPU path unchanged).
 - Feasibility: the project venv has `ctranslate2 4.8.2` (CUDA build, sees 1 device) but **fails without `cublas64_12.dll`** (`RuntimeError: Library cublas64_12.dll is not found or cannot be loaded`). Fix without touching the project venv: new venv `<repo>/../_venv_gpu` (uv, Python 3.12) with `nvidia-cublas-cu12 12.9.2.10`, `nvidia-cudnn-cu12 9.27.0.42`, `nvidia-cuda-nvrtc-cu12 12.9.86` (~0.7 GB download); the project python runs with those `bin` dirs prepended to `PATH` (`scripts/mejora_s1/run_gpu_bench.sh`). RTX 5060 Laptop (Blackwell, 8 GB, driver 616.92, CUDA UMD 13.4) works; `float16` and `int8_float16` both load. Observed once: the very first float16 call of the probe took 28.8 s (one-time driver kernel JIT/cache for sm_120); later processes show 0.2-0.3 s for the first file. Not repeatable on demand, so it is a caveat, not a figure.
 - Side effect to know: with `device="auto"` (the engine default) and those DLLs on `PATH`, `p0` would silently pick the GPU. Without them (default environment) it falls back to CPU int8 as before. The benchmark pins `device="cpu"` explicitly for the baselines.
-- Method: 13 local files of 5-60 s (`results/cierre_oe1_oe3_20261031/3b/cost/inputs`, 449 s of audio), offline path `transcribe_chunked(8 s, 2 s)`, one config per process, serial, OMP=4, round 0 (cold) + warm rounds. Load gate: a round is dropped if system CPU > 15 % in the 2 s before it (other agents were active; background 9-24 %). Texts stay in `gpu/_texts` (not committed). `gpu/discarded_gate_failed/` holds the first GPU run (background 16-17 %), discarded and re-run.
+- Method: 13 local files of 5-60 s (`results/cierre_oe1_oe3_20261031/3b/cost/inputs`, 449 s of audio), offline path `transcribe_chunked(8 s, 2 s)`, one config per process, serial, OMP=4, round 0 (cold) + warm rounds. Load gate: a round is dropped if system CPU > 15 % in the 2 s before it (other processes were active; background 9-24 %). Texts stay in `gpu/_texts` (not committed). `gpu/discarded_gate_failed/` holds the first GPU run (background 16-17 %), discarded and re-run.
 
 | config | load s | cold first pass RTF | warm RTF median/file [min-max] | RSS peak MB | GPU MB (load / peak, delta of device total) | rounds kept |
 |---|---|---|---|---|---|---|
@@ -74,6 +74,6 @@ Route unchanged: `StreamingASR.merge_recent`, 13 s ring re-decoded every tick, w
 
 ## Limitations / pending
 - Self-review only. The clone `...\scratchpad\app_clone` (with `node_modules`) was NOT deleted: the sandbox denied every `rm -rf`/`fs.rmSync` on it. Delete it manually (path in the final report); it is outside both repos.
-- Machine shared with other agents: background CPU 9-24 %, so some rounds were dropped and the p1 CPU baseline has 2 usable rounds, p0 CPU 1.
+- Machine shared with other processes: background CPU 9-24 %, so some rounds were dropped and the p1 CPU baseline has 2 usable rounds, p0 CPU 1.
 - E2E app backend is stubbed; patched panel copy "probabilidad de clase" should be reworded; scope default not implemented (S3).
 - GPU profile is experimental and unvalidated against human references; the engine default stays CPU.

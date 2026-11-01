@@ -1,6 +1,6 @@
 # Consentimiento informado (BORRADOR, NO APROBADO)
 
-**ESTADO: borrador pendiente de revisión del asesor y, si corresponde, del comité de ética. No está firmado ni aprobado. No usar con participantes hasta su aprobación.** Redactado por un agente de software; no es asesoría legal. La referencia a la normativa de datos personales (Ley 29733) proviene del `README.md` del repositorio y **no se verificó** su aplicación concreta.
+**ESTADO: borrador pendiente de revisión del asesor y, si corresponde, del comité de ética. No está firmado ni aprobado. No usar con participantes hasta su aprobación.** Redactado por los autores; no es asesoría legal. La referencia a la normativa de datos personales (Ley 29733) proviene del `README.md` del repositorio y **no se verificó** su aplicación concreta.
 
 ---
 
@@ -41,4 +41,4 @@
 | Fecha | |
 | Nombre y firma de quien aplica | |
 
-(Los campos de firma permanecen vacíos hasta la aplicación real; el agente no los completa.)
+(Los campos de firma permanecen vacíos hasta la aplicación real; los autores no los completan.)

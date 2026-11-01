@@ -1,6 +1,6 @@
 # ASR streaming vs offline against HUMAN references (Task 3.2)
 
-Self-review by the executing agent; no independent review. EXPLORATORY. V0, P0 and live_cfg_v2 remain the defaults; P1 is experimental; scores are uncalibrated. DIHANA fold 5 was never used (folds 1-4 only, nothing was tuned on them in this task).
+Self-reviewed by the author; no independent review. EXPLORATORY. V0, P0 and live_cfg_v2 remain the defaults; P1 is experimental; scores are uncalibrated. DIHANA fold 5 was never used (folds 1-4 only, nothing was tuned on them in this task).
 Raw data: `pred/<condition>/<unit>.json` (word, start, end, prob per unit), `asr_analysis.json`, `class_descriptive.json`, `units.json`, `config.json` (seeds, versions, sha256 of units/model/code). Code: `scripts/cierre3b/{prepare_units,asr_compare,asr_analyze,class_descriptive}.py`.
 
 ## 0. What the "WER 0.76" was

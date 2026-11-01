@@ -1,7 +1,6 @@
 # App patch package - MRCD disfluency section (NOT APPLIED)
 
-Status: **prepared, not applied.** The app repository (`ORATORIA-PROYECTO`) was not modified. Self-review by the author
-agent; no independent review yet.
+Status: **prepared, not applied.** The app repository (`ORATORIA-PROYECTO`) was not modified. Self-reviewed by the author; no independent review yet.
 
 ## What is here
 
@@ -40,7 +39,7 @@ diagnosis wording, and the visual channel is declared unavailable (the service r
 
 Authorization phrase the user must say, verbatim: **`autorizo aplicar el parche a ORATORIA-PROYECTO`**.
 
-After that (these are the commands the agent would run; do not run them before the phrase):
+After that (these are the commands to run; do not run them before the phrase):
 
 ```powershell
 cd "<APP_ROOT>"

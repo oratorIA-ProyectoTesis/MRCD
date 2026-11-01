@@ -1,6 +1,6 @@
 # S3 - OE4: classification improvements with what already exists (2026-11-01)
 
-**Self-review by the executing agent; no independent review.** EXPLORATORY. Protocol frozen 2026-11-01 before measuring (`PROTOCOL.md`, sha256 `053d435cb7609c73...`, annex `PROTOCOL_ANNEX_20261101_1.md`). DIHANA folds 1-4 only (telephone, peninsular Spanish), speaker-grouped nested CV, speaker bootstrap, Holm per family. Fold 5 never loaded. Nothing is declared confirmed; no score is called a calibrated probability. Defaults (V0, P0, `live_cfg_v2`) unchanged: every S3 route is opt-in and experimental.
+**Self-reviewed by the author; an independent adversarial review was run on 2026-11-01 (`results/mejora_objetivos_20261101/REVISION_S/fix_logs/`), findings applied.** EXPLORATORY. Protocol frozen 2026-11-01 before measuring (`PROTOCOL.md`, sha256 `053d435cb7609c73...`, annex `PROTOCOL_ANNEX_20261101_1.md`). DIHANA folds 1-4 only (telephone, peninsular Spanish), speaker-grouped nested CV, speaker bootstrap, Holm per family. Fold 5 never loaded. Nothing is declared confirmed; no score is called a calibrated probability. Defaults (V0, P0, `live_cfg_v2`) unchanged: every S3 route is opt-in and experimental.
 
 ## 1. E1 - repetition literal on P1 text (same P1/P0 CPU decodes for every text model)
 Frame of 1019 label-defined turns (weights = inverse sampling fraction for the sampled negatives), 214 positives from 84 speakers. Metrics F1 weighted; TP/FP/FN raw.

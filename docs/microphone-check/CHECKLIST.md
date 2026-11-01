@@ -1,6 +1,6 @@
 # Microphone check - checklist (tick before and after the run)
 
-Nothing here has been verified on a physical microphone by the agent. You are the one verifying it.
+Nothing here has been verified on a physical microphone by the authors. You are the one verifying it.
 
 ## Before the run
 

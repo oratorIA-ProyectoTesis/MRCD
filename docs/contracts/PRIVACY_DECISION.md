@@ -1,6 +1,6 @@
 # Decisión de privacidad del audio (app ↔ MRCD)
 
-**ESTADO: PENDIENTE DE DECISIÓN del usuario y del asesor.** Este documento prepara la decisión; no la toma. Ninguna opción está aprobada, implementada ni probada. Fecha de preparación: 2026-11-01. Autorrevisión de un agente de software; no es asesoría legal ni sustituye la consulta al asesor o al comité de ética.
+**ESTADO: PENDIENTE DE DECISIÓN del usuario y del asesor.** Este documento prepara la decisión; no la toma. Ninguna opción está aprobada, implementada ni probada. Fecha de preparación: 2026-11-01. Autorrevisión de los autores; no es asesoría legal ni sustituye la consulta al asesor o al comité de ética.
 
 ## 1. Por qué hay que decidir
 
@@ -62,4 +62,4 @@ Compensación: B es la menor huella que aún permite OE3 real y el SUS; no elimi
 | Fecha | |
 | Firma | |
 
-El agente no completa esta tabla. Hasta que se complete, el estado es **PENDIENTE DE DECISIÓN**.
+Esta tabla no se completa en este documento. Hasta que se complete, el estado es **PENDIENTE DE DECISIÓN**.

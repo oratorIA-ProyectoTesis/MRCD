@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Microphone check for the MRCD live path (prepared by the agent, to be RUN BY THE USER).
+"""Microphone check for the MRCD live path (to be RUN BY THE USER).
 
 Uses the normal live path: ``scripts/live_demo.LiveEngine`` (ring buffer -> SessionFeatureTracker -> Whisper ->
 checkpoint -> LiveScorer) with a ``MicrophoneStream`` subclass that also meters the signal level. It writes ONLY
@@ -12,7 +12,7 @@ Privacy defaults (verified in the code, see README "Privacy"):
 * the level report holds aggregate numbers only (peak, noise floor, clipping, silence), never samples.
 * ``share_summary.json`` is the single file meant to be handed over; it contains no rows, no text and no audio.
 
-Nothing in this file has been run against a physical microphone by the agent. ``--simulate-wav`` feeds an existing
+Nothing in this file has been run against a physical microphone by the authors. ``--simulate-wav`` feeds an existing
 WAV through the same code path (including the same metering) without importing ``sounddevice``.
 """
 
