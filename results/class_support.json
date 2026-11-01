@@ -1,0 +1,26 @@
+{
+  "events": {
+    "filler_word": 204,
+    "neutral_pause": 493,
+    "rhetorical_pause": 89,
+    "repetition": 92,
+    "prolongation": 115,
+    "revision": 33,
+    "block": 8
+  },
+  "low_conf": {
+    "block": 52,
+    "prolongation": 92
+  },
+  "windows": {
+    "fluent": 13125,
+    "filler_word": 835,
+    "prolongation": 598,
+    "repetition": 508,
+    "block": 44,
+    "revision": 283,
+    "rhetorical_pause": 595,
+    "neutral_pause": 2939
+  },
+  "zero_classes": []
+}

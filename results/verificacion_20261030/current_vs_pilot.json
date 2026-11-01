@@ -1,0 +1,204 @@
+{
+ "summary": {
+  "n": 32,
+  "labels_equal_pilot": 32,
+  "labels_equal_repro": 32,
+  "max_abs_diff_vs_pilot": 0.0,
+  "max_abs_diff_vs_repro": 0.0,
+  "asr": "cached pilot words (Whisper not re-run)"
+ },
+ "rows": [
+  {
+   "sample_id": "ameresco_000",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_001",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_002",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_003",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_004",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_005",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_006",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_007",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_008",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_009",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_010",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_011",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_012",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_013",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_014",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_015",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_016",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_017",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_018",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_019",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_020",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_021",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_022",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_023",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_024",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_025",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_026",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_027",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_028",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_029",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_030",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  },
+  {
+   "sample_id": "ameresco_031",
+   "max_abs_diff_vs_pilot": 0.0,
+   "max_abs_diff_vs_repro": 0.0,
+   "labels_equal_pilot": true
+  }
+ ]
+}

@@ -1,0 +1,51 @@
+{
+  "audio": "mrcd_sesion_1790263526.wav",
+  "whisper": "small",
+  "resultados": [
+    {
+      "trozo": "5s",
+      "palabras": 115,
+      "repeticiones": 2,
+      "muletillas": 3,
+      "edicion": 0,
+      "alargamientos": 0,
+      "total_marcadores": 5
+    },
+    {
+      "trozo": "8s",
+      "palabras": 115,
+      "repeticiones": 2,
+      "muletillas": 4,
+      "edicion": 0,
+      "alargamientos": 0,
+      "total_marcadores": 6
+    },
+    {
+      "trozo": "13s",
+      "palabras": 112,
+      "repeticiones": 2,
+      "muletillas": 4,
+      "edicion": 0,
+      "alargamientos": 0,
+      "total_marcadores": 6
+    },
+    {
+      "trozo": "30s",
+      "palabras": 111,
+      "repeticiones": 0,
+      "muletillas": 4,
+      "edicion": 0,
+      "alargamientos": 0,
+      "total_marcadores": 4
+    },
+    {
+      "trozo": "entero",
+      "palabras": 107,
+      "repeticiones": 0,
+      "muletillas": 3,
+      "edicion": 0,
+      "alargamientos": 0,
+      "total_marcadores": 3
+    }
+  ]
+}

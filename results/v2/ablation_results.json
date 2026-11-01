@@ -1,0 +1,255 @@
+{
+  "header": "Test con etiquetas de un juez multimodal (VLM); su acuerdo con anotación humana debe reportarse aparte",
+  "label_source": "auto",
+  "test_label_source": "gold_llm",
+  "n_windows": 503,
+  "n_speakers": 18,
+  "split": "Entrenamiento con etiquetas 'auto' (supervisión débil) y evaluación con etiquetas 'gold_llm' independientes; GroupKFold por hablante (k=5, hablantes=18)",
+  "ci_method": "bootstrap de clúster por hablante",
+  "class_support": {
+    "fluent": 177,
+    "filler_word": 50,
+    "prolongation": 13,
+    "repetition": 57,
+    "block": 2,
+    "revision": 10,
+    "rhetorical_pause": 20,
+    "neutral_pause": 174
+  },
+  "train_class_support": {
+    "fluent": 13125,
+    "filler_word": 835,
+    "prolongation": 598,
+    "repetition": 508,
+    "block": 44,
+    "revision": 283,
+    "rhetorical_pause": 595,
+    "neutral_pause": 2939
+  },
+  "modes": {
+    "audio_only": {
+      "macro_f1": 0.11902782402428044,
+      "macro_ci95": [
+        0.09592687389827226,
+        0.1453076740280958
+      ],
+      "per_class": {
+        "fluent": {
+          "f1": 0.39855072463768115,
+          "ci95": [
+            0.2514595808383233,
+            0.5308574007220216
+          ]
+        },
+        "filler_word": {
+          "f1": 0.10294117647058823,
+          "ci95": [
+            0.02039795918367347,
+            0.1702337625979843
+          ]
+        },
+        "prolongation": {
+          "f1": 0.024096385542168676,
+          "ci95": [
+            0.0,
+            0.07059344091618948
+          ]
+        },
+        "repetition": {
+          "f1": 0.12612612612612611,
+          "ci95": [
+            0.0,
+            0.20612887112887107
+          ]
+        },
+        "block": {
+          "f1": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "revision": {
+          "f1": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "rhetorical_pause": {
+          "f1": 0.05555555555555555,
+          "ci95": [
+            0.0,
+            0.12990206514796673
+          ]
+        },
+        "neutral_pause": {
+          "f1": 0.5244755244755245,
+          "ci95": [
+            0.4486674247539178,
+            0.6284113130156912
+          ]
+        }
+      }
+    },
+    "audio_text": {
+      "macro_f1": 0.31843809755410796,
+      "macro_ci95": [
+        0.2810252145712094,
+        0.37647331835210623
+      ],
+      "per_class": {
+        "fluent": {
+          "f1": 0.5985915492957746,
+          "ci95": [
+            0.4296031746031746,
+            0.7412637664932482
+          ]
+        },
+        "filler_word": {
+          "f1": 0.47368421052631576,
+          "ci95": [
+            0.33733671528218134,
+            0.5806830228683931
+          ]
+        },
+        "prolongation": {
+          "f1": 0.08791208791208792,
+          "ci95": [
+            0.0,
+            0.1481944444444444
+          ]
+        },
+        "repetition": {
+          "f1": 0.7213114754098361,
+          "ci95": [
+            0.6666666666666666,
+            0.8125127032520325
+          ]
+        },
+        "block": {
+          "f1": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "revision": {
+          "f1": 0.23529411764705882,
+          "ci95": [
+            0.08159183673469388,
+            0.375
+          ]
+        },
+        "rhetorical_pause": {
+          "f1": 0.1917808219178082,
+          "ci95": [
+            0.03998039215686275,
+            0.31584928229665066
+          ]
+        },
+        "neutral_pause": {
+          "f1": 0.5190839694656488,
+          "ci95": [
+            0.43805555555555553,
+            0.5822180933190276
+          ]
+        }
+      }
+    },
+    "trimodal": {
+      "macro_f1": 0.31079119077601003,
+      "macro_ci95": [
+        0.2701747134240281,
+        0.37017096916919207
+      ],
+      "per_class": {
+        "fluent": {
+          "f1": 0.6148648648648649,
+          "ci95": [
+            0.4712696212989367,
+            0.7378485020782684
+          ]
+        },
+        "filler_word": {
+          "f1": 0.4909090909090909,
+          "ci95": [
+            0.34527650606787297,
+            0.6111274509803922
+          ]
+        },
+        "prolongation": {
+          "f1": 0.1095890410958904,
+          "ci95": [
+            0.0,
+            0.2
+          ]
+        },
+        "repetition": {
+          "f1": 0.7401574803149606,
+          "ci95": [
+            0.6597854555586514,
+            0.8695652173913043
+          ]
+        },
+        "block": {
+          "f1": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "revision": {
+          "f1": 0.2608695652173913,
+          "ci95": [
+            0.09518272425249169,
+            0.4045515139973338
+          ]
+        },
+        "rhetorical_pause": {
+          "f1": 0.10526315789473684,
+          "ci95": [
+            0.0,
+            0.18947368421052632
+          ]
+        },
+        "neutral_pause": {
+          "f1": 0.46875,
+          "ci95": [
+            0.3999616858237548,
+            0.546349593495935
+          ]
+        }
+      }
+    }
+  },
+  "paired_macro_f1_diff_ci95": {
+    "trimodal-audio_only": [
+      0.1566243111747243,
+      0.24363202134925085
+    ],
+    "audio_text-audio_only": [
+      0.1701475065896999,
+      0.24386565596627777
+    ],
+    "trimodal-audio_text": [
+      -0.04401051940650835,
+      0.032927738887778175
+    ]
+  },
+  "hyperparams": {
+    "data": "data\\windows_auto.npz",
+    "test_data": "data\\windows_gold.npz",
+    "allow_auto_labels": false,
+    "allow_same_label_source": false,
+    "folds": 5,
+    "epochs": 15,
+    "bs": 64,
+    "lr": 0.002,
+    "d": 64,
+    "modality_dropout": 0.5,
+    "bootstrap": 1000,
+    "seed": 13,
+    "out": "results\\v2"
+  }
+}

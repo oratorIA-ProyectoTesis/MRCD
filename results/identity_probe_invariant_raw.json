@@ -1,0 +1,43 @@
+{
+  "data": "windows_auto.npz",
+  "normalize": "raw",
+  "n_talks": 17,
+  "n_segments": 86,
+  "n_windows": 18347,
+  "dropped_single_segment": [
+    "PsJ2IAVt7Is"
+  ],
+  "chance": 0.058823529411764705,
+  "folds": 5,
+  "bootstrap": 300,
+  "seed": 13,
+  "branches": {
+    "kinesic": {
+      "balanced_accuracy": 0.5412387350398833,
+      "ci95": [
+        0.5233598136886803,
+        0.6012298048669187
+      ],
+      "ratio_vs_chance": 9.201058495678016,
+      "n_features": 12
+    },
+    "linguistic": {
+      "balanced_accuracy": 0.15417503710238098,
+      "ci95": [
+        0.13710004256436825,
+        0.18242788079357714
+      ],
+      "ratio_vs_chance": 2.620975630740477,
+      "n_features": 12
+    },
+    "acoustic": {
+      "balanced_accuracy": 0.45267218541485066,
+      "ci95": [
+        0.4249200246392993,
+        0.49475435763396436
+      ],
+      "ratio_vs_chance": 7.695427152052461,
+      "n_features": 5
+    }
+  }
+}

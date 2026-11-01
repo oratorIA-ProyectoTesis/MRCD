@@ -1,0 +1,76 @@
+{
+  "video_id": "Ka_okSSytes",
+  "source": "C:\\zArnes-tesis\\mrcd\\data\\results_Ka_okSSytes.json",
+  "n_adjudicated": 60,
+  "n_unusable": 0,
+  "lexical_vs_fluent": {
+    "n": 44,
+    "tp": 10,
+    "fn": 13,
+    "fp": 8,
+    "tn": 13
+  },
+  "product_disfluency_vs_fluent": {
+    "n": 44,
+    "tp": 12,
+    "fn": 11,
+    "fp": 16,
+    "tn": 5
+  },
+  "pauses": {
+    "n": 16,
+    "matrix": {
+      "neutral_pause": {
+        "neutral_pause": 4,
+        "rhetorical_pause": 2,
+        "other": 9
+      },
+      "rhetorical_pause": {
+        "neutral_pause": 0,
+        "rhetorical_pause": 0,
+        "other": 1
+      }
+    }
+  },
+  "revision_vs_filler": {
+    "filler_judgments": 15,
+    "filler_predicted_as_revision": 3,
+    "all_revision_predictions": 3,
+    "lexicon_overlap": [
+      "o sea"
+    ],
+    "weak_label_events": 33,
+    "weak_label_edit_terms": {
+      "es decir": 10,
+      "digo": 6,
+      "perdon": 4,
+      "o sea": 13
+    },
+    "cases": [
+      {
+        "index": 33,
+        "start": 16.5,
+        "text": "[text withheld]",
+        "judge": "filler_word",
+        "prediction": "revision",
+        "probability": 0.9876
+      },
+      {
+        "index": 409,
+        "start": 204.5,
+        "text": "[text withheld]",
+        "judge": "filler_word",
+        "prediction": "revision",
+        "probability": 0.5988
+      },
+      {
+        "index": 49,
+        "start": 24.5,
+        "text": "[text withheld]",
+        "judge": "filler_word",
+        "prediction": "revision",
+        "probability": 0.5645
+      }
+    ]
+  }
+}

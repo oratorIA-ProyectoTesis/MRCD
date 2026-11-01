@@ -1,0 +1,52 @@
+{
+  "data": "windows_auto.npz",
+  "normalize": "speaker",
+  "n_talks": 17,
+  "n_segments": 86,
+  "n_windows": 18347,
+  "dropped_single_segment": [
+    "PsJ2IAVt7Is"
+  ],
+  "chance": 0.058823529411764705,
+  "folds": 5,
+  "bootstrap": 300,
+  "seed": 13,
+  "branches": {
+    "kinesic": {
+      "balanced_accuracy": 0.058823529411764705,
+      "ci95": [
+        0.0,
+        0.06666666666666667
+      ],
+      "ratio_vs_chance": 1.0,
+      "n_features": 24
+    },
+    "prosodic": {
+      "balanced_accuracy": 0.058823529411764705,
+      "ci95": [
+        0.0,
+        0.06666666666666667
+      ],
+      "ratio_vs_chance": 1.0,
+      "n_features": 9
+    },
+    "linguistic": {
+      "balanced_accuracy": 0.058823529411764705,
+      "ci95": [
+        0.0,
+        0.06666666666666667
+      ],
+      "ratio_vs_chance": 1.0,
+      "n_features": 24
+    },
+    "acoustic": {
+      "balanced_accuracy": 0.058823529411764705,
+      "ci95": [
+        0.027941176470588268,
+        0.06666666666666667
+      ],
+      "ratio_vs_chance": 1.0,
+      "n_features": 10
+    }
+  }
+}

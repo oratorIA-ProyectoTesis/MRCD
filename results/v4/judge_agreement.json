@@ -1,0 +1,36 @@
+{
+  "n": 506,
+  "model": "gpt-4o",
+  "kappa_heuristic_vs_judge": 0.344,
+  "judge_distribution": {
+    "fluent": 171,
+    "neutral_pause": 164,
+    "rhetorical_pause": 26,
+    "repetition": 62,
+    "revision": 20,
+    "block": 4,
+    "prolongation": 12,
+    "filler_word": 47
+  },
+  "heuristic_distribution": {
+    "fluent": 120,
+    "neutral_pause": 60,
+    "block": 25,
+    "prolongation": 98,
+    "repetition": 60,
+    "rhetorical_pause": 60,
+    "revision": 33,
+    "filler_word": 50
+  },
+  "negatives": {
+    "n": 120,
+    "events_found": {
+      "revision": 10,
+      "neutral_pause": 6,
+      "rhetorical_pause": 2,
+      "filler_word": 3,
+      "repetition": 6,
+      "prolongation": 2
+    }
+  }
+}

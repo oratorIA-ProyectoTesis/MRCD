@@ -1,0 +1,49 @@
+{
+ "seed": 13,
+ "created_utc": "2026-10-31T09:31:34Z",
+ "OMP_NUM_THREADS_effective": "4",
+ "numpy_imported_before_pin": false,
+ "python": "3.12.10",
+ "platform": "Windows-11-10.0.26200-SP0",
+ "versions": {
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "scikit-learn": "1.9.1",
+  "librosa": "1.0.0",
+  "numba": "0.67.0",
+  "soundfile": "0.14.0",
+  "faster-whisper": "1.2.1",
+  "ctranslate2": "4.8.2"
+ },
+ "protocol_sha256": "3523e36a209aafb11017873acad53f6d310483023d84450512ba65b2eba06e71",
+ "code_sha256": {
+  "mrcd\\asr_recovery\\__init__.py": "5b120db74d2caa6e6d5fee0af72e6d4d91668c10bd0f6782872684658c6ccc4c",
+  "mrcd\\asr_recovery\\acoustic.py": "43206aaaf15cc0aef7c9311970f21a158d579ee7bab1bd1dd9c3becb371e26fb",
+  "mrcd\\asr_recovery\\common.py": "2b57b856403eab2e597cdd3d90aee9835524843183a163578bdfa3d02f3ca51d",
+  "mrcd\\asr_recovery\\cvfold.py": "aa6ac099332007ab14aef34ff853125d98b1c01b08bd4c28d198ac48013f6fac",
+  "mrcd\\asr_recovery\\decode.py": "6e366d1a942ea0c0b5404ae4212cd410ef382a9f7978a739ed8cdf8a44ff5463",
+  "mrcd\\asr_recovery\\signals.py": "87513b3c57bc968e119217aff64deab077c27fcf88589ba70a383b03da93215f",
+  "mrcd\\asr_recovery\\stats.py": "9c51cb9244e4e6d7a7ce1444ba27fbcf7f7a50c1245cb3775d941c93baf617d9",
+  "mrcd\\asr_recovery\\subset.py": "0645e7c047e01689033740f1a6f9f5041651ece042be05f2ec717c6f0d82284a",
+  "scripts\\asr_recovery\\_pin.py": "5bdb1d3d0cc41eee1458a84f1a18dd40ddd44068c636a65dbab468fd579e992c",
+  "scripts\\asr_recovery\\freeze_protocol.py": "deccfb90f6457cea04181afd1113db8ed31089953a34d345192ac431a698b683",
+  "scripts\\asr_recovery\\s0_timing_subset.py": "b7f150f1c262c8d2548d28d51d789c673f94b2f9ceb80e8c19781a5e332fe679",
+  "scripts\\asr_recovery\\s2_decode.py": "80c605b9ded7c1b5562edda097ef76d44da4fa15f385bd24b824f98696737cef",
+  "scripts\\asr_recovery\\s3_acoustic_features.py": "255b916dac983eeb6fb3169117a9ee012d6e33394859dc5b5ebb5882b25b09d1",
+  "scripts\\asr_recovery\\s4_eval_o2_o3.py": "df4b6af65b214d65e628a0717c71fffe2b4a0bf2cd8b3be28c335b7458f5e2c3",
+  "scripts\\asr_recovery\\s5_eval_o1.py": "602fb2b21ffd52b7573e4aa94d25580dd00b60ae0bc0cdaf1b703a5a5ee23e96",
+  "scripts\\asr_recovery\\s6_family.py": "39cb73667a96bf13941c05faf7c086f42b7789139919a2f0a3777cf29643dc6d",
+  "scripts\\asr_recovery\\s7_tables.py": "7923a483d8c1604b482a1dc42b2a97f9b5259f65b5be9d3c3e5fe35e92c8237e",
+  "scripts\\asr_recovery\\s8_c1_prompt_check.py": "86dd204ba2f957bf8f3400f68bd9615475c84236867d5c064cc83c730d002f11",
+  "scripts\\asr_recovery\\s9_eval_c1.py": "ff11c4160b09ae6492f34be41fef739dbca27f7ae17871253771daffd17236c2"
+ },
+ "inputs_sha256": {
+  "subset.json": "d1b1c7be9f1b8bb2484465bd0923c7113ab40d5bcd564c45607bb51397bc9860",
+  "annex3": "f9f1537dd5fd81c211cdd3b5bd34e4966028a5eb49bec5c37369e7fe1d697a23",
+  "parent_predictions.csv": "ec330928f0793a0f5594e9ed7a97406fe114caf244b6c048cb3ce0bd5f16ed5a",
+  "asr_P0": "8bea8e3913a53d531455d9281d03b7ce2652401084d3d6f442291128ee1f249d",
+  "asr_C1": "2affdb31c129689f203f7ac6066dfd4b2a4a194e1084dc457d85944de0171bb3",
+  "asr_P1": "c0a2eea51e3e23b595a00d4b91eb7d6fd346bcdcc0896c1dcf8913c40864dd14"
+ },
+ "seconds": 18.0
+}

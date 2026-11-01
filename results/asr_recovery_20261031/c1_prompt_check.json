@@ -1,0 +1,117 @@
+{
+  "P1": {
+    "sha256": "fe49e930ccc9f94847b7bedaec65f8c347cecaccbcd7283545618bc194c6a8b2",
+    "words": 45,
+    "chars": 216,
+    "whisper_tokens": 71,
+    "adjacent_identical_word_pairs": 4,
+    "ellipses": 5,
+    "filler_tokens_present": [
+      "bueno",
+      "digo",
+      "eh",
+      "este",
+      "mmm",
+      "o",
+      "perdon",
+      "perdone",
+      "sea"
+    ],
+    "has_horario": true,
+    "has_preguntar": true,
+    "3gram_vs_pool": {
+      "distinct_ngrams_hit": 5,
+      "turns_hit": 8,
+      "examples": [
+        "[withheld]",
+        "[withheld]",
+        "[withheld]",
+        "[withheld]",
+        "[withheld]"
+      ]
+    },
+    "3gram_vs_frame": {
+      "distinct_ngrams_hit": 2,
+      "turns_hit": 2,
+      "examples": [
+        "[withheld]",
+        "[withheld]"
+      ]
+    },
+    "4gram_vs_pool": {
+      "distinct_ngrams_hit": 1,
+      "turns_hit": 1,
+      "examples": [
+        "[withheld]"
+      ]
+    },
+    "4gram_vs_frame": {
+      "distinct_ngrams_hit": 1,
+      "turns_hit": 1,
+      "examples": [
+        "[withheld]"
+      ]
+    },
+    "5gram_vs_pool": {
+      "distinct_ngrams_hit": 0,
+      "turns_hit": 0,
+      "examples": []
+    },
+    "5gram_vs_frame": {
+      "distinct_ngrams_hit": 0,
+      "turns_hit": 0,
+      "examples": []
+    }
+  },
+  "C1": {
+    "sha256": "6714aaf4e61a9e1853cf93d7f0e6364d2e571be4a8a04597b6b6a4e133668dd7",
+    "words": 46,
+    "chars": 281,
+    "whisper_tokens": 75,
+    "adjacent_identical_word_pairs": 0,
+    "ellipses": 0,
+    "filler_tokens_present": [],
+    "has_horario": true,
+    "has_preguntar": true,
+    "3gram_vs_pool": {
+      "distinct_ngrams_hit": 4,
+      "turns_hit": 151,
+      "examples": [
+        "[withheld]",
+        "[withheld]",
+        "[withheld]",
+        "[withheld]"
+      ]
+    },
+    "3gram_vs_frame": {
+      "distinct_ngrams_hit": 2,
+      "turns_hit": 42,
+      "examples": [
+        "[withheld]",
+        "[withheld]"
+      ]
+    },
+    "4gram_vs_pool": {
+      "distinct_ngrams_hit": 1,
+      "turns_hit": 3,
+      "examples": [
+        "[withheld]"
+      ]
+    },
+    "4gram_vs_frame": {
+      "distinct_ngrams_hit": 0,
+      "turns_hit": 0,
+      "examples": []
+    },
+    "5gram_vs_pool": {
+      "distinct_ngrams_hit": 0,
+      "turns_hit": 0,
+      "examples": []
+    },
+    "5gram_vs_frame": {
+      "distinct_ngrams_hit": 0,
+      "turns_hit": 0,
+      "examples": []
+    }
+  }
+}
