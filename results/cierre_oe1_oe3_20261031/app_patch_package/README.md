@@ -44,8 +44,8 @@ After that (these are the commands the agent would run; do not run them before t
 
 ```powershell
 cd "<APP_ROOT>"
-git apply --check "C:\zArnes-tesis\mrcd\results\cierre_oe1_oe3_20261031\app_patch_package\0001-feat-report-mrcd-disfluency-section.patch"
-git apply         "C:\zArnes-tesis\mrcd\results\cierre_oe1_oe3_20261031\app_patch_package\0001-feat-report-mrcd-disfluency-section.patch"
+git apply --check "<repo>\results\cierre_oe1_oe3_20261031\app_patch_package\0001-feat-report-mrcd-disfluency-section.patch"
+git apply         "<repo>\results\cierre_oe1_oe3_20261031\app_patch_package\0001-feat-report-mrcd-disfluency-section.patch"
 cd frontend
 npx tsc -b ; npx vitest run
 ```
@@ -57,7 +57,7 @@ npx tsc -b ; npx vitest run
 
 ## Compile / test evidence (what was and was not verified)
 
-- In a temporary clone outside the app and outside `C:\zArnes-tesis`: `tsc -b` exit 0, `eslint` exit 0 on touched paths, full
+- In a temporary clone outside the app and outside `<workspace>`: `tsc -b` exit 0, `eslint` exit 0 on touched paths, full
   `vitest` 64 files / 649 tests passed (includes the 26 new tests). `node_modules` was copied from the app (not installed);
   nothing was written to the app's `node_modules`. The clones were deleted at the end.
 - NOT verified: a real browser, the dev server running together with `vite dev` (CORS preflight is covered by a server-side
@@ -78,3 +78,10 @@ npx tsc -b ; npx vitest run
 ## Rollback
 
 `git apply -R <patch>` (or `git checkout -- <3 touched files>` and delete the new files) restores the app.
+
+## Addendum 2026-11-01 (S3): patch updated for service contract rev 1.2 (STILL NOT APPLIED)
+
+- `0001-...patch` now has 17 files (the 2 new fixtures are real `mrcd.analysis/v1` rev 1.2 documents). The previous patch is kept as `0001-...rev1.1.patch.old`. Self-review only.
+- Behaviour: the report hides the classes outside the evaluated scope (`block`, `rhetorical_pause`, `neutral_pause`, `revision`) by default, **also for older documents**, and does not count them in "Eventos" or in the rate; the rate comes from the service for rev 1.2 or is recomputed from in-scope events for older documents (and stays "No disponible" when the service says so). An unchecked checkbox "Incluir clases fuera de alcance (sin validar)" requests them (`include_out_of_scope=true`); they are then listed in a separate table marked "Fuera de alcance, no validada" and still not counted.
+- Copy: "Puntaje del modelo" -> "Score (softmax, no calibrado)"; the footnote no longer says "probabilidad de clase". Optional per-event `decision` (three states) renders as "Decision experimental ... (estimacion de desarrollo, no calibrada)", never as a percentage.
+- Checks (temporary clone outside both repos, base `f46a2b8`; log `logs/frontend_checks_s3.log`): `git apply --check` OK on a fresh clone, `tsc -b` exit 0, eslint exit 0 on the touched folders, full vitest 64 files / 656 tests passed. Not verified: real browser rerun, real app backend.

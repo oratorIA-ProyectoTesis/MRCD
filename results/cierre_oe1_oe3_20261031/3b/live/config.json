@@ -1,0 +1,40 @@
+{
+ "seeds": [
+  501,
+  502,
+  503,
+  504,
+  505,
+  506
+ ],
+ "minutes": 10.5,
+ "partition": "tick 8000 samples (0.5 s)",
+ "configs": {
+  "live_cfg_v1": "LiveConfig(name='live_cfg_v1', left_margin_s=3.0, right_margin_s=3.0, finalize_on_stop=False, mark_status=False, terminal_window=False, rescore_at_close=False, lag_lookback_s=3.0, fill_dropped_audio=False, viterbi_carry=False)",
+  "live_cfg_v2": "LiveConfig(name='live_cfg_v2', left_margin_s=3.0, right_margin_s=4.0, finalize_on_stop=True, mark_status=True, terminal_window=True, rescore_at_close=True, lag_lookback_s=3.0, fill_dropped_audio=True, viterbi_carry=False)",
+  "live_cfg_v3": "LiveConfig(name='live_cfg_v3', left_margin_s=3.0, right_margin_s=4.0, finalize_on_stop=True, mark_status=True, terminal_window=True, rescore_at_close=True, lag_lookback_s=3.0, fill_dropped_audio=True, viterbi_carry=True)"
+ },
+ "hardware": {
+  "platform": "Windows-11-10.0.26200-SP0",
+  "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "python": "3.12.10",
+  "cpu_count_logical": 20,
+  "OMP_NUM_THREADS": "4",
+  "cpu": {
+   "Name": "13th Gen Intel(R) Core(TM) i7-13650HX",
+   "NumberOfCores": 14,
+   "NumberOfLogicalProcessors": 20
+  },
+  "ram_gb": 23.7,
+  "torch": "2.9.1+cpu",
+  "numpy": "2.5.3",
+  "librosa": "1.0.0",
+  "faster_whisper": "1.2.1",
+  "ctranslate2": "4.8.2",
+  "scipy": "1.18.1",
+  "soundfile": "0.14.0"
+ },
+ "code_sha256_mrcd": "5a6bbf663de74ecbdcbbf90f6d6a216909c469103969a50e25111d736faec34d",
+ "rule_sha256": "f3ac6e6b9326cd01ba2bd2351d023467c4aef4d1d167a550a0be583917642a6c",
+ "omp": "4"
+}

@@ -12,10 +12,10 @@ index b4cc2a4..b468b9d 100644
 +VITE_MRCD_SERVICE_URL=
 diff --git a/frontend/src/contexts/feedback/components/DisfluencyEventsSection.test.tsx b/frontend/src/contexts/feedback/components/DisfluencyEventsSection.test.tsx
 new file mode 100644
-index 0000000..5b3e5de
+index 0000000..38e85a4
 --- /dev/null
 +++ b/frontend/src/contexts/feedback/components/DisfluencyEventsSection.test.tsx
-@@ -0,0 +1,159 @@
+@@ -0,0 +1,232 @@
 +// @vitest-environment jsdom
 +/**
 + * Sección de disfluencias del reporte: clase, tiempos, puntaje "no calibrado",
@@ -27,11 +27,20 @@ index 0000000..5b3e5de
 +
 +import errorStereo from "../../../shared/api/__fixtures__/mrcd/error_stereo.json";
 +import okP0 from "../../../shared/api/__fixtures__/mrcd/response_ok_p0_v0.json";
++import okAll from "../../../shared/api/__fixtures__/mrcd/response_ok_v1_2_all_decision.json";
++import okDefault from "../../../shared/api/__fixtures__/mrcd/response_ok_v1_2_default_scope.json";
 +import okP1 from "../../../shared/api/__fixtures__/mrcd/response_ok_p1_experimental.json";
 +import { MrcdAnalysisSchema } from "../../../shared/api/mrcd-service";
 +import { DisfluencyAnalysisView } from "./DisfluencyEventsSection";
 +
 +let roots: Root[] = [];
++
++const OUT_OF_SCOPE = new Set([
++  "block",
++  "rhetorical_pause",
++  "neutral_pause",
++  "revision",
++]);
 +
 +function mount(element: React.ReactElement): HTMLElement {
 +  const container = document.createElement("div");
@@ -58,8 +67,9 @@ index 0000000..5b3e5de
 +  it("muestra por evento clase, inicio/fin y puntaje marcado como no calibrado", () => {
 +    const view = mount(<DisfluencyAnalysisView analysis={analysis} />);
 +    const rows = view.querySelectorAll("tbody tr");
-+    expect(rows.length).toBe(analysis.events.length);
-+    const first = analysis.events[0]!;
++    const inScope = analysis.events.filter((e) => !OUT_OF_SCOPE.has(e.class));
++    expect(rows.length).toBe(inScope.length);
++    const first = inScope[0]!;
 +    const text = rows[0]!.textContent ?? "";
 +    expect(text).toContain(first.class);
 +    expect(text).toContain(`${first.start_s.toFixed(1)} s`);
@@ -69,15 +79,78 @@ index 0000000..5b3e5de
 +    expect(view.textContent).toContain("no es una probabilidad de acierto");
 +  });
 +
-+  it("marca las clases sin referencia humana como salida técnica sin validar", () => {
++  it("oculta por defecto las clases fuera de alcance, también en documentos antiguos, y no las cuenta", () => {
 +    const view = mount(<DisfluencyAnalysisView analysis={analysis} />);
 +    const rows = [...view.querySelectorAll("tbody tr")];
-+    const unvalidated = new Set(["block", "rhetorical_pause", "neutral_pause", "revision"]);
-+    expect(rows.length).toBeGreaterThan(0);
-+    analysis.events.forEach((event, i) => {
-+      const marked = (rows[i]!.textContent ?? "").includes("Salida técnica sin validar");
-+      expect(marked).toBe(unvalidated.has(event.class));
-+    });
++    const inScope = analysis.events.filter((e) => !OUT_OF_SCOPE.has(e.class));
++    expect(inScope.length).toBeLessThan(analysis.events.length);
++    expect(rows.length).toBe(inScope.length);
++    for (const row of rows) {
++      expect(row.textContent ?? "").not.toMatch(
++        /block|rhetorical_pause|neutral_pause|revision/,
++      );
++    }
++    expect(view.textContent).toContain("Se ocultaron");
++    const eventsCard = [...view.querySelectorAll("p")].find((p) =>
++      (p.textContent ?? "").startsWith("Eventos (dentro de alcance)"),
++    )!;
++    expect(eventsCard.nextElementSibling!.textContent).toBe(
++      String(inScope.length),
++    );
++  });
++
++  it("recalcula la tasa por minuto solo con eventos dentro de alcance en documentos antiguos", () => {
++    const view = mount(<DisfluencyAnalysisView analysis={analysis} />);
++    const inScope = analysis.events.filter(
++      (e) => !OUT_OF_SCOPE.has(e.class),
++    ).length;
++    const expected = (inScope / (36.0 / 60)).toFixed(1);
++    expect(view.textContent).toContain(expected);
++  });
++
++  it("documento rev. 1.2 por defecto: solo las tres clases evaluadas y la tasa del servicio", () => {
++    const doc = MrcdAnalysisSchema.parse(okDefault);
++    const view = mount(<DisfluencyAnalysisView analysis={doc} />);
++    const rows = [...view.querySelectorAll("tbody tr")];
++    expect(rows.length).toBe(doc.summary!.n_events);
++    expect(doc.summary!.out_of_scope!.included).toBe(false);
++    expect(view.textContent).toContain(
++      `Se ocultaron ${doc.summary!.out_of_scope!.n_events}`,
++    );
++    expect(view.textContent).toContain(
++      doc.summary!.events_per_minute.value!.toFixed(1),
++    );
++  });
++
++  it("con la opción explícita lista aparte las clases fuera de alcance, marcadas y sin contarlas", () => {
++    const doc = MrcdAnalysisSchema.parse(okAll);
++    const view = mount(<DisfluencyAnalysisView analysis={doc} />);
++    const tables = view.querySelectorAll("table");
++    expect(tables.length).toBe(2);
++    const inRows = tables[0]!.querySelectorAll("tbody tr");
++    const outRows = [...tables[1]!.querySelectorAll("tbody tr")];
++    expect(inRows.length).toBe(doc.summary!.n_events);
++    expect(outRows.length).toBe(doc.summary!.out_of_scope!.n_events);
++    for (const row of outRows) {
++      expect(row.textContent).toContain("Fuera de alcance, no validada");
++    }
++    expect(view.textContent).toContain("no cuenta en totales ni tasas");
++    expect(view.textContent).not.toContain("Se ocultaron");
++  });
++
++  it("la decisión en tres estados es experimental y no se muestra como probabilidad", () => {
++    const doc = MrcdAnalysisSchema.parse(okAll);
++    const view = mount(<DisfluencyAnalysisView analysis={doc} />);
++    expect(view.textContent).toContain("Decisión experimental");
++    expect(view.textContent).toContain("no calibrada");
++    expect(view.textContent).not.toMatch(/\d\s?%/);
++  });
++
++  it("nombra el score como softmax no calibrado y no como probabilidad de clase", () => {
++    const view = mount(<DisfluencyAnalysisView analysis={analysis} />);
++    const text = view.textContent ?? "";
++    expect(text).toContain("Score (softmax, no calibrado)");
++    expect(text).not.toContain("probabilidad de clase");
 +  });
 +
 +  it("muestra la tasa por minuto junto a la duración del audio", () => {
@@ -177,10 +250,10 @@ index 0000000..5b3e5de
 +});
 diff --git a/frontend/src/contexts/feedback/components/DisfluencyEventsSection.tsx b/frontend/src/contexts/feedback/components/DisfluencyEventsSection.tsx
 new file mode 100644
-index 0000000..29b8332
+index 0000000..7231b0e
 --- /dev/null
 +++ b/frontend/src/contexts/feedback/components/DisfluencyEventsSection.tsx
-@@ -0,0 +1,370 @@
+@@ -0,0 +1,459 @@
 +/**
 + * Disfluencias por evento (motor MRCD, contrato `mrcd.analysis/v1`).
 + *
@@ -188,14 +261,19 @@ index 0000000..29b8332
 + * - Cada evento trae clase, inicio/fin en segundos, puntaje con la marca "no calibrado"
 + *   y procedencia. El intervalo es la franja de decisión de la ventana, no una frontera
 + *   marcada por una persona.
-+ * - El puntaje NO es un porcentaje ni una probabilidad de acierto: se muestra como número
-+ *   crudo del modelo, siempre junto a "no calibrado".
++ * - El puntaje NO es un porcentaje ni una probabilidad de acierto: se muestra como "score
++ *   (softmax, no calibrado)", número crudo del modelo.
 + * - Lo que falta se dice ("No disponible: motivo"); jamás se rellena con 0.
 + * - No se infiere ningún estado psicológico ni se diagnostica nada. La clase es la
 + *   etiqueta de una ventana del modelo, que fue entrenado con etiquetas heurísticas.
-+ * - No hay estado "incierto": el motor no lo emite, así que esta pantalla tampoco lo inventa.
++ * - Alcance (contrato rev. 1.2): por defecto solo se muestran muletilla, prolongación y
++ *   repetición. Las clases fuera de alcance (sin referencia humana compatible) se ocultan y NO
++ *   entran en totales ni tasas; solo con opción explícita se listan aparte, marcadas
++ *   "fuera de alcance, no validada".
++ * - La decisión en tres estados (presente / ausente / incierto) es opcional y EXPERIMENTAL; nunca
++ *   se presenta como probabilidad calibrada.
 + */
-+import { useRef } from "react";
++import { useRef, useState } from "react";
 +
 +import {
 +  mrcdServiceUrl,
@@ -255,6 +333,19 @@ index 0000000..29b8332
 +  "revision",
 +]);
 +
++/** Fuera de alcance: marca explícita del servicio o, en documentos antiguos, la clase. */
++function isOutOfScope(event: MrcdEvent): boolean {
++  return event.in_scope === undefined
++    ? UNVALIDATED_CLASSES.has(event.class)
++    : !event.in_scope;
++}
++
++const DECISION_LABEL_ES = {
++  present: "presente",
++  absent: "ausente",
++  uncertain: "incierto (el modelo se abstiene)",
++} as const;
++
 +function EventRow({ event }: { event: MrcdEvent }) {
 +  return (
 +    <tr className="border-t border-line align-top">
@@ -265,9 +356,9 @@ index 0000000..29b8332
 +        <span className="font-mono text-[10px] text-ink-faint">
 +          {event.class}
 +        </span>
-+        {UNVALIDATED_CLASSES.has(event.class) && (
++        {isOutOfScope(event) && (
 +          <span className="ml-2 rounded border border-line px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-soft">
-+            Salida técnica sin validar
++            Fuera de alcance, no validada
 +          </span>
 +        )}
 +        {event.experimental && (
@@ -278,6 +369,12 @@ index 0000000..29b8332
 +        {event.validation && (
 +          <p className="mt-1 max-w-prose text-[11px] leading-snug text-ink-soft">
 +            {event.validation}
++          </p>
++        )}
++        {event.decision && (
++          <p className="mt-1 max-w-prose text-[11px] leading-snug text-ink-soft">
++            Decisión experimental: {DECISION_LABEL_ES[event.decision.state]}{" "}
++            (estimación de desarrollo, no calibrada)
 +          </p>
 +        )}
 +      </td>
@@ -309,8 +406,37 @@ index 0000000..29b8332
 +  const checkpoint = provenance.checkpoint;
 +  const asr = provenance.asr;
 +  const config = provenance.config;
-+  const events = analysis.events;
-+  const epm = summary?.events_per_minute;
++  const inScope = analysis.events.filter((e) => !isOutOfScope(e));
++  const outOfScope = analysis.events.filter(isOutOfScope);
++  const showOutOfScope = analysis.request.output_scope === "all";
++  const hiddenOutOfScope = showOutOfScope
++    ? 0
++    : (summary?.out_of_scope?.n_events ?? outOfScope.length);
++  const events = inScope;
++  const durationS = analysis.request.audio_duration_s;
++  // Tasa solo con eventos dentro de alcance. Un servicio rev. 1.2 ya la entrega así; en
++  // documentos anteriores se recalcula y, si no se puede, queda "no disponible".
++  const epm:
++    | { available: true; value: number }
++    | { available: false; unavailable_reason: string }
++    | undefined =
++    summary === null
++      ? undefined
++      : summary.out_of_scope !== undefined ||
++          !summary.events_per_minute.available
++        ? summary.events_per_minute.available
++          ? { available: true, value: summary.events_per_minute.value }
++          : {
++              available: false,
++              unavailable_reason: summary.events_per_minute.unavailable_reason,
++            }
++        : durationS.available && durationS.value > 1
++          ? { available: true, value: inScope.length / (durationS.value / 60) }
++          : {
++              available: false,
++              unavailable_reason:
++                "audio shorter than 1 s: a per-minute rate is not meaningful",
++            };
 +
 +  return (
 +    <div className="flex flex-col gap-5">
@@ -332,10 +458,10 @@ index 0000000..29b8332
 +      <div className="grid gap-3 sm:grid-cols-3">
 +        <div className="rounded-lg border border-line bg-surface p-4">
 +          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-faint">
-+            Eventos
++            Eventos (dentro de alcance)
 +          </p>
 +          <p className="font-display mt-1.5 text-[28px] font-extrabold leading-none tabular-nums text-ink">
-+            {summary ? summary.n_events : "—"}
++            {summary ? inScope.length : "—"}
 +          </p>
 +        </div>
 +        <div className="rounded-lg border border-line bg-surface p-4">
@@ -407,7 +533,7 @@ index 0000000..29b8332
 +                  Franja de decisión
 +                </th>
 +                <th scope="col" className="pb-2 pr-4 font-medium">
-+                  Puntaje del modelo
++                  Score (softmax, no calibrado)
 +                </th>
 +                <th scope="col" className="pb-2 font-medium">
 +                  Ventanas
@@ -422,10 +548,36 @@ index 0000000..29b8332
 +          </table>
 +          <p className="mt-2 text-[11px] leading-snug text-ink-faint">
 +            La franja es la ventana de decisión del modelo, no una frontera
-+            marcada por una persona. El puntaje es el máximo de la probabilidad
-+            de clase en las ventanas del evento y no está calibrado: no es una
-+            probabilidad de acierto.
++            marcada por una persona. El score es el máximo softmax del modelo en
++            las ventanas del evento y no está calibrado: no es una probabilidad
++            de acierto.
 +          </p>
++        </div>
++      )}
++
++      {hiddenOutOfScope > 0 && (
++        <p role="note" className="text-[12px] leading-relaxed text-ink-soft">
++          Se ocultaron {hiddenOutOfScope} evento(s) de clases fuera de alcance
++          (sin referencia humana compatible). No se cuentan en los totales ni en
++          las tasas.
++        </p>
++      )}
++
++      {showOutOfScope && outOfScope.length > 0 && (
++        <div className="overflow-x-auto">
++          <h4 className="mb-1 text-[12px] font-semibold text-ink">
++            Fuera de alcance, no validada (no cuenta en totales ni tasas)
++          </h4>
++          <table className="w-full text-left text-[13px]">
++            <caption className="sr-only">
++              Eventos de clases fuera de alcance
++            </caption>
++            <tbody>
++              {outOfScope.map((event) => (
++                <EventRow key={event.id} event={event} />
++              ))}
++            </tbody>
++          </table>
 +        </div>
 +      )}
 +
@@ -494,6 +646,7 @@ index 0000000..29b8332
 +/** Panel con estado: elige un WAV, lo envía al servicio y muestra el resultado. */
 +export function DisfluencyAnalysisPanel() {
 +  const input = useRef<HTMLInputElement>(null);
++  const [includeOutOfScope, setIncludeOutOfScope] = useState(false);
 +  const { analysis, error, pending, analyze, reset } = useMrcdAnalysis();
 +
 +  if (mrcdServiceUrl() === null) {
@@ -521,9 +674,18 @@ index 0000000..29b8332
 +          className="text-[13px] text-ink-soft"
 +          onChange={(event) => {
 +            const file = event.target.files?.[0];
-+            if (file) analyze(file);
++            if (file) analyze(file, { includeOutOfScope });
 +          }}
 +        />
++        <label className="flex items-center gap-1.5 text-[12px] text-ink-soft">
++          <input
++            type="checkbox"
++            checked={includeOutOfScope}
++            disabled={pending}
++            onChange={(event) => setIncludeOutOfScope(event.target.checked)}
++          />
++          Incluir clases fuera de alcance (sin validar)
++        </label>
 +        {(analysis || error) && (
 +          <button
 +            type="button"
@@ -553,10 +715,10 @@ index 0000000..29b8332
 +}
 diff --git a/frontend/src/contexts/feedback/lib/use-mrcd-analysis.ts b/frontend/src/contexts/feedback/lib/use-mrcd-analysis.ts
 new file mode 100644
-index 0000000..5b73f42
+index 0000000..8f66f90
 --- /dev/null
 +++ b/frontend/src/contexts/feedback/lib/use-mrcd-analysis.ts
-@@ -0,0 +1,42 @@
+@@ -0,0 +1,53 @@
 +/**
 + * Estado del análisis de disfluencias (servicio MRCD) para la pantalla de reporte.
 + *
@@ -568,6 +730,7 @@ index 0000000..5b73f42
 +import {
 +  analyzeAudioWithMrcd,
 +  MrcdServiceError,
++  type AnalyzeOptions,
 +  type MrcdAnalysis,
 +} from "../../../shared/api/mrcd-service";
 +
@@ -575,13 +738,23 @@ index 0000000..5b73f42
 +  analysis: MrcdAnalysis | null;
 +  error: { code: string; message: string } | null;
 +  pending: boolean;
-+  analyze: (audio: Blob) => void;
++  analyze: (
++    audio: Blob,
++    options?: Pick<AnalyzeOptions, "includeOutOfScope" | "decision">,
++  ) => void;
 +  reset: () => void;
 +}
 +
 +export function useMrcdAnalysis(): MrcdAnalysisState {
-+  const mutation = useMutation<MrcdAnalysis, Error, Blob>({
-+    mutationFn: (audio) => analyzeAudioWithMrcd(audio),
++  const mutation = useMutation<
++    MrcdAnalysis,
++    Error,
++    {
++      audio: Blob;
++      options?: Pick<AnalyzeOptions, "includeOutOfScope" | "decision">;
++    }
++  >({
++    mutationFn: ({ audio, options }) => analyzeAudioWithMrcd(audio, options),
 +  });
 +  const err = mutation.error;
 +  return {
@@ -595,7 +768,7 @@ index 0000000..5b73f42
 +          }
 +      : null,
 +    pending: mutation.isPending,
-+    analyze: (audio) => mutation.mutate(audio),
++    analyze: (audio, options) => mutation.mutate({ audio, options }),
 +    reset: () => mutation.reset(),
 +  };
 +}
@@ -2060,12 +2233,1061 @@ index 0000000..78e8747
 +    }
 +  ]
 +}
+diff --git a/frontend/src/shared/api/__fixtures__/mrcd/response_ok_v1_2_all_decision.json b/frontend/src/shared/api/__fixtures__/mrcd/response_ok_v1_2_all_decision.json
+new file mode 100644
+index 0000000..27f65cd
+--- /dev/null
++++ b/frontend/src/shared/api/__fixtures__/mrcd/response_ok_v1_2_all_decision.json
+@@ -0,0 +1,667 @@
++{
++  "schema_version": "mrcd.analysis/v1",
++  "status": "completed",
++  "generated_at": "2026-11-01T06:43:23+00:00",
++  "error": null,
++  "request": {
++    "audio_sha256": "0362201d7f82f2b181d0e8de9013c1377ec137e670bd5c93ef41a65a5c2bcb63",
++    "audio_duration_s": {
++      "available": true,
++      "value": 36.0,
++      "unavailable_reason": null
++    },
++    "sample_rate_hz": {
++      "available": true,
++      "value": 16000,
++      "unavailable_reason": null
++    },
++    "channels": {
++      "available": true,
++      "value": 1,
++      "unavailable_reason": null
++    },
++    "asr_profile": "p1_disfluent_prompt",
++    "head": null,
++    "include_text": false,
++    "output_scope": "all",
++    "decision": true,
++    "text_route": "rep_ctx_p1"
++  },
++  "events": [
++    {
++      "id": "ev-0001",
++      "class": "rhetorical_pause",
++      "start_s": 0.0,
++      "end_s": 1.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.609209,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "out_of_scope_unvalidated",
++      "experimental": true,
++      "in_scope": false
++    },
++    {
++      "id": "ev-0002",
++      "class": "neutral_pause",
++      "start_s": 1.0,
++      "end_s": 2.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.698715,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "out_of_scope_unvalidated",
++      "experimental": true,
++      "in_scope": false
++    },
++    {
++      "id": "ev-0003",
++      "class": "rhetorical_pause",
++      "start_s": 2.0,
++      "end_s": 6.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.96572,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 9,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "out_of_scope_unvalidated",
++      "experimental": true,
++      "in_scope": false
++    },
++    {
++      "id": "ev-0004",
++      "class": "filler_word",
++      "start_s": 6.5,
++      "end_s": 9.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.978941,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 5,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true,
++      "in_scope": true,
++      "decision": {
++        "state": "present",
++        "estimate": 0.659069,
++        "lo": 0.24,
++        "hi": 0.382859,
++        "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
++        "calibration_claim": "none"
++      }
++    },
++    {
++      "id": "ev-0005",
++      "class": "prolongation",
++      "start_s": 9.0,
++      "end_s": 10.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.749319,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "observable lengthening; disfluent function not demonstrated",
++      "experimental": true,
++      "in_scope": true,
++      "decision": {
++        "state": "present",
++        "estimate": 0.674495,
++        "lo": 0.3,
++        "hi": 0.473117,
++        "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
++        "calibration_claim": "none"
++      }
++    },
++    {
++      "id": "ev-0006",
++      "class": "prolongation",
++      "start_s": 11.0,
++      "end_s": 11.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.590754,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "observable lengthening; disfluent function not demonstrated",
++      "experimental": true,
++      "in_scope": true,
++      "decision": {
++        "state": "present",
++        "estimate": 0.610828,
++        "lo": 0.3,
++        "hi": 0.473117,
++        "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
++        "calibration_claim": "none"
++      }
++    },
++    {
++      "id": "ev-0007",
++      "class": "prolongation",
++      "start_s": 14.5,
++      "end_s": 15.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.290071,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "observable lengthening; disfluent function not demonstrated",
++      "experimental": true,
++      "in_scope": true,
++      "decision": {
++        "state": "present",
++        "estimate": 0.49228,
++        "lo": 0.3,
++        "hi": 0.473117,
++        "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
++        "calibration_claim": "none"
++      }
++    },
++    {
++      "id": "ev-0008",
++      "class": "rhetorical_pause",
++      "start_s": 15.0,
++      "end_s": 15.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.657522,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "out_of_scope_unvalidated",
++      "experimental": true,
++      "in_scope": false
++    },
++    {
++      "id": "ev-0009",
++      "class": "neutral_pause",
++      "start_s": 15.5,
++      "end_s": 17.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.835308,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 4,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "out_of_scope_unvalidated",
++      "experimental": true,
++      "in_scope": false
++    },
++    {
++      "id": "ev-0010",
++      "class": "rhetorical_pause",
++      "start_s": 17.5,
++      "end_s": 18.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.499648,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "out_of_scope_unvalidated",
++      "experimental": true,
++      "in_scope": false
++    },
++    {
++      "id": "ev-0011",
++      "class": "neutral_pause",
++      "start_s": 18.0,
++      "end_s": 18.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.554595,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "out_of_scope_unvalidated",
++      "experimental": true,
++      "in_scope": false
++    },
++    {
++      "id": "ev-0012",
++      "class": "rhetorical_pause",
++      "start_s": 19.0,
++      "end_s": 19.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.5088,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "out_of_scope_unvalidated",
++      "experimental": true,
++      "in_scope": false
++    },
++    {
++      "id": "ev-0013",
++      "class": "neutral_pause",
++      "start_s": 19.5,
++      "end_s": 21.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.633469,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 3,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "out_of_scope_unvalidated",
++      "experimental": true,
++      "in_scope": false
++    },
++    {
++      "id": "ev-0014",
++      "class": "prolongation",
++      "start_s": 21.0,
++      "end_s": 22.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.501682,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "observable lengthening; disfluent function not demonstrated",
++      "experimental": true,
++      "in_scope": true,
++      "decision": {
++        "state": "present",
++        "estimate": 0.577683,
++        "lo": 0.3,
++        "hi": 0.473117,
++        "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
++        "calibration_claim": "none"
++      }
++    },
++    {
++      "id": "ev-0015",
++      "class": "neutral_pause",
++      "start_s": 22.0,
++      "end_s": 22.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.608208,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "out_of_scope_unvalidated",
++      "experimental": true,
++      "in_scope": false
++    },
++    {
++      "id": "ev-0016",
++      "class": "prolongation",
++      "start_s": 22.5,
++      "end_s": 23.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.597734,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "observable lengthening; disfluent function not demonstrated",
++      "experimental": true,
++      "in_scope": true,
++      "decision": {
++        "state": "present",
++        "estimate": 0.613451,
++        "lo": 0.3,
++        "hi": 0.473117,
++        "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
++        "calibration_claim": "none"
++      }
++    },
++    {
++      "id": "ev-0017",
++      "class": "neutral_pause",
++      "start_s": 23.5,
++      "end_s": 24.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.583844,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "out_of_scope_unvalidated",
++      "experimental": true,
++      "in_scope": false
++    },
++    {
++      "id": "ev-0018",
++      "class": "prolongation",
++      "start_s": 24.5,
++      "end_s": 25.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.572801,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "observable lengthening; disfluent function not demonstrated",
++      "experimental": true,
++      "in_scope": true,
++      "decision": {
++        "state": "present",
++        "estimate": 0.604113,
++        "lo": 0.3,
++        "hi": 0.473117,
++        "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
++        "calibration_claim": "none"
++      }
++    },
++    {
++      "id": "ev-0019",
++      "class": "block",
++      "start_s": 28.5,
++      "end_s": 31.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.997381,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 6,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "out_of_scope_unvalidated",
++      "experimental": true,
++      "in_scope": false
++    }
++  ],
++  "summary": {
++    "n_events": 7,
++    "events_per_minute": {
++      "available": true,
++      "value": 11.6667,
++      "unavailable_reason": null
++    },
++    "counts_by_class": {
++      "filler_word": 1,
++      "prolongation": 6
++    },
++    "out_of_scope": {
++      "included": true,
++      "n_events": 12,
++      "counts_by_class": {
++        "rhetorical_pause": 5,
++        "neutral_pause": 6,
++        "block": 1
++      }
++    }
++  },
++  "modalities": {
++    "acoustic": {
++      "available": true,
++      "reason": null
++    },
++    "linguistic": {
++      "available": true,
++      "reason": null
++    },
++    "kinesic_video": {
++      "available": false,
++      "reason": "service v1 receives audio only; no video was provided or processed"
++    }
++  },
++  "provenance": {
++    "service": {
++      "name": "mrcd.service",
++      "contract": "mrcd.analysis/v1",
++      "contract_revision": "1.2",
++      "mrcd_version": "0.3.0"
++    },
++    "checkpoint": {
++      "file": "ckpt_audio_text.pt",
++      "sha256": "87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669",
++      "mode": "audio_text",
++      "labels": [
++        "fluent",
++        "filler_word",
++        "prolongation",
++        "repetition",
++        "block",
++        "revision",
++        "rhetorical_pause",
++        "neutral_pause"
++      ],
++      "checkpoint_notice": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"
++    },
++    "asr": {
++      "profile": "p1_disfluent_prompt",
++      "experimental": true,
++      "validation": "experimental; not validated outside DIHANA",
++      "initial_prompt_sha256": "fe49e930ccc9f94847b7bedaec65f8c347cecaccbcd7283545618bc194c6a8b2",
++      "model": {
++        "model_size": "small",
++        "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
++        "compute_type": "int8",
++        "device": "cpu"
++      },
++      "language": "es",
++      "decode": {
++        "temperature": 0.0,
++        "beam_size": 5,
++        "condition_on_previous_text": false,
++        "vad_filter": false,
++        "word_timestamps": true,
++        "chunk_s_requested": 8.0
++      },
++      "profile_fingerprint": "3939517c0c60fc7f0ad9ba972203330bee95265ebcd3743dbe26e3be854bb045",
++      "anomalies": []
++    },
++    "head": null,
++    "config": {
++      "window_s": 3.0,
++      "stride_s": 0.5,
++      "terminal_window": false,
++      "span": null,
++      "asr_chunk_s": 8.0
++    },
++    "environment": {
++      "omp_num_threads": "4",
++      "omp_pin_opted_out": false,
++      "cpu_count_logical": 20,
++      "python": "3.12.10",
++      "platform": "Windows-11-10.0.26200-SP0",
++      "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
++      "faster_whisper": "1.2.1",
++      "ctranslate2": "4.8.2",
++      "numpy": "2.5.3",
++      "environment_is_pinned": true,
++      "omp_num_threads_at_mrcd_import": "4",
++      "numpy_imported_before_mrcd": false,
++      "set_before_numpy": true,
++      "assigned_after_import": false,
++      "effective": true,
++      "cpu_threads": {
++        "torch": 1,
++        "asr_cpu_threads_arg": 0
++      },
++      "asr": {
++        "model_size": "small",
++        "device": "cpu",
++        "compute_type": "int8"
++      }
++    },
++    "text_route": {
++      "name": "rep_ctx_p1",
++      "experimental": true,
++      "task": "rep_literal",
++      "trained_on_asr_profile": "p1_disfluent_prompt",
++      "note": "ctx_LR on P1 text, weighted frame of 1019 DIHANA folds 1-4 turns; EXPERIMENTAL; trained turn-level",
++      "unit": "turn-level model applied to ASR segments split at pauses >= 0.6 s",
++      "validated_outside_dihana": false
++    }
++  },
++  "experimental": {
++    "active": true,
++    "components": [
++      "asr_profile:p1_disfluent_prompt",
++      "text_route:rep_ctx_p1",
++      "decision:three_state"
++    ]
++  },
++  "head_decision": null,
++  "transcript": null,
++  "warnings": [
++    {
++      "code": "scores_uncalibrated",
++      "message": "Scores are the maximum window softmax score of an uncalibrated model (softmax, not calibrated); they are not probabilities of correctness."
++    },
++    {
++      "code": "no_human_validation",
++      "message": "Classes are window-level decisions of a model trained with weak (heuristic) supervision; agreement with human annotation has not been established."
++    },
++    {
++      "code": "engine_provenance",
++      "message": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia ASR profile 'p1_disfluent_prompt' is EXPERIMENTAL and NOT validated outside DIHANA. In the exploratory DIHANA experiment a fluent control prompt of equal length and domain did not reproduce its gain; which component of the prompt causes the effect is unknown. Downstream models were trained on P0 text and not retrained for P1."
++    },
++    {
++      "code": "out_of_scope_included",
++      "message": "Events of classes outside the evaluated scope are included on explicit request, marked out_of_scope_unvalidated and excluded from totals and rates."
++    },
++    {
++      "code": "class_block_not_measurable",
++      "message": "The 'block' class is not measurable with the development corpus (n=2); there is no evidence that a 'block' event is correct."
++    },
++    {
++      "code": "experimental_components",
++      "message": "Experimental, opt-in components were used: asr_profile:p1_disfluent_prompt, text_route:rep_ctx_p1, decision:three_state. They are not validated outside their development corpus."
++    }
++  ]
++}
+diff --git a/frontend/src/shared/api/__fixtures__/mrcd/response_ok_v1_2_default_scope.json b/frontend/src/shared/api/__fixtures__/mrcd/response_ok_v1_2_default_scope.json
+new file mode 100644
+index 0000000..2a2d942
+--- /dev/null
++++ b/frontend/src/shared/api/__fixtures__/mrcd/response_ok_v1_2_default_scope.json
+@@ -0,0 +1,370 @@
++{
++  "schema_version": "mrcd.analysis/v1",
++  "status": "completed",
++  "generated_at": "2026-11-01T06:42:49+00:00",
++  "error": null,
++  "request": {
++    "audio_sha256": "0362201d7f82f2b181d0e8de9013c1377ec137e670bd5c93ef41a65a5c2bcb63",
++    "audio_duration_s": {
++      "available": true,
++      "value": 36.0,
++      "unavailable_reason": null
++    },
++    "sample_rate_hz": {
++      "available": true,
++      "value": 16000,
++      "unavailable_reason": null
++    },
++    "channels": {
++      "available": true,
++      "value": 1,
++      "unavailable_reason": null
++    },
++    "asr_profile": "p0",
++    "head": null,
++    "include_text": false,
++    "output_scope": "evaluated",
++    "decision": false,
++    "text_route": null
++  },
++  "events": [
++    {
++      "id": "ev-0001",
++      "class": "filler_word",
++      "start_s": 6.5,
++      "end_s": 8.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.913391,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 3,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false,
++      "in_scope": true
++    },
++    {
++      "id": "ev-0002",
++      "class": "filler_word",
++      "start_s": 8.5,
++      "end_s": 9.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.54446,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false,
++      "in_scope": true
++    },
++    {
++      "id": "ev-0003",
++      "class": "prolongation",
++      "start_s": 9.5,
++      "end_s": 11.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.56211,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 4,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "observable lengthening; disfluent function not demonstrated",
++      "experimental": false,
++      "in_scope": true
++    },
++    {
++      "id": "ev-0004",
++      "class": "prolongation",
++      "start_s": 12.0,
++      "end_s": 12.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.448764,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "observable lengthening; disfluent function not demonstrated",
++      "experimental": false,
++      "in_scope": true
++    },
++    {
++      "id": "ev-0005",
++      "class": "filler_word",
++      "start_s": 13.0,
++      "end_s": 13.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.529813,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false,
++      "in_scope": true
++    },
++    {
++      "id": "ev-0006",
++      "class": "filler_word",
++      "start_s": 19.0,
++      "end_s": 22.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.942349,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 6,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false,
++      "in_scope": true
++    },
++    {
++      "id": "ev-0007",
++      "class": "prolongation",
++      "start_s": 24.5,
++      "end_s": 25.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.665138,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "observable lengthening; disfluent function not demonstrated",
++      "experimental": false,
++      "in_scope": true
++    },
++    {
++      "id": "ev-0008",
++      "class": "prolongation",
++      "start_s": 26.5,
++      "end_s": 27.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.639225,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "observable lengthening; disfluent function not demonstrated",
++      "experimental": false,
++      "in_scope": true
++    },
++    {
++      "id": "ev-0009",
++      "class": "prolongation",
++      "start_s": 27.5,
++      "end_s": 28.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.582679,
++        "kind": "max_window_softmax_score",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": "observable lengthening; disfluent function not demonstrated",
++      "experimental": false,
++      "in_scope": true
++    }
++  ],
++  "summary": {
++    "n_events": 9,
++    "events_per_minute": {
++      "available": true,
++      "value": 15.0,
++      "unavailable_reason": null
++    },
++    "counts_by_class": {
++      "filler_word": 4,
++      "prolongation": 5
++    },
++    "out_of_scope": {
++      "included": false,
++      "n_events": 8,
++      "counts_by_class": {
++        "rhetorical_pause": 4,
++        "neutral_pause": 3,
++        "block": 1
++      }
++    }
++  },
++  "modalities": {
++    "acoustic": {
++      "available": true,
++      "reason": null
++    },
++    "linguistic": {
++      "available": true,
++      "reason": null
++    },
++    "kinesic_video": {
++      "available": false,
++      "reason": "service v1 receives audio only; no video was provided or processed"
++    }
++  },
++  "provenance": {
++    "service": {
++      "name": "mrcd.service",
++      "contract": "mrcd.analysis/v1",
++      "contract_revision": "1.2",
++      "mrcd_version": "0.3.0"
++    },
++    "checkpoint": {
++      "file": "ckpt_audio_text.pt",
++      "sha256": "87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669",
++      "mode": "audio_text",
++      "labels": [
++        "fluent",
++        "filler_word",
++        "prolongation",
++        "repetition",
++        "block",
++        "revision",
++        "rhetorical_pause",
++        "neutral_pause"
++      ],
++      "checkpoint_notice": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"
++    },
++    "asr": {
++      "profile": "p0",
++      "experimental": false,
++      "validation": null,
++      "initial_prompt_sha256": "bd0bddb4329c6c75e2dd7c0b21366a418cc23314f8155357401a1577853b19fa",
++      "model": {
++        "model_size": "small",
++        "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
++        "compute_type": "int8",
++        "device": "cpu"
++      },
++      "language": "es",
++      "decode": {
++        "temperature": 0.0,
++        "beam_size": 5,
++        "condition_on_previous_text": false,
++        "vad_filter": false,
++        "word_timestamps": true,
++        "chunk_s_requested": 8.0
++      },
++      "profile_fingerprint": "efc7f5bfef4d5271862bcb4fe384a229314cb969293ed64d7f7d8a0503522558",
++      "anomalies": []
++    },
++    "head": null,
++    "config": {
++      "window_s": 3.0,
++      "stride_s": 0.5,
++      "terminal_window": false,
++      "span": null,
++      "asr_chunk_s": 8.0
++    },
++    "environment": {
++      "omp_num_threads": "4",
++      "omp_pin_opted_out": false,
++      "cpu_count_logical": 20,
++      "python": "3.12.10",
++      "platform": "Windows-11-10.0.26200-SP0",
++      "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
++      "faster_whisper": "1.2.1",
++      "ctranslate2": "4.8.2",
++      "numpy": "2.5.3",
++      "environment_is_pinned": true,
++      "omp_num_threads_at_mrcd_import": "4",
++      "numpy_imported_before_mrcd": false,
++      "set_before_numpy": true,
++      "assigned_after_import": false,
++      "effective": true,
++      "cpu_threads": {
++        "torch": 1,
++        "asr_cpu_threads_arg": 0
++      },
++      "asr": {
++        "model_size": "small",
++        "device": "cpu",
++        "compute_type": "int8"
++      }
++    }
++  },
++  "experimental": {
++    "active": false,
++    "components": []
++  },
++  "head_decision": null,
++  "transcript": null,
++  "warnings": [
++    {
++      "code": "scores_uncalibrated",
++      "message": "Scores are the maximum window softmax score of an uncalibrated model (softmax, not calibrated); they are not probabilities of correctness."
++    },
++    {
++      "code": "no_human_validation",
++      "message": "Classes are window-level decisions of a model trained with weak (heuristic) supervision; agreement with human annotation has not been established."
++    },
++    {
++      "code": "engine_provenance",
++      "message": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"
++    },
++    {
++      "code": "out_of_scope_hidden",
++      "message": "Classes outside the evaluated scope (no compatible human reference) were detected and hidden: block=1, neutral_pause=3, rhetorical_pause=4. They are not counted in totals or rates."
++    }
++  ]
++}
 diff --git a/frontend/src/shared/api/mrcd-service.test.ts b/frontend/src/shared/api/mrcd-service.test.ts
 new file mode 100644
-index 0000000..acdc152
+index 0000000..7af6184
 --- /dev/null
 +++ b/frontend/src/shared/api/mrcd-service.test.ts
-@@ -0,0 +1,199 @@
+@@ -0,0 +1,220 @@
 +/**
 + * Cliente del servicio MRCD: validación del contrato v1 con respuestas REALES del motor
 + * (fixtures generados por `python -m mrcd.service`), flujo de sondeo y errores estructurados.
@@ -2077,6 +3299,8 @@ index 0000000..acdc152
 +import jobFailed from "./__fixtures__/mrcd/http_job_failed_invalid_audio.json";
 +import jobQueued from "./__fixtures__/mrcd/http_job_queued.json";
 +import okP0 from "./__fixtures__/mrcd/response_ok_p0_v0.json";
++import okAll from "./__fixtures__/mrcd/response_ok_v1_2_all_decision.json";
++import okDefault from "./__fixtures__/mrcd/response_ok_v1_2_default_scope.json";
 +import okP1 from "./__fixtures__/mrcd/response_ok_p1_experimental.json";
 +import {
 +  analyzeAudioWithMrcd,
@@ -2105,6 +3329,23 @@ index 0000000..acdc152
 +    }
 +    expect(parsed.experimental.active).toBe(false);
 +    expect(parsed.modalities.kinesic_video.available).toBe(false);
++  });
++
++  it("acepta los documentos rev. 1.2 (alcance, decisión opcional) y sigue aceptando los antiguos", () => {
++    const all = MrcdAnalysisSchema.parse(okAll);
++    expect(all.request.output_scope).toBe("all");
++    expect(all.events.some((e) => e.in_scope === false)).toBe(true);
++    expect(all.events.some((e) => e.decision !== undefined)).toBe(true);
++    const def = MrcdAnalysisSchema.parse(okDefault);
++    expect(def.events.every((e) => e.in_scope === true)).toBe(true);
++    expect(MrcdAnalysisSchema.safeParse(okP0).success).toBe(true);
++  });
++
++  it("rechaza una decisión que afirme calibración", () => {
++    const bad = JSON.parse(JSON.stringify(okAll));
++    const ev = bad.events.find((e: { decision?: unknown }) => e.decision);
++    ev.decision.calibration_claim = "calibrated";
++    expect(MrcdAnalysisSchema.safeParse(bad).success).toBe(false);
 +  });
 +
 +  it("marca como experimental el perfil ASR P1", () => {
@@ -2246,7 +3487,9 @@ index 0000000..acdc152
 +  it("rechaza una versión de contrato desconocida con un código propio", async () => {
 +    const fetchImpl = vi
 +      .fn<typeof fetch>()
-+      .mockResolvedValueOnce(json({ ...jobQueued, schema_version: "mrcd.job/v2" }, 202));
++      .mockResolvedValueOnce(
++        json({ ...jobQueued, schema_version: "mrcd.job/v2" }, 202),
++      );
 +    await expect(
 +      analyzeAudioWithMrcd(audio, { baseUrl: BASE, fetchImpl }),
 +    ).rejects.toMatchObject({ code: "contract_version_unsupported" });
@@ -2267,14 +3510,14 @@ index 0000000..acdc152
 +});
 diff --git a/frontend/src/shared/api/mrcd-service.ts b/frontend/src/shared/api/mrcd-service.ts
 new file mode 100644
-index 0000000..24bf653
+index 0000000..3139058
 --- /dev/null
 +++ b/frontend/src/shared/api/mrcd-service.ts
-@@ -0,0 +1,293 @@
+@@ -0,0 +1,328 @@
 +/**
 + * Cliente del servicio MRCD (contrato `mrcd.analysis/v1`).
 + *
-+ * El servicio MRCD vive en OTRO repositorio y proceso (`C:\zArnes-tesis\mrcd`,
++ * El servicio MRCD vive en OTRO repositorio y proceso (`<repo>`,
 + * `python -m mrcd.service serve`). Este módulo solo habla su contrato HTTP; no
 + * importa nada del motor.
 + *
@@ -2314,6 +3557,16 @@ index 0000000..24bf653
 +
 +const looseObject = z.record(z.string(), z.unknown());
 +
++/** Decisión opcional en tres estados (contrato rev. 1.2, EXPERIMENTAL; `calibration_claim` siempre "none"). */
++export const MrcdDecisionSchema = z.object({
++  state: z.enum(["present", "absent", "uncertain"]),
++  estimate: z.number().min(0).max(1),
++  lo: z.number().min(0).max(1),
++  hi: z.number().min(0).max(1),
++  basis: z.string(),
++  calibration_claim: z.literal("none"),
++});
++
 +export const MrcdEventSchema = z.object({
 +  id: z.string(),
 +  class: z.string().min(1),
@@ -2322,7 +3575,11 @@ index 0000000..24bf653
 +  interval_semantics: z.literal("decision_stride_not_human_boundary"),
 +  score: z.object({
 +    value: z.number().min(0).max(1),
-+    kind: z.enum(["max_window_softmax_score", "max_window_class_probability"]),
++    kind: z.enum([
++      "max_window_softmax_score",
++      "max_window_class_probability",
++      "text_route_logistic_score",
++    ]),
 +    calibrated: z.literal(false),
 +    label: z.literal("uncalibrated"),
 +  }),
@@ -2331,6 +3588,9 @@ index 0000000..24bf653
 +  text: z.string().nullable(),
 +  validation: z.string().nullable(),
 +  experimental: z.boolean(),
++  /** rev. 1.2: false = clase fuera de alcance (sin referencia humana compatible). */
++  in_scope: z.boolean().optional(),
++  decision: MrcdDecisionSchema.optional(),
 +});
 +export type MrcdEvent = z.infer<typeof MrcdEventSchema>;
 +
@@ -2354,6 +3614,9 @@ index 0000000..24bf653
 +    asr_profile: z.string(),
 +    head: z.string().nullable(),
 +    include_text: z.boolean(),
++    output_scope: z.enum(["evaluated", "all"]).optional(),
++    decision: z.boolean().optional(),
++    text_route: z.string().nullable().optional(),
 +  }),
 +  events: z.array(MrcdEventSchema),
 +  summary: z
@@ -2361,6 +3624,14 @@ index 0000000..24bf653
 +      n_events: z.number().int().min(0),
 +      events_per_minute: measure(z.number()),
 +      counts_by_class: z.record(z.string(), z.number().int()),
++      /** rev. 1.2: eventos de clases fuera de alcance (ocultos o incluidos); no entran en los totales. */
++      out_of_scope: z
++        .object({
++          included: z.boolean(),
++          n_events: z.number().int().min(0),
++          counts_by_class: z.record(z.string(), z.number().int()),
++        })
++        .optional(),
 +    })
 +    .nullable(),
 +  modalities: z.object({
@@ -2375,6 +3646,7 @@ index 0000000..24bf653
 +    head: looseObject.nullable(),
 +    config: looseObject.nullable(),
 +    environment: looseObject.nullable(),
++    text_route: looseObject.nullable().optional(),
 +  }),
 +  experimental: z.object({
 +    active: z.boolean(),
@@ -2417,6 +3689,10 @@ index 0000000..24bf653
 +export interface AnalyzeOptions {
 +  /** Perfil ASR. Por defecto el servicio usa `p0`; `p1_disfluent_prompt` es EXPERIMENTAL. */
 +  asrProfile?: string;
++  /** Pide también las clases fuera de alcance (marcadas "fuera de alcance, no validada"). */
++  includeOutOfScope?: boolean;
++  /** EXPERIMENTAL: decisión en tres estados por evento. */
++  decision?: boolean;
 +  signal?: AbortSignal;
 +  pollIntervalMs?: number;
 +  timeoutMs?: number;
@@ -2460,9 +3736,11 @@ index 0000000..24bf653
 +    );
 +  }
 +  const doFetch = options.fetchImpl ?? fetch;
-+  const query = options.asrProfile
-+    ? `?asr_profile=${encodeURIComponent(options.asrProfile)}`
-+    : "";
++  const params = new URLSearchParams();
++  if (options.asrProfile) params.set("asr_profile", options.asrProfile);
++  if (options.includeOutOfScope) params.set("include_out_of_scope", "true");
++  if (options.decision) params.set("decision", "true");
++  const query = params.size > 0 ? `?${params.toString()}` : "";
 +  const common: RequestInit = {
 +    credentials: "omit",
 +    signal: options.signal,

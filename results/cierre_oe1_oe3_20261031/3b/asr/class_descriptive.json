@@ -1,0 +1,92 @@
+{
+ "note": "descriptive; no human window labels; counts of window argmax per class; flips = windows whose argmax differs from off_p0",
+ "labels": [
+  "fluent",
+  "filler_word",
+  "prolongation",
+  "repetition",
+  "block",
+  "revision",
+  "rhetorical_pause",
+  "neutral_pause"
+ ],
+ "counts": {
+  "off_p0": {
+   "neutral_pause": 226,
+   "rhetorical_pause": 91,
+   "fluent": 394,
+   "repetition": 232,
+   "prolongation": 121,
+   "filler_word": 254,
+   "revision": 120,
+   "block": 18
+  },
+  "str_p0_t2": {
+   "neutral_pause": 213,
+   "fluent": 384,
+   "repetition": 172,
+   "rhetorical_pause": 111,
+   "block": 24,
+   "prolongation": 145,
+   "filler_word": 265,
+   "revision": 142
+  },
+  "str_p0_t2_ca": {
+   "neutral_pause": 226,
+   "rhetorical_pause": 91,
+   "fluent": 394,
+   "repetition": 232,
+   "prolongation": 121,
+   "filler_word": 254,
+   "revision": 120,
+   "block": 18
+  },
+  "off_p1": {
+   "neutral_pause": 220,
+   "block": 19,
+   "rhetorical_pause": 113,
+   "fluent": 418,
+   "repetition": 202,
+   "filler_word": 233,
+   "revision": 143,
+   "prolongation": 108
+  },
+  "str_p1_t2": {
+   "rhetorical_pause": 124,
+   "neutral_pause": 200,
+   "fluent": 371,
+   "filler_word": 244,
+   "block": 23,
+   "prolongation": 161,
+   "repetition": 173,
+   "revision": 160
+  }
+ },
+ "flip_vs_off_p0": {
+  "off_p0": {
+   "flipped": 0,
+   "windows": 0,
+   "rate": null
+  },
+  "str_p0_t2": {
+   "flipped": 582,
+   "windows": 1456,
+   "rate": 0.39972527472527475
+  },
+  "str_p0_t2_ca": {
+   "flipped": 0,
+   "windows": 1456,
+   "rate": 0.0
+  },
+  "off_p1": {
+   "flipped": 455,
+   "windows": 1456,
+   "rate": 0.3125
+  },
+  "str_p1_t2": {
+   "flipped": 699,
+   "windows": 1456,
+   "rate": 0.4800824175824176
+  }
+ }
+}

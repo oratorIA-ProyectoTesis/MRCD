@@ -1,0 +1,13 @@
+{
+ "eligible_after_gate": 301,
+ "evaluated": 76,
+ "pos": 19,
+ "speakers": 24,
+ "pos_speakers": 10,
+ "excluded_after_gate": {
+  "speaker_baseline_insufficient": 5
+ },
+ "gate_config_hash": "b7c7c0e1267042606b3ee89b4c2ce323b2c0c8186ab1070bff90755375f481d6",
+ "subset": "face_only",
+ "tag": "a2"
+}

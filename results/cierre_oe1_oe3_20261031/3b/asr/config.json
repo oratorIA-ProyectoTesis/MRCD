@@ -1,0 +1,109 @@
+{
+ "task": "3.2",
+ "date": "2026-10-31/11-01",
+ "seed_bootstrap": 20261031,
+ "n_boot": 2000,
+ "unit_sampling_seed": 20261031,
+ "units_sha256": "9ec98cca0ed4644ce6a16644d3e0929f58afde1af7e3fc1c1a0ccc5359321b99",
+ "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+ "model_info": {
+  "model_size": "<USER_HOME>\\.cache\\huggingface\\hub\\models--Systran--faster-whisper-small\\snapshots\\536b0662742c02347bc0e980a01041f333bce120",
+  "model_dir": "<USER_HOME>\\.cache\\huggingface\\hub\\models--Systran--faster-whisper-small\\snapshots\\536b0662742c02347bc0e980a01041f333bce120",
+  "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+  "compute_type": "int8",
+  "device": "cpu"
+ },
+ "code_sha256_mrcd": "5a6bbf663de74ecbdcbbf90f6d6a216909c469103969a50e25111d736faec34d",
+ "hardware": {
+  "platform": "Windows-11-10.0.26200-SP0",
+  "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "python": "3.12.10",
+  "cpu_count_logical": 20,
+  "OMP_NUM_THREADS": "4",
+  "cpu": {
+   "Name": "13th Gen Intel(R) Core(TM) i7-13650HX",
+   "NumberOfCores": 14,
+   "NumberOfLogicalProcessors": 20
+  },
+  "ram_gb": 23.7,
+  "torch": "2.9.1+cpu",
+  "numpy": "2.5.3",
+  "librosa": "1.0.0",
+  "faster_whisper": "1.2.1",
+  "ctranslate2": "4.8.2",
+  "scipy": "1.18.1",
+  "soundfile": "0.14.0"
+ },
+ "profiles": {
+  "p0": {
+   "language": "es",
+   "word_timestamps": true,
+   "condition_on_previous_text": false,
+   "initial_prompt": "eh, este, o sea, mmm, bueno, tipo, ah, este...",
+   "suppress_tokens": [],
+   "vad_filter": false,
+   "beam_size": 5,
+   "temperature": 0.0
+  },
+  "p1": {
+   "language": "es",
+   "word_timestamps": true,
+   "condition_on_previous_text": false,
+   "initial_prompt": "Eh... yo quer\u00eda, quer\u00eda preguntar por el, por el... horario. Es que no, no s\u00e9 si... si es el mismo. Perdone, digo, perd\u00f3n. La mesa est\u00e1 en la ca... en la casa, o sea, en la casa de mi t\u00eda. Mmm, este... bueno, s\u00ed, s\u00ed.",
+   "suppress_tokens": [],
+   "vad_filter": false,
+   "beam_size": 5,
+   "temperature": 0.0
+  }
+ },
+ "background_cpu_pct_at_start_of_each_run": [
+  6.83,
+  6.82,
+  5.94,
+  11.16
+ ],
+ "argv_per_run": [
+  [
+   "--out",
+   "results/cierre_oe1_oe3_20261031/3b/asr/pred",
+   "--conds",
+   "off_p0",
+   "off_p1",
+   "str_p0_t2",
+   "str_p1_t2",
+   "str_p0_t2_ca",
+   "str_p1_t2_ca"
+  ],
+  [
+   "--out",
+   "results/cierre_oe1_oe3_20261031/3b/asr/pred",
+   "--conds",
+   "off_p0",
+   "off_p1"
+  ],
+  [
+   "--out",
+   "results/cierre_oe1_oe3_20261031/3b/asr/pred",
+   "--subset-ids",
+   "results/cierre_oe1_oe3_20261031/3b/asr/subset_stream.json",
+   "--conds",
+   "str_p0_t2",
+   "str_p0_t2_ca",
+   "str_p1_t2",
+   "str_p1_t2_ca"
+  ],
+  [
+   "--out",
+   "results/cierre_oe1_oe3_20261031/3b/asr/pred",
+   "--subset-ids",
+   "results/cierre_oe1_oe3_20261031/3b/asr/subset_t05.json",
+   "--conds",
+   "str_p0_t0.5",
+   "str_p0_t0.5_ca"
+  ]
+ ],
+ "ticks": "first tick at 6.0 s then every tick s plus a final tick at the end; ring = last 13 s (CONTEXT_S+WINDOW_S); offline chunk 8 s / overlap 2 s",
+ "streaming_subset_ids_sha256": "6518646f52dc5863d8c16a0637fc5dc8670255d8b19957a1247d27d71e702308",
+ "t05_subset_ids_sha256": "6f44811f52be1592465446e00095b5b461003c49502993b5465b147c2c3a0e56",
+ "omp": "4 (pinned before numpy)"
+}

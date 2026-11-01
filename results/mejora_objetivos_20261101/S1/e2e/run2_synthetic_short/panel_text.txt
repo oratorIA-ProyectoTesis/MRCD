@@ -1,0 +1,7 @@
+DISFLUENCIAS POR EVENTO (EXPERIMENTAL)
+
+Análisis experimental de disfluencias sobre un archivo de audio (WAV mono, 16 kHz, 16 bits). El audio se envía solo al servicio local configurado y no se guarda.
+
+Limpiar
+
+No se pudo analizar el audio (audio_too_short): Audio of 5.0 s; the engine needs at least 13 s.

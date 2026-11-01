@@ -1,0 +1,15 @@
+# S3 patch rev 1.2 checks (temporary clone outside both repos, base f46a2b8)
+## tsc -b
+exit=0
+## eslint src/shared/api src/contexts/feedback
+exit=0
+## vitest run
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+ Test Files  64 passed (64)
+      Tests  656 passed (656)
+   Start at  01:48:30
+   Duration  12.35s (transform 9.27s, setup 0ms, import 23.51s, tests 5.13s, environment 140.89s)
+
+## git apply --check on a fresh clone at f46a2b8: OK (17 files)

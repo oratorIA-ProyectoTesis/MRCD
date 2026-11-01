@@ -1,0 +1,19 @@
+    SessionFeatureTracker(left_margin_s=0.1)
+
+tests/test_live_parity.py::test_margins_below_the_measured_minimum_are_rejected
+  <repo>\tests\test_live_parity.py:200: RuntimeWarning: margins below 3 s left / 3 s right were NOT frame-exact on all 98 AMERESCO clips (see margin_study_*.json); expect small F0 differences versus offline
+    SessionFeatureTracker(right_margin_s=0.5)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SKIPPED [3] tests\test_asr_profiles.py:375: set MRCD_SLOW=1 and OMP_NUM_THREADS=4 (before python starts); needs the faster-whisper small snapshot
+SKIPPED [3] tests\test_asr_profiles.py:389: set MRCD_SLOW=1 and OMP_NUM_THREADS=4 (before python starts); needs the faster-whisper small snapshot
+SKIPPED [1] tests\test_engine_terminal.py:268: set MRCD_SLOW=1: runs the 32 pilot clips (~2 min)
+SKIPPED [1] tests\test_live_stream_partitions.py:447: set MRCD_SLOW=1: ~10.5 min session (~6 min CPU)
+SKIPPED [1] tests\test_live_stream_partitions.py:541: set MRCD_SLOW=1: ~30 s
+SKIPPED [1] tests\test_service_analyzer.py:300: set MRCD_SLOW=1 and OMP_NUM_THREADS=4 before python starts; needs models/ckpt_audio_text.pt and the cached Whisper small
+875 passed, 10 skipped, 10 warnings in 313.39s (0:05:13)
+
+real	5m15.555s
+user	0m0.249s
+sys	0m0.218s

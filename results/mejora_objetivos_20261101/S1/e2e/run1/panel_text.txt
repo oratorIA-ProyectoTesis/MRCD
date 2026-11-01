@@ -1,0 +1,62 @@
+DISFLUENCIAS POR EVENTO (EXPERIMENTAL)
+
+Análisis experimental de disfluencias sobre un archivo de audio (WAV mono, 16 kHz, 16 bits). El audio se envía solo al servicio local configurado y no se guarda.
+
+Limpiar
+
+EVENTOS
+
+22
+
+EVENTOS POR MINUTO
+
+36.7
+
+Audio analizado: 36.0 s
+
+MODALIDADES
+
+Acústica: disponible
+Lingüística (texto del ASR): disponible
+Video: No disponible: service v1 receives audio only; no video was provided or processed
+Eventos de disfluencia por ventana
+CLASE	FRANJA DE DECISIÓN	PUNTAJE DEL MODELO	VENTANAS
+pausa neutra neutral_pauseSALIDA TÉCNICA SIN VALIDAR	0.0 s – 0.5 s	0.55 NO CALIBRADO	1
+pausa retórica rhetorical_pauseSALIDA TÉCNICA SIN VALIDAR	0.5 s – 1.5 s	0.68 NO CALIBRADO	2
+pausa neutra neutral_pauseSALIDA TÉCNICA SIN VALIDAR	1.5 s – 2.0 s	0.52 NO CALIBRADO	1
+pausa retórica rhetorical_pauseSALIDA TÉCNICA SIN VALIDAR	2.0 s – 6.5 s	0.96 NO CALIBRADO	9
+muletilla filler_word	6.5 s – 8.0 s	0.95 NO CALIBRADO	3
+muletilla filler_word	8.5 s – 9.0 s	0.49 NO CALIBRADO	1
+prolongación prolongation	9.5 s – 11.5 s	0.58 NO CALIBRADO	4
+prolongación prolongation	12.0 s – 13.0 s	0.61 NO CALIBRADO	2
+muletilla filler_word	13.0 s – 14.0 s	0.51 NO CALIBRADO	2
+pausa retórica rhetorical_pauseSALIDA TÉCNICA SIN VALIDAR	14.5 s – 15.5 s	0.75 NO CALIBRADO	2
+pausa neutra neutral_pauseSALIDA TÉCNICA SIN VALIDAR	15.5 s – 17.5 s	0.79 NO CALIBRADO	4
+pausa retórica rhetorical_pauseSALIDA TÉCNICA SIN VALIDAR	17.5 s – 18.0 s	0.60 NO CALIBRADO	1
+pausa neutra neutral_pauseSALIDA TÉCNICA SIN VALIDAR	18.0 s – 18.5 s	0.49 NO CALIBRADO	1
+muletilla filler_word	19.0 s – 20.0 s	0.78 NO CALIBRADO	2
+pausa retórica rhetorical_pauseSALIDA TÉCNICA SIN VALIDAR	20.0 s – 20.5 s	0.49 NO CALIBRADO	1
+muletilla filler_word	20.5 s – 22.0 s	0.97 NO CALIBRADO	3
+pausa retórica rhetorical_pauseSALIDA TÉCNICA SIN VALIDAR	22.0 s – 22.5 s	0.56 NO CALIBRADO	1
+pausa neutra neutral_pauseSALIDA TÉCNICA SIN VALIDAR	22.5 s – 24.0 s	0.75 NO CALIBRADO	3
+pausa retórica rhetorical_pauseSALIDA TÉCNICA SIN VALIDAR	24.0 s – 24.5 s	0.70 NO CALIBRADO	1
+prolongación prolongation	26.0 s – 27.0 s	0.65 NO CALIBRADO	2
+prolongación prolongation	28.0 s – 28.5 s	0.55 NO CALIBRADO	1
+bloqueo blockSALIDA TÉCNICA SIN VALIDAR	28.5 s – 31.5 s	0.99 NO CALIBRADO	6
+
+La franja es la ventana de decisión del modelo, no una frontera marcada por una persona. El puntaje es el máximo de la probabilidad de clase en las ventanas del evento y no está calibrado: no es una probabilidad de acierto.
+
+CHECKPOINT
+ckpt_audio_text.pt · 87f95108a765
+ASR
+p0
+CABEZA
+ninguna (V0)
+VENTANA
+3 s / paso 0.5 s
+CONTRATO
+mrcd.analysis/v1
+scores_uncalibrated Scores are the maximum window class probability of an uncalibrated model; they are not probabilities of correctness.
+no_human_validation Classes are window-level decisions of a model trained with weak (heuristic) supervision; agreement with human annotation has not been established.
+engine_provenance PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia
+class_block_not_measurable The 'block' class is not measurable with the development corpus (n=2); there is no evidence that a 'block' event is correct.

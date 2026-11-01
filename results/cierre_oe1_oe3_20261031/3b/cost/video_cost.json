@@ -1,0 +1,281 @@
+{
+ "hardware": {
+  "platform": "Windows-11-10.0.26200-SP0",
+  "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "python": "3.12.10",
+  "cpu_count_logical": 20,
+  "OMP_NUM_THREADS": "4",
+  "cpu": {
+   "Name": "13th Gen Intel(R) Core(TM) i7-13650HX",
+   "NumberOfCores": 14,
+   "NumberOfLogicalProcessors": 20
+  },
+  "ram_gb": 23.7,
+  "torch": "2.9.1+cpu",
+  "numpy": "2.5.3",
+  "librosa": "1.0.0",
+  "faster_whisper": "1.2.1",
+  "ctranslate2": "4.8.2",
+  "scipy": "1.18.1",
+  "soundfile": "0.14.0"
+ },
+ "background": {
+  "system_cpu_pct": 5.19,
+  "heaviest_cpu_s_delta": [
+   {
+    "Name": "ChatGPT",
+    "Delta": 0.11
+   },
+   {
+    "Name": "explorer",
+    "Delta": 0.09
+   },
+   {
+    "Name": "Code",
+    "Delta": 0.08
+   },
+   {
+    "Name": "claude",
+    "Delta": 0.03
+   },
+   {
+    "Name": "ChatGPT",
+    "Delta": 0.03
+   }
+  ]
+ },
+ "date": "2026-10-31T20:35:02",
+ "clips": [
+  {
+   "clip": "MTRsInkqv5E_s04",
+   "available": true,
+   "sha256": "85e8fa5d3cea71f20bd9456895355833024b9edcdeba37944a0eb94c43715b83",
+   "frames_declared": 221,
+   "fps": 10.0,
+   "width": 480,
+   "height": 480,
+   "media_duration_s": 22.1,
+   "decode_only": [
+    {
+     "wall_s": 0.10556199999700766,
+     "cpu_s": 0.609375
+    },
+    {
+     "wall_s": 0.07905780000146478,
+     "cpu_s": 0.671875
+    },
+    {
+     "wall_s": 0.0768370000005234,
+     "cpu_s": 0.671875
+    }
+   ],
+   "decode_plus_face": [
+    {
+     "wall_s": 1.9448912000079872,
+     "cpu_s": 2.390625,
+     "frames": 221,
+     "frames_with_face": 218,
+     "face_pct": 98.64253393665159,
+     "per_frame_ms_median": 6.690800000797026,
+     "per_frame_ms_p95": 12.206599989440292
+    },
+    {
+     "wall_s": 1.8754638000100385,
+     "cpu_s": 2.5,
+     "frames": 221,
+     "frames_with_face": 218,
+     "face_pct": 98.64253393665159,
+     "per_frame_ms_median": 6.611400007386692,
+     "per_frame_ms_p95": 12.153199990279973
+    },
+    {
+     "wall_s": 2.177039000001969,
+     "cpu_s": 2.640625,
+     "frames": 221,
+     "frames_with_face": 218,
+     "face_pct": 98.64253393665159,
+     "per_frame_ms_median": 8.803299991996028,
+     "per_frame_ms_p95": 13.53880000533536
+    }
+   ],
+   "decode_frames": 221
+  },
+  {
+   "clip": "p2ZWJP75kwA_s01",
+   "available": true,
+   "sha256": "c283dec92c4c8218d8f2b0339f3bf951b572a2e782590e0d45bc2696d81c9e74",
+   "frames_declared": 259,
+   "fps": 10.0,
+   "width": 480,
+   "height": 480,
+   "media_duration_s": 25.9,
+   "decode_only": [
+    {
+     "wall_s": 0.0712094999908004,
+     "cpu_s": 0.171875
+    },
+    {
+     "wall_s": 0.07913579999876674,
+     "cpu_s": 0.265625
+    },
+    {
+     "wall_s": 0.07618250000814442,
+     "cpu_s": 0.40625
+    }
+   ],
+   "decode_plus_face": [
+    {
+     "wall_s": 2.1243759999924805,
+     "cpu_s": 2.75,
+     "frames": 259,
+     "frames_with_face": 259,
+     "face_pct": 100.0,
+     "per_frame_ms_median": 6.560399997397326,
+     "per_frame_ms_p95": 11.78997000970412
+    },
+    {
+     "wall_s": 2.201487199999974,
+     "cpu_s": 2.578125,
+     "frames": 259,
+     "frames_with_face": 259,
+     "face_pct": 100.0,
+     "per_frame_ms_median": 6.627800001297146,
+     "per_frame_ms_p95": 12.30379001062829
+    },
+    {
+     "wall_s": 2.1950847999978578,
+     "cpu_s": 2.53125,
+     "frames": 259,
+     "frames_with_face": 259,
+     "face_pct": 100.0,
+     "per_frame_ms_median": 6.565499992575496,
+     "per_frame_ms_p95": 11.919399998441804
+    }
+   ],
+   "decode_frames": 259
+  },
+  {
+   "clip": "ak4Oxthf_fc_s02",
+   "available": true,
+   "sha256": "e15b931219d461e5effd4588f2c27ab53f815eb0a8f7fd1490b850a2b08f65c6",
+   "frames_declared": 285,
+   "fps": 10.0,
+   "width": 480,
+   "height": 480,
+   "media_duration_s": 28.5,
+   "decode_only": [
+    {
+     "wall_s": 0.08388320000085514,
+     "cpu_s": 0.59375
+    },
+    {
+     "wall_s": 0.08134250000875909,
+     "cpu_s": 0.703125
+    },
+    {
+     "wall_s": 0.07693260000087321,
+     "cpu_s": 0.5625
+    }
+   ],
+   "decode_plus_face": [
+    {
+     "wall_s": 2.486068400001386,
+     "cpu_s": 3.140625,
+     "frames": 285,
+     "frames_with_face": 285,
+     "face_pct": 100.0,
+     "per_frame_ms_median": 7.660100003704429,
+     "per_frame_ms_p95": 12.1004000044195
+    },
+    {
+     "wall_s": 2.389496500007226,
+     "cpu_s": 3.09375,
+     "frames": 285,
+     "frames_with_face": 285,
+     "face_pct": 100.0,
+     "per_frame_ms_median": 6.714099989039823,
+     "per_frame_ms_p95": 12.167319995933214
+    },
+    {
+     "wall_s": 2.363231799987261,
+     "cpu_s": 3.25,
+     "frames": 285,
+     "frames_with_face": 285,
+     "face_pct": 100.0,
+     "per_frame_ms_median": 6.554899999173358,
+     "per_frame_ms_p95": 11.950520001119003
+    }
+   ],
+   "decode_frames": 285
+  },
+  {
+   "clip": "ak4Oxthf_fc_s03",
+   "available": true,
+   "sha256": "a8c63079c596f1db66389a787814d99f1ae0c76926de407b4385d23bb34b184e",
+   "frames_declared": 273,
+   "fps": 10.0,
+   "width": 480,
+   "height": 480,
+   "media_duration_s": 27.3,
+   "decode_only": [
+    {
+     "wall_s": 0.07679179999104235,
+     "cpu_s": 0.46875
+    },
+    {
+     "wall_s": 0.07855209999252111,
+     "cpu_s": 0.609375
+    },
+    {
+     "wall_s": 0.07605089999560732,
+     "cpu_s": 0.5625
+    }
+   ],
+   "decode_plus_face": [
+    {
+     "wall_s": 2.348726099997293,
+     "cpu_s": 3.09375,
+     "frames": 273,
+     "frames_with_face": 273,
+     "face_pct": 100.0,
+     "per_frame_ms_median": 6.790100000216626,
+     "per_frame_ms_p95": 11.958220004453324
+    },
+    {
+     "wall_s": 2.6218747999955667,
+     "cpu_s": 3.09375,
+     "frames": 273,
+     "frames_with_face": 273,
+     "face_pct": 100.0,
+     "per_frame_ms_median": 8.6147000110941,
+     "per_frame_ms_p95": 13.293680004426278
+    },
+    {
+     "wall_s": 2.470710699999472,
+     "cpu_s": 3.171875,
+     "frames": 273,
+     "frames_with_face": 273,
+     "face_pct": 100.0,
+     "per_frame_ms_median": 6.935199999134056,
+     "per_frame_ms_p95": 13.302880001720041
+    }
+   ],
+   "decode_frames": 273
+  },
+  {
+   "clip": "does_not_exist_clip",
+   "available": false,
+   "unavailable_reason": "video file not found: does_not_exist_clip.mp4"
+  }
+ ],
+ "versions": {
+  "opencv": "5.0.0",
+  "mediapipe": "1.0.1"
+ },
+ "landmarker_model_sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+ "mem": {
+  "rss_mb": 334.8,
+  "peak_rss_mb": 370.3
+ },
+ "scope_note": "Cost of decoding + face landmarks only. No audio/video fusion, no speaker identity, no synchrony were verified or measured; DIME AVI files are screen recordings without faces and were not used."
+}

@@ -1,0 +1,14 @@
+{
+ "python": "3.12.10",
+ "numpy": "2.5.3",
+ "scikit-learn": "1.9.1",
+ "scipy": "1.18.1",
+ "opencv": "5.0.0",
+ "mediapipe": "1.0.1",
+ "faster_whisper": "1.2.1",
+ "face_landmarker.task": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+ "units.csv": "4004d2f299778146d66c79fe5ffe5778a55a5038036200907ddfbcddcca24359",
+ "tracks_manifest_sha256": "d33cc91ad178a8b083ea494b8ab832e54266ab478eef66d9bec21a5e29313cdd",
+ "whisper_snapshot": "faster-whisper-small 536b0662742c02347bc0e980a01041f333bce120",
+ "asr": "P0 CPU int8, transcribe_chunked 8 s / 2 s overlap"
+}

@@ -1,0 +1,18 @@
+PROTOCOL.md sha256 8b4e07b80d8890224058b79e7d3b00e24521cbdb865fa5e1b49fdbd427d592c6
+mrcd/av/config.py config_hash bb56b8aa5bf5d6be6c8428e71fa75711a8ea867e1f11308b835de9a45c3d7282
+frozen_at 2026-11-01T01:06:29-05:00
+--- amendment A1
+PROTOCOL.md sha256 4699d8fec5c5c4cb251301439b8d31de53895bc96ef73503a5810cc912c83352
+mrcd/av/config.py config_hash 2357f15a17599d9293c0d3ed6047926b7b4748861dafb558e99bcd3d53e2a213
+frozen_at 2026-11-01T01:07:30-05:00
+--- amendment A2 (post-hoc, after A1 gate run)
+PROTOCOL.md sha256 3c47b504937d6a40e3af036a1f171735e58bd6ef35e73e754a644a1cf84972d7
+A2 gate-config sha256 b7c7c0e1267042606b3ee89b4c2ce323b2c0c8186ab1070bff90755375f481d6
+A1 config_hash 2357f15a17599d9293c0d3ed6047926b7b4748861dafb558e99bcd3d53e2a213
+frozen_at 2026-11-01T02:43:34-05:00
+--- A2 heading date typo fixed (no content change)
+PROTOCOL.md sha256 13ac0c5cb8cd29adafb1de968864cb597a6b8225ea9996e0b1563bf609975be4
+at 2026-11-01T02:43:44-05:00
+--- amendment A3 (exploratory-descriptive, after gate runs)
+PROTOCOL.md sha256 44092fdd3834c552f1ed4dc66b3260b0a460d360ca486a14519babb5504638c8
+at 2026-11-01T02:44:58-05:00

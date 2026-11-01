@@ -1,0 +1,22 @@
+{
+ "tag": "sens_r0.4",
+ "units": 1533,
+ "admitted": 44,
+ "pos_total": 173,
+ "pos_admitted": 0,
+ "speakers_admitted": 2,
+ "videos_with_admitted": 2,
+ "video_sync_ok": 2,
+ "videos": 74,
+ "primary_reasons": {
+  "face_not_visible_enough": 1150,
+  "video_sync_unverified": 189,
+  "unit_too_short": 93,
+  "admitted": 44,
+  "lip_audio_correlation_below_threshold": 54,
+  "correlation_not_above_surrogate_null": 2,
+  "second_face_present_active_speaker_ambiguous": 1
+ },
+ "config_hash": "7613e129b75fb69d3ac465fc1552253f89efc211cbe5917f12abb2f1728fab88",
+ "merge_tracks": false
+}

@@ -1,0 +1,55 @@
+{
+ "criteria": {
+  "C1 completeness": false,
+  "C2 parity (v2 shows differences AND v3 <= v2, <= 50 % frames)": true,
+  "C3 latency within 0.05 s": true,
+  "C4 cost (needs load-valid runs) [NOT EVALUABLE: some runs had background CPU >= 15 %]": false,
+  "C5 lost/duplicated = 0": true,
+  "C6 silence equal": true
+ },
+ "all_met": false,
+ "summary": {
+  "live_cfg_v1": {
+   "div": 2,
+   "bad": 24,
+   "lost": 36,
+   "dup": 0,
+   "tick": 0.16934405000210973,
+   "p95": 0.1948371225123992,
+   "rss": 1816.8,
+   "lat_med": 3.0,
+   "lat_p95": 3.0,
+   "n": 6,
+   "valid": 5,
+   "complete": false
+  },
+  "live_cfg_v2": {
+   "div": 2,
+   "bad": 24,
+   "lost": 0,
+   "dup": 0,
+   "tick": 0.20015147499361774,
+   "p95": 0.2748126324986515,
+   "rss": 1816.8,
+   "lat_med": 4.0,
+   "lat_p95": 4.0,
+   "n": 6,
+   "valid": 6,
+   "complete": true
+  },
+  "live_cfg_v3": {
+   "div": 0,
+   "bad": 0,
+   "lost": 0,
+   "dup": 0,
+   "tick": 0.19150090000766795,
+   "p95": 0.26177941000423743,
+   "rss": 1816.8,
+   "lat_med": 4.0,
+   "lat_p95": 4.0,
+   "n": 6,
+   "valid": 6,
+   "complete": true
+  }
+ }
+}

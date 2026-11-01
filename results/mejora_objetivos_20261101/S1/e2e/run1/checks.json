@@ -1,0 +1,489 @@
+{
+ "checks": {
+  "outcome": "ok",
+  "elapsed_s": 31.545,
+  "has_no_calibrado": true,
+  "has_no_disponible": true,
+  "has_proveniencia": true,
+  "has_seconds": true,
+  "classes_shown": [
+   "filler_word",
+   "prolongation",
+   "block",
+   "rhetorical_pause",
+   "neutral_pause"
+  ],
+  "has_percent_sign": false
+ },
+ "stubbed_app_requests": [
+  "GET http://localhost:8000/api/v1/users/me",
+  "GET http://localhost:8000/api/v1/users/me",
+  "GET http://localhost:8000/api/v1/sessions/11111111-1111-4111-8111-111111111111"
+ ],
+ "service_requests": [
+  {
+   "t": 1793513880186,
+   "method": "POST",
+   "url": "http://127.0.0.1:8765/v1/jobs",
+   "status": 202,
+   "body_keys": null,
+   "job_status": null,
+   "bytes_sent": 1152078
+  },
+  {
+   "t": 1793513881193,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513882195,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513883200,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513884225,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513885238,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513886250,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513887253,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513888270,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513889287,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513890289,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513891295,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513892301,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513893305,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513894311,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513895317,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513896322,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513897330,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513898336,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513899353,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513900357,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513901374,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513902393,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513903400,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513904407,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513905411,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513906416,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513907423,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513908434,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513909440,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "running",
+   "bytes_sent": null
+  },
+  {
+   "t": 1793513910448,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/21f3dcd789714f7dafc2a3a11901b2bb",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "completed",
+   "bytes_sent": null
+  }
+ ],
+ "console": [
+  "debug: [vite] connecting...",
+  "debug: [vite] connected.",
+  "info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+ ]
+}

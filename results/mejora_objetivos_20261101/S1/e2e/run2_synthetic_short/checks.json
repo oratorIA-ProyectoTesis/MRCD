@@ -1,0 +1,48 @@
+{
+ "checks": {
+  "outcome": "error",
+  "elapsed_s": 1.236,
+  "has_no_calibrado": false,
+  "has_no_disponible": false,
+  "has_proveniencia": false,
+  "has_seconds": true,
+  "classes_shown": [],
+  "has_percent_sign": false
+ },
+ "stubbed_app_requests": [
+  "GET http://localhost:8000/api/v1/users/me",
+  "GET http://localhost:8000/api/v1/users/me",
+  "GET http://localhost:8000/api/v1/sessions/11111111-1111-4111-8111-111111111111"
+ ],
+ "service_requests": [
+  {
+   "t": 1793513929553,
+   "method": "POST",
+   "url": "http://127.0.0.1:8765/v1/jobs",
+   "status": 202,
+   "body_keys": null,
+   "job_status": null,
+   "bytes_sent": 160044
+  },
+  {
+   "t": 1793513930572,
+   "method": "GET",
+   "url": "http://127.0.0.1:8765/v1/jobs/35d364d0b4d24d87bc46b798a4a2dbed",
+   "status": 200,
+   "body_keys": [
+    "schema_version",
+    "job_id",
+    "status",
+    "created_at",
+    "result"
+   ],
+   "job_status": "failed",
+   "bytes_sent": null
+  }
+ ],
+ "console": [
+  "debug: [vite] connecting...",
+  "debug: [vite] connected.",
+  "info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+ ]
+}

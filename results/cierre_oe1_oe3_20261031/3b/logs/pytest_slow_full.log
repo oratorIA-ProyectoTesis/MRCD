@@ -1,0 +1,56 @@
+........................................................................ [  8%]
+........................................................................ [ 17%]
+........................................................................ [ 26%]
+........................................................................ [ 34%]
+........................................................................ [ 43%]
+........................................................................ [ 52%]
+........................................................................ [ 61%]
+........................................................................ [ 69%]
+........................................................................ [ 78%]
+........................................................................ [ 87%]
+........................................................................ [ 96%]
+.................................                                        [100%]
+============================== warnings summary ===============================
+tests\test_service_server.py:8
+  <repo>\tests\test_service_server.py:8: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient
+
+.venv\Lib\site-packages\starlette\testclient.py:53
+  <repo>\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_head_loading.py::test_malicious_pickle_is_not_executed[False]
+tests/test_head_loading.py::test_malicious_pickle_is_not_executed[True]
+  <repo>\.venv\Lib\site-packages\torch\_weights_only_unpickler.py:552: UserWarning: Detected pickle protocol 4 in the checkpoint, which was not the default pickle protocol used by `torch.load` (2). The weights_only Unpickler might not support all instructions implemented by this protocol, please file an issue for adding support if you encounter this.
+    warnings.warn(
+
+tests/test_live_demo.py::test_websocket_emits_prediction_schema
+tests/test_live_demo.py::test_live_controls_start_and_stop_the_engine
+  <repo>\scripts\live_demo.py:436: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("shutdown")
+
+tests/test_live_demo.py::test_websocket_emits_prediction_schema
+tests/test_live_demo.py::test_live_controls_start_and_stop_the_engine
+  <repo>\.venv\Lib\site-packages\fastapi\applications.py:4681: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)  # ty: ignore[deprecated]
+
+tests/test_live_parity.py::test_margins_below_the_measured_minimum_are_rejected
+  <repo>\tests\test_live_parity.py:198: RuntimeWarning: margins below 3 s left / 3 s right were NOT frame-exact on all 98 AMERESCO clips (see margin_study_*.json); expect small F0 differences versus offline
+    SessionFeatureTracker(left_margin_s=0.1)
+
+tests/test_live_parity.py::test_margins_below_the_measured_minimum_are_rejected
+  <repo>\tests\test_live_parity.py:200: RuntimeWarning: margins below 3 s left / 3 s right were NOT frame-exact on all 98 AMERESCO clips (see margin_study_*.json); expect small F0 differences versus offline
+    SessionFeatureTracker(right_margin_s=0.5)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+825 passed, 10 warnings in 695.57s (0:11:35)

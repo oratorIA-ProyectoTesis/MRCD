@@ -1,0 +1,21 @@
+{
+ "tag": "a2",
+ "units": 1533,
+ "admitted": 66,
+ "pos_total": 173,
+ "pos_admitted": 0,
+ "speakers_admitted": 2,
+ "videos_with_admitted": 2,
+ "video_sync_ok": 2,
+ "videos": 74,
+ "primary_reasons": {
+  "face_not_visible_enough": 1134,
+  "video_sync_unverified": 206,
+  "unit_too_short": 93,
+  "admitted": 66,
+  "lip_audio_correlation_below_threshold": 30,
+  "correlation_not_above_surrogate_null": 4
+ },
+ "config_hash": "b7c7c0e1267042606b3ee89b4c2ce323b2c0c8186ab1070bff90755375f481d6",
+ "merge_tracks": true
+}

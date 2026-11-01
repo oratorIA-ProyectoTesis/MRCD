@@ -1,0 +1,276 @@
+{
+ "n": 5056,
+ "pos": 967,
+ "pos_speakers": 166,
+ "units_with_pause_mark": 1101,
+ "folds_P_a": [
+  {
+   "fold": 0,
+   "C": 0.3,
+   "thr": 0.28,
+   "score_thr": 0.04
+  },
+  {
+   "fold": 1,
+   "C": 0.3,
+   "thr": 0.24,
+   "score_thr": 0.02
+  },
+  {
+   "fold": 2,
+   "C": 0.03,
+   "thr": 0.24,
+   "score_thr": 0.02
+  },
+  {
+   "fold": 3,
+   "C": 0.03,
+   "thr": 0.34,
+   "score_thr": 0.02
+  },
+  {
+   "fold": 4,
+   "C": 0.3,
+   "thr": 0.3,
+   "score_thr": 0.04
+  }
+ ],
+ "folds_1_4": {
+  "V0_argmax": {
+   "n": 5056,
+   "support_pos": 967,
+   "tp": 341,
+   "fp": 180,
+   "fn": 626,
+   "tn": 3909,
+   "precision": 0.654510556621881,
+   "recall": 0.35263702171664946,
+   "f1": 0.4583333333333333,
+   "n_groups": 180,
+   "n_pos_groups": 166,
+   "f1_ci95": [
+    0.42028363820834946,
+    0.49543713157239266
+   ],
+   "fp_with_pause_mark": 122,
+   "fp_without_pause_mark": 58
+  },
+  "V0thr": {
+   "n": 5056,
+   "support_pos": 967,
+   "tp": 699,
+   "fp": 736,
+   "fn": 268,
+   "tn": 3353,
+   "precision": 0.4871080139372822,
+   "recall": 0.7228541882109617,
+   "f1": 0.582014987510408,
+   "n_groups": 180,
+   "n_pos_groups": 166,
+   "f1_ci95": [
+    0.5455325360956685,
+    0.6142720316897612
+   ],
+   "fp_with_pause_mark": 377,
+   "fp_without_pause_mark": 359
+  },
+  "P_a_stack_V0_signals": {
+   "n": 5056,
+   "support_pos": 967,
+   "tp": 692,
+   "fp": 679,
+   "fn": 275,
+   "tn": 3410,
+   "precision": 0.5047410649161196,
+   "recall": 0.7156153050672182,
+   "f1": 0.5919589392643285,
+   "n_groups": 180,
+   "n_pos_groups": 166,
+   "f1_ci95": [
+    0.5553042193311963,
+    0.6248995259686727
+   ],
+   "fp_with_pause_mark": 383,
+   "fp_without_pause_mark": 296
+  }
+ },
+ "fold4_vc": {
+  "n": 1240,
+  "pos": 249,
+  "folds": [
+   {
+    "fold": 0,
+    "C": 0.3,
+    "thr": 0.38,
+    "score_thr": 0.66
+   },
+   {
+    "fold": 1,
+    "C": 0.3,
+    "thr": 0.3,
+    "score_thr": 0.66
+   },
+   {
+    "fold": 2,
+    "C": 0.3,
+    "thr": 0.3,
+    "score_thr": 0.66
+   },
+   {
+    "fold": 3,
+    "C": 0.3,
+    "thr": 0.28,
+    "score_thr": 0.72
+   },
+   {
+    "fold": 4,
+    "C": 0.3,
+    "thr": 0.38,
+    "score_thr": 0.7
+   }
+  ],
+  "note": "Vc-favourable, nested CV inside fold 4",
+  "models": {
+   "Vc_frozen": {
+    "n": 1240,
+    "support_pos": 249,
+    "tp": 181,
+    "fp": 129,
+    "fn": 68,
+    "tn": 862,
+    "precision": 0.5838709677419355,
+    "recall": 0.7269076305220884,
+    "f1": 0.6475849731663685,
+    "n_groups": 45,
+    "n_pos_groups": 43,
+    "f1_ci95": [
+     0.5783951135552664,
+     0.7097800030294449
+    ],
+    "fp_with_pause_mark": 64,
+    "fp_without_pause_mark": 65
+   },
+   "Vcthr": {
+    "n": 1240,
+    "support_pos": 249,
+    "tp": 171,
+    "fp": 122,
+    "fn": 78,
+    "tn": 869,
+    "precision": 0.5836177474402731,
+    "recall": 0.6867469879518072,
+    "f1": 0.6309963099630996,
+    "n_groups": 45,
+    "n_pos_groups": 43,
+    "f1_ci95": [
+     0.5648466087171332,
+     0.6895398355710652
+    ],
+    "fp_with_pause_mark": 62,
+    "fp_without_pause_mark": 60
+   },
+   "V0_argmax": {
+    "n": 1240,
+    "support_pos": 249,
+    "tp": 95,
+    "fp": 39,
+    "fn": 154,
+    "tn": 952,
+    "precision": 0.7089552238805971,
+    "recall": 0.3815261044176707,
+    "f1": 0.4960835509138381,
+    "n_groups": 45,
+    "n_pos_groups": 43,
+    "f1_ci95": [
+     0.4245356338512043,
+     0.5629639559130176
+    ],
+    "fp_with_pause_mark": 28,
+    "fp_without_pause_mark": 11
+   },
+   "P_b_stack_Vc_signals": {
+    "n": 1240,
+    "support_pos": 249,
+    "tp": 179,
+    "fp": 121,
+    "fn": 70,
+    "tn": 870,
+    "precision": 0.5966666666666667,
+    "recall": 0.7188755020080321,
+    "f1": 0.6520947176684881,
+    "n_groups": 45,
+    "n_pos_groups": 43,
+    "f1_ci95": [
+     0.5859976008408199,
+     0.7109381488787375
+    ],
+    "fp_with_pause_mark": 62,
+    "fp_without_pause_mark": 59
+   }
+  }
+ },
+ "family_E4": [
+  {
+   "delta": 0.009943951753920488,
+   "ci": [
+    -0.006429645241340862,
+    0.026096139821994453
+   ],
+   "p_boot": 0.22915416916616677,
+   "n_groups": 180,
+   "n_boot": 5000,
+   "test": "E4: P-a minus V0thr, F1",
+   "p_holm": 0.9166166766646671,
+   "verdict": "not demonstrated"
+  },
+  {
+   "delta": 6.0,
+   "ci": [
+    -14.0,
+    27.0
+   ],
+   "p_boot": 0.5894821035792841,
+   "fused": 383.0,
+   "base": 377.0,
+   "test": "E4: P-a minus V0thr, pause-associated FP count",
+   "p_holm": 1.0,
+   "verdict": "not demonstrated"
+  },
+  {
+   "delta": 0.004509744502119606,
+   "ci": [
+    -0.024684107034006253,
+    0.03277607408232947
+   ],
+   "p_boot": 0.770245950809838,
+   "n_groups": 45,
+   "n_boot": 5000,
+   "test": "E4: P-b minus Vc, F1",
+   "p_holm": 1.0,
+   "verdict": "not demonstrated"
+  },
+  {
+   "delta": -2.0,
+   "ci": [
+    -11.0,
+    7.0
+   ],
+   "p_boot": 0.7818436312737452,
+   "fused": 62.0,
+   "base": 64.0,
+   "test": "E4: P-b minus Vc, pause-associated FP count",
+   "p_holm": 1.0,
+   "verdict": "not demonstrated"
+  }
+ ],
+ "pause_share_of_fp": {
+  "V0_argmax": 0.6777777777777778,
+  "V0thr": 0.5122282608695652,
+  "P_a_stack_V0_signals": 0.5640648011782032
+ },
+ "observable_lengthening_note": "label is an observable-lengthening mark; no claim that it is disfluent",
+ "config": {
+  "protocol_sha256": "053d435cb7609c734cf25b76f8d1b2d49e78d32e589c391233d7d1cc4675f340",
+  "seconds": 49.0
+ }
+}
