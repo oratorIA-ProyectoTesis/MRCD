@@ -1,0 +1,73 @@
+{
+ "version": "s3-decision-bands/1",
+ "experimental": true,
+ "calibration_claim": "none: scores are mapped by a development-fitted Platt curve; NOT a demonstrated calibrated probability",
+ "method": "platt",
+ "protocol_sha256": "053d435cb7609c734cf25b76f8d1b2d49e78d32e589c391233d7d1cc4675f340",
+ "classes": {
+  "filler_word": {
+   "calibrator": {
+    "method": "platt",
+    "params": {
+     "a": 0.29355668740642704,
+     "b": -0.4678601758235874
+    }
+   },
+   "threshold": 0.24,
+   "lo": 0.24,
+   "hi": 0.3828592281015216,
+   "feasible": true,
+   "baseline_error": 0.13983386075949367,
+   "coverage_dev": 0.9402689873417721,
+   "n": 5056
+  },
+  "prolongation": {
+   "calibrator": {
+    "method": "platt",
+    "params": {
+     "a": 0.3816386639861032,
+     "b": 0.3107003871723817
+    }
+   },
+   "threshold": 0.3,
+   "lo": 0.3,
+   "hi": 0.4731174507078437,
+   "feasible": true,
+   "baseline_error": 0.18651107594936708,
+   "coverage_dev": 0.8951740506329114,
+   "n": 5056
+  },
+  "repetition": {
+   "calibrator": {
+    "method": "platt",
+    "params": {
+     "a": 0.40198181591537485,
+     "b": -1.2371652799101462
+    }
+   },
+   "threshold": 0.28,
+   "lo": 0.28,
+   "hi": 0.793563682420188,
+   "feasible": true,
+   "baseline_error": 0.036480256564441774,
+   "coverage_dev": 0.9733413509721387,
+   "n": 4989
+  },
+  "text_route_repetition": {
+   "calibrator": {
+    "method": "platt",
+    "params": {
+     "a": 0.9684447982449782,
+     "b": -0.12222128134791937
+    }
+   },
+   "threshold": 0.28,
+   "lo": 0.28,
+   "hi": 0.6286922474918979,
+   "feasible": true,
+   "baseline_error": 0.03642585073877192,
+   "coverage_dev": 0.9773450253233436,
+   "n": 1019
+  }
+ }
+}

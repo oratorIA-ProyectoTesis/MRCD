@@ -184,8 +184,9 @@ def test_validator_rejects_contract_violations(mutate):
 
 def test_contract_has_no_uncertain_state_and_no_psychological_fields():
     text = SCHEMA_FILE.read_text(encoding="utf-8").lower()
+    # rev 1.2: "uncertain" exists ONLY as a value of the optional per-event decision (S3, opt-in)
+    assert text.count("uncertain") == 1
     for forbidden in (
-        "uncertain",
         "incierto",
         "anxiety",
         "ansiedad",
@@ -230,7 +231,8 @@ def test_text_is_excluded_unless_requested():
 
 def test_block_class_carries_the_not_measurable_warning():
     doc = _doc(
-        _result(events=[Event("block", 1.0, 2.0, 0.7, 2, modalities=("acoustic",))])
+        _result(events=[Event("block", 1.0, 2.0, 0.7, 2, modalities=("acoustic",))]),
+        output_scope="all",
     )
     assert "class_block_not_measurable" in {w["code"] for w in doc["warnings"]}
 
@@ -273,9 +275,9 @@ def test_score_kind_is_not_called_probability_and_legacy_alias_still_validates()
 
     assert SCORE_KIND == "max_window_softmax_score"
     assert SCORE_KIND_DEPRECATED == "max_window_class_probability"
-    assert CONTRACT_REVISION == "1.1"
+    assert CONTRACT_REVISION == "1.2"
     doc = _doc()
-    assert doc["provenance"]["service"]["contract_revision"] == "1.1"
+    assert doc["provenance"]["service"]["contract_revision"] == "1.2"
     assert doc["provenance"]["service"]["contract"] == "mrcd.analysis/v1"
     # old consumers' documents (revision 1.0) keep validating through the deprecated alias
     doc["events"][0]["score"]["kind"] = SCORE_KIND_DEPRECATED

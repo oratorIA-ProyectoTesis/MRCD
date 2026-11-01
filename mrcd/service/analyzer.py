@@ -35,7 +35,12 @@ from mrcd.service.contract import (
     INTERVAL_SEMANTICS,
     NOT_CALIBRATED_LABEL,
     CONTRACT_REVISION,
+    EVALUATED_CLASSES,
+    OUT_OF_SCOPE_VALIDATION,
+    OUTPUT_SCOPES,
     SCORE_KIND,
+    SCORE_KIND_TEXT_ROUTE,
+    TEXT_ROUTES,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -57,6 +62,13 @@ class AnalysisOptions:
     asr_profile: str = "p0"
     head: str | None = None
     include_text: bool = False
+    #: "evaluated" (default): only filler_word, prolongation, repetition. "all": the other classes are included,
+    #: marked ``out_of_scope_unvalidated`` and never counted in the totals.
+    output_scope: str = "evaluated"
+    #: optional three-state decision (present / absent / uncertain) per event; experimental
+    decision: bool = False
+    #: experimental text route ("rep_ctx_p1") that replaces the V0 repetition events
+    text_route: str | None = None
 
 
 def _now() -> str:
@@ -157,6 +169,9 @@ def _request_block(options, digest, duration, rate, channels, reason) -> dict:
         "asr_profile": options.asr_profile,
         "head": options.head,
         "include_text": bool(options.include_text),
+        "output_scope": options.output_scope,
+        "decision": bool(options.decision),
+        "text_route": options.text_route,
     }
 
 
@@ -171,8 +186,8 @@ def _service_block() -> dict:
     }
 
 
-def _provenance(checkpoint, asr, head, config, environment, _unused) -> dict:
-    return {
+def _provenance(checkpoint, asr, head, config, environment, text_route=None) -> dict:
+    out = {
         "service": _service_block(),
         "checkpoint": checkpoint,
         "asr": asr,
@@ -180,6 +195,9 @@ def _provenance(checkpoint, asr, head, config, environment, _unused) -> dict:
         "config": config,
         "environment": environment,
     }
+    if text_route is not None:
+        out["text_route"] = text_route
+    return out
 
 
 def _experimental(options: AnalysisOptions, asr_meta: dict | None) -> dict:
@@ -193,7 +211,44 @@ def _experimental(options: AnalysisOptions, asr_meta: dict | None) -> dict:
         )
     if options.head is not None:
         components.append(f"head:{options.head}")
+    if options.text_route:
+        components.append(f"text_route:{options.text_route}")
+    if options.decision:
+        components.append("decision:three_state")
     return {"active": bool(components), "components": components}
+
+
+#: Opt-in ASR profiles beyond p0/p1 that the service ACCEPTS but marks as experimental (decision 2026-11-01, review S).
+_GPU_PROFILES = ("p0_cuda", "p1_cuda")
+_NOLOOP_PROFILES = ("p0_noloop", "p1_noloop")
+
+
+def _asr_profile_warnings(options: AnalysisOptions, asr_meta: dict | None) -> list[dict]:
+    """Profile-specific caveats, in addition to the generic ``experimental_components`` warning."""
+    out: list[dict] = []
+    name = options.asr_profile
+    if name in _GPU_PROFILES:
+        out.append(
+            {
+                "code": "asr_gpu_text_unvalidated",
+                "message": f"ASR profile {name!r} decodes on CUDA (float16). Its text can differ from the CPU int8 text "
+                "the models were trained on; it is experimental and was not validated against that text.",
+            }
+        )
+    if name in _NOLOOP_PROFILES:
+        lr = (asr_meta or {}).get("loop_redecode") or {}
+        msg = (
+            f"ASR profile {name!r} re-decodes chunks that look like repetition loops (exploratory evidence: 4 AMERESCO "
+            "recordings, no significant loop-rate reduction after Holm correction). Replaced chunks are listed in "
+            "the engine metadata; the sampled rung (T=0.4) is not bit-reproducible."
+        )
+        if lr.get("n_non_reproducible"):
+            msg += f" {lr['n_non_reproducible']} chunk(s) of this run came from that rung: re-running can give different text."
+        out.append({"code": "asr_redecode_experimental", "message": msg})
+    dev = (asr_meta or {}).get("device_warning")
+    if dev:
+        out.append({"code": "asr_device_auto_gpu", "message": str(dev)})
+    return out
 
 
 def _asr_block(meta: dict | None) -> dict | None:
@@ -243,18 +298,14 @@ def build_analysis(
     mods = _MODALITIES_BY_MODE.get(mode, ())
     has_words = bool((result.transcript or "").strip())
 
-    events = []
-    for i, e in enumerate(
-        sorted(result.events, key=lambda ev: (ev.start, ev.end)), start=1
-    ):
+    raw = []
+    for e in sorted(result.events, key=lambda ev: (ev.start, ev.end)):
         e_exp = bool(getattr(e, "asr_profile", "")) or options.head is not None
-        events.append(
+        raw.append(
             {
-                "id": f"ev-{i:04d}",
                 "class": e.label,
                 "start_s": round(float(e.start), 3),
                 "end_s": round(float(e.end), 3),
-                "interval_semantics": INTERVAL_SEMANTICS,
                 "score": {
                     "value": round(float(e.confidence), 6),
                     "kind": SCORE_KIND,
@@ -266,15 +317,82 @@ def build_analysis(
                 "text": (e.text or None) if options.include_text and e.text else None,
                 "validation": e.validation or None,
                 "experimental": e_exp,
+                "_basis": e.label,
             }
         )
+    route_meta = None
+    if options.text_route:
+        from mrcd.service import s3_features as S3F
 
+        route_meta = S3F.route_info()
+        raw = [r for r in raw if r["class"] != "repetition"]  # the route is the single source of repetition
+        for t in S3F.text_route_events(getattr(result, "words", None) or []):
+            raw.append(
+                {
+                    "class": "repetition",
+                    "start_s": round(float(t["start"]), 3),
+                    "end_s": round(float(t["end"]), 3),
+                    "score": {
+                        "value": round(float(t["score"]), 6),
+                        "kind": SCORE_KIND_TEXT_ROUTE,
+                        "calibrated": False,
+                        "label": NOT_CALIBRATED_LABEL,
+                    },
+                    "n_windows": 1,
+                    "modalities_used": ["linguistic"],
+                    "text": t["text"] if options.include_text else None,
+                    "validation": "experimental text route: turn-level model on ASR segment text; not validated outside DIHANA",
+                    "experimental": True,
+                    "_basis": "text_route_repetition",
+                }
+            )
+        raw.sort(key=lambda r: (r["start_s"], r["end_s"]))
+    hidden: dict[str, int] = {}
+    kept = []
+    for r in raw:
+        in_scope = r["class"] in EVALUATED_CLASSES
+        if not in_scope:
+            if options.output_scope != "all":
+                hidden[r["class"]] = hidden.get(r["class"], 0) + 1
+                continue
+            r["validation"] = OUT_OF_SCOPE_VALIDATION
+            r["experimental"] = True
+        elif r["class"] == "prolongation" and not r["validation"]:
+            r["validation"] = "observable lengthening; disfluent function not demonstrated"
+        r["in_scope"] = in_scope
+        kept.append(r)
+    events = []
+    for i, r in enumerate(kept, start=1):
+        basis = r.pop("_basis")
+        ev = {
+            "id": f"ev-{i:04d}",
+            "class": r.pop("class"),
+            "start_s": r.pop("start_s"),
+            "end_s": r.pop("end_s"),
+            "interval_semantics": INTERVAL_SEMANTICS,
+            **r,
+        }
+        if options.decision and ev["in_scope"]:
+            from mrcd.service import s3_features as S3F
+
+            d = S3F.decision_for(basis, ev["score"]["value"])
+            if d is not None:
+                ev["decision"] = d
+        events.append(ev)
+
+    in_events = [ev for ev in events if ev["in_scope"]]
+    out_events = [ev for ev in events if not ev["in_scope"]]
     counts: dict[str, int] = {}
-    for ev in events:
+    for ev in in_events:
         counts[ev["class"]] = counts.get(ev["class"], 0) + 1
+    oos_counts: dict[str, int] = {}
+    for ev in out_events:
+        oos_counts[ev["class"]] = oos_counts.get(ev["class"], 0) + 1
+    for k, v in hidden.items():
+        oos_counts[k] = oos_counts.get(k, 0) + v
     duration = float(result.duration)
     per_minute = (
-        measure(round(len(events) / (duration / 60), 4))
+        measure(round(len(in_events) / (duration / 60), 4))
         if duration > 1.0
         else measure(
             None, "audio shorter than 1 s: a per-minute rate is not meaningful"
@@ -284,8 +402,8 @@ def build_analysis(
     warnings: list[dict] = [
         {
             "code": "scores_uncalibrated",
-            "message": "Scores are the maximum window class probability of an uncalibrated model; "
-            "they are not probabilities of correctness.",
+            "message": "Scores are the maximum window softmax score of an uncalibrated model (softmax, not "
+            "calibrated); they are not probabilities of correctness.",
         },
         {
             "code": "no_human_validation",
@@ -295,7 +413,31 @@ def build_analysis(
     ]
     if result.warning:
         warnings.append({"code": "engine_provenance", "message": str(result.warning)})
-    if any(ev["class"] == "block" for ev in events):
+    if hidden:
+        warnings.append(
+            {
+                "code": "out_of_scope_hidden",
+                "message": "Classes outside the evaluated scope (no compatible human reference) were detected and hidden: "
+                + ", ".join(f"{k}={v}" for k, v in sorted(hidden.items()))
+                + ". They are not counted in totals or rates.",
+            }
+        )
+    if out_events:
+        warnings.append(
+            {
+                "code": "out_of_scope_included",
+                "message": "Events of classes outside the evaluated scope are included on explicit request, marked "
+                "out_of_scope_unvalidated and excluded from totals and rates.",
+            }
+        )
+    if options.text_route and options.asr_profile != "p1_disfluent_prompt":
+        warnings.append(
+            {
+                "code": "text_route_asr_mismatch",
+                "message": "The text route was trained on P1 ASR text; this run used another ASR profile.",
+            }
+        )
+    if any(ev["class"] == "block" for ev in out_events):
         warnings.append(
             {
                 "code": "class_block_not_measurable",
@@ -303,7 +445,7 @@ def build_analysis(
                 "there is no evidence that a 'block' event is correct.",
             }
         )
-    if not events:
+    if not in_events:
         warnings.append(
             {
                 "code": "no_events",
@@ -319,6 +461,7 @@ def build_analysis(
                 + ". They are not validated outside their development corpus.",
             }
         )
+    warnings.extend(_asr_profile_warnings(options, asr_meta))
     anomalies = (asr_meta or {}).get("anomalies") or []
     if anomalies:
         warnings.append(
@@ -354,9 +497,14 @@ def build_analysis(
         "request": request,
         "events": events,
         "summary": {
-            "n_events": len(events),
+            "n_events": len(in_events),
             "events_per_minute": per_minute,
             "counts_by_class": counts,
+            "out_of_scope": {
+                "included": options.output_scope == "all",
+                "n_events": sum(oos_counts.values()),
+                "counts_by_class": oos_counts,
+            },
         },
         "modalities": {
             "acoustic": _modality(
@@ -378,7 +526,7 @@ def build_analysis(
             else None,
             _jsonable(meta.get("window_plan")),
             env,
-            None,
+            route_meta,
         ),
         "experimental": experimental,
         "head_decision": head_decision,
@@ -415,6 +563,13 @@ def _classify_load_failure(
             "head_unavailable",
             f"The experimental head {options.head!r} could not be loaded.",
             {"exception_type": kind},
+        )
+    if kind == "ASRDeviceUnavailable":
+        return ServiceError(
+            "asr_unavailable",
+            f"The ASR profile {options.asr_profile!r} requires a CUDA device that is not usable; GPU profiles "
+            "never fall back to CPU. Use p0 or p1_disfluent_prompt (CPU) instead.",
+            {"exception_type": kind, "asr_profile": options.asr_profile},
         )
     if any(
         k in frames
@@ -474,6 +629,18 @@ class MrcdAnalyzer:
                 "invalid_request",
                 f"Unknown head {options.head!r}.",
                 {"allowed": ["vc"]},
+            )
+        if options.output_scope not in OUTPUT_SCOPES:
+            raise ServiceError(
+                "invalid_request",
+                f"Unknown output_scope {options.output_scope!r}.",
+                {"allowed": list(OUTPUT_SCOPES)},
+            )
+        if options.text_route is not None and options.text_route not in TEXT_ROUTES:
+            raise ServiceError(
+                "invalid_request",
+                f"Unknown text_route {options.text_route!r}.",
+                {"allowed": list(TEXT_ROUTES)},
             )
 
     def _engine(self, options: AnalysisOptions) -> tuple[Any, dict]:
@@ -595,7 +762,8 @@ class MrcdAnalyzer:
         with self._lock:
             engine, info = self._engine(options)
             try:
-                result = engine.analyze(audio.samples, sample_rate=audio.sample_rate)
+                kw = {"return_words": True} if options.text_route else {}
+                result = engine.analyze(audio.samples, sample_rate=audio.sample_rate, **kw)
             except Exception as exc:  # noqa: BLE001
                 err = ServiceError(
                     "analysis_failed",

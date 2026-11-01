@@ -52,6 +52,23 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="include transcript / event text (off by default: privacy)",
     )
+    a.add_argument(
+        "--include-out-of-scope",
+        action="store_true",
+        help="also emit block / rhetorical_pause / neutral_pause / revision, marked out_of_scope_unvalidated "
+        "and never counted in totals (default: hidden)",
+    )
+    a.add_argument(
+        "--decision",
+        action="store_true",
+        help="EXPERIMENTAL: add a three-state decision (present / absent / uncertain) per event",
+    )
+    a.add_argument(
+        "--text-route",
+        default=None,
+        choices=["rep_ctx_p1"],
+        help="EXPERIMENTAL: text route for repetition (best with --asr-profile p1_disfluent_prompt)",
+    )
     _add_engine_args(a)
 
     s = sub.add_parser("serve", help="local development HTTP server (loopback only)")
@@ -106,7 +123,12 @@ def main(argv: list[str] | None = None) -> int:
     doc = analyzer.analyze_file(
         args.audio,
         AnalysisOptions(
-            asr_profile=args.asr_profile, head=args.head, include_text=args.include_text
+            asr_profile=args.asr_profile,
+            head=args.head,
+            include_text=args.include_text,
+            output_scope="all" if args.include_out_of_scope else "evaluated",
+            decision=args.decision,
+            text_route=args.text_route,
         ),
     )
     errors = validate_document(doc)

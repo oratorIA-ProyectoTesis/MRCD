@@ -5,7 +5,7 @@ non-loopback address unless explicitly told to. Raw audio is decoded in memory a
 finishes; nothing is written to disk. Job results (JSON only, no audio, transcript only if the request asked
 for it) are kept in memory, bounded, and vanish when the process stops.
 
-    POST /v1/jobs?asr_profile=p0&head=&include_text=false   body = raw WAV bytes  -> 202 job status
+    POST /v1/jobs?asr_profile=p0&head=&include_text=false&include_out_of_scope=false&decision=false&text_route=   body = raw WAV bytes  -> 202 job status
     GET  /v1/jobs/{job_id}                                                         -> job status (+ result)
     GET  /v1/health, GET /v1/schema
 """
@@ -126,10 +126,20 @@ def _query_options(params: Any) -> AnalysisOptions:
             "include_text must be 'true' or 'false'.",
             {"param": "include_text"},
         )
+    def _flag(name: str) -> bool:
+        v = (params.get(name) or "false").strip().lower()
+        if v not in ("true", "false"):
+            raise ServiceError("invalid_request", f"{name} must be 'true' or 'false'.", {"param": name})
+        return v == "true"
+
+    route = (params.get("text_route") or "").strip().lower()
     options = AnalysisOptions(
         asr_profile=(params.get("asr_profile") or "p0").strip(),
         head=head,
         include_text=(text == "true"),
+        output_scope="all" if _flag("include_out_of_scope") else "evaluated",
+        decision=_flag("decision"),
+        text_route=None if route in ("", "none") else route,
     )
     MrcdAnalyzer.validate_options(options)
     return options

@@ -6,7 +6,7 @@ identical.
 
 What the contract deliberately does NOT contain
 -----------------------------------------------
-* No "uncertain" state: the engine emits one class per window and no abstention, so the contract has none.
+* "uncertain" exists only as the OPTIONAL per-event ``decision`` (rev 1.2, opt-in, experimental); the engine itself abstains never.
 * No calibrated probability: every score carries ``calibrated: false`` and the label ``uncalibrated``.
 * No psychological inference and no visual evidence: video is declared ``available: false`` with a reason.
 * No ``0`` standing for "not measured": a measure is ``{available, value, unavailable_reason}`` and the
@@ -42,13 +42,24 @@ JOB_STATUSES = ("queued", "running", "completed", "failed")
 
 NOT_CALIBRATED_LABEL = "uncalibrated"
 #: Revision of the v1 contract. 1.0 = original; 1.1 = additive: score.kind renamed (see SCORE_KIND_DEPRECATED).
-CONTRACT_REVISION = "1.1"
+CONTRACT_REVISION = "1.2"
+#: 1.2 = additive (S3, 2026-11-01): output scope (default = the three evaluated classes), optional three-state
+#: ``decision`` per event, optional experimental text route, ``summary.out_of_scope``, ``request.output_scope``.
 #: Raw, uncalibrated softmax maximum of the window head. NOT a probability.
 SCORE_KIND = "max_window_softmax_score"
 #: Deprecated alias (revision 1.0 name). Still ACCEPTED by the schema so old documents/consumers validate;
 #: new documents never emit it. Remove only in a future major contract (v2).
 SCORE_KIND_DEPRECATED = "max_window_class_probability"
+#: Score of the experimental text route: a logistic-regression output on text features. NOT a probability.
+SCORE_KIND_TEXT_ROUTE = "text_route_logistic_score"
 INTERVAL_SEMANTICS = "decision_stride_not_human_boundary"
+#: Classes with a compatible human reference (reduced OE4 scope). Everything else is out of scope.
+EVALUATED_CLASSES = ("filler_word", "prolongation", "repetition")
+OUT_OF_SCOPE_CLASSES = ("block", "rhetorical_pause", "neutral_pause", "revision")
+OUT_OF_SCOPE_VALIDATION = "out_of_scope_unvalidated"
+OUTPUT_SCOPES = ("evaluated", "all")
+TEXT_ROUTES = ("rep_ctx_p1",)
+DECISION_STATES = ("present", "absent", "uncertain")
 
 _STR = {"type": "string"}
 _NSTR = {"type": ["string", "null"]}
@@ -185,6 +196,9 @@ SCHEMA: dict = {
                 "include_text",
             ],
             "properties": {
+                "output_scope": {"enum": list(OUTPUT_SCOPES)},
+                "decision": _BOOL,
+                "text_route": _NSTR,
                 "audio_sha256": {
                     "type": ["string", "null"],
                     "pattern": "^[0-9a-f]{64}$",
@@ -225,7 +239,7 @@ SCHEMA: dict = {
                     "required": ["value", "kind", "calibrated", "label"],
                     "properties": {
                         "value": {"type": "number", "minimum": 0, "maximum": 1},
-                        "kind": {"enum": [SCORE_KIND, SCORE_KIND_DEPRECATED]},
+                        "kind": {"enum": [SCORE_KIND, SCORE_KIND_DEPRECATED, SCORE_KIND_TEXT_ROUTE]},
                         "calibrated": {"const": False},
                         "label": {"const": NOT_CALIBRATED_LABEL},
                     },
@@ -235,6 +249,21 @@ SCHEMA: dict = {
                 "text": {"type": ["string", "null"]},
                 "validation": _NSTR,
                 "experimental": _BOOL,
+                "in_scope": _BOOL,
+                "decision": {"$ref": "#/$defs/decision"},
+            },
+        },
+        "decision": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["state", "estimate", "lo", "hi", "basis", "calibration_claim"],
+            "properties": {
+                "state": {"enum": list(DECISION_STATES)},
+                "estimate": {"type": "number", "minimum": 0, "maximum": 1},
+                "lo": {"type": "number", "minimum": 0, "maximum": 1},
+                "hi": {"type": "number", "minimum": 0, "maximum": 1},
+                "basis": _STR,
+                "calibration_claim": {"const": "none"},
             },
         },
         "summary": {
@@ -247,6 +276,16 @@ SCHEMA: dict = {
                 "counts_by_class": {
                     "type": "object",
                     "additionalProperties": {"type": "integer"},
+                },
+                "out_of_scope": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": ["included", "n_events", "counts_by_class"],
+                    "properties": {
+                        "included": _BOOL,
+                        "n_events": {"type": "integer", "minimum": 0},
+                        "counts_by_class": {"type": "object", "additionalProperties": {"type": "integer"}},
+                    },
                 },
             },
         },
@@ -278,6 +317,7 @@ SCHEMA: dict = {
                 "head": {"type": ["object", "null"]},
                 "config": {"type": ["object", "null"]},
                 "environment": {"type": ["object", "null"]},
+                "text_route": {"type": ["object", "null"]},
             },
         },
         "experimental": {

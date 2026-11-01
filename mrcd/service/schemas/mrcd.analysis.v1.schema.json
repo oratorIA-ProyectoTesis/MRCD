@@ -199,6 +199,21 @@
         "include_text"
       ],
       "properties": {
+        "output_scope": {
+          "enum": [
+            "evaluated",
+            "all"
+          ]
+        },
+        "decision": {
+          "type": "boolean"
+        },
+        "text_route": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "audio_sha256": {
           "type": [
             "string",
@@ -409,7 +424,8 @@
             "kind": {
               "enum": [
                 "max_window_softmax_score",
-                "max_window_class_probability"
+                "max_window_class_probability",
+                "text_route_logistic_score"
               ]
             },
             "calibrated": {
@@ -444,6 +460,54 @@
         },
         "experimental": {
           "type": "boolean"
+        },
+        "in_scope": {
+          "type": "boolean"
+        },
+        "decision": {
+          "$ref": "#/$defs/decision"
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "estimate",
+        "lo",
+        "hi",
+        "basis",
+        "calibration_claim"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "present",
+            "absent",
+            "uncertain"
+          ]
+        },
+        "estimate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lo": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "hi": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "basis": {
+          "type": "string"
+        },
+        "calibration_claim": {
+          "const": "none"
         }
       }
     },
@@ -509,6 +573,30 @@
           "type": "object",
           "additionalProperties": {
             "type": "integer"
+          }
+        },
+        "out_of_scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "included",
+            "n_events",
+            "counts_by_class"
+          ],
+          "properties": {
+            "included": {
+              "type": "boolean"
+            },
+            "n_events": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "counts_by_class": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer"
+              }
+            }
           }
         }
       }
@@ -675,6 +763,12 @@
           ]
         },
         "environment": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "text_route": {
           "type": [
             "object",
             "null"
