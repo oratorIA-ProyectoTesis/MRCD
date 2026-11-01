@@ -23,7 +23,8 @@ mrcd/                        paquete del motor (antes `core/`)
   annotation/auto_labeler.py cascada heurística -> candidatos, ventanas, export ELAN (.eaf)
   models/fusion.py           cross-attention (Q=acústica, K/V=[texto; cinésica]) + clasificador
   engine.py · decision.py    inferencia por ventanas y decisión por eventos (3 estados)
-  asr_profiles.py · asr_recovery/   perfiles de ASR y experimento de recuperación
+  asr_profiles.py · asr_recovery/   perfiles de ASR (incl. opt-in sin bucles/CUDA) y experimento de recuperación
+  calibration.py · fusion_text.py · av/   calibración y abstención experimentales, fusión de texto, compuerta de evidencia facial (exploratorio)
   context_eval/ · corpora/   evaluación contextual e importadores de corpus (solo código)
   service/                   servicio local (contrato mrcd.analysis/v1), CLI y servidor HTTP
 scripts/                     minería, extracción, ventanas, ablación, línea base, paridad, auditorías
@@ -32,6 +33,7 @@ docs/contracts/              contratos de eventos, servicio, ASR y cabezal, con 
 docs/architecture/           modelo C4 (Mermaid/PNG/SVG) y verificador
 docs/corpora/                manifiestos, hashes SHA-256 y cómo obtener cada corpus
 docs/oe4/                    informe OE4 reducido (hojas de firma del asesor NO incluidas)
+docs/sus-kit/                borrador de kit SUS (no aplicado; sin datos de personas)
 results/                     informes y métricas agregadas (sin texto, etiquetas ni audio de terceros)
 ```
 
@@ -195,7 +197,7 @@ Pruebas (todas con `OMP_NUM_THREADS=4`; detalle de quién midió qué en el adde
 
 - Autor, árbol local, tras la ronda 7: 741 aprobadas y 9 omitidas por defecto; 750 aprobadas y 0 omitidas con `MRCD_SLOW=1` (ejecutado solo, sin otra carga). Autor, ronda 6 (histórico): 698 + 9 y 707 + 0; el revisor independiente reprodujo esas dos cifras.
 - Revisor independiente, árbol limpio en 4443d71 (sin datos ignorados por git), por defecto: 681 aprobadas y 26 omitidas. El autor no volvió a medir un árbol limpio tras la ronda 7. Las cifras antiguas de árbol limpio (639 + 17 / 641 + 15) son históricas.
-- Rama publicable (sin ningún dato local ni corpus de terceros), suite por defecto con `OMP_NUM_THREADS=4`: **797 aprobadas, 26 omitidas, 0 fallidas** (181 s). Las omisiones declaran su motivo (`pytest -rs`): datos de corpus ausentes (`material/`, DIHANA, AMERESCO, cachés de ASR) o suites lentas (`MRCD_SLOW=1`).
+- Rama publicable (sin ningún dato local ni corpus de terceros), suite por defecto con `OMP_NUM_THREADS=4`, clon limpio de la rama tras la actualización del 2026-11-01: **895 aprobadas, 27 omitidas, 0 fallidas** (141 s). Medición previa: 797 + 26. Las omisiones declaran su motivo (`pytest -rs`): datos de corpus ausentes (`material/`, DIHANA, AMERESCO, cachés de ASR) o suites lentas (`MRCD_SLOW=1`).
 - La diferencia entre árbol local y limpio son pruebas que requieren datos locales (DIHANA `turns.csv`, clips/caché de AMERESCO, clips ligados a checkpoints).
 - **"Bit-idéntico" solo se verifica en una máquina descargada con `OMP_NUM_THREADS=4` fijado antes de importar numpy.** Las pruebas lentas de decodificación comparan flotantes a 1e-6 y son sensibles a la carga: con dos suites concurrentes fallaron 6 en cada una. Ahora se omiten (no fallan) si la CPU está ocupada en más de 50 % o si `OMP_NUM_THREADS` no es 4; `MRCD_SKIP_LOAD_CHECK=1` fuerza la ejecución. No ejecutes la suite lenta junto con otro proceso pesado.
 
