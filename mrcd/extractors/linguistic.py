@@ -48,6 +48,25 @@ def _punct(tok: str) -> str:
 
 
 # ------------------------------------------------------------------ ASR
+def _decode_words(model, audio: np.ndarray, kwargs: dict) -> list[Word]:
+    """One ``WhisperModel.transcribe`` call -> words (module level: test doubles call ``VerbatimASR.transcribe`` unbound)."""
+    segments, _ = model.transcribe(audio.astype(np.float32), **kwargs)
+    words: list[Word] = []
+    for seg in segments:
+        for w in seg.words or []:
+            words.append(
+                Word(
+                    w.word.strip(),
+                    normalize(w.word),
+                    float(w.start),
+                    float(w.end),
+                    float(w.probability),
+                    _punct(w.word),
+                )
+            )
+    return [w for w in words if w.norm]
+
+
 class VerbatimASR:
     def __init__(
         self,
@@ -61,6 +80,31 @@ class VerbatimASR:
 
         # ``None`` -> "p0": the historical decoding parameters, unchanged (see mrcd/asr_profiles.py).
         self.profile = get_profile(profile)
+
+        strict_device = self.profile.device
+        if strict_device is not None:  # opt-in GPU profile: demand it, never fall back silently
+            if device not in ("auto", strict_device):
+                raise ValueError(
+                    f"profile {self.profile.name!r} requires device={strict_device!r}, got device={device!r}"
+                )
+            device = strict_device
+            compute_type = compute_type or self.profile.compute_type
+            if device == "cuda":
+                try:
+                    import ctranslate2  # type: ignore
+
+                    n_cuda = ctranslate2.get_cuda_device_count()
+                except Exception as exc:  # noqa: BLE001
+                    n_cuda, why = 0, f"{type(exc).__name__}: {exc}"
+                else:
+                    why = "ctranslate2 reports 0 CUDA devices"
+                if n_cuda < 1:
+                    from mrcd.asr_profiles import ASRDeviceUnavailable
+
+                    raise ASRDeviceUnavailable(
+                        f"profile {self.profile.name!r} requires CUDA but it is unavailable ({why}); "
+                        "use p0 / p1_disfluent_prompt on CPU instead"
+                    )
 
         if device == "auto":
             try:
@@ -83,6 +127,13 @@ class VerbatimASR:
                     )[0]
                 )
         except Exception as exc:
+            if strict_device == "cuda":
+                from mrcd.asr_profiles import ASRDeviceUnavailable
+
+                raise ASRDeviceUnavailable(
+                    f"profile {self.profile.name!r} requires CUDA but loading/probing failed "
+                    f"({type(exc).__name__}: {str(exc)[:160]}); no CPU fallback for GPU profiles"
+                ) from exc
             if device != "cuda":
                 raise
             print(f"[asr] GPU no utilizable ({str(exc)[:120]}); usando CPU int8")
@@ -145,25 +196,55 @@ class VerbatimASR:
         return info.language, float(info.language_probability)
 
     def transcribe(self, audio: np.ndarray) -> list[Word]:
-        segments, _ = self.model.transcribe(
-            audio.astype(np.float32),
-            # objects built without __init__ (test doubles) fall back to the default profile
-            **get_profile(getattr(self, "profile", None)).decode_kwargs(self.language),
-        )
-        words: list[Word] = []
-        for seg in segments:
-            for w in seg.words or []:
-                words.append(
-                    Word(
-                        w.word.strip(),
-                        normalize(w.word),
-                        float(w.start),
-                        float(w.end),
-                        float(w.probability),
-                        _punct(w.word),
-                    )
+        # objects built without __init__ (test doubles) fall back to the default profile
+        profile = get_profile(getattr(self, "profile", None))
+        kwargs = profile.decode_kwargs(self.language)
+        words = _decode_words(self.model, audio, kwargs)
+        if profile.loop_redecode:
+            words = VerbatimASR._redecode_if_looped(self, audio, kwargs, words)
+        return words
+
+    def _redecode_if_looped(self, audio: np.ndarray, kwargs: dict, words: list[Word]) -> list[Word]:
+        """Opt-in (profiles ``*_noloop``): re-decode a chunk whose text looks like a repetition loop.
+
+        First clean attempt of ``LOOP_REDECODE_LADDER`` replaces the chunk; if none is clean the ORIGINAL words are kept.
+        Every replacement or failure is appended to ``self.redecode_events`` (reset by ``transcribe_chunked``/the engine).
+        """
+        from mrcd.asr_profiles import LOOP_REDECODE_LADDER, LOOP_REDECODE_SEED, chunk_looped
+
+        if not chunk_looped(" ".join(w.text for w in words)):
+            return words
+        if not hasattr(self, "redecode_events"):
+            self.redecode_events = []
+        import ctranslate2  # type: ignore
+
+        for j, override in enumerate(LOOP_REDECODE_LADDER, start=1):
+            ctranslate2.set_random_seed(LOOP_REDECODE_SEED)
+            alt = _decode_words(self.model, audio, {**kwargs, **override})
+            if not chunk_looped(" ".join(w.text for w in alt)):
+                self.redecode_events.append(
+                    {
+                        "attempt": j,
+                        "audio_s": round(len(audio) / SAMPLE_RATE, 3),
+                        "chunk_offset_s": round(float(getattr(self, "_chunk_offset_s", 0.0)), 3),
+                        "words_before": len(words),
+                        "words_after": len(alt),
+                        # a rung that samples (T > 0) is NOT bit-reproducible even with the fixed seed
+                        "reproducible": float(override.get("temperature", 0.0)) == 0.0,
+                    }
                 )
-        return [w for w in words if w.norm]
+                return alt
+        self.redecode_events.append(
+            {
+                "attempt": None,
+                "kept_original": True,
+                "audio_s": round(len(audio) / SAMPLE_RATE, 3),
+                "chunk_offset_s": round(float(getattr(self, "_chunk_offset_s", 0.0)), 3),
+                "words_before": len(words),
+                "reproducible": True,  # the original (deterministic) text is kept
+            }
+        )
+        return words
 
     def transcribe_chunked(
         self, audio: np.ndarray, chunk_s: float = 8.0, overlap_s: float = 2.0
@@ -186,6 +267,8 @@ class VerbatimASR:
         deduplicar asi borraria justo el fenomeno a detectar. El solape solo da
         contexto al ASR; esas palabras ya las aporto el trozo anterior.
         """
+        self.redecode_events = []
+        self._chunk_offset_s = 0.0
         if chunk_s <= 0 or len(audio) <= chunk_s * SAMPLE_RATE:
             return self.transcribe(audio)
 
@@ -197,6 +280,7 @@ class VerbatimASR:
             if len(seg) < SAMPLE_RATE:  # < 1 s no aporta
                 break
             offset = start / SAMPLE_RATE
+            self._chunk_offset_s = offset  # lets the opt-in re-decode record where the chunk sits
             new_from = 0.0 if k == 0 else overlap_s
             for w in self.transcribe(seg):
                 if (w.start + w.end) / 2 < new_from:
@@ -211,6 +295,7 @@ class VerbatimASR:
                         w.punct_after,
                     )
                 )
+        self._chunk_offset_s = 0.0
         out.sort(key=lambda w: w.start)
         return out
 

@@ -106,6 +106,8 @@ class AnalysisResult:
     metadata: dict = field(default_factory=dict)
     #: experimental head decisions (Vc); None when the engine runs the default V0
     head: dict | None = None
+    #: ASR words with timestamps (dicts); only filled when ``analyze(return_words=True)``, else None
+    words: list[dict] | None = None
 
     def __iter__(self) -> Iterator[Event]:
         return iter(self.events)
@@ -277,6 +279,7 @@ class DisfluencyEngine:
         keep_windows: bool = False,
         terminal_window: bool = False,
         span: tuple[float, float] | None = None,
+        return_words: bool = False,
     ) -> AnalysisResult:
         """Analiza audio mono float32 en [-1, 1] y devuelve los eventos.
 
@@ -327,6 +330,8 @@ class DisfluencyEngine:
                 "analisis y sin ella no hay decision que tomar."
             )
 
+        if hasattr(self._asr, "redecode_events"):  # opt-in loop re-decode log is per analysis
+            self._asr.redecode_events = []
         words = (
             self._asr.transcribe_chunked(audio, chunk_s=asr_chunk_s)
             if asr_chunk_s
@@ -350,7 +355,13 @@ class DisfluencyEngine:
             # Only an opt-in experimental profile touches `warning`; p0 keeps the historical value.
             from mrcd.asr_profiles import EXPERIMENTAL_NOTE, anomaly_warning
 
-            extra = [EXPERIMENTAL_NOTE, anomaly_warning(profile_meta["anomalies"])]
+            from mrcd.asr_profiles import loop_redecode_warning
+
+            extra = [
+                EXPERIMENTAL_NOTE,
+                anomaly_warning(profile_meta["anomalies"]),
+                loop_redecode_warning(profile_meta.get("loop_redecode", {}).get("events", [])),
+            ]
             warning = " ".join(x for x in [warning, *extra] if x)
         return AnalysisResult(
             events=events,
@@ -361,6 +372,7 @@ class DisfluencyEngine:
             warning=warning,
             metadata=meta,
             head=head_report,
+            words=[w.to_dict() for w in words] if return_words else None,
         )
 
     def _mark(self, e: Event, head_report: dict) -> Event:
@@ -454,6 +466,14 @@ class DisfluencyEngine:
             chunk_s=asr_chunk_s,
         )
         out = profile.describe()
+        if profile.loop_redecode:  # every chunk whose text was replaced (or could not be) is listed here
+            events = list(getattr(asr, "redecode_events", []) or [])
+            out["loop_redecode"]["events"] = events
+            out["loop_redecode"]["n_replaced"] = sum(1 for e in events if e.get("attempt") is not None)
+            out["loop_redecode"]["n_unresolved"] = sum(1 for e in events if e.get("attempt") is None)
+            n_nr = sum(1 for e in events if e.get("reproducible") is False)
+            out["loop_redecode"]["n_non_reproducible"] = n_nr
+            out["loop_redecode"]["reproducible"] = n_nr == 0  # False once any chunk text came from the T=0.4 rung
         out.update(
             {
                 "model": info,
@@ -478,6 +498,14 @@ class DisfluencyEngine:
                 "anomalies": detect_asr_anomalies(transcript, profile.initial_prompt),
             }
         )
+        if profile.device is None and info.get("device") == "cuda":
+            # device="auto" picked the GPU for a profile that is documented as CPU int8: the text can differ
+            # (S1: 4/13 units identical to CPU). Only added in that case; the CPU output is unchanged.
+            out["device_warning"] = (
+                f"Profile {profile.name!r} is documented as CPU int8 but ran on CUDA ({info.get('compute_type')}) because "
+                "device='auto' found a usable GPU; the text can differ from the CPU int8 text the models were trained on. "
+                "Pass device='cpu' to pin it."
+            )
         return out
 
     def analyze_file(self, path: str | Path, **kw) -> AnalysisResult:

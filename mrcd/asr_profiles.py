@@ -18,7 +18,7 @@ import json
 import re
 import unicodedata
 import zlib
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from mrcd.constants import WHISPER_INITIAL_PROMPT
 
@@ -59,6 +59,14 @@ class ASRProfile:
     experimental: bool = False
     validation: str = ""
     description: str = ""
+    #: ``None`` = historical behaviour (``device="auto"``, int8 on CPU). A profile that sets ``device="cuda"``
+    #: demands that device: if CUDA cannot be used, loading raises ``ASRDeviceUnavailable`` (no silent CPU fallback).
+    device: str | None = None
+    compute_type: str | None = None
+    #: S2 (2026-11-01): when True, a decoded chunk whose text looks like a repetition loop is RE-DECODED with the fixed
+    #: ``LOOP_REDECODE_LADDER`` (see ``VerbatimASR.transcribe``). Every re-decode is recorded; an unresolved chunk keeps its
+    #: original text. ``False`` = historical behaviour (p0/p1 are untouched).
+    loop_redecode: bool = False
 
     @property
     def prompt_sha256(self) -> str:
@@ -82,6 +90,15 @@ class ASRProfile:
         return f"{self.name}-{self.prompt_sha256[:12]}"
 
     def describe(self) -> dict:
+        out = self._describe_base()
+        if self.device is not None:  # p0/p1 keep exactly their historical description
+            out["device"] = self.device
+            out["compute_type"] = self.compute_type
+        if self.loop_redecode:
+            out["loop_redecode"] = {"enabled": True, "ladder": [dict(a) for a in LOOP_REDECODE_LADDER], "seed": LOOP_REDECODE_SEED}
+        return out
+
+    def _describe_base(self) -> dict:
         return {
             "name": self.name,
             "experimental": self.experimental,
@@ -113,6 +130,55 @@ PROFILES: dict[str, ASRProfile] = {
         description="Only initial_prompt differs from p0 (literal P1 text).",
     ),
 }
+
+
+class ASRDeviceUnavailable(RuntimeError):
+    """A profile that demands a device (e.g. ``p0_cuda``) could not get it."""
+
+
+# Opt-in GPU variants (S1, 2026-11-01). Same decoding parameters and prompts as p0/p1; ONLY the device and compute
+# type differ. EXPERIMENTAL: float16 text can differ from CPU int8 text (measured in
+# ``results/mejora_objetivos_20261101/S1/gpu``); downstream models were trained on CPU int8 text. The fingerprint
+# differs from p0/p1 through the profile name and the device/compute_type fields.
+GPU_COMPUTE_TYPE = "float16"
+PROFILES["p0_cuda"] = replace(
+    PROFILES["p0"],
+    name="p0_cuda",
+    experimental=True,
+    validation="experimental; GPU float16 text not validated against the CPU int8 text the heads were trained on",
+    description="p0 decoding on CUDA (float16). Opt-in; never selected by default.",
+    device="cuda",
+    compute_type=GPU_COMPUTE_TYPE,
+)
+PROFILES["p1_cuda"] = replace(
+    PROFILES["p1_disfluent_prompt"],
+    name="p1_cuda",
+    experimental=True,
+    validation="experimental; P1 not validated outside DIHANA and GPU float16 text not validated",
+    description="P1 prompt decoding on CUDA (float16). Opt-in; never selected by default.",
+    device="cuda",
+    compute_type=GPU_COMPUTE_TYPE,
+)
+
+
+# Opt-in loop-safe variants (S2, 2026-11-01; ``results/mejora_objetivos_20261101/S2``). Same prompts and decoding parameters as p0 / p1; only
+# ``loop_redecode`` differs. EXPERIMENTAL: evidence is exploratory (AMERESCO has 4 recordings; survival measured on DIHANA only).
+PROFILES["p0_noloop"] = replace(
+    PROFILES["p0"],
+    name="p0_noloop",
+    experimental=True,
+    validation="experimental; exploratory S2 evidence (4 AMERESCO recordings, DIHANA survival); not validated elsewhere",
+    description="p0 decoding + re-decode of a chunk that loops (prompt-free ladder; rung 2 samples at T=0.4 and is NOT bit-reproducible). Opt-in; never selected by default.",
+    loop_redecode=True,
+)
+PROFILES["p1_noloop"] = replace(
+    PROFILES["p1_disfluent_prompt"],
+    name="p1_noloop",
+    experimental=True,
+    validation="experimental; P1 not validated outside DIHANA; exploratory S2 evidence for the loop re-decode",
+    description="P1 prompt + re-decode of a chunk that loops (prompt-free ladder; rung 2 samples at T=0.4 and is NOT bit-reproducible). Opt-in; never selected by default.",
+    loop_redecode=True,
+)
 
 
 def get_profile(profile: str | ASRProfile | None) -> ASRProfile:
@@ -182,6 +248,8 @@ def asr_cache_key(
         "omp_num_threads": omp_num_threads,
         "audio_sha256": audio_sha256,
     }
+    if p.loop_redecode:  # only for the opt-in profiles: p0/p1 keys stay bit-identical
+        payload["loop_redecode"] = {"ladder": [dict(a) for a in LOOP_REDECODE_LADDER], "seed": LOOP_REDECODE_SEED}
     return sha256_text(json.dumps(payload, sort_keys=True, ensure_ascii=True))
 
 
@@ -322,3 +390,39 @@ def anomaly_warning(anomalies: list[dict]) -> str | None:
         + "): the transcript may contain "
         "prompt echo or hallucinated loops; events derived from the affected words are unreliable."
     )
+
+
+# --------------------------------------------------------------------------- loop re-decode (S2)
+#: Fixed ladder, in order. The first attempt whose text does not look looped replaces the chunk; if none does, the ORIGINAL chunk is kept.
+LOOP_REDECODE_LADDER = (
+    {"initial_prompt": None, "temperature": 0.0},
+    {"initial_prompt": None, "temperature": 0.4, "best_of": 5},
+)
+LOOP_REDECODE_SEED = 13
+
+
+def chunk_looped(text: str) -> bool:
+    """True if the chunk text has a back-to-back n-gram run at the ``LOOP_MIN_REPEATS`` thresholds or a zlib ratio above 2.4 (>= 80 chars)."""
+    if _scan_loops(_tokens(text)):
+        return True
+    raw = text.encode("utf8")
+    return len(text) >= COMPRESSION_MIN_CHARS and len(raw) / len(zlib.compress(raw)) > COMPRESSION_RATIO_MAX
+
+
+def loop_redecode_warning(events: list[dict]) -> str | None:
+    """Human-readable notice that some chunk text was REPLACED by a re-decode (or could not be)."""
+    if not events:
+        return None
+    n_ok = sum(1 for e in events if e.get("attempt") is not None)
+    n_bad = len(events) - n_ok
+    n_nr = sum(1 for e in events if e.get("reproducible") is False)
+    msg = (
+        f"Loop re-decode (profile option): {n_ok} chunk(s) were re-decoded after looking like a repetition loop and their text was replaced by the "
+        f"re-decoded text; {n_bad} chunk(s) still looked looped and kept the original text. Details in metadata.asr_profile.loop_redecode.events."
+    )
+    if n_nr:
+        msg += (
+            f" {n_nr} replaced chunk(s) came from the sampled rung (T=0.4) and are NOT bit-reproducible: "
+            "re-running the same audio can give different text for those chunks."
+        )
+    return msg
