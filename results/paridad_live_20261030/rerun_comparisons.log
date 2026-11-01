@@ -1,0 +1,45 @@
+engine 0 BAQ_001_03_16_a111
+engine 10 BAQ_001_03_16_a47
+engine 20 BUE_001_03_19_a147
+engine 30 BUE_001_03_19_a345
+engine 40 BUE_001_03_19_a540
+engine 50 BUE_001_03_19_a868
+engine 60 HAV_001_02_12_a216
+engine 70 HAV_001_02_12_a94
+engine 80 MEX_001_02_15_a336
+engine 90 MEX_001_02_15_a639
+
+AMERESCO (frozen features)
+  with_terminal     pilot32 V0: 5/3/11/13  P=0.625 R=0.312 F1=0.417
+  with_terminal     pilot32 Vc: 14/13/2/3  P=0.519 R=0.875 F1=0.651
+  with_terminal     all98   V0: 7/8/30/53  P=0.467 R=0.189 F1=0.269
+  with_terminal     all98   Vc: 32/46/5/15  P=0.410 R=0.865 F1=0.557
+  with_terminal     new66   V0: 2/5/19/40  P=0.286 R=0.095 F1=0.143
+  with_terminal     new66   Vc: 18/33/3/12  P=0.353 R=0.857 F1=0.500
+  without_terminal  pilot32 V0: 3/1/13/15  P=0.750 R=0.188 F1=0.300
+  without_terminal  pilot32 Vc: 12/11/4/5  P=0.522 R=0.750 F1=0.615
+  without_terminal  all98   V0: 5/5/32/56  P=0.500 R=0.135 F1=0.213
+  without_terminal  all98   Vc: 29/39/8/22  P=0.426 R=0.784 F1=0.552
+  without_terminal  new66   V0: 2/4/19/41  P=0.333 R=0.095 F1=0.148
+  without_terminal  new66   Vc: 17/28/4/17  P=0.378 R=0.810 F1=0.515
+AMERESCO (Engine end to end)
+  with_terminal     pilot32 V0: 5/3/11/13  P=0.625 R=0.312 F1=0.417
+  with_terminal     pilot32 Vc: 14/13/2/3  P=0.519 R=0.875 F1=0.651
+  with_terminal     all98   V0: 7/8/30/53  P=0.467 R=0.189 F1=0.269
+  with_terminal     all98   Vc: 32/46/5/15  P=0.410 R=0.865 F1=0.557
+  without_terminal  pilot32 V0: 3/1/13/15  P=0.750 R=0.188 F1=0.300
+  without_terminal  pilot32 Vc: 12/11/4/5  P=0.522 R=0.750 F1=0.615
+  without_terminal  all98   V0: 5/5/32/56  P=0.500 R=0.135 F1=0.213
+  without_terminal  all98   Vc: 29/39/8/22  P=0.426 R=0.784 F1=0.552
+discordant engine-vs-cached: {'with_terminal/V0': 0, 'with_terminal/Vc': 0, 'without_terminal/V0': 0, 'without_terminal/Vc': 0}
+dihana_fold4_tune n 1240 Vc new == previous code: True
+   filler_word {'V0': '84/54/84/1018  P=0.609 R=0.500 F1=0.549', 'Vc': '123/87/45/985  P=0.586 R=0.732 F1=0.651'}
+   prolongation {'V0': '95/39/154/952  P=0.709 R=0.382 F1=0.496', 'Vc': '181/129/68/862  P=0.584 R=0.727 F1=0.648'}
+   repetition {'V0': '27/21/33/1159  P=0.562 R=0.450 F1=0.500', 'Vc': '24/17/36/1163  P=0.585 R=0.400 F1=0.475'}
+   revision {'V0': '5/5/43/1187  P=0.500 R=0.104 F1=0.172'}
+dihana_fold5_test_regression_only n 1223 Vc new == previous code: True
+   filler_word {'V0': '64/44/81/1034  P=0.593 R=0.441 F1=0.506', 'Vc': '90/77/55/1001  P=0.539 R=0.621 F1=0.577'}
+   prolongation {'V0': '95/46/116/966  P=0.674 R=0.450 F1=0.540', 'Vc': '157/130/54/882  P=0.547 R=0.744 F1=0.631'}
+   repetition {'V0': '17/20/43/1143  P=0.459 R=0.283 F1=0.351', 'Vc': '14/14/46/1149  P=0.500 R=0.233 F1=0.318'}
+   revision {'V0': '2/5/34/1182  P=0.286 R=0.056 F1=0.093'}
+matches frozen: {'filler_word/V0': True, 'filler_word/Vc': True, 'prolongation/V0': True, 'prolongation/Vc': True, 'repetition/V0': True, 'repetition/Vc': True, 'revision/V0': True, 'ameresco98/V0': True, 'ameresco98/Vc': True}

@@ -1,0 +1,68 @@
+{
+  "level": {
+    "measured": true,
+    "samples": 556000,
+    "audio_seconds": 34.75,
+    "peak_dbfs": -3.97,
+    "clipped_samples": 0,
+    "clipped_fraction": 0.0,
+    "rms_mean_dbfs": -30.36,
+    "noise_floor_dbfs_p10": -52.03,
+    "active_gate_dbfs": -40.03,
+    "active_fraction": 0.761,
+    "leading_silence_s": 0.2,
+    "trailing_silence_s": 0.1,
+    "dc_offset": 1e-05,
+    "signal_present": true
+  },
+  "checks": {
+    "signal": {
+      "status": "PASS",
+      "why": "signal present"
+    },
+    "clipping": {
+      "status": "PASS",
+      "why": "no clipped samples"
+    },
+    "level": {
+      "status": "PASS",
+      "why": "peak -3.97 dBFS (warn below -30.0)"
+    },
+    "noise_floor": {
+      "status": "PASS",
+      "why": "p10 block level -52.03 dBFS"
+    },
+    "silence_edges": {
+      "status": "WARN",
+      "why": "leading 0.2s, trailing 0.1s (want >= 2.0s each)"
+    },
+    "dc_offset": {
+      "status": "PASS",
+      "why": "1e-05"
+    },
+    "dropped_blocks": {
+      "status": "PASS",
+      "why": "0 blocks flagged by the audio driver"
+    },
+    "clock_drift": {
+      "status": "PASS",
+      "why": "audio 34.75s vs wall 36.0s"
+    }
+  },
+  "dropped_blocks": 0,
+  "dropped_samples": 0,
+  "wall_s": 36.0,
+  "thresholds": {
+    "clip_fail_fraction": 0.001,
+    "peak_min_dbfs": -30.0,
+    "noise_floor_warn_dbfs": -50.0,
+    "noise_floor_fail_dbfs": -40.0,
+    "active_above_floor_db": 12.0,
+    "active_min_dbfs": -45.0,
+    "edge_silence_min_s": 2.0,
+    "dc_offset_warn": 0.02,
+    "dropped_blocks_fail": 5,
+    "duration_drift_warn_s": 1.5
+  },
+  "thresholds_note": "Operational smoke-check heuristics chosen by the author of the kit. They are NOT calibrated acoustic standards and were not validated; a WARN is a prompt to look, not a verdict about your microphone or your speech."
+}

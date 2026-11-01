@@ -1,0 +1,73 @@
+{
+  "schema_version": "mrcd.job/v1",
+  "job_id": "06de8d880f8f4c1ea64b5ecd71ffd269",
+  "status": "failed",
+  "created_at": "2026-10-31T20:21:48+00:00",
+  "result": {
+    "schema_version": "mrcd.analysis/v1",
+    "status": "failed",
+    "generated_at": "2026-10-31T20:21:48+00:00",
+    "error": {
+      "code": "invalid_audio_file",
+      "message": "The body is not a readable WAV file.",
+      "retryable": false,
+      "details": {}
+    },
+    "request": {
+      "audio_sha256": "4cd3dbe65af1de75e03d0f138cbc894e0ebf8ec42a108b8b54ecba958605b810",
+      "audio_duration_s": {
+        "available": false,
+        "value": null,
+        "unavailable_reason": "audio could not be read"
+      },
+      "sample_rate_hz": {
+        "available": false,
+        "value": null,
+        "unavailable_reason": "audio could not be read"
+      },
+      "channels": {
+        "available": false,
+        "value": null,
+        "unavailable_reason": "audio could not be read"
+      },
+      "asr_profile": "p0",
+      "head": null,
+      "include_text": false
+    },
+    "events": [],
+    "summary": null,
+    "modalities": {
+      "acoustic": {
+        "available": false,
+        "reason": "analysis did not run"
+      },
+      "linguistic": {
+        "available": false,
+        "reason": "analysis did not run"
+      },
+      "kinesic_video": {
+        "available": false,
+        "reason": "service v1 receives audio only; no video was provided or processed"
+      }
+    },
+    "provenance": {
+      "service": {
+        "name": "mrcd.service",
+        "contract": "mrcd.analysis/v1",
+        "mrcd_version": "0.3.0"
+      },
+      "checkpoint": null,
+      "asr": null,
+      "head": null,
+      "config": null,
+      "environment": null
+    },
+    "experimental": {
+      "active": false,
+      "components": []
+    },
+    "head_decision": null,
+    "transcript": null,
+    "warnings": []
+  }
+}

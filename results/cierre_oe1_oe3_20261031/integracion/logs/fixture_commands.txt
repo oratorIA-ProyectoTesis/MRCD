@@ -1,0 +1,8 @@
+# exact commands (cwd = C:\zArnes-tesis\mrcd, venv python, OMP_NUM_THREADS=4, run 2026-10-31)
+OMP_NUM_THREADS=4 .venv/Scripts/python.exe -m mrcd.service analyze data/annotation_batch_01/DNrrpE-sYnU_s00.wav --out results/cierre_oe1_oe3_20261031/integracion/fixtures/response_ok_p0_v0.json
+OMP_NUM_THREADS=4 .venv/Scripts/python.exe -m mrcd.service analyze data/annotation_batch_01/DNrrpE-sYnU_s00.wav --asr-profile p1_disfluent_prompt --out results/cierre_oe1_oe3_20261031/integracion/fixtures/response_ok_p1_experimental.json
+OMP_NUM_THREADS=4 .venv/Scripts/python.exe -m mrcd.service analyze data/annotation_batch_01/DNrrpE-sYnU_s00.wav --head vc --out results/cierre_oe1_oe3_20261031/integracion/fixtures/response_ok_vc_experimental.json
+OMP_NUM_THREADS=4 .venv/Scripts/python.exe -m mrcd.service analyze data/annotation_batch_01/DNrrpE-sYnU_s00.wav --include-text --out <scratch, NOT committed: contains transcript>
+OMP_NUM_THREADS=4 .venv/Scripts/python.exe results/cierre_oe1_oe3_20261031/integracion/make_fixtures.py
+OMP_NUM_THREADS=4 .venv/Scripts/python.exe results/cierre_oe1_oe3_20261031/integracion/http_e2e.py data/annotation_batch_01/DNrrpE-sYnU_s00.wav
+OMP_NUM_THREADS=4 .venv/Scripts/python.exe docs/microphone-check/mic_check.py --simulate-wav data/annotation_batch_01/DNrrpE-sYnU_s00.wav --duration-s 36 --i-consent --out-root results/cierre_oe1_oe3_20261031/integracion/mic_check_simulated

@@ -1,0 +1,16 @@
+# 2026-10-31; cwd C:\zArnes-tesis\mrcd; venv python; OMP_NUM_THREADS=4
+$ OMP_NUM_THREADS=4 .venv/Scripts/python.exe -m pytest tests/test_service_contract.py tests/test_service_analyzer.py tests/test_service_server.py tests/test_service_microphone_check.py -q -rs
+.........................................s........................       [100%]
+============================== warnings summary ===============================
+tests\test_service_server.py:8
+  C:\zArnes-tesis\mrcd\tests\test_service_server.py:8: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient
+
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\zArnes-tesis\mrcd\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_service_analyzer.py:300: set MRCD_SLOW=1 and OMP_NUM_THREADS=4 before python starts; needs models/ckpt_audio_text.pt and the cached Whisper small
+65 passed, 1 skipped, 2 warnings in 25.95s

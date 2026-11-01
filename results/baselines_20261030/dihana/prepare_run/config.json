@@ -1,0 +1,62 @@
+{
+ "run": "dihana_prepare",
+ "script": "C:\\zArnes-tesis\\mrcd\\scripts\\baselines\\dihana_prepare.py",
+ "script_sha256": "1e18a51d60924257956b767892b1327cb795c8d4cc0eb76709d32686f63e1fd7",
+ "seed": 13,
+ "created_utc": "2026-10-30T15:53:20Z",
+ "versions": {
+  "python": "3.12.10",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "torch": "2.9.1+cpu",
+  "soundfile": "0.14.0",
+  "faster_whisper": "1.2.1",
+  "ctranslate2": "4.8.2",
+  "librosa": "1.0.0",
+  "silero_vad": "6.2.2",
+  "onnxruntime": "1.30.0"
+ },
+ "code_sha256": {
+  "mrcd\\__init__.py": "dc62fb858bbad2e817b8e49a859e5a24d24c695c33f85d223962e60d098732b0",
+  "mrcd\\annotation\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "mrcd\\annotation\\auto_labeler.py": "91af8a0546915da56c70d07d5abf3862a2284832f5b69a0ed0a6bd0d614cb533",
+  "mrcd\\constants.py": "7a2d360253c4d286e9430a74b2d3847bce7ccbfec52b095b563da6256606c599",
+  "mrcd\\dataset.py": "ce9fbc2c2eaf7e5dd0a4426c20eb480addf61641864bc0657bcf23da13c6f356",
+  "mrcd\\engine.py": "b387df0a307cc6dfc70d7a4f7e0399ee773912476b56e00bc0969ec203240261",
+  "mrcd\\extractors\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "mrcd\\extractors\\acoustic.py": "990d6fa8a0b532c6f03364e464b1c685c59b729d04de8b1bd39ae63ef18a9d24",
+  "mrcd\\extractors\\face_tracking.py": "5aa86a442a99fdb0c401d07526e0453e07a686dc36dd10a3c0e1528aff0260f2",
+  "mrcd\\extractors\\kinesic.py": "7cf706e5981a52f55449fcb1075277ef80ab75a36a652cf7e8b39e7fd398f6c3",
+  "mrcd\\extractors\\linguistic.py": "e7670754755d07c5407641bc9722ac5092071bfeffe9f760c2cb8c4e37a831d9",
+  "mrcd\\extractors\\prosody.py": "d8fe98180c22e229fa1ea37bd9e9308ece4abd72830776a29f1d0b406f8d29fc",
+  "mrcd\\inference.py": "286d889c50193a06a0054fae1a71f52b589461894657be7a20872fcaa127ef9b",
+  "mrcd\\live\\__init__.py": "c7b0685af579711247de4ba7b0c27a0bad35a2593d6303fbeeaf0cf0d8ba271c",
+  "mrcd\\live\\mic_stream.py": "1aaf96bbf71ebc83a3116f85e4e1f0ad4f3ac2c29579675bac00f9f5f8c661fb",
+  "mrcd\\live\\streaming_asr.py": "74cac04862e02cdbd0f99de3533c750cedc64216b45eb3274ed8f6d85fadcfc7",
+  "mrcd\\live\\window_builder.py": "edbfe6b38e42223b8d3416183d219a0661396095f38406b1009a590e5be7a9fe",
+  "mrcd\\models\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "mrcd\\models\\fusion.py": "8f24db5b168931f4ce56d2fd60d2731079a43a0a3e15fb4afc30066825834115",
+  "mrcd\\sync\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "mrcd\\sync\\buffer.py": "fa7d818220795265e84000efe868d15a18ac1a55eed7b4dce59c81a9c66912fa",
+  "scripts/baselines/bl_common.py": "4369cd544d91c8f92cdc983b5042b2977a85d767f1de835ebb8c2f4877febe6e"
+ },
+ "input_hashes": {
+  "guides": {
+   "dihana1.gui": "f0898aeca06cdcb2498006b0b715162e363216d1acbf9968fe02703b70bb2db3",
+   "dihana2.gui": "7a69eb33058fcb7471cd0869400224713de54d3d37498e788f366395b4b09f45",
+   "dihana3.gui": "6e73a31741a18a375070b88129a1b812387e36fdbddcb48e36cab70bf53423da",
+   "dihana4.gui": "84ed1ea7ff7fa30e8a5e472a1cb33fc6e13baa3a2c432545fcf92118bc861112",
+   "dihana5.gui": "b7fab1118e02d05050f22b71ef390ee4ce0c10d950d87261925ad522dabfb858"
+  },
+  "turns.csv": "0036b1c54faac7ba8ebbac507421f2700861efc2bbfaba6ca889b18e83b4ed2d"
+ },
+ "split": {
+  "1": "dev",
+  "2": "dev",
+  "3": "dev",
+  "4": "tune",
+  "5": "test"
+ },
+ "unit": "user turn"
+}

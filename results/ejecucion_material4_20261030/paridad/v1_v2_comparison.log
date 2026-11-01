@@ -1,0 +1,84 @@
+BAQ_001_03_16_a12 11s
+BAQ_001_03_16_a23 21s
+BAQ_001_03_16_a121 29s
+BAQ_001_03_16_a160 40s
+BUE_001_03_19_a126 48s
+BUE_001_03_19_a106 56s
+BUE_001_03_19_a194 66s
+BUE_001_03_19_a227 74s
+BUE_001_03_19_a203 83s
+BUE_001_03_19_a272 93s
+BUE_001_03_19_a476 104s
+BUE_001_03_19_a533 112s
+BUE_001_03_19_a678 120s
+BUE_001_03_19_a880 130s
+BUE_001_03_19_a868 138s
+BUE_001_03_19_a1149 148s
+HAV_001_02_12_a9 157s
+HAV_001_02_12_a93 164s
+HAV_001_02_12_a131 172s
+HAV_001_02_12_a213 180s
+HAV_001_02_12_a230 189s
+HAV_001_02_12_a242 196s
+HAV_001_02_12_a272 204s
+HAV_001_02_12_a316 212s
+MEX_001_02_15_a336 220s
+MEX_001_02_15_a86 229s
+MEX_001_02_15_a173 238s
+MEX_001_02_15_a694 246s
+MEX_001_02_15_a709 254s
+MEX_001_02_15_a630 263s
+MEX_001_02_15_a724 271s
+MEX_001_02_15_a765 282s
+{
+ "clips": 32,
+ "contained_windows_offline": 105,
+ "coverage_contained_windows": {
+  "v1": 105,
+  "v2_prov": 105,
+  "v2_final": 105,
+  "offline": 105
+ },
+ "confusion": {
+  "v1": {
+   "TP": 4,
+   "FP": 1,
+   "FN": 12,
+   "TN": 15
+  },
+  "v2_prov": {
+   "TP": 4,
+   "FP": 1,
+   "FN": 12,
+   "TN": 15
+  },
+  "v2_final": {
+   "TP": 3,
+   "FP": 1,
+   "FN": 13,
+   "TN": 15
+  },
+  "offline": {
+   "TP": 3,
+   "FP": 1,
+   "FN": 13,
+   "TN": 15
+  }
+ },
+ "decision_flips_vs_offline": {
+  "v1": 1,
+  "v2_prov": 1,
+  "v2_final": 0,
+  "offline": 0
+ },
+ "v1_vs_v2_provisional_common_windows": 489,
+ "v1_vs_v2_provisional_common_windows_with_different_probs": 0,
+ "provisional_windows_only_in_v1": 64,
+ "v2_final_windows_with_prob_difference_vs_offline": 0,
+ "provisional_latency_after_window_end_s": {
+  "median": 4.0,
+  "p95": 4.0,
+  "max": 4.0
+ },
+ "elapsed_s": 281.78117179870605
+}

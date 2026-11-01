@@ -1,0 +1,58 @@
+[
+ [
+  "N1 survival n-gram sizes (1,2,3,4)->(1,2)",
+  "DETECTED | 2 failed, 24 passed in 0.95s"
+ ],
+ [
+  "N1b n-gram sizes ->(1,2,3,4,5)",
+  "DETECTED | 1 failed, 25 passed in 0.21s"
+ ],
+ [
+  "N2 fragment prefix <=3 -> <=1",
+  "DETECTED | 1 failed, 25 passed in 0.20s"
+ ],
+ [
+  "N2b fragment prefix <=3 -> <=4",
+  "DETECTED | 1 failed, 25 passed in 0.19s"
+ ],
+ [
+  "N3 correction cov 0.8 -> 0.0",
+  "DETECTED | 1 failed, 25 passed in 0.20s"
+ ],
+ [
+  "N3b correction cov 0.8 -> 0.9",
+  "DETECTED | 1 failed, 25 passed in 0.20s"
+ ],
+ [
+  "N4 bootstrap p smoothing removed",
+  "DETECTED | 2 failed, 24 passed in 7.78s"
+ ],
+ [
+  "N9 Cf stripping removed",
+  "DETECTED | 1 failed, 194 passed, 4 skipped in 0.54s"
+ ],
+ [
+  "N10 r:borrado removed from allow-list",
+  "DETECTED | 2 failed, 192 passed, 4 skipped in 0.45s"
+ ],
+ [
+  "N12 silenc stem removed",
+  "DETECTED | 3 failed, 192 passed, 4 skipped in 0.44s"
+ ],
+ [
+  "N13 is_plain_label disabled (homoglyph storage)",
+  "DETECTED | 3 failed, 192 passed, 4 skipped in 0.47s"
+ ],
+ [
+  "N14 pyin ndim check removed",
+  "DETECTED | 1 error in 0.88s"
+ ],
+ [
+  "N14 pyin ndim check removed",
+  "DETECTED | 1 failed, 4 passed (re-run by hand in a temp copy with results junction; the first automated run errored at collection)"
+ ],
+ [
+  "BASELINE unmutated copy (pyin file)",
+  "5 passed"
+ ]
+]

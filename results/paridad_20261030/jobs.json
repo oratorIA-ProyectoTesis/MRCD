@@ -1,0 +1,301 @@
+[
+ {
+  "id": "ameresco_000",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_000.wav",
+  "sha256": "5ba2ca86f518d374db1a031911dec4908961ca800ab0bd69a2c178cd376e8374",
+  "a": 5.0,
+  "b": 8.959000000000003,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_000_asr.json"
+ },
+ {
+  "id": "ameresco_001",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_001.wav",
+  "sha256": "0f13bb0eb0ca2212c05bdb43fb42dc471910a8901db822324b181f4a52c97ed3",
+  "a": 5.0,
+  "b": 11.210000000000008,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_001_asr.json"
+ },
+ {
+  "id": "ameresco_002",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_002.wav",
+  "sha256": "7830bd92e570170cbcdf597c8fec51aefe0607e2df63a61fcab9846b63e60e5f",
+  "a": 5.0,
+  "b": 9.279999999999973,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_002_asr.json"
+ },
+ {
+  "id": "ameresco_003",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_003.wav",
+  "sha256": "54922605e3d29b0930201731500841f8d5e422caa839102f53010e124269de0d",
+  "a": 5.0,
+  "b": 11.550000000000068,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_003_asr.json"
+ },
+ {
+  "id": "ameresco_004",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_004.wav",
+  "sha256": "8c12b6348db7fedb19098b7aaed4ec4caf9ede82420d104735b166ebeac14d7e",
+  "a": 5.0,
+  "b": 8.079999999999998,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_004_asr.json"
+ },
+ {
+  "id": "ameresco_005",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_005.wav",
+  "sha256": "892e6dcb7ca480c951b6c15483ff414a72af587c23188c1dcf2f6d7945b8110c",
+  "a": 5.0,
+  "b": 8.659999999999968,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_005_asr.json"
+ },
+ {
+  "id": "ameresco_006",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_006.wav",
+  "sha256": "05ce6db047f9ac29d1271d965046ec004a207e02fdfcac9a3bf37015b29a838e",
+  "a": 5.0,
+  "b": 10.939000000000021,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_006_asr.json"
+ },
+ {
+  "id": "ameresco_007",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_007.wav",
+  "sha256": "b23ce7d2aecd6a2c10a75fa84140f68456dd1741a1881fe16f833ba62119a94c",
+  "a": 5.0,
+  "b": 9.050999999999988,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_007_asr.json"
+ },
+ {
+  "id": "ameresco_008",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_008.wav",
+  "sha256": "4f78dd6b8c811ed122b19f1df7ea79c693afe5ad46689fe53795124e307766c5",
+  "a": 5.0,
+  "b": 9.363,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_008_asr.json"
+ },
+ {
+  "id": "ameresco_009",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_009.wav",
+  "sha256": "a59f017db4c6d06a0788241ec7e47bd23fbfd5ced70e4dde22f1e5ad6bc8114d",
+  "a": 5.0,
+  "b": 11.419999999999959,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_009_asr.json"
+ },
+ {
+  "id": "ameresco_010",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_010.wav",
+  "sha256": "c751c0b44c973f2ab336bedd13914889b01a191707fb66e22831b61986565981",
+  "a": 5.0,
+  "b": 11.533999999999992,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_010_asr.json"
+ },
+ {
+  "id": "ameresco_011",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_011.wav",
+  "sha256": "fcbd91bcd4e2b3ab8fa11bc62a5851e0639194cc87792607647034bd5ae7dbe9",
+  "a": 5.0,
+  "b": 8.12600000000009,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_011_asr.json"
+ },
+ {
+  "id": "ameresco_012",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_012.wav",
+  "sha256": "d8bdf5dd91bfb7c9e54898b891b0801a69425a029d637892139c3529b69e398e",
+  "a": 5.0,
+  "b": 8.37299999999982,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_012_asr.json"
+ },
+ {
+  "id": "ameresco_013",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_013.wav",
+  "sha256": "cf6339e63881d4d57cceec41e444b00829bf2636e6c0ea1c95d1eaa0ec98166e",
+  "a": 5.0,
+  "b": 10.978000000000065,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_013_asr.json"
+ },
+ {
+  "id": "ameresco_014",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_014.wav",
+  "sha256": "0973c4ae41ee6498ffc20cf60a5a58781ed73fefbf5d6b8b16096df887e424e7",
+  "a": 5.0,
+  "b": 10.11999999999989,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_014_asr.json"
+ },
+ {
+  "id": "ameresco_015",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_015.wav",
+  "sha256": "62199eccdc275a59a5de6275843a379228c430d8f4696ba32347097d7cadbc6e",
+  "a": 5.0,
+  "b": 11.717000000000098,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_015_asr.json"
+ },
+ {
+  "id": "ameresco_016",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_016.wav",
+  "sha256": "090bd714c827d2119fc4e4fd6347afc3bb1a334e012182aad96b11d5cdf37cd2",
+  "a": 5.0,
+  "b": 8.53,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_016_asr.json"
+ },
+ {
+  "id": "ameresco_017",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_017.wav",
+  "sha256": "b6b099cbbc724752724a271d78ded92f2199a1471e41b25dd969874e39a9ea30",
+  "a": 5.0,
+  "b": 8.26600000000002,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_017_asr.json"
+ },
+ {
+  "id": "ameresco_018",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_018.wav",
+  "sha256": "3b85fa81dea0b34444b93664b886a6a051fbbb20d12a78ba8c5bda777c4a7163",
+  "a": 5.0,
+  "b": 8.274999999999977,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_018_asr.json"
+ },
+ {
+  "id": "ameresco_019",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_019.wav",
+  "sha256": "5029c68cada6ab8b4eeac88f5e93d5a2c6b55e6995d93b552ac50a5c2ef06661",
+  "a": 5.0,
+  "b": 8.067000000000007,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_019_asr.json"
+ },
+ {
+  "id": "ameresco_020",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_020.wav",
+  "sha256": "e1333ff1a226e82db01f87197f28cb26cb25a15f4780327f3b5b437299fd33f9",
+  "a": 5.0,
+  "b": 9.87700000000001,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_020_asr.json"
+ },
+ {
+  "id": "ameresco_021",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_021.wav",
+  "sha256": "060ff90816ed2b94294cdb086e3e4b4728e26c63de31cbc6c70fff7622dbd82a",
+  "a": 5.0,
+  "b": 8.281999999999982,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_021_asr.json"
+ },
+ {
+  "id": "ameresco_022",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_022.wav",
+  "sha256": "bd8a7c051720d5b9de0cd96975a4d14a1fa9e9930310ffd09d9860fec4ee9a89",
+  "a": 5.0,
+  "b": 8.86200000000008,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_022_asr.json"
+ },
+ {
+  "id": "ameresco_023",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_023.wav",
+  "sha256": "c5fd7af853cbe090c8ec917ac1f5e7f9d15a50ec1e5ae968b171cadc8581c299",
+  "a": 5.0,
+  "b": 8.07000000000005,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_023_asr.json"
+ },
+ {
+  "id": "ameresco_024",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_024.wav",
+  "sha256": "939f6f188911ea3cecefa9b5fd5dab9fb784d6ebd9f6ec246479987f2f6e7b30",
+  "a": 5.0,
+  "b": 8.08999999999999,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_024_asr.json"
+ },
+ {
+  "id": "ameresco_025",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_025.wav",
+  "sha256": "72b02ca87a5efdb23af64fc36e34c2082979af91c250058a4ce550a88d7a89cd",
+  "a": 5.0,
+  "b": 9.049999999999955,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_025_asr.json"
+ },
+ {
+  "id": "ameresco_026",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_026.wav",
+  "sha256": "7962f059301a1d39a8c5690e35610853922d619dd4ad586bf56072833badcc9e",
+  "a": 5.0,
+  "b": 10.232999999999947,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_026_asr.json"
+ },
+ {
+  "id": "ameresco_027",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_027.wav",
+  "sha256": "20cff782e33e57bb589c4c95d3fc6552605433889f93899d4d49bb344da3c462",
+  "a": 5.0,
+  "b": 8.177000000000135,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_027_asr.json"
+ },
+ {
+  "id": "ameresco_028",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_028.wav",
+  "sha256": "a0e32a701e678d409a3e1213d06db39fa7e42395c5fe0d2e7e0fb55495e56c29",
+  "a": 5.0,
+  "b": 8.855000000000018,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_028_asr.json"
+ },
+ {
+  "id": "ameresco_029",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_029.wav",
+  "sha256": "91efd6502de546524b6d69adac6cc31f20fdf9d937910f6d466fac7b82492980",
+  "a": 5.0,
+  "b": 8.97700000000009,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_029_asr.json"
+ },
+ {
+  "id": "ameresco_030",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_030.wav",
+  "sha256": "1aae267312e44175d682fa9a0f836df9d266a1068d8e3560a2867a87212f366b",
+  "a": 5.0,
+  "b": 8.233999999999924,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_030_asr.json"
+ },
+ {
+  "id": "ameresco_031",
+  "wav": "<PILOT_ROOT>\\inputs\\ameresco_031.wav",
+  "sha256": "a484e7112899d84e7898e46563eeb7ef5fa66006eaaa67b33969b486199b1058",
+  "a": 5.0,
+  "b": 10.588999999999942,
+  "kind": "pilot",
+  "pilot_words": "<PILOT_ROOT>\\results\\ameresco_031_asr.json"
+ },
+ {
+  "id": "extra_yD9_30_70",
+  "wav": "C:\\zArnes-tesis\\mrcd\\results\\paridad_20261030\\extra_audio\\yD9Igp27VNE_30s_70s.wav",
+  "sha256": "456452e2537f87943154891d4d1f5b5d270346e23c0e0229b1c3d41216363f8a",
+  "a": 5.0,
+  "b": 35.0,
+  "kind": "extra",
+  "source_wav": "C:\\zArnes-tesis\\mrcd\\data\\clips\\yD9Igp27VNE.wav",
+  "source_sha256": "190d0f22903764cd2dcd1934f942b8d94ece5d0f66cf959c0099f773f0cf4c4b",
+  "pilot_words": null
+ }
+]

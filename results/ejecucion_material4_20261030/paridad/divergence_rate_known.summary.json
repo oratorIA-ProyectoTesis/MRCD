@@ -1,0 +1,38 @@
+{
+ "label": "known",
+ "sessions": [
+  23,
+  26
+ ],
+ "jobs": 6,
+ "v2": {
+  "sessions_diverging": "2/2",
+  "session_rate": 1.0,
+  "session_ci95_clopper_pearson": [
+   0.15811388300841897,
+   1.0
+  ],
+  "session_partition_diverging": "6/6",
+  "job_rate_ci95": [
+   0.5407418735600995,
+   1.0
+  ],
+  "max_frames_in_a_job": 13,
+  "max_abs_f0_st": 23.95641326904297
+ },
+ "v3": {
+  "sessions_diverging": "1/2",
+  "session_rate": 0.5,
+  "session_ci95_clopper_pearson": [
+   0.01257911709342505,
+   0.9874208829065749
+  ],
+  "session_partition_diverging": "3/6",
+  "job_rate_ci95": [
+   0.11811724875702521,
+   0.8818827512429748
+  ],
+  "max_frames_in_a_job": 3,
+  "max_abs_f0_st": 5.556412220001221
+ }
+}

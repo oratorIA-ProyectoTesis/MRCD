@@ -1,0 +1,137 @@
+{
+  "root": "<CORPORA_ROOT>\\12_AMERESCO",
+  "recordings": {
+    "BAQ_001_03_16": {
+      "eaf": "<CORPORA_ROOT>\\12_AMERESCO\\BAQ_001_03_16\\BAQ_001_03_16.eaf",
+      "eaf_sha256": "1a1ac65c5e67308021757ea614655674be1628a1562a2f21be4bc99d52fe5a76",
+      "speech_tiers": {
+        "A": {
+          "intervals": 109,
+          "alargamiento_intervals": 18
+        },
+        "B": {
+          "intervals": 83,
+          "alargamiento_intervals": 5
+        },
+        "C": {
+          "intervals": 3,
+          "alargamiento_intervals": 0
+        },
+        "?": {
+          "intervals": 1,
+          "alargamiento_intervals": 0
+        }
+      },
+      "speech_intervals": 196,
+      "alargamiento_positive_intervals": 23,
+      "intervals_with_restart_dash": 31,
+      "speech_seconds": 635.1,
+      "has_mp3": true,
+      "has_textgrid": true
+    },
+    "BUE_001_03_19": {
+      "eaf": "<CORPORA_ROOT>\\12_AMERESCO\\BUE_001_03_19\\BUE_001_03_19.eaf",
+      "eaf_sha256": "1f73de1c4ccb53f70eb1ec2e2620093ab455c3fb91cfd0fba8770058e5932ab4",
+      "speech_tiers": {
+        "A": {
+          "intervals": 227,
+          "alargamiento_intervals": 42
+        },
+        "B": {
+          "intervals": 328,
+          "alargamiento_intervals": 64
+        },
+        "C": {
+          "intervals": 515,
+          "alargamiento_intervals": 123
+        }
+      },
+      "speech_intervals": 1070,
+      "alargamiento_positive_intervals": 229,
+      "intervals_with_restart_dash": 45,
+      "speech_seconds": 1523.2,
+      "has_mp3": true,
+      "has_textgrid": false
+    },
+    "HAV_001_02_12": {
+      "eaf": "<CORPORA_ROOT>\\12_AMERESCO\\HAV_001_02_12\\HAV_001_02_12.eaf",
+      "eaf_sha256": "c2b3519d2f37d299892c6236dab2aee97d0bb7a925b2c54dc59a8502aca74326",
+      "speech_tiers": {
+        "A": {
+          "intervals": 140,
+          "alargamiento_intervals": 38
+        },
+        "B": {
+          "intervals": 182,
+          "alargamiento_intervals": 52
+        }
+      },
+      "speech_intervals": 322,
+      "alargamiento_positive_intervals": 90,
+      "intervals_with_restart_dash": 24,
+      "speech_seconds": 523.0,
+      "has_mp3": true,
+      "has_textgrid": true
+    },
+    "MEX_001_02_15": {
+      "eaf": "<CORPORA_ROOT>\\12_AMERESCO\\MEX_001_02_15\\MEX_001_02_15.eaf",
+      "eaf_sha256": "5f0a77a4d2cb4acc1493d71af36cfbfe34d3e05b32114a0680c3f143e71e41fe",
+      "speech_tiers": {
+        "M1": {
+          "intervals": 386,
+          "alargamiento_intervals": 30
+        },
+        "M2": {
+          "intervals": 387,
+          "alargamiento_intervals": 28
+        }
+      },
+      "speech_intervals": 773,
+      "alargamiento_positive_intervals": 58,
+      "intervals_with_restart_dash": 23,
+      "speech_seconds": 1150.9,
+      "has_mp3": true,
+      "has_textgrid": true
+    }
+  },
+  "total_speech_intervals": 2361,
+  "total_alargamiento_positive_intervals": 400,
+  "total_audio_minutes_mp3_not_measured": null,
+  "index_csv": "<PILOT_ROOT>\\source_data\\AMERESCO\\source_annotation_index.csv",
+  "index_rows": 2361,
+  "index_positive": 400,
+  "candidates_after_automatic_filters": 1105,
+  "candidate_positive": 209,
+  "candidates_3_to_8s": 98,
+  "candidates_3_to_8s_positive": 37,
+  "exclusion_reason_counts": {
+    "unintelligible_content": 105,
+    "anonymized_content": 164,
+    "overlapping_speaker": 1111,
+    "unknown_speaker": 1
+  },
+  "pilot_refs_n": 32,
+  "pilot_refs_positive": 16,
+  "pilot_manifest_recording_counts": {
+    "BAQ_001_03_16": 4,
+    "BUE_001_03_19": 12,
+    "HAV_001_02_12": 8,
+    "MEX_001_02_15": 8
+  },
+  "pilot_distinct_speaker_tiers": 9,
+  "pilot_tier_pos_neg": {
+    "positives_by_recording": {
+      "BAQ_001_03_16": 2,
+      "BUE_001_03_19": 6,
+      "HAV_001_02_12": 6,
+      "MEX_001_02_15": 2
+    }
+  },
+  "protocol_notes": {
+    "alargamiento": "<alargamiento/> marks vocalic AND consonantic lengthening, any function (protocol sec. 4.2)",
+    "pauses": "Val.Es.Co. pauses are NOT marked (protocol sec. 4.4: alignment with ELAN makes them unnecessary)",
+    "restarts": "dash '-' marks restarts/self-interruptions; repeated words are transcribed as many times as pronounced",
+    "times": "interval times are human-aligned ELAN speech turns (segment level), not event boundaries"
+  },
+  "licence": "CC BY-NC-SA 4.0 (declared by project site; see pilot LICENSE_NOTICES.md)"
+}

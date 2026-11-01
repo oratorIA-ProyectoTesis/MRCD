@@ -1,0 +1,493 @@
+{
+  "local_spanish_source_videos": 74,
+  "local_media_selected_dir": 73,
+  "total_minutes": 241.4,
+  "ffprobe_errors": 0,
+  "all_have_video_and_audio": true,
+  "spanish_source_videos_published": 130,
+  "codex_136_refs_mapped_to_recording": 136,
+  "codex_136_refs_ambiguous_text_match": 0,
+  "codex_136_refs_unmapped": 0,
+  "recordings_covering_codex_136": 62,
+  "of_which_media_present_locally": 62,
+  "files": [
+    {
+      "file": "epic_st_20-07-04-p-003-org-es.mp4",
+      "duration_s": 11.28,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_01-04-04-m-006-org-es.mp4",
+      "duration_s": 21.88,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_01-04-04-m-028-org-es.mp4",
+      "duration_s": 68.56,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_08-03-04-p-014-org-es.mp4",
+      "duration_s": 72.92,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_08-03-04-p-020-org-es.mp4",
+      "duration_s": 50.72,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_08-03-04-p-072-org-es.mp4",
+      "duration_s": 253.64,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_08-03-04-p-091-org-es.mp4",
+      "duration_s": 161.64,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_09-02-04-p-007-org-es.mp4",
+      "duration_s": 127.72,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_09-02-04-p-060-org-es.mp4",
+      "duration_s": 23.92,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_09-02-04-p-063-org-es.mp4",
+      "duration_s": 376.04,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_09-03-04-m-029-org-es.mp4",
+      "duration_s": 155.08,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_10-02-04-m-058-org-es.mp4",
+      "duration_s": 149.0,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_10-02-04-m-074-org-es.mp4",
+      "duration_s": 1512.08,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_10-02-04-p-156-org-es.mp4",
+      "duration_s": 210.48,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_10-02-04-p-159-org-es.mp4",
+      "duration_s": 25.56,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_10-02-04-p-164-org-es.mp4",
+      "duration_s": 201.68,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_10-02-04-p-170-org-es.mp4",
+      "duration_s": 157.32,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_10-02-04-p-183-org-es.mp4",
+      "duration_s": 359.04,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_10-02-04-p-202-org-es.mp4",
+      "duration_s": 133.04,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_10-03-04-m-008-org-es.mp4",
+      "duration_s": 344.52,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_11-02-04-m-017-org-es.mp4",
+      "duration_s": 208.4,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_11-02-04-m-032-org-es.mp4",
+      "duration_s": 202.8,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_11-02-04-m-035-org-es.mp4",
+      "duration_s": 187.2,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_11-02-04-m-054-org-es.mp4",
+      "duration_s": 102.28,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_11-02-04-p-123-org-es.mp4",
+      "duration_s": 196.8,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_12-02-04-m-010-org-es.mp4",
+      "duration_s": 143.04,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_12-02-04-m-038-org-es.mp4",
+      "duration_s": 129.56,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_12-02-04-p-089-org-es.mp4",
+      "duration_s": 39.48,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_12-02-04-p-109-org-es.mp4",
+      "duration_s": 177.52,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_20-04-04-m-013-org-es.mp4",
+      "duration_s": 255.68,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_20-04-04-m-016-org-es.mp4",
+      "duration_s": 196.2,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_20-04-04-m-021-org-es.mp4",
+      "duration_s": 172.38,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_20-04-04-m-032-org-es.mp4",
+      "duration_s": 164.73,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_20-04-04-m-033-org-es.mp4",
+      "duration_s": 106.81,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_20-04-04-m-046-org-es.mp4",
+      "duration_s": 302.68,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_20-04-04-m-062-org-es.mp4",
+      "duration_s": 39.65,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_20-04-04-m-073-org-es.mp4",
+      "duration_s": 28.26,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_20-04-04-m-077-org-es.mp4",
+      "duration_s": 418.37,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_20-07-04-p-001-org-es.mp4",
+      "duration_s": 413.52,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_20-07-04-p-007-org-es.mp4",
+      "duration_s": 31.84,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_20-07-04-p-010-org-es.mp4",
+      "duration_s": 165.52,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_21-07-04-m-031-org-es.mp4",
+      "duration_s": 140.84,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_21-07-04-p-003-org-es.mp4",
+      "duration_s": 17.52,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_21-07-04-p-005-org-es.mp4",
+      "duration_s": 152.96,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_21-07-04-p-007-org-es.mp4",
+      "duration_s": 292.28,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_21-07-04-p-044-org-es.mp4",
+      "duration_s": 185.44,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_22-04-04-m-039-org-es.mp4",
+      "duration_s": 166.45,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_22-07-04-m-004-org-es.mp4",
+      "duration_s": 206.44,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_25-02-04-p-027-org-es.mp4",
+      "duration_s": 134.68,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_25-02-04-p-030-org-es.mp4",
+      "duration_s": 191.16,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_25-02-04-p-034-org-es.mp4",
+      "duration_s": 134.36,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_25-02-04-p-037-org-es.mp4",
+      "duration_s": 176.44,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_25-02-04-p-047-org-es.mp4",
+      "duration_s": 349.96,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_25-02-04-p-072-org-es.mp4",
+      "duration_s": 114.76,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_25-02-04-p-081-org-es.mp4",
+      "duration_s": 484.52,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_25-02-04-p-096-org-es.mp4",
+      "duration_s": 76.12,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_30-03-04-m-007-org-es.mp4",
+      "duration_s": 315.52,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_30-03-04-m-008-org-es.mp4",
+      "duration_s": 455.28,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_30-03-04-m-009-org-es.mp4",
+      "duration_s": 246.8,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_30-03-04-m-011-org-es.mp4",
+      "duration_s": 128.44,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_30-03-04-m-040-org-es.mp4",
+      "duration_s": 152.2,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_30-03-04-m-046-org-es.mp4",
+      "duration_s": 134.4,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_30-03-04-m-062-org-es.mp4",
+      "duration_s": 142.64,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_30-03-04-m-065-org-es.mp4",
+      "duration_s": 135.0,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_30-03-04-m-066-org-es.mp4",
+      "duration_s": 128.96,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_30-03-04-p-172-org-es.mp4",
+      "duration_s": 317.2,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_30-03-04-p-187-org-es.mp4",
+      "duration_s": 190.48,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_31-03-04-m-012-org-es.mp4",
+      "duration_s": 337.76,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_31-03-04-m-023-org-es.mp4",
+      "duration_s": 182.96,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_31-03-04-m-027-org-es.mp4",
+      "duration_s": 202.4,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_31-03-04-m-041-org-es.mp4",
+      "duration_s": 148.56,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_31-03-04-m-044-org-es.mp4",
+      "duration_s": 163.36,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_31-03-04-m-054-org-es.mp4",
+      "duration_s": 103.68,
+      "video": true,
+      "audio": true
+    },
+    {
+      "file": "epic_st_31-03-04-m-055-org-es.mp4",
+      "duration_s": 75.8,
+      "video": true,
+      "audio": true
+    }
+  ],
+  "local_media_support": {
+    "sentences": 1533,
+    "fp_sent": 173,
+    "trunc_sent": 147,
+    "pause_sent": 1392,
+    "distinct_actors_local": 39,
+    "actors_with_fp_sentence": 31,
+    "fp_sentences_per_actor_top5": [
+      [
+        "epic_actor_010",
+        36
+      ],
+      [
+        "epic_actor_173",
+        35
+      ],
+      [
+        "epic_actor_138",
+        12
+      ],
+      [
+        "epic_actor_119",
+        11
+      ],
+      [
+        "epic_actor_021",
+        8
+      ]
+    ]
+  },
+  "all_130_originals_support": {
+    "sentences": 2384,
+    "fp_sent": 214
+  }
+}

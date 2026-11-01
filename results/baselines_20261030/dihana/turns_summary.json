@@ -1,0 +1,54 @@
+{
+ "per_fold": {
+  "1": {
+   "filler_present": 228,
+   "lengthening_present": 263,
+   "repetition_present": 86,
+   "reformulation_present": 42,
+   "turns": 1350
+  },
+  "2": {
+   "filler_present": 218,
+   "lengthening_present": 242,
+   "repetition_present": 81,
+   "reformulation_present": 42,
+   "turns": 1294
+  },
+  "3": {
+   "filler_present": 160,
+   "lengthening_present": 213,
+   "repetition_present": 54,
+   "reformulation_present": 29,
+   "turns": 1172
+  },
+  "4": {
+   "filler_present": 168,
+   "lengthening_present": 249,
+   "repetition_present": 60,
+   "reformulation_present": 48,
+   "turns": 1240
+  },
+  "5": {
+   "filler_present": 145,
+   "lengthening_present": 211,
+   "repetition_present": 60,
+   "reformulation_present": 36,
+   "turns": 1223
+  }
+ },
+ "speakers_per_fold": {
+  "1": 45,
+  "2": 45,
+  "3": 45,
+  "4": 45,
+  "5": 45
+ },
+ "split": {
+  "1": "dev",
+  "2": "dev",
+  "3": "dev",
+  "4": "tune",
+  "5": "test"
+ },
+ "n_turns": 6279
+}

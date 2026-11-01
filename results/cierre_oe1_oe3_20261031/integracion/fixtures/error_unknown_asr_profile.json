@@ -1,0 +1,74 @@
+{
+  "schema_version": "mrcd.analysis/v1",
+  "status": "failed",
+  "generated_at": "2026-10-31T20:21:00+00:00",
+  "error": {
+    "code": "invalid_request",
+    "message": "Unknown asr_profile 'p9'.",
+    "retryable": false,
+    "details": {
+      "allowed": [
+        "p0",
+        "p1_disfluent_prompt"
+      ]
+    }
+  },
+  "request": {
+    "audio_sha256": "6da1074a1e1f13aff5f416d9ddb78dbf5bc481d4da0c0e8eac311abf8a2c3bf3",
+    "audio_duration_s": {
+      "available": true,
+      "value": 20.0,
+      "unavailable_reason": null
+    },
+    "sample_rate_hz": {
+      "available": true,
+      "value": 16000,
+      "unavailable_reason": null
+    },
+    "channels": {
+      "available": true,
+      "value": 1,
+      "unavailable_reason": null
+    },
+    "asr_profile": "p9",
+    "head": null,
+    "include_text": false
+  },
+  "events": [],
+  "summary": null,
+  "modalities": {
+    "acoustic": {
+      "available": false,
+      "reason": "analysis did not run"
+    },
+    "linguistic": {
+      "available": false,
+      "reason": "analysis did not run"
+    },
+    "kinesic_video": {
+      "available": false,
+      "reason": "service v1 receives audio only; no video was provided or processed"
+    }
+  },
+  "provenance": {
+    "service": {
+      "name": "mrcd.service",
+      "contract": "mrcd.analysis/v1",
+      "mrcd_version": "0.3.0"
+    },
+    "checkpoint": null,
+    "asr": null,
+    "head": null,
+    "config": null,
+    "environment": null
+  },
+  "experimental": {
+    "active": true,
+    "components": [
+      "asr_profile:p9"
+    ]
+  },
+  "head_decision": null,
+  "transcript": null,
+  "warnings": []
+}

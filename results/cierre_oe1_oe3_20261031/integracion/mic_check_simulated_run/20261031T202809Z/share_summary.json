@@ -1,0 +1,137 @@
+{
+  "what_this_is": "Minimised summary of a microphone-pipeline check. Contains no audio, no text and no per-window rows.",
+  "result_state": "SIMULATED INPUT - not a microphone result",
+  "metadata": {
+    "started_utc": "2026-10-31T20:28:09+00:00",
+    "simulated_input": true,
+    "requested_duration_s": 36.0,
+    "live_config": "live_cfg_v2",
+    "whisper_size": "small",
+    "checkpoint_sha256": "87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669",
+    "git_commit": "955d27c",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.10"
+  },
+  "device": {
+    "simulated": "DNrrpE-sYnU_s00.wav"
+  },
+  "level": {
+    "measured": true,
+    "samples": 556000,
+    "audio_seconds": 34.75,
+    "peak_dbfs": -3.97,
+    "clipped_samples": 0,
+    "clipped_fraction": 0.0,
+    "rms_mean_dbfs": -30.36,
+    "noise_floor_dbfs_p10": -52.03,
+    "active_gate_dbfs": -40.03,
+    "active_fraction": 0.761,
+    "leading_silence_s": 0.2,
+    "trailing_silence_s": 0.1,
+    "dc_offset": 1e-05,
+    "signal_present": true
+  },
+  "checks": {
+    "signal": {
+      "status": "PASS",
+      "why": "signal present"
+    },
+    "clipping": {
+      "status": "PASS",
+      "why": "no clipped samples"
+    },
+    "level": {
+      "status": "PASS",
+      "why": "peak -3.97 dBFS (warn below -30.0)"
+    },
+    "noise_floor": {
+      "status": "PASS",
+      "why": "p10 block level -52.03 dBFS"
+    },
+    "silence_edges": {
+      "status": "WARN",
+      "why": "leading 0.2s, trailing 0.1s (want >= 2.0s each)"
+    },
+    "dc_offset": {
+      "status": "PASS",
+      "why": "1e-05"
+    },
+    "dropped_blocks": {
+      "status": "PASS",
+      "why": "0 blocks flagged by the audio driver"
+    },
+    "clock_drift": {
+      "status": "PASS",
+      "why": "audio 34.75s vs wall 36.0s"
+    }
+  },
+  "dropped_blocks": 0,
+  "n_rows": 81,
+  "rows_by_class": {
+    "neutral_pause": 14,
+    "rhetorical_pause": 8,
+    "fluent": 11,
+    "prolongation": 24,
+    "filler_word": 18,
+    "block": 6
+  },
+  "gaps": [
+    {
+      "kind": "windows_skipped",
+      "from_s": 0.0,
+      "to_s": 1.0,
+      "n_windows": 2,
+      "reason": "consumer_lag_or_asr_floor",
+      "at_s": 8.05
+    },
+    {
+      "kind": "windows_skipped",
+      "from_s": 1.5,
+      "to_s": 5.0,
+      "n_windows": 7,
+      "reason": "consumer_lag_or_asr_floor",
+      "at_s": 12.45
+    },
+    {
+      "kind": "windows_skipped",
+      "from_s": 5.5,
+      "to_s": 8.5,
+      "n_windows": 6,
+      "reason": "consumer_lag_or_asr_floor",
+      "at_s": 16.5
+    },
+    {
+      "kind": "windows_skipped",
+      "from_s": 10.0,
+      "to_s": 12.45,
+      "n_windows": 5,
+      "reason": "consumer_lag_or_asr_floor",
+      "at_s": 20.45
+    },
+    {
+      "kind": "windows_skipped",
+      "from_s": 13.5,
+      "to_s": 16.35,
+      "n_windows": 6,
+      "reason": "consumer_lag_or_asr_floor",
+      "at_s": 24.35
+    },
+    {
+      "kind": "windows_skipped",
+      "from_s": 17.5,
+      "to_s": 20.25,
+      "n_windows": 6,
+      "reason": "consumer_lag_or_asr_floor",
+      "at_s": 28.25
+    },
+    {
+      "kind": "windows_skipped",
+      "from_s": 21.5,
+      "to_s": 24.15,
+      "n_windows": 5,
+      "reason": "consumer_lag_or_asr_floor",
+      "at_s": 32.15
+    }
+  ],
+  "error": null
+}

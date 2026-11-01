@@ -1,0 +1,2 @@
+shard 1 1/1570 elapsed 7s
+shard 1 26/1570 elapsed 108s

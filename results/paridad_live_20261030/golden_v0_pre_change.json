@@ -1,0 +1,2807 @@
+{
+  "synth_18s": {
+    "windows": [
+      [
+        0.0,
+        3.0,
+        "rhetorical_pause",
+        0.7914711236953735,
+        {
+          "fluent": 2.1130070308572613e-05,
+          "filler_word": 0.0013605232816189528,
+          "prolongation": 1.8060695765598211e-06,
+          "repetition": 1.0031753845396452e-05,
+          "block": 4.3551438011490973e-07,
+          "revision": 6.898867468407843e-06,
+          "rhetorical_pause": 0.7914711236953735,
+          "neutral_pause": 0.20712797343730927
+        },
+        "[text withheld]"
+      ],
+      [
+        0.5,
+        3.5,
+        "rhetorical_pause",
+        0.7132241725921631,
+        {
+          "fluent": 0.0009288349538110197,
+          "filler_word": 0.04799767583608627,
+          "prolongation": 6.455909897340462e-05,
+          "repetition": 0.00029610664932988584,
+          "block": 4.305497895984445e-06,
+          "revision": 0.0007511733565479517,
+          "rhetorical_pause": 0.7132241725921631,
+          "neutral_pause": 0.23673324286937714
+        },
+        "[text withheld]"
+      ],
+      [
+        1.0,
+        4.0,
+        "rhetorical_pause",
+        0.8269715905189514,
+        {
+          "fluent": 0.0007317365380004048,
+          "filler_word": 0.04548686370253563,
+          "prolongation": 7.104642281774431e-05,
+          "repetition": 0.00039887576713226736,
+          "block": 1.4642254427599255e-05,
+          "revision": 0.0016766964690759778,
+          "rhetorical_pause": 0.8269715905189514,
+          "neutral_pause": 0.1246485784649849
+        },
+        "[text withheld]"
+      ],
+      [
+        1.5,
+        4.5,
+        "rhetorical_pause",
+        0.8025277853012085,
+        {
+          "fluent": 2.2971038561081514e-05,
+          "filler_word": 0.0005227341898716986,
+          "prolongation": 9.165533811028581e-06,
+          "repetition": 4.4197549868840724e-05,
+          "block": 6.438526725105476e-06,
+          "revision": 4.1416970475438575e-07,
+          "rhetorical_pause": 0.8025277853012085,
+          "neutral_pause": 0.1968662440776825
+        },
+        "[text withheld]"
+      ],
+      [
+        2.0,
+        5.0,
+        "rhetorical_pause",
+        0.6962916851043701,
+        {
+          "fluent": 2.1072364688734524e-05,
+          "filler_word": 0.0002706193190533668,
+          "prolongation": 4.818034540221561e-06,
+          "repetition": 1.2081930435670074e-05,
+          "block": 1.2165644420747412e-06,
+          "revision": 1.139003131811478e-07,
+          "rhetorical_pause": 0.6962916851043701,
+          "neutral_pause": 0.30339840054512024
+        },
+        "[text withheld]"
+      ],
+      [
+        2.5,
+        5.5,
+        "rhetorical_pause",
+        0.5651817917823792,
+        {
+          "fluent": 1.4439765436691232e-05,
+          "filler_word": 0.00025193378678523004,
+          "prolongation": 3.1356566978502087e-06,
+          "repetition": 1.5515757922912599e-06,
+          "block": 3.909985366590263e-07,
+          "revision": 4.7771710143251767e-08,
+          "rhetorical_pause": 0.5651817917823792,
+          "neutral_pause": 0.43454667925834656
+        },
+        "[text withheld]"
+      ],
+      [
+        3.0,
+        6.0,
+        "neutral_pause",
+        0.545573890209198,
+        {
+          "fluent": 0.00047924197860993445,
+          "filler_word": 0.0034577862825244665,
+          "prolongation": 2.7159065211890265e-05,
+          "repetition": 0.00023548421449959278,
+          "block": 6.010516244714381e-07,
+          "revision": 1.805946340027731e-05,
+          "rhetorical_pause": 0.45020774006843567,
+          "neutral_pause": 0.545573890209198
+        },
+        "[text withheld]"
+      ],
+      [
+        3.5,
+        6.5,
+        "neutral_pause",
+        0.6247172355651855,
+        {
+          "fluent": 0.000964289007242769,
+          "filler_word": 0.004210265353322029,
+          "prolongation": 8.003699622349814e-05,
+          "repetition": 0.00038129804306663573,
+          "block": 5.409147547652537e-07,
+          "revision": 1.0155310519621707e-05,
+          "rhetorical_pause": 0.3696362376213074,
+          "neutral_pause": 0.6247172355651855
+        },
+        "[text withheld]"
+      ],
+      [
+        4.0,
+        7.0,
+        "neutral_pause",
+        0.6775150895118713,
+        {
+          "fluent": 0.000998722156509757,
+          "filler_word": 0.0025208869483321905,
+          "prolongation": 7.18731535016559e-05,
+          "repetition": 0.00029275487759150565,
+          "block": 7.669054866710212e-07,
+          "revision": 5.333939043339342e-06,
+          "rhetorical_pause": 0.3185946047306061,
+          "neutral_pause": 0.6775150895118713
+        },
+        "[text withheld]"
+      ],
+      [
+        4.5,
+        7.5,
+        "neutral_pause",
+        0.7257078289985657,
+        {
+          "fluent": 0.0016603911062702537,
+          "filler_word": 0.0010442883940413594,
+          "prolongation": 0.0003597258764784783,
+          "repetition": 0.0007202727720141411,
+          "block": 4.182562349797081e-07,
+          "revision": 7.344438472500769e-06,
+          "rhetorical_pause": 0.27049970626831055,
+          "neutral_pause": 0.7257078289985657
+        },
+        "[text withheld]"
+      ],
+      [
+        5.0,
+        8.0,
+        "neutral_pause",
+        0.7542834281921387,
+        {
+          "fluent": 0.0015005795285105705,
+          "filler_word": 0.0014830187428742647,
+          "prolongation": 0.0002967282198369503,
+          "repetition": 0.0013462151400744915,
+          "block": 5.039501047576778e-07,
+          "revision": 7.001744052104186e-06,
+          "rhetorical_pause": 0.2410825490951538,
+          "neutral_pause": 0.7542834281921387
+        },
+        "[text withheld]"
+      ],
+      [
+        5.5,
+        8.5,
+        "neutral_pause",
+        0.7058889865875244,
+        {
+          "fluent": 0.0010561139788478613,
+          "filler_word": 0.0015758428489789367,
+          "prolongation": 0.00025126853142865,
+          "repetition": 0.00035492717870511115,
+          "block": 4.634889307908452e-07,
+          "revision": 6.779134764656192e-06,
+          "rhetorical_pause": 0.29086560010910034,
+          "neutral_pause": 0.7058889865875244
+        },
+        "[text withheld]"
+      ],
+      [
+        6.0,
+        9.0,
+        "neutral_pause",
+        0.5522675514221191,
+        {
+          "fluent": 0.0009723115945234895,
+          "filler_word": 0.0009682807722128928,
+          "prolongation": 0.00014237631694413722,
+          "repetition": 0.00012757735385093838,
+          "block": 2.9880033025619923e-07,
+          "revision": 1.0426974768051878e-05,
+          "rhetorical_pause": 0.445511132478714,
+          "neutral_pause": 0.5522675514221191
+        },
+        "[text withheld]"
+      ],
+      [
+        6.5,
+        9.5,
+        "neutral_pause",
+        0.5535522103309631,
+        {
+          "fluent": 0.0028160209767520428,
+          "filler_word": 0.0037569801788777113,
+          "prolongation": 0.0002939370460808277,
+          "repetition": 0.052248962223529816,
+          "block": 3.158093022648245e-07,
+          "revision": 0.0003728373849298805,
+          "rhetorical_pause": 0.3869587779045105,
+          "neutral_pause": 0.5535522103309631
+        },
+        "[text withheld]"
+      ],
+      [
+        7.0,
+        10.0,
+        "neutral_pause",
+        0.5341828465461731,
+        {
+          "fluent": 0.002659898716956377,
+          "filler_word": 0.005222654901444912,
+          "prolongation": 0.000222407907131128,
+          "repetition": 0.0639677420258522,
+          "block": 3.125976775208983e-07,
+          "revision": 0.0006152177811600268,
+          "rhetorical_pause": 0.3931289315223694,
+          "neutral_pause": 0.5341828465461731
+        },
+        "[text withheld]"
+      ],
+      [
+        7.5,
+        10.5,
+        "rhetorical_pause",
+        0.5382445454597473,
+        {
+          "fluent": 0.000366448046406731,
+          "filler_word": 0.0019525778479874134,
+          "prolongation": 2.134916758222971e-05,
+          "repetition": 0.00020172074437141418,
+          "block": 2.912077263772517e-07,
+          "revision": 2.5174402253469452e-05,
+          "rhetorical_pause": 0.5382445454597473,
+          "neutral_pause": 0.4591878652572632
+        },
+        "[text withheld]"
+      ],
+      [
+        8.0,
+        11.0,
+        "rhetorical_pause",
+        0.5509641170501709,
+        {
+          "fluent": 0.0004317756392993033,
+          "filler_word": 0.0019205682910978794,
+          "prolongation": 2.5216673748218454e-05,
+          "repetition": 0.00013074860908091068,
+          "block": 2.9955708669149317e-07,
+          "revision": 2.4374010536121204e-05,
+          "rhetorical_pause": 0.5509641170501709,
+          "neutral_pause": 0.4465029537677765
+        },
+        "[text withheld]"
+      ],
+      [
+        8.5,
+        11.5,
+        "rhetorical_pause",
+        0.5932740569114685,
+        {
+          "fluent": 0.00033926506876014173,
+          "filler_word": 0.002766010584309697,
+          "prolongation": 1.6367974239983596e-05,
+          "repetition": 0.00031404223409481347,
+          "block": 2.831932306435192e-07,
+          "revision": 5.9831156249856576e-05,
+          "rhetorical_pause": 0.5932740569114685,
+          "neutral_pause": 0.40323013067245483
+        },
+        "[text withheld]"
+      ],
+      [
+        9.0,
+        12.0,
+        "rhetorical_pause",
+        0.6232656836509705,
+        {
+          "fluent": 0.00047988584265112877,
+          "filler_word": 0.0029362724162638187,
+          "prolongation": 2.662499355210457e-05,
+          "repetition": 0.00013819315063301474,
+          "block": 2.598913226847799e-07,
+          "revision": 6.934924749657512e-05,
+          "rhetorical_pause": 0.6232656836509705,
+          "neutral_pause": 0.3730836510658264
+        },
+        "[text withheld]"
+      ],
+      [
+        9.5,
+        12.5,
+        "rhetorical_pause",
+        0.5535042881965637,
+        {
+          "fluent": 0.0006604685331694782,
+          "filler_word": 0.001755482517182827,
+          "prolongation": 3.7624304241035134e-05,
+          "repetition": 0.0003536669828463346,
+          "block": 2.0771554432030825e-07,
+          "revision": 3.9384307456202805e-05,
+          "rhetorical_pause": 0.5535042881965637,
+          "neutral_pause": 0.4436488151550293
+        },
+        "[text withheld]"
+      ],
+      [
+        10.0,
+        13.0,
+        "rhetorical_pause",
+        0.6158347725868225,
+        {
+          "fluent": 0.0005339202471077442,
+          "filler_word": 0.0019042342901229858,
+          "prolongation": 2.5410718080820516e-05,
+          "repetition": 0.00017375742027070373,
+          "block": 2.4004845045055845e-07,
+          "revision": 7.286179607035592e-05,
+          "rhetorical_pause": 0.6158347725868225,
+          "neutral_pause": 0.38145482540130615
+        },
+        "[text withheld]"
+      ],
+      [
+        10.5,
+        13.5,
+        "rhetorical_pause",
+        0.5495516061782837,
+        {
+          "fluent": 0.0006112686241976917,
+          "filler_word": 0.0016592709580436349,
+          "prolongation": 3.3716951293172315e-05,
+          "repetition": 0.0004993917536921799,
+          "block": 1.980180428517997e-07,
+          "revision": 5.750705167884007e-05,
+          "rhetorical_pause": 0.5495516061782837,
+          "neutral_pause": 0.4475870430469513
+        },
+        "[text withheld]"
+      ],
+      [
+        11.0,
+        14.0,
+        "rhetorical_pause",
+        0.5440288186073303,
+        {
+          "fluent": 0.0004848066018894315,
+          "filler_word": 0.002229160163551569,
+          "prolongation": 2.7938924176851287e-05,
+          "repetition": 0.00024988522636704147,
+          "block": 2.71177100330533e-07,
+          "revision": 4.053723387187347e-05,
+          "rhetorical_pause": 0.5440288186073303,
+          "neutral_pause": 0.45293861627578735
+        },
+        "[text withheld]"
+      ],
+      [
+        11.5,
+        14.5,
+        "rhetorical_pause",
+        0.5747138857841492,
+        {
+          "fluent": 0.00044254917884245515,
+          "filler_word": 0.002916343742981553,
+          "prolongation": 4.281541987438686e-05,
+          "repetition": 5.711540870834142e-05,
+          "block": 3.128719754386111e-07,
+          "revision": 2.6549303584033623e-05,
+          "rhetorical_pause": 0.5747138857841492,
+          "neutral_pause": 0.421800434589386
+        },
+        "[text withheld]"
+      ],
+      [
+        12.0,
+        15.0,
+        "rhetorical_pause",
+        0.5015325546264648,
+        {
+          "fluent": 0.0007009474793449044,
+          "filler_word": 0.0022560872603207827,
+          "prolongation": 4.1859075281536207e-05,
+          "repetition": 0.000535186380147934,
+          "block": 2.413006541246432e-07,
+          "revision": 2.863194458768703e-05,
+          "rhetorical_pause": 0.5015325546264648,
+          "neutral_pause": 0.49490445852279663
+        },
+        "[text withheld]"
+      ],
+      [
+        12.5,
+        15.5,
+        "neutral_pause",
+        0.6029228568077087,
+        {
+          "fluent": 0.004631230607628822,
+          "filler_word": 0.002622805070132017,
+          "prolongation": 0.0005802735686302185,
+          "repetition": 0.10459025949239731,
+          "block": 4.47146192072978e-07,
+          "revision": 0.0003339015820529312,
+          "rhetorical_pause": 0.284318208694458,
+          "neutral_pause": 0.6029228568077087
+        },
+        "[text withheld]"
+      ],
+      [
+        13.0,
+        16.0,
+        "neutral_pause",
+        0.6383639574050903,
+        {
+          "fluent": 0.0037087262608110905,
+          "filler_word": 0.0017678416334092617,
+          "prolongation": 0.0006224063690751791,
+          "repetition": 0.04427025839686394,
+          "block": 4.2720037640719966e-07,
+          "revision": 0.00016134572797454894,
+          "rhetorical_pause": 0.31110498309135437,
+          "neutral_pause": 0.6383639574050903
+        },
+        "[text withheld]"
+      ],
+      [
+        13.5,
+        16.5,
+        "neutral_pause",
+        0.6138789653778076,
+        {
+          "fluent": 0.00450047617778182,
+          "filler_word": 0.002686118008568883,
+          "prolongation": 0.0004952960298396647,
+          "repetition": 0.10337217897176743,
+          "block": 4.52283842378165e-07,
+          "revision": 0.00028168107382953167,
+          "rhetorical_pause": 0.2747848927974701,
+          "neutral_pause": 0.6138789653778076
+        },
+        "[text withheld]"
+      ],
+      [
+        14.0,
+        17.0,
+        "neutral_pause",
+        0.607611358165741,
+        {
+          "fluent": 0.00429302966222167,
+          "filler_word": 0.002903173677623272,
+          "prolongation": 0.0005068266182206571,
+          "repetition": 0.10696534812450409,
+          "block": 4.663424419959483e-07,
+          "revision": 0.00030593492556363344,
+          "rhetorical_pause": 0.27741381525993347,
+          "neutral_pause": 0.607611358165741
+        },
+        "[text withheld]"
+      ],
+      [
+        14.5,
+        17.5,
+        "neutral_pause",
+        0.5740686655044556,
+        {
+          "fluent": 0.002735354471951723,
+          "filler_word": 0.010218407027423382,
+          "prolongation": 7.176151848398149e-05,
+          "repetition": 0.050553884357213974,
+          "block": 5.531619535759091e-07,
+          "revision": 0.0004805024655070156,
+          "rhetorical_pause": 0.3618708848953247,
+          "neutral_pause": 0.5740686655044556
+        },
+        "[text withheld]"
+      ],
+      [
+        15.0,
+        18.0,
+        "neutral_pause",
+        0.5733171701431274,
+        {
+          "fluent": 0.0028715652879327536,
+          "filler_word": 0.010381541214883327,
+          "prolongation": 9.474214311921969e-05,
+          "repetition": 0.04122047498822212,
+          "block": 4.498562589105859e-07,
+          "revision": 0.0004747384518850595,
+          "rhetorical_pause": 0.3716393709182739,
+          "neutral_pause": 0.5733171701431274
+        },
+        "[text withheld]"
+      ]
+    ],
+    "events": [
+      [
+        "rhetorical_pause",
+        0.0,
+        3.0,
+        0.8269715905189514,
+        6,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "neutral_pause",
+        3.0,
+        7.5,
+        0.7542834281921387,
+        9,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "rhetorical_pause",
+        7.5,
+        12.5,
+        0.6232656836509705,
+        10,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "neutral_pause",
+        12.5,
+        15.5,
+        0.6383639574050903,
+        6,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ]
+    ],
+    "transcript": "[text withheld]",
+    "duration": 18.0,
+    "mode": "audio_text",
+    "warning": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia",
+    "dict": {
+      "mode": "audio_text",
+      "duration": 18.0,
+      "warning": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia",
+      "transcript": "[text withheld]",
+      "events": [
+        {
+          "label": "rhetorical_pause",
+          "start": 0.0,
+          "end": 3.0,
+          "confidence": 0.8269715905189514,
+          "n_windows": 6,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "neutral_pause",
+          "start": 3.0,
+          "end": 7.5,
+          "confidence": 0.7542834281921387,
+          "n_windows": 9,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "rhetorical_pause",
+          "start": 7.5,
+          "end": 12.5,
+          "confidence": 0.6232656836509705,
+          "n_windows": 10,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "neutral_pause",
+          "start": 12.5,
+          "end": 15.5,
+          "confidence": 0.6383639574050903,
+          "n_windows": 6,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        }
+      ]
+    }
+  },
+  "BAQ_001_03_16_a12": {
+    "windows": [
+      [
+        0.0,
+        3.0,
+        "neutral_pause",
+        0.7820621132850647,
+        {
+          "fluent": 0.05212650075554848,
+          "filler_word": 0.002166957827284932,
+          "prolongation": 0.0005241797771304846,
+          "repetition": 0.00031328145996667445,
+          "block": 0.12298494577407837,
+          "revision": 0.00017599518469069153,
+          "rhetorical_pause": 0.03964601084589958,
+          "neutral_pause": 0.7820621132850647
+        },
+        "[text withheld]"
+      ],
+      [
+        0.5,
+        3.5,
+        "neutral_pause",
+        0.6495521664619446,
+        {
+          "fluent": 0.005333987530320883,
+          "filler_word": 4.5256962039275095e-05,
+          "prolongation": 0.0002829496224876493,
+          "repetition": 7.002586062299088e-05,
+          "block": 0.2669397294521332,
+          "revision": 1.549398984934669e-05,
+          "rhetorical_pause": 0.07776032388210297,
+          "neutral_pause": 0.6495521664619446
+        },
+        "[text withheld]"
+      ],
+      [
+        1.0,
+        4.0,
+        "neutral_pause",
+        0.44424542784690857,
+        {
+          "fluent": 0.005273598246276379,
+          "filler_word": 7.127682329155505e-05,
+          "prolongation": 0.0025956109166145325,
+          "repetition": 1.777802754077129e-05,
+          "block": 0.3402438759803772,
+          "revision": 1.3225393331595114e-06,
+          "rhetorical_pause": 0.20755113661289215,
+          "neutral_pause": 0.44424542784690857
+        },
+        "[text withheld]"
+      ],
+      [
+        1.5,
+        4.5,
+        "neutral_pause",
+        0.6270530819892883,
+        {
+          "fluent": 0.0014188640052452683,
+          "filler_word": 2.5835171982180327e-05,
+          "prolongation": 0.0002924295258708298,
+          "repetition": 6.39400650470634e-06,
+          "block": 0.011656713671982288,
+          "revision": 8.959699471233762e-08,
+          "rhetorical_pause": 0.3595465421676636,
+          "neutral_pause": 0.6270530819892883
+        },
+        "[text withheld]"
+      ],
+      [
+        2.0,
+        5.0,
+        "rhetorical_pause",
+        0.6863457560539246,
+        {
+          "fluent": 0.0006148814572952688,
+          "filler_word": 6.765921716578305e-05,
+          "prolongation": 6.334198405966163e-05,
+          "repetition": 1.400264591211453e-05,
+          "block": 0.000516141823027283,
+          "revision": 1.5829185429083736e-07,
+          "rhetorical_pause": 0.6863457560539246,
+          "neutral_pause": 0.3123779892921448
+        },
+        "[text withheld]"
+      ],
+      [
+        2.5,
+        5.5,
+        "rhetorical_pause",
+        0.48751333355903625,
+        {
+          "fluent": 0.021717064082622528,
+          "filler_word": 0.0009462636662647128,
+          "prolongation": 0.0014739868929609656,
+          "repetition": 0.0003979420871473849,
+          "block": 0.0017196222906932235,
+          "revision": 8.15225939732045e-05,
+          "rhetorical_pause": 0.48751333355903625,
+          "neutral_pause": 0.48615020513534546
+        },
+        "[text withheld]"
+      ],
+      [
+        3.0,
+        6.0,
+        "neutral_pause",
+        0.5202388763427734,
+        {
+          "fluent": 0.05917756259441376,
+          "filler_word": 0.001234097988344729,
+          "prolongation": 0.010819253511726856,
+          "repetition": 0.0010427285451442003,
+          "block": 0.0027957353740930557,
+          "revision": 0.00019801878079306334,
+          "rhetorical_pause": 0.4044937789440155,
+          "neutral_pause": 0.5202388763427734
+        },
+        "[text withheld]"
+      ],
+      [
+        3.5,
+        6.5,
+        "fluent",
+        0.7451601028442383,
+        {
+          "fluent": 0.7451601028442383,
+          "filler_word": 0.016030313447117805,
+          "prolongation": 0.06134921684861183,
+          "repetition": 0.0046689994633197784,
+          "block": 1.722017827887612e-06,
+          "revision": 6.810612103436142e-05,
+          "rhetorical_pause": 0.00021855963859707117,
+          "neutral_pause": 0.17250297963619232
+        },
+        "[text withheld]"
+      ],
+      [
+        4.0,
+        7.0,
+        "fluent",
+        0.783988893032074,
+        {
+          "fluent": 0.783988893032074,
+          "filler_word": 0.005636180285364389,
+          "prolongation": 0.031641390174627304,
+          "repetition": 0.004016354214400053,
+          "block": 3.706012194015784e-06,
+          "revision": 0.00011319170880597085,
+          "rhetorical_pause": 0.00048324913950636983,
+          "neutral_pause": 0.17411692440509796
+        },
+        "[text withheld]"
+      ],
+      [
+        4.5,
+        7.5,
+        "fluent",
+        0.720902144908905,
+        {
+          "fluent": 0.720902144908905,
+          "filler_word": 0.00765569182112813,
+          "prolongation": 0.019908694550395012,
+          "repetition": 0.017352450639009476,
+          "block": 1.8857053873944096e-05,
+          "revision": 0.0001702779991319403,
+          "rhetorical_pause": 0.00042304518865421414,
+          "neutral_pause": 0.23356877267360687
+        },
+        "[text withheld]"
+      ],
+      [
+        5.0,
+        8.0,
+        "fluent",
+        0.7033057808876038,
+        {
+          "fluent": 0.7033057808876038,
+          "filler_word": 0.002238460583612323,
+          "prolongation": 0.06344099342823029,
+          "repetition": 0.01586485281586647,
+          "block": 0.0003087491204496473,
+          "revision": 0.0011234271805733442,
+          "rhetorical_pause": 0.022166870534420013,
+          "neutral_pause": 0.1915508508682251
+        },
+        "[text withheld]"
+      ],
+      [
+        5.5,
+        8.5,
+        "fluent",
+        0.7349758148193359,
+        {
+          "fluent": 0.7349758148193359,
+          "filler_word": 0.011095051653683186,
+          "prolongation": 0.2508698105812073,
+          "repetition": 0.002401874866336584,
+          "block": 2.812087416259601e-07,
+          "revision": 0.0004336358979344368,
+          "rhetorical_pause": 9.65003710007295e-06,
+          "neutral_pause": 0.00021394716168288141
+        },
+        "[text withheld]"
+      ],
+      [
+        6.0,
+        9.0,
+        "fluent",
+        0.8411267399787903,
+        {
+          "fluent": 0.8411267399787903,
+          "filler_word": 0.0027249776758253574,
+          "prolongation": 0.15259966254234314,
+          "repetition": 0.002891808981075883,
+          "block": 7.86294720001024e-07,
+          "revision": 0.00014512949564959854,
+          "rhetorical_pause": 1.590102692716755e-05,
+          "neutral_pause": 0.000495009298902005
+        },
+        "[text withheld]"
+      ],
+      [
+        6.5,
+        9.5,
+        "fluent",
+        0.2534416615962982,
+        {
+          "fluent": 0.2534416615962982,
+          "filler_word": 0.1858692318201065,
+          "prolongation": 0.23605163395404816,
+          "repetition": 0.17041747272014618,
+          "block": 6.77532511872414e-07,
+          "revision": 0.00031753844814375043,
+          "rhetorical_pause": 0.08280601352453232,
+          "neutral_pause": 0.07109580934047699
+        },
+        "[text withheld]"
+      ],
+      [
+        7.0,
+        10.0,
+        "rhetorical_pause",
+        0.5350707173347473,
+        {
+          "fluent": 0.008242488838732243,
+          "filler_word": 0.0373380146920681,
+          "prolongation": 0.0064722876995801926,
+          "repetition": 0.1179339736700058,
+          "block": 1.3506622053682804e-05,
+          "revision": 0.0001360637106699869,
+          "rhetorical_pause": 0.5350707173347473,
+          "neutral_pause": 0.29479289054870605
+        },
+        "[text withheld]"
+      ],
+      [
+        7.5,
+        10.5,
+        "rhetorical_pause",
+        0.5753244757652283,
+        {
+          "fluent": 0.0060296873562037945,
+          "filler_word": 0.020931659266352654,
+          "prolongation": 0.0029005843680351973,
+          "repetition": 0.13652941584587097,
+          "block": 1.9878241801052354e-05,
+          "revision": 0.00029834164888598025,
+          "rhetorical_pause": 0.5753244757652283,
+          "neutral_pause": 0.25796595215797424
+        },
+        "[text withheld]"
+      ],
+      [
+        8.0,
+        11.0,
+        "repetition",
+        0.7372029423713684,
+        {
+          "fluent": 0.0038920100778341293,
+          "filler_word": 0.010655420832335949,
+          "prolongation": 0.001858013914898038,
+          "repetition": 0.7372029423713684,
+          "block": 2.6913872716249898e-05,
+          "revision": 0.0007630566251464188,
+          "rhetorical_pause": 0.14593835175037384,
+          "neutral_pause": 0.09966329485177994
+        },
+        "[text withheld]"
+      ],
+      [
+        8.5,
+        11.5,
+        "repetition",
+        0.8715159893035889,
+        {
+          "fluent": 0.0029678810387849808,
+          "filler_word": 0.012071286328136921,
+          "prolongation": 0.0015875882236286998,
+          "repetition": 0.8715159893035889,
+          "block": 3.4425574995111674e-05,
+          "revision": 0.0008967687608674169,
+          "rhetorical_pause": 0.0459156334400177,
+          "neutral_pause": 0.06501036882400513
+        },
+        "[text withheld]"
+      ],
+      [
+        9.0,
+        12.0,
+        "repetition",
+        0.9380504488945007,
+        {
+          "fluent": 0.001664568088017404,
+          "filler_word": 0.003916989546269178,
+          "prolongation": 0.0006053150282241404,
+          "repetition": 0.9380504488945007,
+          "block": 3.734773781616241e-05,
+          "revision": 0.0008360835490748286,
+          "rhetorical_pause": 0.020219864323735237,
+          "neutral_pause": 0.03466930240392685
+        },
+        "[text withheld]"
+      ],
+      [
+        9.5,
+        12.5,
+        "repetition",
+        0.927943766117096,
+        {
+          "fluent": 0.004189154598861933,
+          "filler_word": 0.02226632833480835,
+          "prolongation": 0.0030391591135412455,
+          "repetition": 0.927943766117096,
+          "block": 2.421588396828156e-05,
+          "revision": 0.0008979993872344494,
+          "rhetorical_pause": 0.013275178149342537,
+          "neutral_pause": 0.02836419641971588
+        },
+        "[text withheld]"
+      ],
+      [
+        10.0,
+        13.0,
+        "repetition",
+        0.9360988140106201,
+        {
+          "fluent": 0.006741022691130638,
+          "filler_word": 0.050799351185560226,
+          "prolongation": 0.0032811430282890797,
+          "repetition": 0.9360988140106201,
+          "block": 4.889186389078759e-09,
+          "revision": 0.0030614242423325777,
+          "rhetorical_pause": 1.1690202654790482e-06,
+          "neutral_pause": 1.7175234461319633e-05
+        },
+        "[text withheld]"
+      ],
+      [
+        10.5,
+        13.5,
+        "repetition",
+        0.6616361141204834,
+        {
+          "fluent": 0.019758673384785652,
+          "filler_word": 0.3008142411708832,
+          "prolongation": 0.01420843880623579,
+          "repetition": 0.6616361141204834,
+          "block": 1.4540708193067076e-08,
+          "revision": 0.0035003998782485723,
+          "rhetorical_pause": 5.416194653662387e-06,
+          "neutral_pause": 7.668395846849307e-05
+        },
+        "[text withheld]"
+      ]
+    ],
+    "events": [
+      [
+        "neutral_pause",
+        0.0,
+        2.0,
+        0.7820621132850647,
+        4,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "rhetorical_pause",
+        2.0,
+        3.0,
+        0.6863457560539246,
+        2,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "neutral_pause",
+        3.0,
+        3.5,
+        0.5202388763427734,
+        1,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "rhetorical_pause",
+        7.0,
+        8.0,
+        0.5753244757652283,
+        2,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "repetition",
+        8.0,
+        11.0,
+        0.9380504488945007,
+        6,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ]
+    ],
+    "transcript": "[text withheld]",
+    "duration": 13.959,
+    "mode": "audio_text",
+    "warning": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia",
+    "dict": {
+      "mode": "audio_text",
+      "duration": 13.959,
+      "warning": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia",
+      "transcript": "[text withheld]",
+      "events": [
+        {
+          "label": "neutral_pause",
+          "start": 0.0,
+          "end": 2.0,
+          "confidence": 0.7820621132850647,
+          "n_windows": 4,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "rhetorical_pause",
+          "start": 2.0,
+          "end": 3.0,
+          "confidence": 0.6863457560539246,
+          "n_windows": 2,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "neutral_pause",
+          "start": 3.0,
+          "end": 3.5,
+          "confidence": 0.5202388763427734,
+          "n_windows": 1,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "rhetorical_pause",
+          "start": 7.0,
+          "end": 8.0,
+          "confidence": 0.5753244757652283,
+          "n_windows": 2,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "repetition",
+          "start": 8.0,
+          "end": 11.0,
+          "confidence": 0.9380504488945007,
+          "n_windows": 6,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        }
+      ]
+    }
+  },
+  "BAQ_001_03_16_a23": {
+    "windows": [
+      [
+        0.0,
+        3.0,
+        "filler_word",
+        0.7377862334251404,
+        {
+          "fluent": 0.10423988848924637,
+          "filler_word": 0.7377862334251404,
+          "prolongation": 0.12346433103084564,
+          "repetition": 0.00651266984641552,
+          "block": 0.008418007753789425,
+          "revision": 0.0033906749449670315,
+          "rhetorical_pause": 0.0004978722427040339,
+          "neutral_pause": 0.015690244734287262
+        },
+        "[text withheld]"
+      ],
+      [
+        0.5,
+        3.5,
+        "filler_word",
+        0.8607450723648071,
+        {
+          "fluent": 0.10639205574989319,
+          "filler_word": 0.8607450723648071,
+          "prolongation": 0.02154005691409111,
+          "repetition": 0.005970741622149944,
+          "block": 1.7615744582144544e-05,
+          "revision": 0.004323200788348913,
+          "rhetorical_pause": 4.011265991721302e-05,
+          "neutral_pause": 0.0009710407466627657
+        },
+        "[text withheld]"
+      ],
+      [
+        1.0,
+        4.0,
+        "filler_word",
+        0.7092431783676147,
+        {
+          "fluent": 0.2575286030769348,
+          "filler_word": 0.7092431783676147,
+          "prolongation": 0.025675825774669647,
+          "repetition": 0.0030486995819956064,
+          "block": 1.0823843695106916e-05,
+          "revision": 0.003332578344270587,
+          "rhetorical_pause": 7.239327533170581e-05,
+          "neutral_pause": 0.0010879002511501312
+        },
+        "[text withheld]"
+      ],
+      [
+        1.5,
+        4.5,
+        "rhetorical_pause",
+        0.6202213168144226,
+        {
+          "fluent": 0.014726489782333374,
+          "filler_word": 0.0357753224670887,
+          "prolongation": 0.0023047542199492455,
+          "repetition": 0.0010652508353814483,
+          "block": 0.00046425743494182825,
+          "revision": 3.483514956315048e-05,
+          "rhetorical_pause": 0.6202213168144226,
+          "neutral_pause": 0.3254077434539795
+        },
+        "[text withheld]"
+      ],
+      [
+        2.0,
+        5.0,
+        "rhetorical_pause",
+        0.8345282077789307,
+        {
+          "fluent": 0.0009487344650551677,
+          "filler_word": 0.0022256332449615,
+          "prolongation": 3.598727562348358e-05,
+          "repetition": 0.0001647054305067286,
+          "block": 0.00026290249661542475,
+          "revision": 1.2752313523378689e-05,
+          "rhetorical_pause": 0.8345282077789307,
+          "neutral_pause": 0.16182109713554382
+        },
+        "[text withheld]"
+      ],
+      [
+        2.5,
+        5.5,
+        "rhetorical_pause",
+        0.6351606845855713,
+        {
+          "fluent": 0.02445167489349842,
+          "filler_word": 0.12697623670101166,
+          "prolongation": 7.136291969800368e-05,
+          "repetition": 0.0008305255905725062,
+          "block": 0.0009677264024503529,
+          "revision": 0.0004898823099210858,
+          "rhetorical_pause": 0.6351606845855713,
+          "neutral_pause": 0.21105189621448517
+        },
+        "[text withheld]"
+      ],
+      [
+        3.0,
+        6.0,
+        "rhetorical_pause",
+        0.8109362125396729,
+        {
+          "fluent": 0.00626564584672451,
+          "filler_word": 0.0006783953285776079,
+          "prolongation": 2.6722203983808868e-05,
+          "repetition": 0.00030251231510192156,
+          "block": 0.00013365806080400944,
+          "revision": 0.00012108659575460479,
+          "rhetorical_pause": 0.8109362125396729,
+          "neutral_pause": 0.18153579533100128
+        },
+        "[text withheld]"
+      ],
+      [
+        3.5,
+        6.5,
+        "rhetorical_pause",
+        0.8651527762413025,
+        {
+          "fluent": 0.004054038319736719,
+          "filler_word": 0.00014062246191315353,
+          "prolongation": 2.61675249930704e-05,
+          "repetition": 0.00024154508719220757,
+          "block": 0.00032351448317058384,
+          "revision": 0.000317693455144763,
+          "rhetorical_pause": 0.8651527762413025,
+          "neutral_pause": 0.12974362075328827
+        },
+        "[text withheld]"
+      ],
+      [
+        4.0,
+        7.0,
+        "rhetorical_pause",
+        0.8857489824295044,
+        {
+          "fluent": 0.0008833847241476178,
+          "filler_word": 7.061818905640393e-05,
+          "prolongation": 1.203736974275671e-05,
+          "repetition": 5.1548780902521685e-05,
+          "block": 0.0001444443769287318,
+          "revision": 1.4490651665255427e-05,
+          "rhetorical_pause": 0.8857489824295044,
+          "neutral_pause": 0.11307453364133835
+        },
+        "[text withheld]"
+      ],
+      [
+        4.5,
+        7.5,
+        "rhetorical_pause",
+        0.7992240190505981,
+        {
+          "fluent": 0.004255817271769047,
+          "filler_word": 0.0009327212464995682,
+          "prolongation": 6.4491578086745e-05,
+          "repetition": 0.00034697024966590106,
+          "block": 0.0006297586369328201,
+          "revision": 0.00011834201723104343,
+          "rhetorical_pause": 0.7992240190505981,
+          "neutral_pause": 0.19442789256572723
+        },
+        "[text withheld]"
+      ],
+      [
+        5.0,
+        8.0,
+        "fluent",
+        0.6868854761123657,
+        {
+          "fluent": 0.6868854761123657,
+          "filler_word": 0.0580284409224987,
+          "prolongation": 0.014758381992578506,
+          "repetition": 0.16702423989772797,
+          "block": 7.812359399395064e-05,
+          "revision": 0.006939553190022707,
+          "rhetorical_pause": 0.016084322705864906,
+          "neutral_pause": 0.05020154267549515
+        },
+        "[text withheld]"
+      ],
+      [
+        5.5,
+        8.5,
+        "filler_word",
+        0.667792797088623,
+        {
+          "fluent": 0.29752495884895325,
+          "filler_word": 0.667792797088623,
+          "prolongation": 0.0270336102694273,
+          "repetition": 0.006013893056660891,
+          "block": 5.971290306661103e-08,
+          "revision": 0.0014249499654397368,
+          "rhetorical_pause": 1.934751526277978e-05,
+          "neutral_pause": 0.00019032643467653543
+        },
+        "[text withheld]"
+      ],
+      [
+        6.0,
+        9.0,
+        "filler_word",
+        0.9956615567207336,
+        {
+          "fluent": 0.002921168226748705,
+          "filler_word": 0.9956615567207336,
+          "prolongation": 0.00039681518683210015,
+          "repetition": 0.0003040230949409306,
+          "block": 2.632600137886243e-09,
+          "revision": 6.785865843994543e-05,
+          "rhetorical_pause": 0.0003046848578378558,
+          "neutral_pause": 0.00034393786336295307
+        },
+        "[text withheld]"
+      ],
+      [
+        6.5,
+        9.5,
+        "filler_word",
+        0.988310694694519,
+        {
+          "fluent": 0.009377491660416126,
+          "filler_word": 0.988310694694519,
+          "prolongation": 0.0010083084926009178,
+          "repetition": 0.00022150020231492817,
+          "block": 3.1029423475104068e-09,
+          "revision": 0.0001037493348121643,
+          "rhetorical_pause": 7.716487743891776e-06,
+          "neutral_pause": 0.0009705101838335395
+        },
+        "[text withheld]"
+      ],
+      [
+        7.0,
+        10.0,
+        "filler_word",
+        0.991006076335907,
+        {
+          "fluent": 0.007404599338769913,
+          "filler_word": 0.991006076335907,
+          "prolongation": 0.0008116369135677814,
+          "repetition": 0.00024428070173598826,
+          "block": 1.5838764966247254e-08,
+          "revision": 6.517106521641836e-05,
+          "rhetorical_pause": 2.0328884602349717e-06,
+          "neutral_pause": 0.00046613032463938
+        },
+        "[text withheld]"
+      ],
+      [
+        7.5,
+        10.5,
+        "filler_word",
+        0.9914733171463013,
+        {
+          "fluent": 0.007071948144584894,
+          "filler_word": 0.9914733171463013,
+          "prolongation": 0.0003350488259457052,
+          "repetition": 0.000413457746617496,
+          "block": 6.151387310637801e-08,
+          "revision": 0.00014678436855319887,
+          "rhetorical_pause": 2.9214365895313676e-06,
+          "neutral_pause": 0.0005563151207752526
+        },
+        "[text withheld]"
+      ],
+      [
+        8.0,
+        11.0,
+        "filler_word",
+        0.9841768741607666,
+        {
+          "fluent": 0.012501269578933716,
+          "filler_word": 0.9841768741607666,
+          "prolongation": 0.000665977771859616,
+          "repetition": 0.0011847505811601877,
+          "block": 2.3246924740760733e-07,
+          "revision": 0.00031817369745112956,
+          "rhetorical_pause": 4.968648681824561e-06,
+          "neutral_pause": 0.0011479125823825598
+        },
+        "[text withheld]"
+      ],
+      [
+        8.5,
+        11.5,
+        "filler_word",
+        0.921797513961792,
+        {
+          "fluent": 0.0673726424574852,
+          "filler_word": 0.921797513961792,
+          "prolongation": 0.005536676850169897,
+          "repetition": 0.0006354938959702849,
+          "block": 7.707673148615868e-07,
+          "revision": 0.0012349601602181792,
+          "rhetorical_pause": 1.8524913684814237e-05,
+          "neutral_pause": 0.003403577022254467
+        },
+        "[text withheld]"
+      ],
+      [
+        9.0,
+        12.0,
+        "rhetorical_pause",
+        0.5850761532783508,
+        {
+          "fluent": 0.006351044401526451,
+          "filler_word": 0.22645530104637146,
+          "prolongation": 0.0013026593951508403,
+          "repetition": 0.0025001319590955973,
+          "block": 3.4588065318530425e-05,
+          "revision": 9.188611147692427e-05,
+          "rhetorical_pause": 0.5850761532783508,
+          "neutral_pause": 0.17818821966648102
+        },
+        "[text withheld]"
+      ],
+      [
+        9.5,
+        12.5,
+        "rhetorical_pause",
+        0.8315795063972473,
+        {
+          "fluent": 0.0015166264493018389,
+          "filler_word": 0.000864001049194485,
+          "prolongation": 0.0004901571664959192,
+          "repetition": 4.487213118409272e-06,
+          "block": 7.766889029880986e-05,
+          "revision": 1.8948628621728858e-06,
+          "rhetorical_pause": 0.8315795063972473,
+          "neutral_pause": 0.16546569764614105
+        },
+        "[text withheld]"
+      ],
+      [
+        10.0,
+        13.0,
+        "rhetorical_pause",
+        0.8731099367141724,
+        {
+          "fluent": 0.0006371262716129422,
+          "filler_word": 0.000606776331551373,
+          "prolongation": 0.00013387613580562174,
+          "repetition": 1.569874939377769e-06,
+          "block": 7.844813808333129e-05,
+          "revision": 1.7347077800877742e-06,
+          "rhetorical_pause": 0.8731099367141724,
+          "neutral_pause": 0.12543046474456787
+        },
+        "[text withheld]"
+      ],
+      [
+        10.5,
+        13.5,
+        "rhetorical_pause",
+        0.9021030068397522,
+        {
+          "fluent": 0.0002853222831618041,
+          "filler_word": 1.4273286069510505e-05,
+          "prolongation": 3.3201293263118714e-05,
+          "repetition": 6.939913532733044e-07,
+          "block": 0.0001296721020480618,
+          "revision": 5.585606572822144e-07,
+          "rhetorical_pause": 0.9021030068397522,
+          "neutral_pause": 0.09743325412273407
+        },
+        "[text withheld]"
+      ],
+      [
+        11.0,
+        14.0,
+        "rhetorical_pause",
+        0.8699905276298523,
+        {
+          "fluent": 0.0004043731023557484,
+          "filler_word": 6.584471702808514e-05,
+          "prolongation": 4.347557114670053e-05,
+          "repetition": 1.3797044857710716e-06,
+          "block": 0.0007787292124703526,
+          "revision": 9.946874115485116e-07,
+          "rhetorical_pause": 0.8699905276298523,
+          "neutral_pause": 0.12871459126472473
+        },
+        "[text withheld]"
+      ],
+      [
+        11.5,
+        14.5,
+        "rhetorical_pause",
+        0.7341678738594055,
+        {
+          "fluent": 0.010860095731914043,
+          "filler_word": 5.135934770805761e-05,
+          "prolongation": 0.0007866902742534876,
+          "repetition": 0.00011305874068057165,
+          "block": 0.0011850065784528852,
+          "revision": 3.773165008169599e-05,
+          "rhetorical_pause": 0.7341678738594055,
+          "neutral_pause": 0.2527982294559479
+        },
+        "[text withheld]"
+      ],
+      [
+        12.0,
+        15.0,
+        "neutral_pause",
+        0.4019484221935272,
+        {
+          "fluent": 0.21546894311904907,
+          "filler_word": 0.010404488071799278,
+          "prolongation": 0.02610667422413826,
+          "repetition": 0.0010025009978562593,
+          "block": 0.0010004718787968159,
+          "revision": 0.0014582436997443438,
+          "rhetorical_pause": 0.34261026978492737,
+          "neutral_pause": 0.4019484221935272
+        },
+        "[text withheld]"
+      ],
+      [
+        12.5,
+        15.5,
+        "fluent",
+        0.6306767463684082,
+        {
+          "fluent": 0.6306767463684082,
+          "filler_word": 0.3115840256214142,
+          "prolongation": 0.05203263461589813,
+          "repetition": 0.002988611813634634,
+          "block": 2.4575641873525456e-05,
+          "revision": 0.00254981592297554,
+          "rhetorical_pause": 1.1897435570062953e-06,
+          "neutral_pause": 0.0001423900102963671
+        },
+        "[text withheld]"
+      ],
+      [
+        13.0,
+        16.0,
+        "fluent",
+        0.7248135209083557,
+        {
+          "fluent": 0.7248135209083557,
+          "filler_word": 0.015152473002672195,
+          "prolongation": 0.08771169930696487,
+          "repetition": 0.00964339543133974,
+          "block": 0.06702462583780289,
+          "revision": 0.00030877970857545733,
+          "rhetorical_pause": 0.017705382779240608,
+          "neutral_pause": 0.07763994485139847
+        },
+        "[text withheld]"
+      ]
+    ],
+    "events": [
+      [
+        "filler_word",
+        0.0,
+        1.5,
+        0.8607450723648071,
+        3,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "rhetorical_pause",
+        1.5,
+        5.0,
+        0.8857489824295044,
+        7,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "filler_word",
+        5.5,
+        9.0,
+        0.9956615567207336,
+        7,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "rhetorical_pause",
+        9.0,
+        12.0,
+        0.9021030068397522,
+        6,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "neutral_pause",
+        12.0,
+        12.5,
+        0.4019484221935272,
+        1,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ]
+    ],
+    "transcript": "[text withheld]",
+    "duration": 16.21,
+    "mode": "audio_text",
+    "warning": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia",
+    "dict": {
+      "mode": "audio_text",
+      "duration": 16.21,
+      "warning": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia",
+      "transcript": "[text withheld]",
+      "events": [
+        {
+          "label": "filler_word",
+          "start": 0.0,
+          "end": 1.5,
+          "confidence": 0.8607450723648071,
+          "n_windows": 3,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "rhetorical_pause",
+          "start": 1.5,
+          "end": 5.0,
+          "confidence": 0.8857489824295044,
+          "n_windows": 7,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "filler_word",
+          "start": 5.5,
+          "end": 9.0,
+          "confidence": 0.9956615567207336,
+          "n_windows": 7,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "rhetorical_pause",
+          "start": 9.0,
+          "end": 12.0,
+          "confidence": 0.9021030068397522,
+          "n_windows": 6,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "neutral_pause",
+          "start": 12.0,
+          "end": 12.5,
+          "confidence": 0.4019484221935272,
+          "n_windows": 1,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        }
+      ]
+    }
+  },
+  "BAQ_001_03_16_a24": {
+    "windows": [
+      [
+        0.0,
+        3.0,
+        "filler_word",
+        0.7296727895736694,
+        {
+          "fluent": 0.0009341413388028741,
+          "filler_word": 0.7296727895736694,
+          "prolongation": 4.101501690456644e-05,
+          "repetition": 0.0003193246084265411,
+          "block": 0.00028780123102478683,
+          "revision": 0.0009423918090760708,
+          "rhetorical_pause": 0.23135417699813843,
+          "neutral_pause": 0.036448415368795395
+        },
+        "[text withheld]"
+      ],
+      [
+        0.5,
+        3.5,
+        "filler_word",
+        0.9770100116729736,
+        {
+          "fluent": 0.0005700568435713649,
+          "filler_word": 0.9770100116729736,
+          "prolongation": 2.0122435671510175e-05,
+          "repetition": 8.490028267260641e-05,
+          "block": 0.00013400758325587958,
+          "revision": 0.000579445215407759,
+          "rhetorical_pause": 0.01528802141547203,
+          "neutral_pause": 0.006313343532383442
+        },
+        "[text withheld]"
+      ],
+      [
+        1.0,
+        4.0,
+        "filler_word",
+        0.9901742935180664,
+        {
+          "fluent": 0.008467345498502254,
+          "filler_word": 0.9901742935180664,
+          "prolongation": 0.0002385579136898741,
+          "repetition": 0.000683020509313792,
+          "block": 8.167351239762866e-09,
+          "revision": 0.0003913267282769084,
+          "rhetorical_pause": 1.0433422659161806e-07,
+          "neutral_pause": 4.540603549685329e-05
+        },
+        "[text withheld]"
+      ],
+      [
+        1.5,
+        4.5,
+        "filler_word",
+        0.9902055859565735,
+        {
+          "fluent": 0.008214821107685566,
+          "filler_word": 0.9902055859565735,
+          "prolongation": 0.00017770490376278758,
+          "repetition": 0.0005522148567251861,
+          "block": 3.986480123785441e-08,
+          "revision": 0.0007992534665390849,
+          "rhetorical_pause": 8.005299889646267e-08,
+          "neutral_pause": 5.025918653700501e-05
+        },
+        "[text withheld]"
+      ],
+      [
+        2.0,
+        5.0,
+        "filler_word",
+        0.8904240727424622,
+        {
+          "fluent": 0.0005180774605832994,
+          "filler_word": 0.8904240727424622,
+          "prolongation": 2.685138133529108e-05,
+          "repetition": 0.0001982431422220543,
+          "block": 1.995455750147812e-05,
+          "revision": 0.00015646230895072222,
+          "rhetorical_pause": 0.09401559829711914,
+          "neutral_pause": 0.01464063674211502
+        },
+        "[text withheld]"
+      ],
+      [
+        2.5,
+        5.5,
+        "rhetorical_pause",
+        0.9183904528617859,
+        {
+          "fluent": 0.0004386052314657718,
+          "filler_word": 0.001639402355067432,
+          "prolongation": 2.3120555852074176e-05,
+          "repetition": 5.724539732909761e-06,
+          "block": 2.1934716642135754e-05,
+          "revision": 1.0509884305065498e-06,
+          "rhetorical_pause": 0.9183904528617859,
+          "neutral_pause": 0.07947972416877747
+        },
+        "[text withheld]"
+      ],
+      [
+        3.0,
+        6.0,
+        "rhetorical_pause",
+        0.8769773840904236,
+        {
+          "fluent": 0.0009309232700616121,
+          "filler_word": 9.203764784615487e-05,
+          "prolongation": 3.360747723490931e-05,
+          "repetition": 4.615591024048626e-06,
+          "block": 3.720206950674765e-05,
+          "revision": 1.2729788068099879e-06,
+          "rhetorical_pause": 0.8769773840904236,
+          "neutral_pause": 0.12192286550998688
+        },
+        "[text withheld]"
+      ],
+      [
+        3.5,
+        6.5,
+        "rhetorical_pause",
+        0.8252024054527283,
+        {
+          "fluent": 0.0007930665160529315,
+          "filler_word": 7.445042137987912e-05,
+          "prolongation": 1.023450749926269e-05,
+          "repetition": 1.1532838470884599e-05,
+          "block": 0.000197268818737939,
+          "revision": 1.1022057151421905e-06,
+          "rhetorical_pause": 0.8252024054527283,
+          "neutral_pause": 0.1737099289894104
+        },
+        "[text withheld]"
+      ],
+      [
+        4.0,
+        7.0,
+        "rhetorical_pause",
+        0.8463716506958008,
+        {
+          "fluent": 0.00027145666535943747,
+          "filler_word": 5.217776197241619e-05,
+          "prolongation": 5.792212050437229e-06,
+          "repetition": 3.487507456156891e-06,
+          "block": 0.00030406861333176494,
+          "revision": 5.632825832435628e-07,
+          "rhetorical_pause": 0.8463716506958008,
+          "neutral_pause": 0.15299071371555328
+        },
+        "[text withheld]"
+      ],
+      [
+        4.5,
+        7.5,
+        "rhetorical_pause",
+        0.6898841261863708,
+        {
+          "fluent": 0.005339029245078564,
+          "filler_word": 0.0014852505410090089,
+          "prolongation": 8.528685430064797e-05,
+          "repetition": 0.00011565542808966711,
+          "block": 0.0011954057263210416,
+          "revision": 4.19318639615085e-05,
+          "rhetorical_pause": 0.6898841261863708,
+          "neutral_pause": 0.30185332894325256
+        },
+        "[text withheld]"
+      ],
+      [
+        5.0,
+        8.0,
+        "rhetorical_pause",
+        0.2989538609981537,
+        {
+          "fluent": 0.17703032493591309,
+          "filler_word": 0.22675341367721558,
+          "prolongation": 0.005786436144262552,
+          "repetition": 0.011288846842944622,
+          "block": 0.0006516063003800809,
+          "revision": 0.0012736448552459478,
+          "rhetorical_pause": 0.2989538609981537,
+          "neutral_pause": 0.27826181054115295
+        },
+        "[text withheld]"
+      ],
+      [
+        5.5,
+        8.5,
+        "fluent",
+        0.8991705179214478,
+        {
+          "fluent": 0.8991705179214478,
+          "filler_word": 0.06820803135633469,
+          "prolongation": 0.0054491800256073475,
+          "repetition": 0.02497047372162342,
+          "block": 8.865201266416989e-07,
+          "revision": 0.0016866385703906417,
+          "rhetorical_pause": 6.494751869468018e-05,
+          "neutral_pause": 0.00044942443491891026
+        },
+        "[text withheld]"
+      ],
+      [
+        6.0,
+        9.0,
+        "rhetorical_pause",
+        0.3891980051994324,
+        {
+          "fluent": 0.1997176855802536,
+          "filler_word": 0.044596925377845764,
+          "prolongation": 0.00787313561886549,
+          "repetition": 0.009004113264381886,
+          "block": 0.0012320964597165585,
+          "revision": 3.0302473533083685e-05,
+          "rhetorical_pause": 0.3891980051994324,
+          "neutral_pause": 0.3483477234840393
+        },
+        "[text withheld]"
+      ],
+      [
+        6.5,
+        9.5,
+        "rhetorical_pause",
+        0.6115423440933228,
+        {
+          "fluent": 0.10855760425329208,
+          "filler_word": 0.0034213457256555557,
+          "prolongation": 0.0008622319437563419,
+          "repetition": 0.01117889117449522,
+          "block": 0.012916143983602524,
+          "revision": 6.427711196010932e-05,
+          "rhetorical_pause": 0.6115423440933228,
+          "neutral_pause": 0.2514571249485016
+        },
+        "[text withheld]"
+      ],
+      [
+        7.0,
+        10.0,
+        "rhetorical_pause",
+        0.6663923859596252,
+        {
+          "fluent": 0.04323829710483551,
+          "filler_word": 0.04257394000887871,
+          "prolongation": 0.0006118546007201076,
+          "repetition": 0.0012433467200025916,
+          "block": 0.0011381307849660516,
+          "revision": 6.421075522666797e-05,
+          "rhetorical_pause": 0.6663923859596252,
+          "neutral_pause": 0.24473781883716583
+        },
+        "[text withheld]"
+      ],
+      [
+        7.5,
+        10.5,
+        "rhetorical_pause",
+        0.6930409669876099,
+        {
+          "fluent": 0.03829023241996765,
+          "filler_word": 0.008857388980686665,
+          "prolongation": 0.002481587463989854,
+          "repetition": 0.0002529925259295851,
+          "block": 0.00037219072692096233,
+          "revision": 3.3487547625554726e-05,
+          "rhetorical_pause": 0.6930409669876099,
+          "neutral_pause": 0.2566712498664856
+        },
+        "[text withheld]"
+      ],
+      [
+        8.0,
+        11.0,
+        "rhetorical_pause",
+        0.5509245991706848,
+        {
+          "fluent": 0.048257648944854736,
+          "filler_word": 0.003053765743970871,
+          "prolongation": 0.004199855495244265,
+          "repetition": 0.0011427376884967089,
+          "block": 0.00153015844989568,
+          "revision": 5.380756556405686e-05,
+          "rhetorical_pause": 0.5509245991706848,
+          "neutral_pause": 0.3908374309539795
+        },
+        "[text withheld]"
+      ],
+      [
+        8.5,
+        11.5,
+        "rhetorical_pause",
+        0.5613192319869995,
+        {
+          "fluent": 0.031408436596393585,
+          "filler_word": 0.0013796084094792604,
+          "prolongation": 0.003585207276046276,
+          "repetition": 0.00020596684771589935,
+          "block": 0.0008561221766285598,
+          "revision": 3.490508606773801e-05,
+          "rhetorical_pause": 0.5613192319869995,
+          "neutral_pause": 0.4012105166912079
+        },
+        "[text withheld]"
+      ],
+      [
+        9.0,
+        12.0,
+        "rhetorical_pause",
+        0.8445218801498413,
+        {
+          "fluent": 0.016572395339608192,
+          "filler_word": 0.0030242623761296272,
+          "prolongation": 0.003212929470464587,
+          "repetition": 0.0003341658739373088,
+          "block": 1.0846412806131411e-05,
+          "revision": 3.6670603549282532e-06,
+          "rhetorical_pause": 0.8445218801498413,
+          "neutral_pause": 0.1323198825120926
+        },
+        "[text withheld]"
+      ],
+      [
+        9.5,
+        12.5,
+        "fluent",
+        0.7641806602478027,
+        {
+          "fluent": 0.7641806602478027,
+          "filler_word": 0.11165955662727356,
+          "prolongation": 0.06286919862031937,
+          "repetition": 0.006158937234431505,
+          "block": 1.77403780980967e-05,
+          "revision": 0.0001805434876587242,
+          "rhetorical_pause": 0.005843860562890768,
+          "neutral_pause": 0.049089446663856506
+        },
+        "[text withheld]"
+      ],
+      [
+        10.0,
+        13.0,
+        "fluent",
+        0.8713819980621338,
+        {
+          "fluent": 0.8713819980621338,
+          "filler_word": 0.032098136842250824,
+          "prolongation": 0.04063897207379341,
+          "repetition": 0.007066262885928154,
+          "block": 3.659511639853008e-05,
+          "revision": 0.0002801883383654058,
+          "rhetorical_pause": 0.0036208878736943007,
+          "neutral_pause": 0.04487692564725876
+        },
+        "[text withheld]"
+      ],
+      [
+        10.5,
+        13.5,
+        "fluent",
+        0.6965875029563904,
+        {
+          "fluent": 0.6965875029563904,
+          "filler_word": 0.22729209065437317,
+          "prolongation": 0.014621447771787643,
+          "repetition": 0.0056703956797719,
+          "block": 3.9380392991006374e-05,
+          "revision": 0.0009701430099084973,
+          "rhetorical_pause": 0.0036252669524401426,
+          "neutral_pause": 0.05119381472468376
+        },
+        "[text withheld]"
+      ]
+    ],
+    "events": [
+      [
+        "filler_word",
+        0.0,
+        2.5,
+        0.9902055859565735,
+        5,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "rhetorical_pause",
+        2.5,
+        5.5,
+        0.9183904528617859,
+        6,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "rhetorical_pause",
+        6.0,
+        9.5,
+        0.8445218801498413,
+        7,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ]
+    ],
+    "transcript": "[text withheld]",
+    "duration": 13.6,
+    "mode": "audio_text",
+    "warning": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia",
+    "dict": {
+      "mode": "audio_text",
+      "duration": 13.6,
+      "warning": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia",
+      "transcript": "[text withheld]",
+      "events": [
+        {
+          "label": "filler_word",
+          "start": 0.0,
+          "end": 2.5,
+          "confidence": 0.9902055859565735,
+          "n_windows": 5,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "rhetorical_pause",
+          "start": 2.5,
+          "end": 5.5,
+          "confidence": 0.9183904528617859,
+          "n_windows": 6,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "rhetorical_pause",
+          "start": 6.0,
+          "end": 9.5,
+          "confidence": 0.8445218801498413,
+          "n_windows": 7,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        }
+      ]
+    }
+  },
+  "BAQ_001_03_16_a30": {
+    "windows": [
+      [
+        0.0,
+        3.0,
+        "neutral_pause",
+        0.6976617574691772,
+        {
+          "fluent": 0.03257777541875839,
+          "filler_word": 0.0009703478426672518,
+          "prolongation": 0.0024282571393996477,
+          "repetition": 0.00020400536595843732,
+          "block": 7.132274913601577e-05,
+          "revision": 6.903584107931238e-06,
+          "rhetorical_pause": 0.2660796344280243,
+          "neutral_pause": 0.6976617574691772
+        },
+        "[text withheld]"
+      ],
+      [
+        0.5,
+        3.5,
+        "neutral_pause",
+        0.689221203327179,
+        {
+          "fluent": 0.01831134967505932,
+          "filler_word": 0.0021680037025362253,
+          "prolongation": 0.0006573066930286586,
+          "repetition": 0.0008830493898130953,
+          "block": 3.082769762841053e-05,
+          "revision": 3.014049434568733e-05,
+          "rhetorical_pause": 0.28869813680648804,
+          "neutral_pause": 0.689221203327179
+        },
+        "[text withheld]"
+      ],
+      [
+        1.0,
+        4.0,
+        "neutral_pause",
+        0.7949063777923584,
+        {
+          "fluent": 0.025236191228032112,
+          "filler_word": 0.0006506738136522472,
+          "prolongation": 0.00012515128764789551,
+          "repetition": 0.01755508780479431,
+          "block": 0.00014126749010756612,
+          "revision": 0.0018320990493521094,
+          "rhetorical_pause": 0.1595531702041626,
+          "neutral_pause": 0.7949063777923584
+        },
+        "[text withheld]"
+      ],
+      [
+        1.5,
+        4.5,
+        "neutral_pause",
+        0.7002472281455994,
+        {
+          "fluent": 0.0094490060582757,
+          "filler_word": 0.0008051778422668576,
+          "prolongation": 0.00016052527644205838,
+          "repetition": 0.0012633397709578276,
+          "block": 0.0001621409464860335,
+          "revision": 0.00010802398173836991,
+          "rhetorical_pause": 0.28780457377433777,
+          "neutral_pause": 0.7002472281455994
+        },
+        "[text withheld]"
+      ],
+      [
+        2.0,
+        5.0,
+        "rhetorical_pause",
+        0.5501068234443665,
+        {
+          "fluent": 0.008711228147149086,
+          "filler_word": 0.0002456357760820538,
+          "prolongation": 5.236895231064409e-05,
+          "repetition": 0.0017862861277535558,
+          "block": 0.0003014107933267951,
+          "revision": 0.00012829212937504053,
+          "rhetorical_pause": 0.5501068234443665,
+          "neutral_pause": 0.438667893409729
+        },
+        "[text withheld]"
+      ],
+      [
+        2.5,
+        5.5,
+        "neutral_pause",
+        0.5218174457550049,
+        {
+          "fluent": 0.010852294974029064,
+          "filler_word": 0.0015712345484644175,
+          "prolongation": 0.00027287707780487835,
+          "repetition": 0.0026047935243695974,
+          "block": 1.881412936199922e-05,
+          "revision": 4.4847427489003167e-05,
+          "rhetorical_pause": 0.4628176689147949,
+          "neutral_pause": 0.5218174457550049
+        },
+        "[text withheld]"
+      ],
+      [
+        3.0,
+        6.0,
+        "rhetorical_pause",
+        0.5933142304420471,
+        {
+          "fluent": 0.004818543326109648,
+          "filler_word": 0.0003354983637109399,
+          "prolongation": 8.30059580039233e-05,
+          "repetition": 0.00037558935582637787,
+          "block": 5.69914082007017e-05,
+          "revision": 2.9816528694937006e-05,
+          "rhetorical_pause": 0.5933142304420471,
+          "neutral_pause": 0.4009862542152405
+        },
+        "[text withheld]"
+      ],
+      [
+        3.5,
+        6.5,
+        "rhetorical_pause",
+        0.5947840213775635,
+        {
+          "fluent": 0.004652090836316347,
+          "filler_word": 0.0003893838729709387,
+          "prolongation": 7.772848766762763e-05,
+          "repetition": 0.0006432586233131588,
+          "block": 0.00010994377953466028,
+          "revision": 8.197872375603765e-05,
+          "rhetorical_pause": 0.5947840213775635,
+          "neutral_pause": 0.39926159381866455
+        },
+        "[text withheld]"
+      ],
+      [
+        4.0,
+        7.0,
+        "rhetorical_pause",
+        0.7361711263656616,
+        {
+          "fluent": 0.0022526856046169996,
+          "filler_word": 2.4339235096704215e-05,
+          "prolongation": 2.738617331488058e-05,
+          "repetition": 4.1468545532552525e-05,
+          "block": 0.0013709028717130423,
+          "revision": 6.48676541459281e-06,
+          "rhetorical_pause": 0.7361711263656616,
+          "neutral_pause": 0.2601056396961212
+        },
+        "[text withheld]"
+      ],
+      [
+        4.5,
+        7.5,
+        "neutral_pause",
+        0.3652128577232361,
+        {
+          "fluent": 0.010935436934232712,
+          "filler_word": 0.002675089053809643,
+          "prolongation": 0.002018999308347702,
+          "repetition": 0.2537105977535248,
+          "block": 0.0016419898020103574,
+          "revision": 0.00023840271751396358,
+          "rhetorical_pause": 0.36356663703918457,
+          "neutral_pause": 0.3652128577232361
+        },
+        "[text withheld]"
+      ],
+      [
+        5.0,
+        8.0,
+        "neutral_pause",
+        0.4146168529987335,
+        {
+          "fluent": 0.12259621918201447,
+          "filler_word": 0.0050472840666770935,
+          "prolongation": 0.027561770752072334,
+          "repetition": 0.27850648760795593,
+          "block": 0.0010934605961665511,
+          "revision": 0.0005151149234734476,
+          "rhetorical_pause": 0.15006275475025177,
+          "neutral_pause": 0.4146168529987335
+        },
+        "[text withheld]"
+      ],
+      [
+        5.5,
+        8.5,
+        "prolongation",
+        0.3470737040042877,
+        {
+          "fluent": 0.34455621242523193,
+          "filler_word": 0.02982000634074211,
+          "prolongation": 0.3470737040042877,
+          "repetition": 0.25684264302253723,
+          "block": 1.0723760368591684e-07,
+          "revision": 2.2618180082645267e-05,
+          "rhetorical_pause": 0.005071622785180807,
+          "neutral_pause": 0.01661326363682747
+        },
+        "[text withheld]"
+      ],
+      [
+        6.0,
+        9.0,
+        "repetition",
+        0.7666263580322266,
+        {
+          "fluent": 0.005209882277995348,
+          "filler_word": 0.0012431356590241194,
+          "prolongation": 0.004257473628968,
+          "repetition": 0.7666263580322266,
+          "block": 4.5909619075246155e-06,
+          "revision": 8.662868822284508e-06,
+          "rhetorical_pause": 0.05094491317868233,
+          "neutral_pause": 0.17170500755310059
+        },
+        "[text withheld]"
+      ],
+      [
+        6.5,
+        9.5,
+        "neutral_pause",
+        0.9082300662994385,
+        {
+          "fluent": 0.0016038513276726007,
+          "filler_word": 9.770106407813728e-05,
+          "prolongation": 0.00020822430087719113,
+          "repetition": 0.014422505162656307,
+          "block": 6.640504579991102e-06,
+          "revision": 3.036985845028539e-07,
+          "rhetorical_pause": 0.0754307359457016,
+          "neutral_pause": 0.9082300662994385
+        },
+        "[text withheld]"
+      ],
+      [
+        7.0,
+        10.0,
+        "neutral_pause",
+        0.8105245232582092,
+        {
+          "fluent": 0.0013448409736156464,
+          "filler_word": 0.00015883105515968055,
+          "prolongation": 0.00019546691328287125,
+          "repetition": 0.1360410749912262,
+          "block": 1.1878750228788704e-05,
+          "revision": 2.689511347853113e-06,
+          "rhetorical_pause": 0.05172063037753105,
+          "neutral_pause": 0.8105245232582092
+        },
+        "[text withheld]"
+      ],
+      [
+        7.5,
+        10.5,
+        "neutral_pause",
+        0.5769731998443604,
+        {
+          "fluent": 0.0011486114235594869,
+          "filler_word": 8.494684152537957e-05,
+          "prolongation": 0.0001843045320129022,
+          "repetition": 0.3902888596057892,
+          "block": 2.6280316888005473e-05,
+          "revision": 1.1208904652448837e-05,
+          "rhetorical_pause": 0.03128249943256378,
+          "neutral_pause": 0.5769731998443604
+        },
+        "[text withheld]"
+      ],
+      [
+        8.0,
+        11.0,
+        "neutral_pause",
+        0.37360358238220215,
+        {
+          "fluent": 0.00035720813320949674,
+          "filler_word": 6.0058358940295875e-05,
+          "prolongation": 2.0688383301603608e-05,
+          "repetition": 0.25077277421951294,
+          "block": 0.014950510114431381,
+          "revision": 1.1230264135519974e-05,
+          "rhetorical_pause": 0.3602239191532135,
+          "neutral_pause": 0.37360358238220215
+        },
+        "[text withheld]"
+      ],
+      [
+        8.5,
+        11.5,
+        "repetition",
+        0.8440992832183838,
+        {
+          "fluent": 0.006734252907335758,
+          "filler_word": 0.00017821637447923422,
+          "prolongation": 0.0009546884684823453,
+          "repetition": 0.8440992832183838,
+          "block": 0.004143722355365753,
+          "revision": 0.00028970869607292116,
+          "rhetorical_pause": 0.038620468229055405,
+          "neutral_pause": 0.10497966408729553
+        },
+        "[text withheld]"
+      ],
+      [
+        9.0,
+        12.0,
+        "repetition",
+        0.9356788396835327,
+        {
+          "fluent": 0.031821392476558685,
+          "filler_word": 0.0022995327599346638,
+          "prolongation": 0.008365051820874214,
+          "repetition": 0.9356788396835327,
+          "block": 0.0002445972932036966,
+          "revision": 0.00039017878589220345,
+          "rhetorical_pause": 0.0017319966573268175,
+          "neutral_pause": 0.019468357786536217
+        },
+        "[text withheld]"
+      ],
+      [
+        9.5,
+        12.5,
+        "fluent",
+        0.8228707909584045,
+        {
+          "fluent": 0.8228707909584045,
+          "filler_word": 0.05107951909303665,
+          "prolongation": 0.056967686861753464,
+          "repetition": 0.011968497186899185,
+          "block": 3.252639089623699e-06,
+          "revision": 8.688122034072876e-05,
+          "rhetorical_pause": 0.018688885495066643,
+          "neutral_pause": 0.038334526121616364
+        },
+        "[text withheld]"
+      ],
+      [
+        10.0,
+        13.0,
+        "fluent",
+        0.6177162528038025,
+        {
+          "fluent": 0.6177162528038025,
+          "filler_word": 0.00935781467705965,
+          "prolongation": 0.031185287982225418,
+          "repetition": 0.027073770761489868,
+          "block": 0.0003665532567538321,
+          "revision": 5.1169168727938086e-05,
+          "rhetorical_pause": 0.007810336537659168,
+          "neutral_pause": 0.30643877387046814
+        },
+        "[text withheld]"
+      ]
+    ],
+    "events": [
+      [
+        "neutral_pause",
+        0.0,
+        2.0,
+        0.7949063777923584,
+        4,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "rhetorical_pause",
+        2.0,
+        2.5,
+        0.5501068234443665,
+        1,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "neutral_pause",
+        2.5,
+        3.0,
+        0.5218174457550049,
+        1,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "rhetorical_pause",
+        3.0,
+        4.5,
+        0.7361711263656616,
+        3,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "neutral_pause",
+        4.5,
+        5.5,
+        0.4146168529987335,
+        2,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "prolongation",
+        5.5,
+        6.0,
+        0.3470737040042877,
+        1,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "repetition",
+        6.0,
+        6.5,
+        0.7666263580322266,
+        1,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "neutral_pause",
+        6.5,
+        8.5,
+        0.9082300662994385,
+        4,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ],
+      [
+        "repetition",
+        8.5,
+        9.5,
+        0.9356788396835327,
+        2,
+        "[text withheld]",
+        [
+          "acoustic",
+          "linguistic"
+        ]
+      ]
+    ],
+    "transcript": "[text withheld]",
+    "duration": 13.28,
+    "mode": "audio_text",
+    "warning": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia",
+    "dict": {
+      "mode": "audio_text",
+      "duration": 13.28,
+      "warning": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia",
+      "transcript": "[text withheld]",
+      "events": [
+        {
+          "label": "neutral_pause",
+          "start": 0.0,
+          "end": 2.0,
+          "confidence": 0.7949063777923584,
+          "n_windows": 4,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "rhetorical_pause",
+          "start": 2.0,
+          "end": 2.5,
+          "confidence": 0.5501068234443665,
+          "n_windows": 1,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "neutral_pause",
+          "start": 2.5,
+          "end": 3.0,
+          "confidence": 0.5218174457550049,
+          "n_windows": 1,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "rhetorical_pause",
+          "start": 3.0,
+          "end": 4.5,
+          "confidence": 0.7361711263656616,
+          "n_windows": 3,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "neutral_pause",
+          "start": 4.5,
+          "end": 5.5,
+          "confidence": 0.4146168529987335,
+          "n_windows": 2,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "prolongation",
+          "start": 5.5,
+          "end": 6.0,
+          "confidence": 0.3470737040042877,
+          "n_windows": 1,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "repetition",
+          "start": 6.0,
+          "end": 6.5,
+          "confidence": 0.7666263580322266,
+          "n_windows": 1,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "neutral_pause",
+          "start": 6.5,
+          "end": 8.5,
+          "confidence": 0.9082300662994385,
+          "n_windows": 4,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        },
+        {
+          "label": "repetition",
+          "start": 8.5,
+          "end": 9.5,
+          "confidence": 0.9356788396835327,
+          "n_windows": 2,
+          "text": "[text withheld]",
+          "modalities": [
+            "acoustic",
+            "linguistic"
+          ]
+        }
+      ]
+    }
+  }
+}

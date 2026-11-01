@@ -1,0 +1,225 @@
+{
+ "jobs": {
+  "ameresco_000": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_000_asr.json",
+   "n_words": 26,
+   "n_starts": 3,
+   "dur_s": 13.959
+  },
+  "ameresco_001": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_001_asr.json",
+   "n_words": 46,
+   "n_starts": 8,
+   "dur_s": 16.21
+  },
+  "ameresco_002": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_002_asr.json",
+   "n_words": 36,
+   "n_starts": 4,
+   "dur_s": 14.28
+  },
+  "ameresco_003": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_003_asr.json",
+   "n_words": 150,
+   "n_starts": 9,
+   "dur_s": 16.55
+  },
+  "ameresco_004": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_004_asr.json",
+   "n_words": 33,
+   "n_starts": 2,
+   "dur_s": 13.08
+  },
+  "ameresco_005": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_005_asr.json",
+   "n_words": 62,
+   "n_starts": 3,
+   "dur_s": 13.66
+  },
+  "ameresco_006": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_006_asr.json",
+   "n_words": 63,
+   "n_starts": 7,
+   "dur_s": 15.939
+  },
+  "ameresco_007": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_007_asr.json",
+   "n_words": 60,
+   "n_starts": 4,
+   "dur_s": 14.051
+  },
+  "ameresco_008": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_008_asr.json",
+   "n_words": 57,
+   "n_starts": 4,
+   "dur_s": 14.363
+  },
+  "ameresco_009": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_009_asr.json",
+   "n_words": 39,
+   "n_starts": 8,
+   "dur_s": 16.42
+  },
+  "ameresco_010": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_010_asr.json",
+   "n_words": 56,
+   "n_starts": 9,
+   "dur_s": 16.534
+  },
+  "ameresco_011": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_011_asr.json",
+   "n_words": 48,
+   "n_starts": 2,
+   "dur_s": 13.126
+  },
+  "ameresco_012": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_012_asr.json",
+   "n_words": 97,
+   "n_starts": 2,
+   "dur_s": 13.373
+  },
+  "ameresco_013": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_013_asr.json",
+   "n_words": 50,
+   "n_starts": 7,
+   "dur_s": 15.978
+  },
+  "ameresco_014": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_014_asr.json",
+   "n_words": 25,
+   "n_starts": 6,
+   "dur_s": 15.12
+  },
+  "ameresco_015": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_015_asr.json",
+   "n_words": 49,
+   "n_starts": 9,
+   "dur_s": 16.717
+  },
+  "ameresco_016": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_016_asr.json",
+   "n_words": 51,
+   "n_starts": 3,
+   "dur_s": 13.53
+  },
+  "ameresco_017": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_017_asr.json",
+   "n_words": 48,
+   "n_starts": 2,
+   "dur_s": 13.266
+  },
+  "ameresco_018": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_018_asr.json",
+   "n_words": 40,
+   "n_starts": 2,
+   "dur_s": 13.275
+  },
+  "ameresco_019": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_019_asr.json",
+   "n_words": 138,
+   "n_starts": 2,
+   "dur_s": 13.067
+  },
+  "ameresco_020": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_020_asr.json",
+   "n_words": 39,
+   "n_starts": 5,
+   "dur_s": 14.877
+  },
+  "ameresco_021": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_021_asr.json",
+   "n_words": 51,
+   "n_starts": 2,
+   "dur_s": 13.282
+  },
+  "ameresco_022": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_022_asr.json",
+   "n_words": 129,
+   "n_starts": 3,
+   "dur_s": 13.862
+  },
+  "ameresco_023": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_023_asr.json",
+   "n_words": 66,
+   "n_starts": 2,
+   "dur_s": 13.07
+  },
+  "ameresco_024": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_024_asr.json",
+   "n_words": 31,
+   "n_starts": 2,
+   "dur_s": 13.09
+  },
+  "ameresco_025": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_025_asr.json",
+   "n_words": 45,
+   "n_starts": 4,
+   "dur_s": 14.05
+  },
+  "ameresco_026": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_026_asr.json",
+   "n_words": 34,
+   "n_starts": 6,
+   "dur_s": 15.233
+  },
+  "ameresco_027": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_027_asr.json",
+   "n_words": 24,
+   "n_starts": 2,
+   "dur_s": 13.177
+  },
+  "ameresco_028": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_028_asr.json",
+   "n_words": 37,
+   "n_starts": 3,
+   "dur_s": 13.855
+  },
+  "ameresco_029": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_029_asr.json",
+   "n_words": 32,
+   "n_starts": 3,
+   "dur_s": 13.977
+  },
+  "ameresco_030": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_030_asr.json",
+   "n_words": 170,
+   "n_starts": 2,
+   "dur_s": 13.234
+  },
+  "ameresco_031": {
+   "words_file": "<PILOT_ROOT>\\results\\ameresco_031_asr.json",
+   "n_words": 20,
+   "n_starts": 7,
+   "dur_s": 15.589
+  },
+  "extra_yD9_30_70": {
+   "words_file": "C:\\zArnes-tesis\\mrcd\\results\\paridad_20261030\\asr_run1\\extra_yD9_30_70_asr.json",
+   "n_words": 125,
+   "n_starts": 55,
+   "dur_s": 40.0
+  }
+ },
+ "root": "C:\\zArnes-tesis\\mrcd",
+ "ckpt": "C:\\zArnes-tesis\\mrcd\\models\\ckpt_audio_text.pt",
+ "labels": [
+  "fluent",
+  "filler_word",
+  "prolongation",
+  "repetition",
+  "block",
+  "revision",
+  "rhetorical_pause",
+  "neutral_pause"
+ ],
+ "modes": [
+  "batch",
+  "batch_bs1",
+  "bw",
+  "engine",
+  "slice"
+ ],
+ "words": "pilot",
+ "ling_dim": 12,
+ "torch": "2.9.1+cpu",
+ "np": "2.5.3"
+}

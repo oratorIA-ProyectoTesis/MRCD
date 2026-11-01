@@ -1,0 +1,200 @@
+{
+  "base": "<PILOT_ROOT>\\source_data\\EPIC_v2",
+  "zip_sha256": {
+    "08_alignments_v2.0.zip": "5bb1d4079921e4cfba20e738224f03f20f419b2717c5ce0444c5ed764b168529",
+    "07_annotations_v2.0.zip": "04896b3cbfd3f29a794c1fe200a4ab36eff7abd8c923f3535432fb4d828d587e",
+    "04_metadata_v2.0.zip": "2b0fbb6306bd04c8e1e393b254e31a74861c3d7e1e858fc41a515c66e10baf2b"
+  },
+  "alignment_files_total": 1632,
+  "spanish_source_originals_alignments": {
+    "files": 130,
+    "sentences_with_time": 2384,
+    "sentence_seconds_sum": 22617.5,
+    "mark_counts": {
+      "filled_pause_marks": 281,
+      "truncation_marks": 269,
+      "midword_pause_marks": 24,
+      "silent_pause_marks": 7460
+    },
+    "pause_bins": {
+      "0.2-0.5": 4491,
+      ">1.0(explicit seconds)": 549,
+      "0.5-1.0": 2420
+    },
+    "sentences_with_filled_pause": 214,
+    "sentences_with_truncation": 225,
+    "sentences_with_silent_pause": 2141,
+    "files_with_filled_pause": 63,
+    "distinct_actor_ids": 39,
+    "distinct_events_sessions": 23
+  },
+  "spanish_interpretation_targets_alignments": {
+    "files": 414,
+    "sentences_with_time": 8478,
+    "sentence_seconds_sum": 88233.0,
+    "mark_counts": {
+      "filled_pause_marks": 2838,
+      "truncation_marks": 1989,
+      "midword_pause_marks": 304,
+      "silent_pause_marks": 25664
+    },
+    "pause_bins": {
+      "0.5-1.0": 6580,
+      ">1.0(explicit seconds)": 3810,
+      "0.2-0.5": 15274
+    },
+    "sentences_with_filled_pause": 1981,
+    "sentences_with_truncation": 1574,
+    "sentences_with_silent_pause": 7732,
+    "files_with_filled_pause": 345,
+    "distinct_actor_ids": 0,
+    "distinct_events_sessions": 0
+  },
+  "metadata_manual_annotation_types": [
+    {
+      "source_text_id": "all",
+      "annotation_type": [
+        "mispronunciation"
+      ],
+      "annotation_mode": "manual",
+      "annotation_tool": null,
+      "annotation_tool_version": null,
+      "source_language": [
+        "eng",
+        "ita",
+        "spa"
+      ],
+      "target_language": [
+        "eng",
+        "ita",
+        "spa"
+      ],
+      "annotator_id": "epic_annotator_001"
+    },
+    {
+      "source_text_id": "all",
+      "annotation_type": [
+        "POS"
+      ],
+      "annotation_mode": "automatic",
+      "annotation_tool": "Stanza",
+      "annotation_tool_version": "Stanza 1.8.1",
+      "source_language": [
+        "eng",
+        "ita",
+        "spa"
+      ],
+      "target_language": [
+        "eng",
+        "ita",
+        "spa"
+      ],
+      "annotator_id": "epic_annotator_002"
+    },
+    {
+      "source_text_id": "all",
+      "annotation_type": [
+        "lemma"
+      ],
+      "annotation_mode": "automatic",
+      "annotation_tool": "Stanza",
+      "annotation_tool_version": "Stanza 1.8.1",
+      "source_language": [
+        "eng",
+        "ita",
+        "spa"
+      ],
+      "target_language": [
+        "ita",
+        "eng",
+        "spa"
+      ],
+      "annotator_id": "epic_annotator_002"
+    }
+  ],
+  "alignment_metadata": [
+    {
+      "alignment_type": "texts",
+      "alignment_mode": "mixed",
+      "alignment_tool": "InterText",
+      "text_alignment_unit": "sentence",
+      "source_text_id": "all",
+      "target_text_id": "all"
+    },
+    {
+      "alignment_type": "text-recording",
+      "alignment_mode": "automatic",
+      "alignment_tool": "WebMAUS",
+      "text_alignment_unit": null,
+      "source_text_id": "all",
+      "target_text_id": "all"
+    }
+  ],
+  "spanish_source_pos_custom_tag_counts": {
+    "SPAUSE": 7462,
+    "TRUNCATION": 232,
+    "FPAUSE": 282,
+    "MIDWORDPAUSE": 31,
+    "CORRECTION": 168
+  },
+  "local_media_files": [
+    "epic_st_20-07-04-p-003-org-es.mp4"
+  ],
+  "local_media_bytes": [
+    438301
+  ],
+  "codex_reference_set": {
+    "n": 136,
+    "positive_FPAUSE": 68,
+    "negative": 68,
+    "distinct_actor_ids": 29,
+    "splits": {
+      "train": 78,
+      "validation": 24,
+      "test": 34
+    },
+    "actors_with_positive": 29,
+    "negatives_containing_truncation_or_midword": 8,
+    "negatives_containing_silent_pause": 66,
+    "positives_per_actor": {
+      "epic_actor_008": 3,
+      "epic_actor_010": 4,
+      "epic_actor_011": 2,
+      "epic_actor_012": 4,
+      "epic_actor_021": 4,
+      "epic_actor_034": 2,
+      "epic_actor_061": 3,
+      "epic_actor_063": 4,
+      "epic_actor_104": 2,
+      "epic_actor_119": 3,
+      "epic_actor_120": 3,
+      "epic_actor_131": 3,
+      "epic_actor_132": 4,
+      "epic_actor_138": 4,
+      "epic_actor_161": 2,
+      "epic_actor_173": 4,
+      "epic_actor_030": 1,
+      "epic_actor_057": 3,
+      "epic_actor_078": 1,
+      "epic_actor_079": 1,
+      "epic_actor_093": 1,
+      "epic_actor_101": 1,
+      "epic_actor_102": 1,
+      "epic_actor_103": 1,
+      "epic_actor_121": 2,
+      "epic_actor_135": 2,
+      "epic_actor_144": 1,
+      "epic_actor_153": 1,
+      "epic_actor_159": 1
+    }
+  },
+  "epic_uds_es": {
+    "texts": 162,
+    "sentences": 2537,
+    "token_lines": 53947,
+    "tokens_eh_ehm_like": 1,
+    "tokens_ending_dash_or_equals": 0,
+    "has_audio_video": false,
+    "note": "cleaned text + automatic morphosyntax; no pause/filler/truncation marks => no disfluency reference"
+  }
+}

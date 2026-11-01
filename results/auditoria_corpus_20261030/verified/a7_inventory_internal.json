@@ -1,0 +1,281 @@
+{
+  "repo_folders": {
+    "01_DIHANA": {
+      "files": 10808,
+      "bytes": 428744720,
+      "ext_counts": {
+        ".ul": 6279,
+        ".cad": 900,
+        ".cwd": 900,
+        ".dia": 900,
+        ".dis": 900,
+        ".xml": 900,
+        ".pdf": 8,
+        ".txt": 5
+      }
+    },
+    "02_NOCANDO_ES": {
+      "files": 174,
+      "bytes": 125939376,
+      "ext_counts": {
+        ".txt": 79,
+        ".html": 43,
+        ".mp3": 33,
+        ".textgrid": 14,
+        ".xml": 2,
+        ".md": 1,
+        ".url": 1,
+        ".json": 1
+      }
+    },
+    "03_Spanish_in_Texas": {
+      "files": 102,
+      "bytes": 3373548,
+      "ext_counts": {
+        ".txt": 96,
+        ".md": 1,
+        ".url": 1,
+        ".json": 1,
+        ".html": 1,
+        ".zip": 1,
+        "": 1
+      },
+      "transcript_txt_files": 96,
+      "audio_or_video_files": 0
+    },
+    "04_SOPHIAS": {
+      "files": 20,
+      "bytes": 246575,
+      "ext_counts": {
+        ".json": 16,
+        ".md": 2,
+        ".url": 1,
+        ".pdf": 1
+      },
+      "recording_files_local": 0
+    },
+    "05_Corpus_migra_sev": {
+      "files": 5,
+      "bytes": 125224,
+      "ext_counts": {
+        ".html": 3,
+        ".md": 1,
+        ".url": 1
+      }
+    },
+    "06_Nebrija_CAO": {
+      "files": 4,
+      "bytes": 23513,
+      "ext_counts": {
+        ".html": 2,
+        ".md": 1,
+        ".url": 1
+      }
+    },
+    "07_Glissando_ES": {
+      "files": 3,
+      "bytes": 41169,
+      "ext_counts": {
+        ".md": 1,
+        ".url": 1,
+        ".html": 1
+      }
+    },
+    "08_COE_San_Millan": {
+      "files": 5,
+      "bytes": 86385798,
+      "ext_counts": {
+        ".md": 1,
+        ".url": 1,
+        ".html": 1,
+        ".wav": 1,
+        ".xml": 1
+      }
+    },
+    "09_ES_Port": {
+      "files": 1175,
+      "bytes": 46839388,
+      "ext_counts": {
+        ".json": 1171,
+        ".md": 2,
+        ".zip": 1,
+        ".pdf": 1
+      }
+    },
+    "10_disfluentES": {
+      "files": 5,
+      "bytes": 13306489,
+      "ext_counts": {
+        ".json": 3,
+        ".md": 1,
+        ".pdf": 1
+      }
+    },
+    "11_PRAUTOCAL": {
+      "files": 2,
+      "bytes": 193967,
+      "ext_counts": {
+        ".md": 1,
+        ".pdf": 1
+      },
+      "audio_files_local": 0
+    },
+    "12_AMERESCO": {
+      "files": 27,
+      "bytes": 136968557,
+      "ext_counts": {
+        ".pdf": 5,
+        ".json": 4,
+        ".eaf": 4,
+        ".mp3": 4,
+        ".textgrid": 4,
+        ".txt": 4,
+        ".md": 1,
+        ".csv": 1
+      }
+    },
+    "13_PUCP_Cabrera": {
+      "files": 7,
+      "bytes": 1960398,
+      "ext_counts": {
+        ".json": 5,
+        ".md": 1,
+        ".pdf": 1
+      },
+      "wav_files_local": 0
+    },
+    "14_EPIC_UdS": {
+      "files": 3,
+      "bytes": 5220043,
+      "ext_counts": {
+        ".zip": 1,
+        ".vrt": 1,
+        ".md": 1
+      }
+    },
+    "15_Bangor_Miami": {
+      "files": 2,
+      "bytes": 1260,
+      "ext_counts": {
+        ".html": 1,
+        ".md": 1
+      },
+      "chat_files_local": 0
+    },
+    "16_EPIC_v2": {
+      "files": 90,
+      "bytes": 558997018,
+      "ext_counts": {
+        ".mp4": 74,
+        ".json": 9,
+        ".zip": 5,
+        ".html": 1,
+        ".md": 1
+      }
+    }
+  },
+  "destination_checks": {
+    "C:/zTESIS-2026-02/corpus-repository_files": 0,
+    "C:/zTESIS-2026-02/SOPHIAS_files": 54,
+    "C:/zTESIS-2026-02/SOPHIAS_media_or_data_files": 0
+  },
+  "sophias_events_schema_description": "Timestamped contextual event annotations recorded during a presentation session through the AICoFe-related annotation workflow. Each record represents one annotated event interval, including the event label, the participant identifier when applicable, and the start and end timestamps in both local time and UNIX time.",
+  "internal": {
+    "v3_root_manifest": {
+      "recordings": 87,
+      "speakers": 18,
+      "source_videos": 18,
+      "minutes": 161.54,
+      "event_counts_AUTOMATIC": {
+        "filler_word": 204,
+        "prolongation": 115,
+        "repetition": 92,
+        "block": 8,
+        "revision": 33,
+        "rhetorical_pause": 89,
+        "neutral_pause": 493
+      },
+      "label_source": {
+        "auto": 87
+      },
+      "licence": {
+        "no declarada": 87
+      }
+    },
+    "v4_manifest": {
+      "recordings": 87,
+      "speakers": 18,
+      "source_videos": 18,
+      "minutes": 161.54,
+      "event_counts_AUTOMATIC": {
+        "filler_word": 421,
+        "prolongation": 71,
+        "repetition": 228,
+        "block": 3,
+        "revision": 33,
+        "rhetorical_pause": 101,
+        "neutral_pause": 492
+      },
+      "label_source": {
+        "auto": 87
+      },
+      "licence": {
+        "no declarada": 87
+      }
+    },
+    "annotation_batch_01": {
+      "eaf_files": 29,
+      "human_disfluency_tier_nonempty_values": {}
+    },
+    "judge_human_check_csv": {
+      "rows": 51,
+      "rows_with_human_label": 0
+    },
+    "llm_judge_judgments": {
+      "n": 512,
+      "by_label_AUTOMATIC_NOT_HUMAN": {
+        "prolongation": 13,
+        "neutral_pause": 177,
+        "fluent": 178,
+        "rhetorical_pause": 20,
+        "repetition": 60,
+        "filler_word": 52,
+        "revision": 10,
+        "block": 2
+      },
+      "models": "gpt-4o (per record)"
+    },
+    "corpus_case_study_eaf": {
+      "case_study_interview_annotator_B.eaf": {
+        "words": 1537,
+        "disfluency": 0,
+        "role": 0,
+        "text": 0,
+        "note": 0
+      },
+      "case_study_interview_annotator_B.ORIGINAL-respaldo.eaf": {
+        "words": 1537,
+        "disfluency": 0,
+        "role": 0,
+        "text": 0,
+        "note": 0
+      },
+      "case_study_interview_annotator_A.eaf": {
+        "words": 1537,
+        "disfluency": 0,
+        "role": 0,
+        "text": 0,
+        "note": 0
+      },
+      "case_study_interview_annotator_A.ORIGINAL-respaldo.eaf": {
+        "words": 1537,
+        "disfluency": 0,
+        "role": 0,
+        "text": 0,
+        "note": 0
+      }
+    },
+    "corpus_case_study_has_wav": true,
+    "other_eaf_outside_batch_and_features": []
+  }
+}

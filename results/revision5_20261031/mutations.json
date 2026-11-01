@@ -1,0 +1,54 @@
+[
+ [
+  "M1s tracker ignores viterbi_carry (DEFAULT suite file)",
+  "DETECTED | 1 failed, 2 passed in 11.67s"
+ ],
+ [
+  "M3b ALLOWED_FOLDS includes 5",
+  "DETECTED | 1 failed, 10 passed in 0.21s"
+ ],
+ [
+  "M4a repetition survival 0.8 -> 0.5",
+  "DETECTED | 1 failed, 3 passed in 0.15s"
+ ],
+ [
+  "M4b repetition survival 0.8 -> 0.7",
+  "DETECTED | 1 failed, 3 passed in 0.14s"
+ ],
+ [
+  "M4c repetition survival 0.8 -> 0.9",
+  "DETECTED | 1 failed, 3 passed in 0.13s"
+ ],
+ [
+  "M4d revision threshold cov_span 0.8 -> 0.5",
+  "DETECTED | 1 failed, 9 passed in 0.16s"
+ ],
+ [
+  "M5 pyin_carry back to global monkeypatch (old implementation)",
+  "DETECTED | 1 failed, 1 passed in 5.56s"
+ ],
+ [
+  "M6 guard: allow-list check removed",
+  "DETECTED | 1 failed, 108 passed in 0.27s"
+ ],
+ [
+  "M7 guard: confusables not folded",
+  "DETECTED | 1 failed, 168 passed in 0.28s"
+ ],
+ [
+  "M8 guard: NFKC dropped",
+  "DETECTED | 1 failed, 168 passed in 0.28s"
+ ],
+ [
+  "M9 guard: type check dropped",
+  "DETECTED | 1 failed, 140 passed in 0.28s"
+ ],
+ [
+  "M10 guard: family contains-stems dropped",
+  "DETECTED | 1 failed, 168 passed in 0.29s"
+ ],
+ [
+  "M11 guard: numeric suffix strip dropped",
+  "DETECTED | 1 failed, 168 passed in 0.31s"
+ ]
+]

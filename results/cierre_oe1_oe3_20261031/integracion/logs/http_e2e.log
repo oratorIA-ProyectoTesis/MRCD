@@ -1,0 +1,7 @@
+MRCD service (development) on http://127.0.0.1:8765  - no auth, loopback only
+health: (200, {'status': 'ok', 'contract': 'urn:mrcd:service:analysis:v1', 'engine_loaded': False})
+POST /v1/jobs -> 202 queued
+status sequence: ['queued', 'running', 'completed'] events: 17
+unknown job -> 404 job_not_found
+bad profile -> 400 invalid_request
+garbage body -> job failed invalid_audio_file

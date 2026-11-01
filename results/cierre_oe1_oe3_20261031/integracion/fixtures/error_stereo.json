@@ -1,0 +1,69 @@
+{
+  "schema_version": "mrcd.analysis/v1",
+  "status": "failed",
+  "generated_at": "2026-10-31T20:21:00+00:00",
+  "error": {
+    "code": "audio_not_mono",
+    "message": "Mono audio is required; the file has 2 channels. Downmix before sending (the service never mixes channels silently).",
+    "retryable": false,
+    "details": {
+      "channels": 2
+    }
+  },
+  "request": {
+    "audio_sha256": "7a1306962eefbd5c6a4741daeb951ddb83a4ba9bf904bbd11b6b52b8aec2afab",
+    "audio_duration_s": {
+      "available": true,
+      "value": 20.0,
+      "unavailable_reason": null
+    },
+    "sample_rate_hz": {
+      "available": true,
+      "value": 16000,
+      "unavailable_reason": null
+    },
+    "channels": {
+      "available": true,
+      "value": 2,
+      "unavailable_reason": null
+    },
+    "asr_profile": "p0",
+    "head": null,
+    "include_text": false
+  },
+  "events": [],
+  "summary": null,
+  "modalities": {
+    "acoustic": {
+      "available": false,
+      "reason": "analysis did not run"
+    },
+    "linguistic": {
+      "available": false,
+      "reason": "analysis did not run"
+    },
+    "kinesic_video": {
+      "available": false,
+      "reason": "service v1 receives audio only; no video was provided or processed"
+    }
+  },
+  "provenance": {
+    "service": {
+      "name": "mrcd.service",
+      "contract": "mrcd.analysis/v1",
+      "mrcd_version": "0.3.0"
+    },
+    "checkpoint": null,
+    "asr": null,
+    "head": null,
+    "config": null,
+    "environment": null
+  },
+  "experimental": {
+    "active": false,
+    "components": []
+  },
+  "head_decision": null,
+  "transcript": null,
+  "warnings": []
+}

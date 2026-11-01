@@ -1,0 +1,48 @@
+{
+ "label": "fresh",
+ "sessions": [
+  101,
+  102,
+  103,
+  104,
+  105,
+  106,
+  107,
+  108,
+  109,
+  110,
+  111,
+  112
+ ],
+ "jobs": 36,
+ "v2": {
+  "sessions_diverging": "7/12",
+  "session_rate": 0.5833333333333334,
+  "session_ci95_clopper_pearson": [
+   0.2766696856821058,
+   0.8483477701915698
+  ],
+  "session_partition_diverging": "18/36",
+  "job_rate_ci95": [
+   0.3292217994577103,
+   0.6707782005422896
+  ],
+  "max_frames_in_a_job": 19,
+  "max_abs_f0_st": 23.95641326904297
+ },
+ "v3": {
+  "sessions_diverging": "1/12",
+  "session_rate": 0.08333333333333333,
+  "session_ci95_clopper_pearson": [
+   0.002107593231860227,
+   0.38479616515094406
+  ],
+  "session_partition_diverging": "3/36",
+  "job_rate_ci95": [
+   0.01752649592393462,
+   0.2246897605569731
+  ],
+  "max_frames_in_a_job": 1,
+  "max_abs_f0_st": 5.456412315368652
+ }
+}

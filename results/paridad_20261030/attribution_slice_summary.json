@@ -1,0 +1,26 @@
+{
+ "n_windows": 160,
+ "argmax_flips": {
+  "S": 10,
+  "S_wc": 7,
+  "W_sc": 3
+ },
+ "max_prob_diff": {
+  "S": 0.6453717947006226,
+  "S_wc": 0.6695897579193115,
+  "W_sc": 0.09457996487617493
+ },
+ "center_abs_diff_semitones": {
+  "mean": 0.28750006556510926,
+  "max": 2.09999942779541
+ },
+ "frames_max_col_diff_overall": {
+  "log_rms": 0.0,
+  "f0_st": 0.0,
+  "voiced_prob": 0.0,
+  "vad": 1.0,
+  "df0": 0.0
+ },
+ "windows_with_vad_frame_diff": 24,
+ "max_vad_frames_differing": 190
+}

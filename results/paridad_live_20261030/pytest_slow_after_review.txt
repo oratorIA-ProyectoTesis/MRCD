@@ -1,0 +1,6 @@
+============================= test session starts =============================
+collecting ... collected 15 items / 14 deselected / 1 selected
+
+tests/test_engine_terminal.py::test_pilot_32_clips_reproduce_5_3_11_13_with_terminal_and_3_1_13_15_without PASSED [100%]
+
+====================== 1 passed, 14 deselected in 35.04s ======================

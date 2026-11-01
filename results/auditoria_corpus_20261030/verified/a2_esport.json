@@ -1,0 +1,195 @@
+{
+  "archive": "<CORPORA_ROOT>\\09_ES_Port\\esport.zip",
+  "archive_sha256": "0017a2d6bbbf57d2971872c7a8eb7c1bf266c76dfb8ba2736c17086a948f1f2c",
+  "dialogue_json_files": 1170,
+  "turns": 65239,
+  "utterances": 99298,
+  "mark_counts": {
+    "filled_or_continuer": 26656,
+    "unfinished_or_nonword": 9141,
+    "repetition_or_false_start": 12279,
+    "lengthening_equals": 14211
+  },
+  "utterances_with_mark": {
+    "filled_or_continuer": 22034,
+    "repetition_or_false_start": 10575,
+    "lengthening_equals": 12060,
+    "unfinished_or_nonword": 8162
+  },
+  "dialogues_with_mark": {
+    "filled_or_continuer": 1169,
+    "repetition_or_false_start": 1112,
+    "lengthening_equals": 1080,
+    "unfinished_or_nonword": 1067
+  },
+  "filler_continuer_top": [
+    [
+      "eh",
+      6990
+    ],
+    [
+      "pues",
+      3765
+    ],
+    [
+      "aver",
+      2573
+    ],
+    [
+      "osea",
+      2253
+    ],
+    [
+      "bueno",
+      1909
+    ],
+    [
+      "venga",
+      1889
+    ],
+    [
+      "mm",
+      1662
+    ],
+    [
+      "mira",
+      1332
+    ],
+    [
+      "mhm",
+      1277
+    ],
+    [
+      "ehh",
+      1043
+    ],
+    [
+      "ehm",
+      354
+    ],
+    [
+      "oye",
+      313
+    ],
+    [
+      "vamos",
+      297
+    ],
+    [
+      "sabes",
+      236
+    ],
+    [
+      "ah",
+      232
+    ],
+    [
+      "aha",
+      110
+    ],
+    [
+      "hombre",
+      97
+    ],
+    [
+      "mire",
+      88
+    ],
+    [
+      "ay",
+      64
+    ],
+    [
+      "ahm",
+      24
+    ],
+    [
+      "hala",
+      23
+    ],
+    [
+      "hm",
+      22
+    ],
+    [
+      "enfin",
+      17
+    ],
+    [
+      "ostras",
+      16
+    ],
+    [
+      "uff",
+      16
+    ]
+  ],
+  "filler_continuer_all": {
+    "eh": 6990,
+    "pues": 3765,
+    "aver": 2573,
+    "osea": 2253,
+    "bueno": 1909,
+    "venga": 1889,
+    "mm": 1662,
+    "mira": 1332,
+    "mhm": 1277,
+    "ehh": 1043,
+    "ehm": 354,
+    "oye": 313,
+    "vamos": 297,
+    "sabes": 236,
+    "ah": 232,
+    "aha": 110,
+    "hombre": 97,
+    "mire": 88,
+    "ay": 64,
+    "ahm": 24,
+    "hala": 23,
+    "hm": 22,
+    "enfin": 17,
+    "ostras": 16,
+    "uff": 16,
+    "hale": 10,
+    "buff": 9,
+    "bua": 7,
+    "uhm": 5,
+    "nm": 5,
+    "sabe": 5,
+    "ahaha": 5,
+    "mmm": 3,
+    "oy": 3,
+    "puff": 1,
+    "ahh": 1
+  },
+  "filler_continuer_distinct": 36,
+  "event_counts": {
+    "noise-nontrans": 3838,
+    "noise-b": 2269,
+    "silence": 1664,
+    "noise-conv": 1079,
+    "noise-musique": 679,
+    "pronounce-*": 522,
+    "noise-rire": 378,
+    "noise-tx": 321,
+    "noise-bb": 160,
+    "noise-pf": 102,
+    "noise-i": 102,
+    "pronounce-ch": 95,
+    "noise-e": 79,
+    "noise-toux en fond": 66,
+    "noise-r": 53,
+    "pronounce-pif": 26,
+    "noise-rire en fond": 18,
+    "pronounce-pi": 11,
+    "noise-n": 5,
+    "noise-bg": 3,
+    "noise-sif": 3,
+    "noise-shh": 1
+  },
+  "silence_events": 1664,
+  "turns_with_silence_event": 1664,
+  "dialogues_with_silence_event": 459,
+  "speaker_identity_note": "speakers are per-dialogue labels (spk1/spk2); not linkable across dialogues -> partition unit = dialogue",
+  "negative_coverage_note": "README does not state exhaustive marking; absence of a mark is not an accredited negative"
+}

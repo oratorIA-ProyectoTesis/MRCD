@@ -1,0 +1,37 @@
+BAQ_001_03_16_a12: 7.9s  windows session=16 old=3
+BAQ_001_03_16_a23: 9.1s  windows session=21 old=8
+BAQ_001_03_16_a121: 6.4s  windows session=17 old=4
+BAQ_001_03_16_a160: 10.0s  windows session=22 old=9
+BUE_001_03_19_a126: 5.4s  windows session=15 old=2
+BUE_001_03_19_a106: 5.7s  windows session=16 old=3
+BUE_001_03_19_a194: 8.3s  windows session=20 old=7
+BUE_001_03_19_a227: 6.3s  windows session=17 old=4
+BUE_001_03_19_a203: 6.1s  windows session=17 old=4
+BUE_001_03_19_a272: 8.8s  windows session=21 old=8
+BUE_001_03_19_a476: 9.8s  windows session=22 old=9
+BUE_001_03_19_a533: 5.4s  windows session=15 old=2
+BUE_001_03_19_a678: 5.2s  windows session=15 old=2
+BUE_001_03_19_a880: 8.7s  windows session=20 old=7
+BUE_001_03_19_a868: 7.2s  windows session=19 old=6
+BUE_001_03_19_a1149: 9.0s  windows session=22 old=9
+HAV_001_02_12_a9: 5.8s  windows session=16 old=3
+HAV_001_02_12_a93: 4.9s  windows session=15 old=2
+HAV_001_02_12_a131: 5.0s  windows session=15 old=2
+HAV_001_02_12_a213: 4.8s  windows session=15 old=2
+HAV_001_02_12_a230: 7.0s  windows session=18 old=5
+HAV_001_02_12_a242: 5.0s  windows session=15 old=2
+HAV_001_02_12_a272: 5.9s  windows session=16 old=3
+HAV_001_02_12_a316: 5.1s  windows session=15 old=2
+MEX_001_02_15_a336: 5.2s  windows session=15 old=2
+MEX_001_02_15_a86: 6.5s  windows session=17 old=4
+MEX_001_02_15_a173: 7.6s  windows session=19 old=6
+MEX_001_02_15_a694: 5.1s  windows session=15 old=2
+MEX_001_02_15_a709: 5.7s  windows session=16 old=3
+MEX_001_02_15_a630: 6.0s  windows session=16 old=3
+MEX_001_02_15_a724: 5.3s  windows session=15 old=2
+MEX_001_02_15_a765: 8.7s  windows session=20 old=7
+extra_yD9_30_70: 39.3s  windows session=69 old=55
+old_live windows 192 argmax_changes 6 max_prob_diff 0.950647 {'ac': (21.4564, 164), 'pros': (93.8214, 106), 'ling': (0.0, 0), 'lpos': (1.0, 45), 'lmask': (0.0, 0)}
+session_oracle windows 622 argmax_changes 0 max_prob_diff 0.0 {'ac': (0.0, 0), 'pros': (0.0, 0), 'ling': (0.0, 0), 'lpos': (0.0, 0), 'lmask': (0.0, 0)}
+session_causal windows 622 argmax_changes 20 max_prob_diff 0.888629 {'ac': (23.1, 577), 'pros': (5.5, 283), 'ling': (0.0, 0), 'lpos': (0.0, 0), 'lmask': (0.0, 0)}
+pilot grid confusion {'offline': {'TP': 3, 'FP': 1, 'FN': 13, 'TN': 15}, 'session_oracle': {'TP': 3, 'FP': 1, 'FN': 13, 'TN': 15}, 'session_causal': {'TP': 4, 'FP': 1, 'FN': 12, 'TN': 15}} flips {'session_oracle': 0, 'session_causal': 1}

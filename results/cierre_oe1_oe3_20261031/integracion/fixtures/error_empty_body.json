@@ -1,0 +1,67 @@
+{
+  "schema_version": "mrcd.analysis/v1",
+  "status": "failed",
+  "generated_at": "2026-10-31T20:21:00+00:00",
+  "error": {
+    "code": "invalid_audio_file",
+    "message": "The request body is empty.",
+    "retryable": false,
+    "details": {}
+  },
+  "request": {
+    "audio_sha256": null,
+    "audio_duration_s": {
+      "available": false,
+      "value": null,
+      "unavailable_reason": "audio could not be read"
+    },
+    "sample_rate_hz": {
+      "available": false,
+      "value": null,
+      "unavailable_reason": "audio could not be read"
+    },
+    "channels": {
+      "available": false,
+      "value": null,
+      "unavailable_reason": "audio could not be read"
+    },
+    "asr_profile": "p0",
+    "head": null,
+    "include_text": false
+  },
+  "events": [],
+  "summary": null,
+  "modalities": {
+    "acoustic": {
+      "available": false,
+      "reason": "analysis did not run"
+    },
+    "linguistic": {
+      "available": false,
+      "reason": "analysis did not run"
+    },
+    "kinesic_video": {
+      "available": false,
+      "reason": "service v1 receives audio only; no video was provided or processed"
+    }
+  },
+  "provenance": {
+    "service": {
+      "name": "mrcd.service",
+      "contract": "mrcd.analysis/v1",
+      "mrcd_version": "0.3.0"
+    },
+    "checkpoint": null,
+    "asr": null,
+    "head": null,
+    "config": null,
+    "environment": null
+  },
+  "experimental": {
+    "active": false,
+    "components": []
+  },
+  "head_decision": null,
+  "transcript": null,
+  "warnings": []
+}

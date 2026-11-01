@@ -1,0 +1,70 @@
+{
+  "schema_version": "mrcd.analysis/v1",
+  "status": "failed",
+  "generated_at": "2026-10-31T20:21:00+00:00",
+  "error": {
+    "code": "unsupported_sample_rate",
+    "message": "The engine takes 16000 Hz and the file is 44100 Hz; resample before sending.",
+    "retryable": false,
+    "details": {
+      "expected_hz": 16000,
+      "received_hz": 44100
+    }
+  },
+  "request": {
+    "audio_sha256": "461fa3bb3c30d480c0da5554d1706960f7d93a8937a3edb2a366632f16406a7c",
+    "audio_duration_s": {
+      "available": true,
+      "value": 7.256,
+      "unavailable_reason": null
+    },
+    "sample_rate_hz": {
+      "available": true,
+      "value": 44100,
+      "unavailable_reason": null
+    },
+    "channels": {
+      "available": true,
+      "value": 1,
+      "unavailable_reason": null
+    },
+    "asr_profile": "p0",
+    "head": null,
+    "include_text": false
+  },
+  "events": [],
+  "summary": null,
+  "modalities": {
+    "acoustic": {
+      "available": false,
+      "reason": "analysis did not run"
+    },
+    "linguistic": {
+      "available": false,
+      "reason": "analysis did not run"
+    },
+    "kinesic_video": {
+      "available": false,
+      "reason": "service v1 receives audio only; no video was provided or processed"
+    }
+  },
+  "provenance": {
+    "service": {
+      "name": "mrcd.service",
+      "contract": "mrcd.analysis/v1",
+      "mrcd_version": "0.3.0"
+    },
+    "checkpoint": null,
+    "asr": null,
+    "head": null,
+    "config": null,
+    "environment": null
+  },
+  "experimental": {
+    "active": false,
+    "components": []
+  },
+  "head_decision": null,
+  "transcript": null,
+  "warnings": []
+}

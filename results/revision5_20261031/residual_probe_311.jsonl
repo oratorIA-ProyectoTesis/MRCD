@@ -1,0 +1,2 @@
+{"seed": 311, "R": 14.0, "committed_bad": 7, "final_bad": 7, "first_bad_s": [358.14, 358.15, 358.16, 358.17, 358.18, 358.19], "stretch_of_first_bad": {"kind": "real", "start_s": 343.67, "len_s": 14.52, "offset_in_stretch_s": 14.47}, "longest_silence_s": 27.96, "len_equal": true, "sec": 521.9}
+{"seed": 311, "R": 16.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 27.96, "len_equal": true, "sec": 573.6}

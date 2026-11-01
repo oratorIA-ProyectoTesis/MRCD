@@ -1,0 +1,35 @@
+session {'real_clips': 46, 'n_parts': 68, 'duration_s': 723.0588125}
+t=2.0 min tick_mean_last_min=0.4439s traced=134.2MB rss=None
+t=4.0 min tick_mean_last_min=0.4721s traced=136.3MB rss=None
+t=6.0 min tick_mean_last_min=0.4807s traced=138.4MB rss=None
+t=8.0 min tick_mean_last_min=0.6387s traced=140.6MB rss=None
+t=10.0 min tick_mean_last_min=0.5364s traced=142.7MB rss=None
+t=12.0 min tick_mean_last_min=0.4425s traced=144.9MB rss=None
+{
+ "label": "before",
+ "minutes": 12.050980208333334,
+ "real_clips": 46,
+ "tick_mean_s_per_minute": {
+  "0": 0.496577911666706,
+  "1": 0.44390401999977863,
+  "2": 0.46220193083311945,
+  "3": 0.4721235316667541,
+  "4": 0.5886032141668086,
+  "5": 0.4807165125000514,
+  "6": 0.660328906666291,
+  "7": 0.6386794699999883,
+  "8": 0.4254401849997521,
+  "9": 0.5364059316669227,
+  "10": 0.43985494000001685,
+  "11": 0.4425355574998321,
+  "12": 0.44473252857278567
+ },
+ "tick_max_s": 4.340047099998628,
+ "traced_mb_final": 144.904514,
+ "traced_mb_peak": 166.308817,
+ "rss_mb": null,
+ "elapsed_s": 733.6255965232849,
+ "committed_frames": 72006,
+ "bad_frames_vs_offline": 0,
+ "max_abs_f0_diff_st": 0.0
+}

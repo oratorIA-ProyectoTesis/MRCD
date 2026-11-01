@@ -1,0 +1,9 @@
+BAQ_001_03_16_a12 {'wer_offline_vs_streaming_final': 2.6923076923076925, 'wer_cache_vs_offline_rerun': 0.0, 't_streaming_s': 288.7263135910034}
+BAQ_001_03_16_a23 {'wer_offline_vs_streaming_final': 0.41304347826086957, 'wer_cache_vs_offline_rerun': 0.0, 't_streaming_s': 33.250526428222656}
+BAQ_001_03_16_a121 {'wer_offline_vs_streaming_final': 0.9722222222222222, 'wer_cache_vs_offline_rerun': 0.0, 't_streaming_s': 46.03819274902344}
+BAQ_001_03_16_a160 {'wer_offline_vs_streaming_final': 0.78, 'wer_cache_vs_offline_rerun': 0.0, 't_streaming_s': 57.694485664367676}
+BUE_001_03_19_a126 {'wer_offline_vs_streaming_final': 1.0, 'wer_cache_vs_offline_rerun': 0.0, 't_streaming_s': 18.733710050582886}
+BUE_001_03_19_a106 {'wer_offline_vs_streaming_final': 0.8870967741935484, 'wer_cache_vs_offline_rerun': 0.0, 't_streaming_s': 25.019753456115723}
+BUE_001_03_19_a194 {'wer_offline_vs_streaming_final': 0.2222222222222222, 'wer_cache_vs_offline_rerun': 0.0, 't_streaming_s': 13.564016342163086}
+BUE_001_03_19_a227 {'wer_offline_vs_streaming_final': 0.3, 'wer_cache_vs_offline_rerun': 0.0, 't_streaming_s': 15.890100479125977}
+{'tick_s': 2.0, 'model': '<HF_CACHE_PARENT>\\hub\\models--Systran--faster-whisper-small\\snapshots\\536b0662742c02347bc0e980a01041f333bce120', 'asr': {'device': 'cpu', 'compute_type': 'int8'}, 'mean_wer_offline_vs_streaming': 0.9083615486508194, 'total_errors': 361, 'total_ref_words': 476, 'elapsed_s': 666.6724991798401}

@@ -1,0 +1,630 @@
+{
+  "schema_version": "mrcd.analysis/v1",
+  "status": "completed",
+  "generated_at": "2026-10-31T20:20:52+00:00",
+  "error": null,
+  "request": {
+    "audio_sha256": "0362201d7f82f2b181d0e8de9013c1377ec137e670bd5c93ef41a65a5c2bcb63",
+    "audio_duration_s": {
+      "available": true,
+      "value": 36.0,
+      "unavailable_reason": null
+    },
+    "sample_rate_hz": {
+      "available": true,
+      "value": 16000,
+      "unavailable_reason": null
+    },
+    "channels": {
+      "available": true,
+      "value": 1,
+      "unavailable_reason": null
+    },
+    "asr_profile": "p0",
+    "head": "vc",
+    "include_text": false
+  },
+  "events": [
+    {
+      "id": "ev-0001",
+      "class": "rhetorical_pause",
+      "start_s": 0.0,
+      "end_s": 1.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.609209,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 2,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "not validated (no compatible human reference); V0 window argmax, not covered by the Vc head",
+      "experimental": true
+    },
+    {
+      "id": "ev-0002",
+      "class": "neutral_pause",
+      "start_s": 1.0,
+      "end_s": 2.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.626382,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 2,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "not validated (no compatible human reference); V0 window argmax, not covered by the Vc head",
+      "experimental": true
+    },
+    {
+      "id": "ev-0003",
+      "class": "rhetorical_pause",
+      "start_s": 2.0,
+      "end_s": 6.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.956699,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 9,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "not validated (no compatible human reference); V0 window argmax, not covered by the Vc head",
+      "experimental": true
+    },
+    {
+      "id": "ev-0004",
+      "class": "filler_word",
+      "start_s": 6.5,
+      "end_s": 8.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.913391,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 3,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "V0 window argmax; the experimental Vc decision is turn-level (result.head), uncalibrated, trained on DIHANA",
+      "experimental": true
+    },
+    {
+      "id": "ev-0005",
+      "class": "filler_word",
+      "start_s": 8.5,
+      "end_s": 9.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.54446,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 1,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "V0 window argmax; the experimental Vc decision is turn-level (result.head), uncalibrated, trained on DIHANA",
+      "experimental": true
+    },
+    {
+      "id": "ev-0006",
+      "class": "prolongation",
+      "start_s": 9.5,
+      "end_s": 11.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.56211,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 4,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "V0 window argmax; the experimental Vc decision is turn-level (result.head), uncalibrated, trained on DIHANA",
+      "experimental": true
+    },
+    {
+      "id": "ev-0007",
+      "class": "prolongation",
+      "start_s": 12.0,
+      "end_s": 12.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.448764,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 1,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "V0 window argmax; the experimental Vc decision is turn-level (result.head), uncalibrated, trained on DIHANA",
+      "experimental": true
+    },
+    {
+      "id": "ev-0008",
+      "class": "filler_word",
+      "start_s": 13.0,
+      "end_s": 13.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.529813,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 1,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "V0 window argmax; the experimental Vc decision is turn-level (result.head), uncalibrated, trained on DIHANA",
+      "experimental": true
+    },
+    {
+      "id": "ev-0009",
+      "class": "rhetorical_pause",
+      "start_s": 14.5,
+      "end_s": 15.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.586851,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 2,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "not validated (no compatible human reference); V0 window argmax, not covered by the Vc head",
+      "experimental": true
+    },
+    {
+      "id": "ev-0010",
+      "class": "neutral_pause",
+      "start_s": 15.5,
+      "end_s": 17.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.891872,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 4,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "not validated (no compatible human reference); V0 window argmax, not covered by the Vc head",
+      "experimental": true
+    },
+    {
+      "id": "ev-0011",
+      "class": "rhetorical_pause",
+      "start_s": 17.5,
+      "end_s": 18.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.511654,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 2,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "not validated (no compatible human reference); V0 window argmax, not covered by the Vc head",
+      "experimental": true
+    },
+    {
+      "id": "ev-0012",
+      "class": "filler_word",
+      "start_s": 19.0,
+      "end_s": 22.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.942349,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 6,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "V0 window argmax; the experimental Vc decision is turn-level (result.head), uncalibrated, trained on DIHANA",
+      "experimental": true
+    },
+    {
+      "id": "ev-0013",
+      "class": "neutral_pause",
+      "start_s": 22.0,
+      "end_s": 24.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.770086,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 5,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "not validated (no compatible human reference); V0 window argmax, not covered by the Vc head",
+      "experimental": true
+    },
+    {
+      "id": "ev-0014",
+      "class": "prolongation",
+      "start_s": 24.5,
+      "end_s": 25.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.665138,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 1,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "V0 window argmax; the experimental Vc decision is turn-level (result.head), uncalibrated, trained on DIHANA",
+      "experimental": true
+    },
+    {
+      "id": "ev-0015",
+      "class": "prolongation",
+      "start_s": 26.5,
+      "end_s": 27.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.639225,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 1,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "V0 window argmax; the experimental Vc decision is turn-level (result.head), uncalibrated, trained on DIHANA",
+      "experimental": true
+    },
+    {
+      "id": "ev-0016",
+      "class": "prolongation",
+      "start_s": 27.5,
+      "end_s": 28.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.582679,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 1,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "V0 window argmax; the experimental Vc decision is turn-level (result.head), uncalibrated, trained on DIHANA",
+      "experimental": true
+    },
+    {
+      "id": "ev-0017",
+      "class": "block",
+      "start_s": 28.5,
+      "end_s": 31.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.997691,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 6,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "not validated (no compatible human reference); V0 window argmax, not covered by the Vc head",
+      "experimental": true
+    }
+  ],
+  "summary": {
+    "n_events": 17,
+    "events_per_minute": {
+      "available": true,
+      "value": 28.3333,
+      "unavailable_reason": null
+    },
+    "counts_by_class": {
+      "rhetorical_pause": 4,
+      "neutral_pause": 3,
+      "filler_word": 4,
+      "prolongation": 5,
+      "block": 1
+    }
+  },
+  "modalities": {
+    "acoustic": {
+      "available": true,
+      "reason": null
+    },
+    "linguistic": {
+      "available": true,
+      "reason": null
+    },
+    "kinesic_video": {
+      "available": false,
+      "reason": "service v1 receives audio only; no video was provided or processed"
+    }
+  },
+  "provenance": {
+    "service": {
+      "name": "mrcd.service",
+      "contract": "mrcd.analysis/v1",
+      "mrcd_version": "0.3.0"
+    },
+    "checkpoint": {
+      "file": "ckpt_audio_text.pt",
+      "sha256": "87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669",
+      "mode": "audio_text",
+      "labels": [
+        "fluent",
+        "filler_word",
+        "prolongation",
+        "repetition",
+        "block",
+        "revision",
+        "rhetorical_pause",
+        "neutral_pause"
+      ],
+      "checkpoint_notice": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"
+    },
+    "asr": {
+      "profile": "p0",
+      "experimental": false,
+      "validation": null,
+      "initial_prompt_sha256": "bd0bddb4329c6c75e2dd7c0b21366a418cc23314f8155357401a1577853b19fa",
+      "model": {
+        "model_size": "small",
+        "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+        "compute_type": "int8",
+        "device": "cpu"
+      },
+      "language": "es",
+      "decode": {
+        "temperature": 0.0,
+        "beam_size": 5,
+        "condition_on_previous_text": false,
+        "vad_filter": false,
+        "word_timestamps": true,
+        "chunk_s_requested": 8.0
+      },
+      "profile_fingerprint": "efc7f5bfef4d5271862bcb4fe384a229314cb969293ed64d7f7d8a0503522558",
+      "anomalies": []
+    },
+    "head": {
+      "head": "vc",
+      "experimental": true,
+      "checkpoint": "ckpt_head_dihana_f123_zero.pt",
+      "sha256": "776c72f8e064e42c569e3046f5d237de03aec4a810cabfdef5054d234066ab4a",
+      "base_checkpoint_sha256": "87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669",
+      "head_kind": "mlp",
+      "classes": [
+        "filler_word",
+        "prolongation",
+        "repetition"
+      ],
+      "train_folds": [
+        1,
+        2,
+        3
+      ],
+      "selection_fold": 4,
+      "n_train_units": 3816,
+      "task": "turn-level presence of the class anywhere in the unit (max over windows)",
+      "label_source": "human DIHANA turn-level presence (f, a, r:repeticion)",
+      "domain": "DIHANA: telephone, peninsular Spanish, train-information dialogues",
+      "scores_are_calibrated_probabilities": false
+    },
+    "config": {
+      "window_s": 3.0,
+      "stride_s": 0.5,
+      "terminal_window": false,
+      "span": null,
+      "asr_chunk_s": 8.0
+    },
+    "environment": {
+      "omp_num_threads": "4",
+      "omp_pin_opted_out": false,
+      "cpu_count_logical": 20,
+      "python": "3.12.10",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+      "faster_whisper": "1.2.1",
+      "ctranslate2": "4.8.2",
+      "numpy": "2.5.3",
+      "environment_is_pinned": true,
+      "omp_num_threads_at_mrcd_import": "4",
+      "numpy_imported_before_mrcd": false,
+      "set_before_numpy": true,
+      "assigned_after_import": false,
+      "effective": true,
+      "cpu_threads": {
+        "torch": 1,
+        "asr_cpu_threads_arg": 0
+      },
+      "asr": {
+        "model_size": "small",
+        "device": "cpu",
+        "compute_type": "int8"
+      }
+    }
+  },
+  "experimental": {
+    "active": true,
+    "components": [
+      "head:vc"
+    ]
+  },
+  "head_decision": {
+    "experimental": true,
+    "provenance": {
+      "head": "vc",
+      "experimental": true,
+      "checkpoint": "ckpt_head_dihana_f123_zero.pt",
+      "sha256": "776c72f8e064e42c569e3046f5d237de03aec4a810cabfdef5054d234066ab4a",
+      "base_checkpoint_sha256": "87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669",
+      "head_kind": "mlp",
+      "classes": [
+        "filler_word",
+        "prolongation",
+        "repetition"
+      ],
+      "train_folds": [
+        1,
+        2,
+        3
+      ],
+      "selection_fold": 4,
+      "n_train_units": 3816,
+      "task": "turn-level presence of the class anywhere in the unit (max over windows)",
+      "label_source": "human DIHANA turn-level presence (f, a, r:repeticion)",
+      "domain": "DIHANA: telephone, peninsular Spanish, train-information dialogues",
+      "scores_are_calibrated_probabilities": false
+    },
+    "unit": {
+      "start": 0.0,
+      "end": 36.0,
+      "n_windows": 67,
+      "note": "The decision is 'present anywhere in this unit'. Thresholds were frozen on DIHANA turns (mostly < 10 s); on a long unit presence saturates. Use span= to score a turn-sized segment."
+    },
+    "scores_calibrated": false,
+    "decision_rule": "max over windows of the head sigmoid score >= frozen per-class threshold",
+    "classes": {
+      "filler_word": {
+        "score": 0.9662672877311707,
+        "threshold": 0.7,
+        "present": true,
+        "experimental": true,
+        "calibrated": false,
+        "reference_tune_f1": 0.6507936507936508
+      },
+      "prolongation": {
+        "score": 0.8648346662521362,
+        "threshold": 0.66,
+        "present": true,
+        "experimental": true,
+        "calibrated": false,
+        "reference_tune_f1": 0.6475849731663685
+      },
+      "repetition": {
+        "score": 0.8934653997421265,
+        "threshold": 0.9,
+        "present": false,
+        "experimental": true,
+        "calibrated": false,
+        "reference_tune_f1": 0.4752475247524752
+      }
+    },
+    "unvalidated_classes": {
+      "block": {
+        "source": "V0",
+        "validated": false,
+        "reason": "no compatible human reference (DIHANA '<b>' is ambiguous; n=2 in the original evaluation)"
+      },
+      "rhetorical_pause": {
+        "source": "V0",
+        "validated": false,
+        "reason": "no human reference with pause onset/offset and function"
+      },
+      "neutral_pause": {
+        "source": "V0",
+        "validated": false,
+        "reason": "no human reference with pause onset/offset and function"
+      },
+      "revision": {
+        "source": "V0",
+        "validated": false,
+        "reason": "a human reference exists but the head was not trained for it (V0 detects almost none, see MEJORAS.md)"
+      }
+    }
+  },
+  "transcript": null,
+  "warnings": [
+    {
+      "code": "scores_uncalibrated",
+      "message": "Scores are the maximum window class probability of an uncalibrated model; they are not probabilities of correctness."
+    },
+    {
+      "code": "no_human_validation",
+      "message": "Classes are window-level decisions of a model trained with weak (heuristic) supervision; agreement with human annotation has not been established."
+    },
+    {
+      "code": "engine_provenance",
+      "message": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"
+    },
+    {
+      "code": "class_block_not_measurable",
+      "message": "The 'block' class is not measurable with the development corpus (n=2); there is no evidence that a 'block' event is correct."
+    },
+    {
+      "code": "experimental_components",
+      "message": "Experimental, opt-in components were used: head:vc. They are not validated outside their development corpus."
+    }
+  ]
+}

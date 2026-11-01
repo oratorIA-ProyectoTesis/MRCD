@@ -1,0 +1,8 @@
+0 18 {'signal': 'long10_4', 'L': 3.0, 'R': 3.0, 'part': 'mix', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+3:3|mix {'jobs': 3, 'with_bad': 0, 'bad_frames': 0, 'committed': 180949, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+3:3|rand {'jobs': 3, 'with_bad': 0, 'bad_frames': 0, 'committed': 180949, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+3:4|mix {'jobs': 3, 'with_bad': 0, 'bad_frames': 0, 'committed': 180649, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+3:4|rand {'jobs': 3, 'with_bad': 0, 'bad_frames': 0, 'committed': 180649, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+3:5|mix {'jobs': 3, 'with_bad': 0, 'bad_frames': 0, 'committed': 180349, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+3:5|rand {'jobs': 3, 'with_bad': 0, 'bad_frames': 0, 'committed': 180349, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+elapsed_s 651.4970500469208

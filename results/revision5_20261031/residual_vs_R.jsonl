@@ -1,0 +1,26 @@
+{"seed": 302, "R": 4.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 21.13, "len_equal": true, "sec": 401.5}
+{"seed": 301, "R": 4.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 16.37, "len_equal": true, "sec": 406.6}
+{"seed": 303, "R": 4.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 12.43, "len_equal": true, "sec": 405.6}
+{"seed": 302, "R": 30.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 21.13, "len_equal": true, "sec": 1620.2}
+{"seed": 301, "R": 30.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 16.37, "len_equal": true, "sec": 1648.2}
+{"seed": 304, "R": 4.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 28.57, "len_equal": true, "sec": 417.1}
+{"seed": 306, "R": 4.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 22.38, "len_equal": true, "sec": 417.2}
+{"seed": 307, "R": 4.0, "committed_bad": 7, "final_bad": 7, "first_bad_s": [244.83, 244.84, 244.85, 244.86, 244.87, 244.88], "stretch_of_first_bad": {"kind": "real", "start_s": 230.36, "len_s": 14.52, "offset_in_stretch_s": 14.47}, "longest_silence_s": 29.09, "len_equal": true, "sec": 424.3}
+{"seed": 305, "R": 4.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 22.99, "len_equal": true, "sec": 429.0}
+{"seed": 309, "R": 4.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 29.53, "len_equal": true, "sec": 428.4}
+{"seed": 308, "R": 4.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 20.52, "len_equal": true, "sec": 435.5}
+{"seed": 311, "R": 4.0, "committed_bad": 7, "final_bad": 7, "first_bad_s": [358.14, 358.15, 358.16, 358.17, 358.18, 358.19], "stretch_of_first_bad": {"kind": "real", "start_s": 343.67, "len_s": 14.52, "offset_in_stretch_s": 14.47}, "longest_silence_s": 27.96, "len_equal": true, "sec": 391.0}
+{"seed": 310, "R": 4.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 20.3, "len_equal": true, "sec": 399.7}
+{"seed": 312, "R": 4.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 16.78, "len_equal": true, "sec": 403.3}
+{"seed": 304, "R": 30.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 28.57, "len_equal": true, "sec": 1556.1}
+{"seed": 306, "R": 30.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 22.38, "len_equal": true, "sec": 1582.2}
+{"seed": 307, "R": 30.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 29.09, "len_equal": true, "sec": 1589.2}
+{"seed": 303, "R": 30.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 12.43, "len_equal": true, "sec": 1607.6}
+{"seed": 305, "R": 30.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 22.99, "len_equal": true, "sec": 1607.7}
+{"seed": 309, "R": 30.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 29.53, "len_equal": true, "sec": 1604.3}
+{"seed": 310, "R": 30.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 20.3, "len_equal": true, "sec": 1608.4}
+{"seed": 308, "R": 30.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 20.52, "len_equal": true, "sec": 1626.2}
+{"seed": 311, "R": 30.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 27.96, "len_equal": true, "sec": 1385.4}
+{"seed": 312, "R": 30.0, "committed_bad": 0, "final_bad": 0, "first_bad_s": [], "stretch_of_first_bad": null, "longest_silence_s": 16.78, "len_equal": true, "sec": 1378.5}
+{"seed": 311, "R": 12.0, "committed_bad": 7, "final_bad": 7, "first_bad_s": [358.14, 358.15, 358.16, 358.17, 358.18, 358.19], "stretch_of_first_bad": {"kind": "real", "start_s": 343.67, "len_s": 14.52, "offset_in_stretch_s": 14.47}, "longest_silence_s": 27.96, "len_equal": true, "sec": 495.5}
+{"seed": 307, "R": 12.0, "committed_bad": 7, "final_bad": 7, "first_bad_s": [244.83, 244.84, 244.85, 244.86, 244.87, 244.88], "stretch_of_first_bad": {"kind": "real", "start_s": 230.36, "len_s": 14.52, "offset_in_stretch_s": 14.47}, "longest_silence_s": 29.09, "len_equal": true, "sec": 502.3}

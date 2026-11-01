@@ -1,0 +1,52 @@
+0 2379 {'signal': 'BAQ_001_03_16_a111', 'L': 2.0, 'R': 3.0, 'part': 'tick', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+99 2379 {'signal': 'BAQ_001_03_16_a23', 'L': 3.0, 'R': 2.0, 'part': 'tick', 'bad_frames': 24, 'final_bad_frames': 24, 'max_abs_f0_st': 12.09999942779541}
+100 2379 {'signal': 'BAQ_001_03_16_a23', 'L': 3.0, 'R': 2.0, 'part': 'rand', 'bad_frames': 24, 'final_bad_frames': 24, 'max_abs_f0_st': 12.09999942779541}
+101 2379 {'signal': 'BAQ_001_03_16_a23', 'L': 3.0, 'R': 2.0, 'part': 'tiny', 'bad_frames': 24, 'final_bad_frames': 24, 'max_abs_f0_st': 12.09999942779541}
+120 2379 {'signal': 'BAQ_001_03_16_a24', 'L': 2.0, 'R': 3.0, 'part': 'tick', 'bad_frames': 7, 'final_bad_frames': 7, 'max_abs_f0_st': 1.143587589263916}
+200 2379 {'signal': 'BAQ_001_03_16_a32', 'L': 3.0, 'R': 3.0, 'part': 'tiny', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+300 2379 {'signal': 'BUE_001_03_19_a106', 'L': 3.0, 'R': 4.0, 'part': 'tick', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+400 2379 {'signal': 'BUE_001_03_19_a1149', 'L': 4.0, 'R': 4.0, 'part': 'rand', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+500 2379 {'signal': 'BUE_001_03_19_a147', 'L': 6.0, 'R': 3.0, 'part': 'tiny', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+600 2379 {'signal': 'BUE_001_03_19_a203', 'L': 2.0, 'R': 3.0, 'part': 'tick', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+700 2379 {'signal': 'BUE_001_03_19_a277', 'L': 3.0, 'R': 2.0, 'part': 'rand', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+800 2379 {'signal': 'BUE_001_03_19_a381', 'L': 3.0, 'R': 3.0, 'part': 'tiny', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+900 2379 {'signal': 'BUE_001_03_19_a527', 'L': 3.0, 'R': 4.0, 'part': 'tick', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+1000 2379 {'signal': 'BUE_001_03_19_a545', 'L': 4.0, 'R': 4.0, 'part': 'rand', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+1100 2379 {'signal': 'BUE_001_03_19_a649', 'L': 6.0, 'R': 3.0, 'part': 'tiny', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+1200 2379 {'signal': 'BUE_001_03_19_a868', 'L': 2.0, 'R': 3.0, 'part': 'tick', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+1300 2379 {'signal': 'HAV_001_02_12_a131', 'L': 3.0, 'R': 2.0, 'part': 'rand', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+1400 2379 {'signal': 'HAV_001_02_12_a212', 'L': 3.0, 'R': 3.0, 'part': 'tiny', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+1500 2379 {'signal': 'HAV_001_02_12_a230', 'L': 3.0, 'R': 4.0, 'part': 'tick', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+1600 2379 {'signal': 'HAV_001_02_12_a272', 'L': 4.0, 'R': 4.0, 'part': 'rand', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+1700 2379 {'signal': 'HAV_001_02_12_a94', 'L': 6.0, 'R': 3.0, 'part': 'tiny', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+1800 2379 {'signal': 'MEX_001_02_15_a20', 'L': 2.0, 'R': 3.0, 'part': 'tick', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+1900 2379 {'signal': 'MEX_001_02_15_a320', 'L': 3.0, 'R': 2.0, 'part': 'rand', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+2000 2379 {'signal': 'MEX_001_02_15_a393', 'L': 3.0, 'R': 3.0, 'part': 'tiny', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+2100 2379 {'signal': 'MEX_001_02_15_a582', 'L': 3.0, 'R': 4.0, 'part': 'tick', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+2200 2379 {'signal': 'MEX_001_02_15_a694', 'L': 4.0, 'R': 4.0, 'part': 'rand', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+2300 2379 {'signal': 'MEX_001_02_15_a734', 'L': 6.0, 'R': 3.0, 'part': 'tiny', 'bad_frames': 0, 'final_bad_frames': 0, 'max_abs_f0_st': 0.0}
+2:3|rand {'jobs': 101, 'with_bad': 0, 'bad_frames': 0, 'committed': 169821, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+2:3|tick {'jobs': 101, 'with_bad': 1, 'bad_frames': 7, 'committed': 169821, 'max_abs_f0_st': 1.143587589263916, 'final_bad_frames': 7}
+2:3|tiny {'jobs': 101, 'with_bad': 0, 'bad_frames': 0, 'committed': 165296, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+3:2|rand {'jobs': 98, 'with_bad': 1, 'bad_frames': 24, 'committed': 116236, 'max_abs_f0_st': 12.09999942779541, 'final_bad_frames': 24}
+3:2|tick {'jobs': 98, 'with_bad': 1, 'bad_frames': 24, 'committed': 116236, 'max_abs_f0_st': 12.09999942779541, 'final_bad_frames': 24}
+3:2|tiny {'jobs': 98, 'with_bad': 1, 'bad_frames': 24, 'committed': 111827, 'max_abs_f0_st': 12.09999942779541, 'final_bad_frames': 24}
+3:3|rand {'jobs': 101, 'with_bad': 0, 'bad_frames': 0, 'committed': 169821, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+3:3|tick {'jobs': 101, 'with_bad': 0, 'bad_frames': 0, 'committed': 169821, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+3:3|tiny {'jobs': 101, 'with_bad': 0, 'bad_frames': 0, 'committed': 165296, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+3:4|rand {'jobs': 101, 'with_bad': 0, 'bad_frames': 0, 'committed': 159721, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+3:4|tick {'jobs': 101, 'with_bad': 0, 'bad_frames': 0, 'committed': 159721, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+3:4|tiny {'jobs': 101, 'with_bad': 0, 'bad_frames': 0, 'committed': 155196, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+3:6|rand {'jobs': 98, 'with_bad': 0, 'bad_frames': 0, 'committed': 77036, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+3:6|tick {'jobs': 98, 'with_bad': 0, 'bad_frames': 0, 'committed': 77036, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+3:6|tiny {'jobs': 98, 'with_bad': 0, 'bad_frames': 0, 'committed': 72627, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+4:3|rand {'jobs': 98, 'with_bad': 0, 'bad_frames': 0, 'committed': 106436, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+4:3|tick {'jobs': 98, 'with_bad': 0, 'bad_frames': 0, 'committed': 106436, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+4:3|tiny {'jobs': 98, 'with_bad': 0, 'bad_frames': 0, 'committed': 102027, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+4:4|rand {'jobs': 98, 'with_bad': 0, 'bad_frames': 0, 'committed': 96636, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+4:4|tick {'jobs': 98, 'with_bad': 0, 'bad_frames': 0, 'committed': 96636, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+4:4|tiny {'jobs': 98, 'with_bad': 0, 'bad_frames': 0, 'committed': 92227, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+6:3|rand {'jobs': 98, 'with_bad': 0, 'bad_frames': 0, 'committed': 106436, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+6:3|tick {'jobs': 98, 'with_bad': 0, 'bad_frames': 0, 'committed': 106436, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+6:3|tiny {'jobs': 98, 'with_bad': 0, 'bad_frames': 0, 'committed': 102027, 'max_abs_f0_st': 0.0, 'final_bad_frames': 0}
+elapsed_s 1633.526520729065

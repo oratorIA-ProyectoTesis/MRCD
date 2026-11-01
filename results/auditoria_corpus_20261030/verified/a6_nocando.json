@@ -1,0 +1,214 @@
+{
+  "root": "<CORPORA_ROOT>\\02_NOCANDO_ES",
+  "mp3_files": 33,
+  "mp3_bytes": 121651119,
+  "transcripts_ts": 40,
+  "annotations_tsa": 39,
+  "textgrids": 14,
+  "audio_distinct_speakers": 11,
+  "transcript_distinct_speakers": 14,
+  "speaker_ids_audio": [
+    "berta",
+    "carmen",
+    "cristina-mem",
+    "enrique",
+    "enrique2",
+    "gemma",
+    "iris",
+    "jessica3-mem",
+    "maria",
+    "maribel",
+    "nuria"
+  ],
+  "textgrid_files": {
+    "berta_es_1.TextGrid": {
+      "tiers": [
+        "transcript",
+        "annotation"
+      ],
+      "intervals_total": 81,
+      "intervals_nonempty": 77
+    },
+    "berta_es_2.TextGrid": {
+      "tiers": [
+        "transcript",
+        "annotation"
+      ],
+      "intervals_total": 168,
+      "intervals_nonempty": 130
+    },
+    "berta_es_3.TextGrid": {
+      "tiers": [
+        "transcript",
+        "annotation"
+      ],
+      "intervals_total": 158,
+      "intervals_nonempty": 114
+    },
+    "carmen_es_1.TextGrid": {
+      "tiers": [
+        "transcription",
+        "annotation"
+      ],
+      "intervals_total": 348,
+      "intervals_nonempty": 235
+    },
+    "carmen_es_2.TextGrid": {
+      "tiers": [
+        "Tras",
+        "syntax"
+      ],
+      "intervals_total": 299,
+      "intervals_nonempty": 252
+    },
+    "carmen_es_3.TextGrid": {
+      "tiers": [
+        "transcript",
+        "annotation"
+      ],
+      "intervals_total": 354,
+      "intervals_nonempty": 262
+    },
+    "enrique_es_1.TextGrid": {
+      "tiers": [
+        "transcript",
+        "annotation"
+      ],
+      "intervals_total": 236,
+      "intervals_nonempty": 197
+    },
+    "enrique_es_2.TextGrid": {
+      "tiers": [
+        "transcript",
+        "annotation"
+      ],
+      "intervals_total": 198,
+      "intervals_nonempty": 156
+    },
+    "enrique_es_3.TextGrid": {
+      "tiers": [
+        "transcript",
+        "annotation"
+      ],
+      "intervals_total": 278,
+      "intervals_nonempty": 214
+    },
+    "maria_es_2.TextGrid": {
+      "tiers": [
+        "Transcript",
+        "annotation"
+      ],
+      "intervals_total": 116,
+      "intervals_nonempty": 88
+    },
+    "maria_es_3.TextGrid": {
+      "tiers": [
+        "Transcript",
+        "annotation"
+      ],
+      "intervals_total": 104,
+      "intervals_nonempty": 72
+    },
+    "nuria_es_1.TextGrid": {
+      "tiers": [
+        "transcription",
+        "annotation"
+      ],
+      "intervals_total": 220,
+      "intervals_nonempty": 157
+    },
+    "nuria_es_2.TextGrid": {
+      "tiers": [
+        "transcript",
+        "annotation"
+      ],
+      "intervals_total": 154,
+      "intervals_nonempty": 115
+    },
+    "nuria_es_3.TextGrid": {
+      "tiers": [
+        "transcript",
+        "annotation"
+      ],
+      "intervals_total": 270,
+      "intervals_nonempty": 213
+    }
+  },
+  "textgrid_total_nonempty_intervals": 2282,
+  "transcript_segments": 3801,
+  "segments_with": {
+    "underscore_suffix": 560,
+    "hash": 82,
+    "hm_token": 165,
+    "square_bracket_word": 91
+  },
+  "token_marks": {
+    "underscore_suffix_tokens": 643,
+    "hm_eh_tokens": 175
+  },
+  "tsa_nocans_label_counts_top": [
+    [
+      "nsbj",
+      895
+    ],
+    [
+      "nsbj_c",
+      368
+    ],
+    [
+      "sbjinv",
+      241
+    ],
+    [
+      "pres",
+      91
+    ],
+    [
+      "sbj-sep",
+      88
+    ],
+    [
+      "impers",
+      86
+    ],
+    [
+      "arbnsbj",
+      25
+    ],
+    [
+      "cldbl",
+      24
+    ],
+    [
+      "narg",
+      16
+    ],
+    [
+      "impersv",
+      11
+    ],
+    [
+      "pscleft",
+      10
+    ],
+    [
+      "cldbl,nsbj",
+      9
+    ],
+    [
+      "cldbl,nsbj_c",
+      8
+    ],
+    [
+      "obj-sep",
+      8
+    ],
+    [
+      "inv-pscleft",
+      6
+    ]
+  ],
+  "licence": "CC BY-NC-SA 3.0 (declared on NOCANDO site)",
+  "convention_documented_locally": false,
+  "note": "'_' / 'hm' / '#' are transcription traits; their convention is NOT documented in the downloaded files -> not accepted as labels"
+}

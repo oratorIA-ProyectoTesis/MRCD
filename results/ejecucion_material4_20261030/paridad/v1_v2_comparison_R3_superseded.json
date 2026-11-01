@@ -1,0 +1,50 @@
+{
+ "clips": 32,
+ "contained_windows_offline": 105,
+ "coverage_contained_windows": {
+  "v1": 105,
+  "v2_prov": 105,
+  "v2_final": 105,
+  "offline": 105
+ },
+ "confusion": {
+  "v1": {
+   "TP": 4,
+   "FP": 1,
+   "FN": 12,
+   "TN": 15
+  },
+  "v2_prov": {
+   "TP": 4,
+   "FP": 1,
+   "FN": 12,
+   "TN": 15
+  },
+  "v2_final": {
+   "TP": 3,
+   "FP": 1,
+   "FN": 13,
+   "TN": 15
+  },
+  "offline": {
+   "TP": 3,
+   "FP": 1,
+   "FN": 13,
+   "TN": 15
+  }
+ },
+ "decision_flips_vs_offline": {
+  "v1": 1,
+  "v2_prov": 1,
+  "v2_final": 0,
+  "offline": 0
+ },
+ "v1_vs_v2_provisional_clips_with_difference": 0,
+ "v2_final_windows_with_prob_difference_vs_offline": 0,
+ "provisional_latency_after_window_end_s": {
+  "median": 3.0,
+  "p95": 3.0,
+  "max": 3.0
+ },
+ "elapsed_s": 353.4725253582001
+}

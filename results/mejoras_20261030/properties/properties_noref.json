@@ -1,0 +1,437 @@
+{
+ "n_units": 120,
+ "units_source": "DIHANA fold 4 (tune), seeded sample, ASR from frozen cache",
+ "determinism": {
+  "repeat_same_threads": {
+   "max_abs_prob_diff": 3.4924596548080444e-10,
+   "units_with_any_window_argmax_change": 0
+  },
+  "torch_threads_1_vs_2": {
+   "max_abs_prob_diff": 2.384185791015625e-07,
+   "units_with_any_window_argmax_change": 0
+  },
+  "torch_threads_4_vs_2": {
+   "max_abs_prob_diff": 1.7881393432617188e-07,
+   "units_with_any_window_argmax_change": 0
+  }
+ },
+ "perturbation": {
+  "noise_snr30": {
+   "window_argmax_agreement": 0.9366197183098591,
+   "max_abs_prob_diff": 0.6763595342636108,
+   "unit_emission_flip_rate": {
+    "filler_word": 0.008333333333333333,
+    "prolongation": 0.016666666666666666,
+    "repetition": 0.008333333333333333,
+    "block": 0.025,
+    "revision": 0.0,
+    "rhetorical_pause": 0.05,
+    "neutral_pause": 0.08333333333333333
+   },
+   "unit_emission_rate_before_after": {
+    "block": [
+     0.10833333333333334,
+     0.11666666666666667
+    ],
+    "rhetorical_pause": [
+     0.4083333333333333,
+     0.35833333333333334
+    ],
+    "neutral_pause": [
+     0.325,
+     0.3416666666666667
+    ]
+   }
+  },
+  "noise_snr20": {
+   "window_argmax_agreement": 0.8967136150234741,
+   "max_abs_prob_diff": 0.753530740737915,
+   "unit_emission_flip_rate": {
+    "filler_word": 0.008333333333333333,
+    "prolongation": 0.025,
+    "repetition": 0.008333333333333333,
+    "block": 0.03333333333333333,
+    "revision": 0.0,
+    "rhetorical_pause": 0.08333333333333333,
+    "neutral_pause": 0.14166666666666666
+   },
+   "unit_emission_rate_before_after": {
+    "block": [
+     0.10833333333333334,
+     0.125
+    ],
+    "rhetorical_pause": [
+     0.4083333333333333,
+     0.375
+    ],
+    "neutral_pause": [
+     0.325,
+     0.31666666666666665
+    ]
+   }
+  },
+  "gain_x0.5": {
+   "window_argmax_agreement": 0.9460093896713615,
+   "max_abs_prob_diff": 0.713853120803833,
+   "unit_emission_flip_rate": {
+    "filler_word": 0.0,
+    "prolongation": 0.0,
+    "repetition": 0.0,
+    "block": 0.016666666666666666,
+    "revision": 0.0,
+    "rhetorical_pause": 0.041666666666666664,
+    "neutral_pause": 0.058333333333333334
+   },
+   "unit_emission_rate_before_after": {
+    "block": [
+     0.10833333333333334,
+     0.10833333333333334
+    ],
+    "rhetorical_pause": [
+     0.4083333333333333,
+     0.4
+    ],
+    "neutral_pause": [
+     0.325,
+     0.3333333333333333
+    ]
+   }
+  },
+  "gain_x2": {
+   "window_argmax_agreement": 0.9272300469483568,
+   "max_abs_prob_diff": 0.8478588461875916,
+   "unit_emission_flip_rate": {
+    "filler_word": 0.016666666666666666,
+    "prolongation": 0.016666666666666666,
+    "repetition": 0.0,
+    "block": 0.03333333333333333,
+    "revision": 0.0,
+    "rhetorical_pause": 0.041666666666666664,
+    "neutral_pause": 0.09166666666666666
+   },
+   "unit_emission_rate_before_after": {
+    "block": [
+     0.10833333333333334,
+     0.14166666666666666
+    ],
+    "rhetorical_pause": [
+     0.4083333333333333,
+     0.38333333333333336
+    ],
+    "neutral_pause": [
+     0.325,
+     0.3
+    ]
+   }
+  },
+  "gain_x0.25": {
+   "window_argmax_agreement": 0.8474178403755869,
+   "max_abs_prob_diff": 0.8693787455558777,
+   "unit_emission_flip_rate": {
+    "filler_word": 0.008333333333333333,
+    "prolongation": 0.075,
+    "repetition": 0.0,
+    "block": 0.03333333333333333,
+    "revision": 0.0,
+    "rhetorical_pause": 0.125,
+    "neutral_pause": 0.125
+   },
+   "unit_emission_rate_before_after": {
+    "block": [
+     0.10833333333333334,
+     0.10833333333333334
+    ],
+    "rhetorical_pause": [
+     0.4083333333333333,
+     0.4666666666666667
+    ],
+    "neutral_pause": [
+     0.325,
+     0.2833333333333333
+    ]
+   }
+  }
+ },
+ "padding": {
+  "n_short_units": 71,
+  "zero_vs_noise_floor_pad": {
+   "unit_emission_flip_rate": {
+    "filler_word": 0.028169014084507043,
+    "prolongation": 0.0,
+    "repetition": 0.0,
+    "block": 0.04225352112676056,
+    "revision": 0.0,
+    "rhetorical_pause": 0.4647887323943662,
+    "neutral_pause": 0.4225352112676056
+   },
+   "emission_rate_zero_vs_other": {
+    "block": [
+     0.07042253521126761,
+     0.08450704225352113
+    ],
+    "rhetorical_pause": [
+     0.5633802816901409,
+     0.09859154929577464
+    ],
+    "neutral_pause": [
+     0.2676056338028169,
+     0.5211267605633803
+    ]
+   }
+  },
+  "zero_pad_3s_vs_zero_pad_4.5s": {
+   "unit_emission_flip_rate": {
+    "filler_word": 0.0,
+    "prolongation": 0.0,
+    "repetition": 0.0,
+    "block": 0.028169014084507043,
+    "revision": 0.0,
+    "rhetorical_pause": 0.28169014084507044,
+    "neutral_pause": 0.4647887323943662
+   },
+   "emission_rate_zero_vs_other": {
+    "block": [
+     0.07042253521126761,
+     0.09859154929577464
+    ],
+    "rhetorical_pause": [
+     0.5633802816901409,
+     0.8450704225352113
+    ],
+    "neutral_pause": [
+     0.2676056338028169,
+     0.7323943661971831
+    ]
+   }
+  }
+ },
+ "three_state": {
+  "classification_of_emitted_labels": {
+   "block": "DISFLUENCY",
+   "filler_word": "DISFLUENCY",
+   "fluent": "FLUENT",
+   "neutral_pause": "NEUTRAL_PAUSE",
+   "prolongation": "DISFLUENCY",
+   "repetition": "DISFLUENCY",
+   "revision": "DISFLUENCY",
+   "rhetorical_pause": "RHETORICAL_PAUSE"
+  },
+  "window_label_counts": {
+   "fluent": 166,
+   "filler_word": 39,
+   "prolongation": 35,
+   "repetition": 21,
+   "block": 23,
+   "revision": 1,
+   "rhetorical_pause": 52,
+   "neutral_pause": 89
+  },
+  "state_fractions_at_thr0.5_margin0.1": {
+   "block": {
+    "present": 0.03286384976525822,
+    "uncertain": 0.01643192488262911,
+    "absent": 0.9507042253521126
+   },
+   "rhetorical_pause": {
+    "present": 0.07276995305164319,
+    "uncertain": 0.04225352112676056,
+    "absent": 0.8849765258215962
+   },
+   "neutral_pause": {
+    "present": 0.13145539906103287,
+    "uncertain": 0.07746478873239436,
+    "absent": 0.7910798122065728
+   }
+  },
+  "nan_score_is_uncertain": true,
+  "monotone_check": true
+ },
+ "dihana_emission": {
+  "n_units": 6279,
+  "units_with_pause_gt_0.4s": 532,
+  "emission_rate_unit": {
+   "filler_word": 0.11084567606306736,
+   "prolongation": 0.10543080108297499,
+   "repetition": 0.0337633381111642,
+   "block": 0.15034241121197642,
+   "revision": 0.005733397037744864,
+   "rhetorical_pause": 0.4459308807134894,
+   "neutral_pause": 0.3062589584328715
+  },
+  "window_fraction_mean": {
+   "filler_word": 0.06141009929342286,
+   "prolongation": 0.028346933300109425,
+   "repetition": 0.023222327322283295,
+   "block": 0.06448375197787226,
+   "revision": 0.003900961660380223,
+   "rhetorical_pause": 0.39167528073099334,
+   "neutral_pause": 0.20071507474760028
+  },
+  "spearman_emission_vs_max_internal_pause": {
+   "block": [
+    0.23444520034712377,
+    3.764290744565296e-79
+   ],
+   "rhetorical_pause": [
+    -0.12815964833798124,
+    2.0781339240272262e-24
+   ],
+   "neutral_pause": [
+    0.21594758345849863,
+    3.7553805168743283e-67
+   ]
+  },
+  "spearman_emission_vs_turn_duration": {
+   "block": [
+    0.34857596838308114,
+    7.686094347476538e-179
+   ],
+   "rhetorical_pause": [
+    -0.43387573188075895,
+    1.2313140975823099e-286
+   ],
+   "neutral_pause": [
+    0.2102928775517619,
+    1.0659016938242074e-63
+   ]
+  },
+  "spearman_windowfraction_vs_max_internal_pause": {
+   "block": [
+    0.2108151980857881,
+    5.1634006395004704e-64
+   ],
+   "rhetorical_pause": [
+    -0.21590997503001122,
+    3.96231882543168e-67
+   ],
+   "neutral_pause": [
+    0.13263526926790337,
+    4.836669138110171e-26
+   ]
+  },
+  "spearman_pause_vs_duration": [
+   0.5757710891789112,
+   0.0
+  ],
+  "emission_rate_by_duration_bin_and_pause_tercile": {
+   "0-1s": {
+    "n": 1561,
+    "pause_tercile_edges_s": [
+     0.0,
+     0.0
+    ],
+    "block": [
+     null,
+     null,
+     0.04356181934657271
+    ],
+    "rhetorical_pause": [
+     null,
+     null,
+     0.7162075592568866
+    ],
+    "neutral_pause": [
+     null,
+     null,
+     0.23830877642536835
+    ]
+   },
+   "1-3s": {
+    "n": 2327,
+    "pause_tercile_edges_s": [
+     0.0,
+     0.0
+    ],
+    "block": [
+     null,
+     null,
+     0.06403094112591319
+    ],
+    "rhetorical_pause": [
+     null,
+     null,
+     0.5277180919639021
+    ],
+    "neutral_pause": [
+     null,
+     null,
+     0.25655350236355823
+    ]
+   },
+   "3-6s": {
+    "n": 1501,
+    "pause_tercile_edges_s": [
+     0.0,
+     0.1
+    ],
+    "block": [
+     null,
+     0.24085365853658536,
+     0.20889748549323017
+    ],
+    "rhetorical_pause": [
+     null,
+     0.08028455284552846,
+     0.15087040618955513
+    ],
+    "neutral_pause": [
+     null,
+     0.22560975609756098,
+     0.344294003868472
+    ]
+   },
+   "6-1000000000.0s": {
+    "n": 890,
+    "pause_tercile_edges_s": [
+     0.2,
+     0.5
+    ],
+    "block": [
+     0.4025974025974026,
+     0.41533546325878595,
+     0.4595375722543353
+    ],
+    "rhetorical_pause": [
+     0.22943722943722944,
+     0.28115015974440893,
+     0.4508670520231214
+    ],
+    "neutral_pause": [
+     0.47619047619047616,
+     0.48881789137380194,
+     0.8410404624277457
+    ]
+   }
+  },
+  "descriptive_vs_reference_silent_pause_mark_p": {
+   "note": "DIHANA 'p' marks a silent pause WITHOUT duration/function: descriptive co-occurrence only, NOT a reference for these classes",
+   "n_with_p": 1388,
+   "block": [
+    0.28602305475504325,
+    0.11183806992435084
+   ],
+   "rhetorical_pause": [
+    0.2889048991354467,
+    0.49049274177059904
+   ],
+   "neutral_pause": [
+    0.45172910662824206,
+    0.26497648742588426
+   ]
+  },
+  "emission_in_padded_vs_unpadded_turns": {
+   "block": [
+    0.05581275720164609,
+    0.3040568799665412
+   ],
+   "rhetorical_pause": [
+    0.6033950617283951,
+    0.18987871183605187
+   ],
+   "neutral_pause": [
+    0.2492283950617284,
+    0.3989962358845671
+   ]
+  }
+ }
+}

@@ -1,0 +1,13 @@
+# temp clone of ORATORIA-PROYECTO@f46a2b8 (node_modules copied from the app, not installed); patch contents applied as working-tree changes; 2026-10-31
+$ node node_modules/typescript/bin/tsc -b
+exit=0
+$ node node_modules/eslint/bin/eslint.js src/shared/api src/contexts/feedback src/vite-env.d.ts
+exit=0
+$ node node_modules/vitest/vitest.mjs run   (full frontend suite)
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+ Test Files  64 passed (64)
+      Tests  649 passed (649)
+   Start at  15:41:14
+   Duration  14.00s (transform 6.97s, setup 0ms, import 20.42s, tests 5.23s, environment 157.81s)
+

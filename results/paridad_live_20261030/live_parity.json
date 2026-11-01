@@ -1,0 +1,3915 @@
+{
+ "per_clip": {
+  "BAQ_001_03_16_a12": {
+   "dur_s": 13.959,
+   "c_offline": 9.256413459777832,
+   "c_causal_final": 13.356412887573242,
+   "n_session_windows": 16,
+   "committed_frames": 1096,
+   "frame_rows_differing": 0,
+   "n_old_windows": 3,
+   "old_live": {
+    "n_windows": 3,
+    "tensors": {
+     "ac": {
+      "max": 6.59999942779541,
+      "mean": 0.055753189093743764,
+      "n_differing": 3
+     },
+     "pros": {
+      "max": 0.5662074089050293,
+      "mean": 0.027398747978387056,
+      "n_differing": 1
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.01719081401824951,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 16,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 16,
+    "tensors": {
+     "ac": {
+      "max": 5.5,
+      "mean": 0.17719167820612589,
+      "n_differing": 16
+     },
+     "pros": {
+      "max": 5.499999761581421,
+      "mean": 0.14444444080193838,
+      "n_differing": 6
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.2425880879163742,
+    "argmax_changes": 1,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "BAQ_001_03_16_a23": {
+   "dur_s": 16.21,
+   "c_offline": 12.256412506103516,
+   "c_causal_final": 11.206412315368652,
+   "n_session_windows": 21,
+   "committed_frames": 1322,
+   "frame_rows_differing": 0,
+   "n_old_windows": 8,
+   "old_live": {
+    "n_windows": 8,
+    "tensors": {
+     "ac": {
+      "max": 1.4000015258789062,
+      "mean": 0.0973750491142273,
+      "n_differing": 8
+     },
+     "pros": {
+      "max": 1.400001585483551,
+      "mean": 0.10596238873485062,
+      "n_differing": 8
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0331953763961792,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 21,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 21,
+    "tensors": {
+     "ac": {
+      "max": 11.300000011920929,
+      "mean": 0.7533110524699802,
+      "n_differing": 21
+     },
+     "pros": {
+      "max": 5.199999690055847,
+      "mean": 0.1301586905484477,
+      "n_differing": 9
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.8886291980743408,
+    "argmax_changes": 4,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "BAQ_001_03_16_a121": {
+   "dur_s": 14.28,
+   "c_offline": 0.25641244649887085,
+   "c_causal_final": 0.45641177892684937,
+   "n_session_windows": 17,
+   "committed_frames": 1129,
+   "frame_rows_differing": 0,
+   "n_old_windows": 4,
+   "old_live": {
+    "n_windows": 4,
+    "tensors": {
+     "ac": {
+      "max": 1.0,
+      "mean": 0.007150024950504303,
+      "n_differing": 4
+     },
+     "pros": {
+      "max": 0.10000038146972656,
+      "mean": 0.00930144741303391,
+      "n_differing": 4
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.008777439594268799,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 17,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 17,
+    "tensors": {
+     "ac": {
+      "max": 23.100000381469727,
+      "mean": 0.12371768563635209,
+      "n_differing": 17
+     },
+     "pros": {
+      "max": 1.9000005722045898,
+      "mean": 0.05620916000281284,
+      "n_differing": 9
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.07154247164726257,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "BAQ_001_03_16_a160": {
+   "dur_s": 16.55,
+   "c_offline": 15.456413269042969,
+   "c_causal_final": 15.256412506103516,
+   "n_session_windows": 22,
+   "committed_frames": 1356,
+   "frame_rows_differing": 0,
+   "n_old_windows": 9,
+   "old_live": {
+    "n_windows": 9,
+    "tensors": {
+     "ac": {
+      "max": 1.0,
+      "mean": 0.025414861891004774,
+      "n_differing": 8
+     },
+     "pros": {
+      "max": 0.5,
+      "mean": 0.028801944152808484,
+      "n_differing": 5
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 1.0,
+      "mean": 0.002777777777777778,
+      "n_differing": 1
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.03053760528564453,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 22,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 22,
+    "tensors": {
+     "ac": {
+      "max": 1.3999996185302734,
+      "mean": 0.040975748235529116,
+      "n_differing": 18
+     },
+     "pros": {
+      "max": 0.8999976962804794,
+      "mean": 0.013636367188559638,
+      "n_differing": 7
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.005591273307800293,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "BUE_001_03_19_a126": {
+   "dur_s": 13.08,
+   "c_offline": 14.2564115524292,
+   "c_causal_final": 14.956412315368652,
+   "n_session_windows": 15,
+   "committed_frames": 1009,
+   "frame_rows_differing": 0,
+   "n_old_windows": 2,
+   "old_live": {
+    "n_windows": 2,
+    "tensors": {
+     "ac": {
+      "max": 1.0,
+      "mean": 0.0033333333333333335,
+      "n_differing": 1
+     },
+     "pros": {
+      "max": 6.33306448161602,
+      "mean": 0.36101367986864513,
+      "n_differing": 1
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 1.0,
+      "mean": 0.0125,
+      "n_differing": 1
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.15215831995010376,
+    "argmax_changes": 1
+   },
+   "session_oracle": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 1.800002098083496,
+      "mean": 0.11178685099283854,
+      "n_differing": 15
+     },
+     "pros": {
+      "max": 0.9000024795532227,
+      "mean": 0.052963062568947124,
+      "n_differing": 10
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.06595146656036377,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "BUE_001_03_19_a106": {
+   "dur_s": 13.66,
+   "c_offline": 15.756412506103516,
+   "c_causal_final": 15.756412506103516,
+   "n_session_windows": 16,
+   "committed_frames": 1067,
+   "frame_rows_differing": 0,
+   "n_old_windows": 3,
+   "old_live": {
+    "n_windows": 3,
+    "tensors": {
+     "ac": {
+      "max": 1.0,
+      "mean": 0.03115557607014974,
+      "n_differing": 3
+     },
+     "pros": {
+      "max": 0.40000002086162567,
+      "mean": 0.02814816352393892,
+      "n_differing": 3
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.04436659812927246,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 16,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 16,
+    "tensors": {
+     "ac": {
+      "max": 0.1999988555908203,
+      "mean": 0.011412500063578288,
+      "n_differing": 9
+     },
+     "pros": {
+      "max": 0.1999988555908203,
+      "mean": 0.005555550257364909,
+      "n_differing": 6
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.008690178394317627,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "BUE_001_03_19_a194": {
+   "dur_s": 15.939,
+   "c_offline": 13.956413269042969,
+   "c_causal_final": 14.056413650512695,
+   "n_session_windows": 20,
+   "committed_frames": 1294,
+   "frame_rows_differing": 0,
+   "n_old_windows": 7,
+   "old_live": {
+    "n_windows": 7,
+    "tensors": {
+     "ac": {
+      "max": 12.556414604187012,
+      "mean": 0.03470271465519355,
+      "n_differing": 7
+     },
+     "pros": {
+      "max": 3.6785659790039062,
+      "mean": 0.07590408552260626,
+      "n_differing": 4
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.26663142442703247,
+    "argmax_changes": 1
+   },
+   "session_oracle": {
+    "n_windows": 20,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 20,
+    "tensors": {
+     "ac": {
+      "max": 1.7000007629394531,
+      "mean": 0.09930340099334717,
+      "n_differing": 18
+     },
+     "pros": {
+      "max": 1.5000018626451492,
+      "mean": 0.03833335658742322,
+      "n_differing": 6
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.06704992055892944,
+    "argmax_changes": 1,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "BUE_001_03_19_a227": {
+   "dur_s": 14.051,
+   "c_offline": 13.756413459777832,
+   "c_causal_final": 13.856411933898926,
+   "n_session_windows": 17,
+   "committed_frames": 1106,
+   "frame_rows_differing": 0,
+   "n_old_windows": 4,
+   "old_live": {
+    "n_windows": 4,
+    "tensors": {
+     "ac": {
+      "max": 1.0,
+      "mean": 0.027964879231217005,
+      "n_differing": 3
+     },
+     "pros": {
+      "max": 1.6416146755218506,
+      "mean": 0.08723699254915118,
+      "n_differing": 3
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 1.0,
+      "mean": 0.00625,
+      "n_differing": 1
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.07037311792373657,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 17,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 17,
+    "tensors": {
+     "ac": {
+      "max": 1.149998664855957,
+      "mean": 0.10394885844810337,
+      "n_differing": 17
+     },
+     "pros": {
+      "max": 0.9999990463256836,
+      "mean": 0.03986922081779031,
+      "n_differing": 10
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.10840404033660889,
+    "argmax_changes": 1,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "BUE_001_03_19_a203": {
+   "dur_s": 14.363,
+   "c_offline": 9.856413841247559,
+   "c_causal_final": 9.656412124633789,
+   "n_session_windows": 17,
+   "committed_frames": 1137,
+   "frame_rows_differing": 0,
+   "n_old_windows": 4,
+   "old_live": {
+    "n_windows": 4,
+    "tensors": {
+     "ac": {
+      "max": 11.056410789489746,
+      "mean": 0.016229974211193623,
+      "n_differing": 1
+     },
+     "pros": {
+      "max": 1.0967153310775757,
+      "mean": 0.034075213596224785,
+      "n_differing": 1
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.022158443927764893,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 17,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 17,
+    "tensors": {
+     "ac": {
+      "max": 1.3000011444091797,
+      "mean": 0.07149815349952847,
+      "n_differing": 16
+     },
+     "pros": {
+      "max": 1.100001335144043,
+      "mean": 0.0235294454237994,
+      "n_differing": 9
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.1427093744277954,
+    "argmax_changes": 1,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "BUE_001_03_19_a272": {
+   "dur_s": 16.42,
+   "c_offline": 13.556411743164062,
+   "c_causal_final": 12.956413269042969,
+   "n_session_windows": 21,
+   "committed_frames": 1343,
+   "frame_rows_differing": 0,
+   "n_old_windows": 8,
+   "old_live": {
+    "n_windows": 8,
+    "tensors": {
+     "ac": {
+      "max": 1.0,
+      "mean": 0.05239991736412048,
+      "n_differing": 6
+     },
+     "pros": {
+      "max": 3.60575008392334,
+      "mean": 0.11589634904844894,
+      "n_differing": 4
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 1.0,
+      "mean": 0.003125,
+      "n_differing": 1
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.1372775435447693,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 21,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 21,
+    "tensors": {
+     "ac": {
+      "max": 1.2999992370605469,
+      "mean": 0.08256502514793759,
+      "n_differing": 21
+     },
+     "pros": {
+      "max": 1.299999475479126,
+      "mean": 0.03994706005015701,
+      "n_differing": 9
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.09807908535003662,
+    "argmax_changes": 2,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "BUE_001_03_19_a476": {
+   "dur_s": 16.534,
+   "c_offline": 13.956413269042969,
+   "c_causal_final": 13.356412887573242,
+   "n_session_windows": 22,
+   "committed_frames": 1354,
+   "frame_rows_differing": 0,
+   "n_old_windows": 9,
+   "old_live": {
+    "n_windows": 9,
+    "tensors": {
+     "ac": {
+      "max": 18.856414794921875,
+      "mean": 0.07639381210761213,
+      "n_differing": 8
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.08881044387817383,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 22,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 22,
+    "tensors": {
+     "ac": {
+      "max": 4.0,
+      "mean": 0.19129400207057143,
+      "n_differing": 22
+     },
+     "pros": {
+      "max": 4.0,
+      "mean": 0.07247476294787243,
+      "n_differing": 8
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.2562403082847595,
+    "argmax_changes": 2,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "BUE_001_03_19_a533": {
+   "dur_s": 13.126,
+   "c_offline": 13.956413269042969,
+   "c_causal_final": 13.856411933898926,
+   "n_session_windows": 15,
+   "committed_frames": 1013,
+   "frame_rows_differing": 0,
+   "n_old_windows": 2,
+   "old_live": {
+    "n_windows": 2,
+    "tensors": {
+     "ac": {
+      "max": 18.856412887573242,
+      "mean": 0.04563433174509555,
+      "n_differing": 2
+     },
+     "pros": {
+      "max": 2.6234948337078094,
+      "mean": 0.1559567308674256,
+      "n_differing": 2
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0836668610572815,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 1.7999992370605469,
+      "mean": 0.07145775447421604,
+      "n_differing": 15
+     },
+     "pros": {
+      "max": 1.7999992370605469,
+      "mean": 0.03703701584427445,
+      "n_differing": 11
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.07481718063354492,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "BUE_001_03_19_a678": {
+   "dur_s": 13.373,
+   "c_offline": 12.556414604187012,
+   "c_causal_final": 12.456411361694336,
+   "n_session_windows": 15,
+   "committed_frames": 1038,
+   "frame_rows_differing": 0,
+   "n_old_windows": 2,
+   "old_live": {
+    "n_windows": 2,
+    "tensors": {
+     "ac": {
+      "max": 11.2564115524292,
+      "mean": 0.041390635031896335,
+      "n_differing": 2
+     },
+     "pros": {
+      "max": 1.107142448425293,
+      "mean": 0.1219994326432546,
+      "n_differing": 2
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.007823098450899124,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.899998664855957,
+      "mean": 0.08092865943908692,
+      "n_differing": 14
+     },
+     "pros": {
+      "max": 0.899998664855957,
+      "mean": 0.02518511171694155,
+      "n_differing": 5
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.06654638051986694,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "BUE_001_03_19_a880": {
+   "dur_s": 15.978,
+   "c_offline": 12.356412887573242,
+   "c_causal_final": 12.556414604187012,
+   "n_session_windows": 20,
+   "committed_frames": 1298,
+   "frame_rows_differing": 0,
+   "n_old_windows": 7,
+   "old_live": {
+    "n_windows": 7,
+    "tensors": {
+     "ac": {
+      "max": 1.7000007629394531,
+      "mean": 0.04341008399577723,
+      "n_differing": 7
+     },
+     "pros": {
+      "max": 9.761881828308105,
+      "mean": 0.21542690315889934,
+      "n_differing": 6
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.016763150691986084,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 20,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 20,
+    "tensors": {
+     "ac": {
+      "max": 1.0,
+      "mean": 0.05836334702173869,
+      "n_differing": 16
+     },
+     "pros": {
+      "max": 0.9000005722045898,
+      "mean": 0.025000009271833632,
+      "n_differing": 10
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0402829647064209,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "BUE_001_03_19_a868": {
+   "dur_s": 15.12,
+   "c_offline": 10.856412887573242,
+   "c_causal_final": 10.956412315368652,
+   "n_session_windows": 19,
+   "committed_frames": 1213,
+   "frame_rows_differing": 0,
+   "n_old_windows": 6,
+   "old_live": {
+    "n_windows": 6,
+    "tensors": {
+     "ac": {
+      "max": 1.0,
+      "mean": 0.011233304129706488,
+      "n_differing": 5
+     },
+     "pros": {
+      "max": 4.178584456443787,
+      "mean": 0.31105361547735,
+      "n_differing": 5
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.16981521248817444,
+    "argmax_changes": 1
+   },
+   "session_oracle": {
+    "n_windows": 19,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 1,
+    "decision_offline_same_windows": 1
+   },
+   "session_causal": {
+    "n_windows": 19,
+    "tensors": {
+     "ac": {
+      "max": 0.8000011444091797,
+      "mean": 0.06591926454242907,
+      "n_differing": 19
+     },
+     "pros": {
+      "max": 0.8000002168118954,
+      "mean": 0.029239766844357664,
+      "n_differing": 11
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.014553263783454895,
+    "argmax_changes": 0,
+    "decision_live": 1,
+    "decision_offline_same_windows": 1
+   }
+  },
+  "BUE_001_03_19_a1149": {
+   "dur_s": 16.717,
+   "c_offline": 11.956413269042969,
+   "c_causal_final": 11.956413269042969,
+   "n_session_windows": 22,
+   "committed_frames": 1372,
+   "frame_rows_differing": 0,
+   "n_old_windows": 9,
+   "old_live": {
+    "n_windows": 9,
+    "tensors": {
+     "ac": {
+      "max": 1.0,
+      "mean": 0.0342432939377096,
+      "n_differing": 8
+     },
+     "pros": {
+      "max": 0.9285736083984375,
+      "mean": 0.05750586294833525,
+      "n_differing": 7
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.025768697261810303,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 22,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 22,
+    "tensors": {
+     "ac": {
+      "max": 1.8999996185302734,
+      "mean": 0.1025423221877127,
+      "n_differing": 20
+     },
+     "pros": {
+      "max": 1.8999996185302734,
+      "mean": 0.05707068274719546,
+      "n_differing": 9
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.1805623471736908,
+    "argmax_changes": 1,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "HAV_001_02_12_a9": {
+   "dur_s": 13.53,
+   "c_offline": 15.956413269042969,
+   "c_causal_final": 15.956413269042969,
+   "n_session_windows": 16,
+   "committed_frames": 1054,
+   "frame_rows_differing": 0,
+   "n_old_windows": 3,
+   "old_live": {
+    "n_windows": 3,
+    "tensors": {
+     "ac": {
+      "max": 0.10000038146972656,
+      "mean": 0.00553335444132487,
+      "n_differing": 1
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0017563402652740479,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 16,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 16,
+    "tensors": {
+     "ac": {
+      "max": 1.2999992370605469,
+      "mean": 0.09530625184377034,
+      "n_differing": 14
+     },
+     "pros": {
+      "max": 1.2999989986419678,
+      "mean": 0.03472220069832272,
+      "n_differing": 5
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.05612272024154663,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "HAV_001_02_12_a93": {
+   "dur_s": 13.266,
+   "c_offline": 8.456413269042969,
+   "c_causal_final": 8.556413650512695,
+   "n_session_windows": 15,
+   "committed_frames": 1027,
+   "frame_rows_differing": 0,
+   "n_old_windows": 2,
+   "old_live": {
+    "n_windows": 2,
+    "tensors": {
+     "ac": {
+      "max": 6.456414222717285,
+      "mean": 0.03517494822014123,
+      "n_differing": 2
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0046272873878479,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 1.599998950958252,
+      "mean": 0.058857735612657336,
+      "n_differing": 15
+     },
+     "pros": {
+      "max": 1.0999994277954102,
+      "mean": 0.019629635634245697,
+      "n_differing": 9
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0007562295068055391,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "HAV_001_02_12_a131": {
+   "dur_s": 13.275,
+   "c_offline": 14.656414031982422,
+   "c_causal_final": 14.656414031982422,
+   "n_session_windows": 15,
+   "committed_frames": 1028,
+   "frame_rows_differing": 0,
+   "n_old_windows": 2,
+   "old_live": {
+    "n_windows": 2,
+    "tensors": {
+     "ac": {
+      "max": 2.1999998092651367,
+      "mean": 0.02370091480948031,
+      "n_differing": 1
+     },
+     "pros": {
+      "max": 0.35714006423950195,
+      "mean": 0.030835542413923476,
+      "n_differing": 1
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.01674899458885193,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.5,
+      "mean": 0.025106552759806316,
+      "n_differing": 10
+     },
+     "pros": {
+      "max": 0.5,
+      "mean": 0.012962917045310692,
+      "n_differing": 6
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.007671773433685303,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "HAV_001_02_12_a213": {
+   "dur_s": 13.067,
+   "c_offline": 7.456412315368652,
+   "c_causal_final": 7.556413650512695,
+   "n_session_windows": 15,
+   "committed_frames": 1007,
+   "frame_rows_differing": 0,
+   "n_old_windows": 2,
+   "old_live": {
+    "n_windows": 2,
+    "tensors": {
+     "ac": {
+      "max": 1.1000003814697266,
+      "mean": 0.019810827447101474,
+      "n_differing": 1
+     },
+     "pros": {
+      "max": 7.607149124145508,
+      "mean": 0.5332219137085809,
+      "n_differing": 1
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.03762498497962952,
+    "argmax_changes": 1
+   },
+   "session_oracle": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.5,
+      "mean": 0.03616002442042033,
+      "n_differing": 13
+     },
+     "pros": {
+      "max": 0.4999997615814209,
+      "mean": 0.022222248713175456,
+      "n_differing": 11
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0005390048027038574,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "HAV_001_02_12_a230": {
+   "dur_s": 14.877,
+   "c_offline": 9.956413269042969,
+   "c_causal_final": 8.956413269042969,
+   "n_session_windows": 18,
+   "committed_frames": 1188,
+   "frame_rows_differing": 0,
+   "n_old_windows": 5,
+   "old_live": {
+    "n_windows": 5,
+    "tensors": {
+     "ac": {
+      "max": 21.45641326904297,
+      "mean": 0.08387083631381392,
+      "n_differing": 5
+     },
+     "pros": {
+      "max": 10.566336631774902,
+      "mean": 0.539547993739446,
+      "n_differing": 5
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.12840360403060913,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 18,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 18,
+    "tensors": {
+     "ac": {
+      "max": 2.7500009536743164,
+      "mean": 0.3144407961280258,
+      "n_differing": 18
+     },
+     "pros": {
+      "max": 2.7500008940696716,
+      "mean": 0.14660496586634789,
+      "n_differing": 13
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.22792717814445496,
+    "argmax_changes": 2,
+    "decision_live": 1,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "HAV_001_02_12_a242": {
+   "dur_s": 13.282,
+   "c_offline": 9.956413269042969,
+   "c_causal_final": 10.056412696838379,
+   "n_session_windows": 15,
+   "committed_frames": 1029,
+   "frame_rows_differing": 0,
+   "n_old_windows": 2,
+   "old_live": {
+    "n_windows": 2,
+    "tensors": {
+     "ac": {
+      "max": 7.456412315368652,
+      "mean": 0.039875606866863866,
+      "n_differing": 2
+     },
+     "pros": {
+      "max": 2.506666421890259,
+      "mean": 0.33311829964319867,
+      "n_differing": 2
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0013045668601989746,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.600001335144043,
+      "mean": 0.03236004876030816,
+      "n_differing": 12
+     },
+     "pros": {
+      "max": 0.600001335144043,
+      "mean": 0.017777811156378852,
+      "n_differing": 11
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0007695592939853668,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "HAV_001_02_12_a272": {
+   "dur_s": 13.862,
+   "c_offline": 8.256413459777832,
+   "c_causal_final": 8.156413078308105,
+   "n_session_windows": 16,
+   "committed_frames": 1087,
+   "frame_rows_differing": 0,
+   "n_old_windows": 3,
+   "old_live": {
+    "n_windows": 3,
+    "tensors": {
+     "ac": {
+      "max": 4.4564127922058105,
+      "mean": 0.019204681208357215,
+      "n_differing": 3
+     },
+     "pros": {
+      "max": 1.0265789031982422,
+      "mean": 0.1207535586975239,
+      "n_differing": 3
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.017221033573150635,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 16,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 16,
+    "tensors": {
+     "ac": {
+      "max": 1.6000003814697266,
+      "mean": 0.1265915970802307,
+      "n_differing": 16
+     },
+     "pros": {
+      "max": 1.6000003814697266,
+      "mean": 0.04861111111111111,
+      "n_differing": 9
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.04758274555206299,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "HAV_001_02_12_a316": {
+   "dur_s": 13.07,
+   "c_offline": 7.856412887573242,
+   "c_causal_final": 7.456412315368652,
+   "n_session_windows": 15,
+   "committed_frames": 1008,
+   "frame_rows_differing": 0,
+   "n_old_windows": 2,
+   "old_live": {
+    "n_windows": 2,
+    "tensors": {
+     "ac": {
+      "max": 1.0,
+      "mean": 0.002,
+      "n_differing": 1
+     },
+     "pros": {
+      "max": 5.464282989501953,
+      "mean": 0.3419978933201896,
+      "n_differing": 1
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.018778443336486816,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.7999992370605469,
+      "mean": 0.0507956174214681,
+      "n_differing": 14
+     },
+     "pros": {
+      "max": 0.40000057220458984,
+      "mean": 0.019259296854337058,
+      "n_differing": 10
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.005752205848693848,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "MEX_001_02_15_a336": {
+   "dur_s": 13.09,
+   "c_offline": 10.356412887573242,
+   "c_causal_final": 10.956412315368652,
+   "n_session_windows": 15,
+   "committed_frames": 1010,
+   "frame_rows_differing": 0,
+   "n_old_windows": 2,
+   "old_live": {
+    "n_windows": 2,
+    "tensors": {
+     "ac": {
+      "max": 1.0,
+      "mean": 0.006200064977010091,
+      "n_differing": 1
+     },
+     "pros": {
+      "max": 0.1400003433227539,
+      "mean": 0.01523684130774604,
+      "n_differing": 1
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.001762986183166504,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 2.3999996185302734,
+      "mean": 0.13837779846191406,
+      "n_differing": 14
+     },
+     "pros": {
+      "max": 1.3999996185302734,
+      "mean": 0.03555556403266059,
+      "n_differing": 7
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.10393071174621582,
+    "argmax_changes": 1,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "MEX_001_02_15_a86": {
+   "dur_s": 14.05,
+   "c_offline": 10.856412887573242,
+   "c_causal_final": 11.356412887573242,
+   "n_session_windows": 17,
+   "committed_frames": 1106,
+   "frame_rows_differing": 0,
+   "n_old_windows": 4,
+   "old_live": {
+    "n_windows": 4,
+    "tensors": {
+     "ac": {
+      "max": 1.0,
+      "mean": 0.015083288033803304,
+      "n_differing": 3
+     },
+     "pros": {
+      "max": 0.3168447017669678,
+      "mean": 0.023826553175846737,
+      "n_differing": 3
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.00021541246678680182,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 17,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 17,
+    "tensors": {
+     "ac": {
+      "max": 1.6499996185302734,
+      "mean": 0.12698626024582807,
+      "n_differing": 17
+     },
+     "pros": {
+      "max": 1.649999737739563,
+      "mean": 0.05849672537418752,
+      "n_differing": 10
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.05309709906578064,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "MEX_001_02_15_a173": {
+   "dur_s": 15.233,
+   "c_offline": 9.856413841247559,
+   "c_causal_final": 9.856413841247559,
+   "n_session_windows": 19,
+   "committed_frames": 1224,
+   "frame_rows_differing": 0,
+   "n_old_windows": 6,
+   "old_live": {
+    "n_windows": 6,
+    "tensors": {
+     "ac": {
+      "max": 9.356412887573242,
+      "mean": 0.019049809450180165,
+      "n_differing": 5
+     },
+     "pros": {
+      "max": 0.6389456987380981,
+      "mean": 0.032533582437921454,
+      "n_differing": 5
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.2993020713329315,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 19,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 1,
+    "decision_offline_same_windows": 1
+   },
+   "session_causal": {
+    "n_windows": 19,
+    "tensors": {
+     "ac": {
+      "max": 1.4999990463256836,
+      "mean": 0.07292796543188262,
+      "n_differing": 14
+     },
+     "pros": {
+      "max": 1.2999980449676514,
+      "mean": 0.03859645049822958,
+      "n_differing": 8
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.06853407621383667,
+    "argmax_changes": 1,
+    "decision_live": 1,
+    "decision_offline_same_windows": 1
+   }
+  },
+  "MEX_001_02_15_a694": {
+   "dur_s": 13.177,
+   "c_offline": 9.856413841247559,
+   "c_causal_final": 9.756412506103516,
+   "n_session_windows": 15,
+   "committed_frames": 1018,
+   "frame_rows_differing": 0,
+   "n_old_windows": 2,
+   "old_live": {
+    "n_windows": 2,
+    "tensors": {
+     "ac": {
+      "max": 10.956412315368652,
+      "mean": 0.03572806010550509,
+      "n_differing": 2
+     },
+     "pros": {
+      "max": 3.9999866485595703,
+      "mean": 0.2507189713004563,
+      "n_differing": 2
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.015107035636901855,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.6000003814697266,
+      "mean": 0.03081552170647515,
+      "n_differing": 15
+     },
+     "pros": {
+      "max": 0.4000006318092346,
+      "mean": 0.01666663885116577,
+      "n_differing": 10
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.03656119108200073,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "MEX_001_02_15_a709": {
+   "dur_s": 13.855,
+   "c_offline": 11.056412696838379,
+   "c_causal_final": 10.756413459777832,
+   "n_session_windows": 16,
+   "committed_frames": 1086,
+   "frame_rows_differing": 0,
+   "n_old_windows": 3,
+   "old_live": {
+    "n_windows": 3,
+    "tensors": {
+     "ac": {
+      "max": 16.35641098022461,
+      "mean": 0.05258905444604655,
+      "n_differing": 2
+     },
+     "pros": {
+      "max": 2.5674309730529785,
+      "mean": 0.13820185512304306,
+      "n_differing": 2
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.08116567134857178,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 16,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 16,
+    "tensors": {
+     "ac": {
+      "max": 1.5,
+      "mean": 0.16969582760334015,
+      "n_differing": 16
+     },
+     "pros": {
+      "max": 0.600000411272049,
+      "mean": 0.009722213157349162,
+      "n_differing": 3
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.03500723838806152,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "MEX_001_02_15_a630": {
+   "dur_s": 13.977,
+   "c_offline": 13.956413269042969,
+   "c_causal_final": 14.056413650512695,
+   "n_session_windows": 16,
+   "committed_frames": 1098,
+   "frame_rows_differing": 0,
+   "n_old_windows": 3,
+   "old_live": {
+    "n_windows": 3,
+    "tensors": {
+     "ac": {
+      "max": 1.5000028610229492,
+      "mean": 0.015077151419180963,
+      "n_differing": 3
+     },
+     "pros": {
+      "max": 0.4137815237045288,
+      "mean": 0.023085991541544598,
+      "n_differing": 3
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.018105626106262207,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 16,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   },
+   "session_causal": {
+    "n_windows": 16,
+    "tensors": {
+     "ac": {
+      "max": 1.5,
+      "mean": 0.10975824769337972,
+      "n_differing": 16
+     },
+     "pros": {
+      "max": 1.5,
+      "mean": 0.04652776941657066,
+      "n_differing": 9
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.232033371925354,
+    "argmax_changes": 1,
+    "decision_live": 0,
+    "decision_offline_same_windows": 0
+   }
+  },
+  "MEX_001_02_15_a724": {
+   "dur_s": 13.234,
+   "c_offline": 8.956413269042969,
+   "c_causal_final": 8.556413650512695,
+   "n_session_windows": 15,
+   "committed_frames": 1024,
+   "frame_rows_differing": 0,
+   "n_old_windows": 2,
+   "old_live": {
+    "n_windows": 2,
+    "tensors": {
+     "ac": {
+      "max": 13.156412124633789,
+      "mean": 0.053755410146899524,
+      "n_differing": 2
+     },
+     "pros": {
+      "max": 0.8928537368774414,
+      "mean": 0.11802681369913949,
+      "n_differing": 2
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.001858435571193695,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 1,
+    "decision_offline_same_windows": 1
+   },
+   "session_causal": {
+    "n_windows": 15,
+    "tensors": {
+     "ac": {
+      "max": 1.4000015258789062,
+      "mean": 0.04337781202528212,
+      "n_differing": 15
+     },
+     "pros": {
+      "max": 1.4000009894371033,
+      "mean": 0.041851875517103405,
+      "n_differing": 9
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.07080870866775513,
+    "argmax_changes": 1,
+    "decision_live": 1,
+    "decision_offline_same_windows": 1
+   }
+  },
+  "MEX_001_02_15_a765": {
+   "dur_s": 15.589,
+   "c_offline": 12.156412124633789,
+   "c_causal_final": 12.156412124633789,
+   "n_session_windows": 20,
+   "committed_frames": 1259,
+   "frame_rows_differing": 0,
+   "n_old_windows": 7,
+   "old_live": {
+    "n_windows": 7,
+    "tensors": {
+     "ac": {
+      "max": 8.200000762939453,
+      "mean": 0.0058258243128657345,
+      "n_differing": 3
+     },
+     "pros": {
+      "max": 17.85714054107666,
+      "mean": 0.3219737221324255,
+      "n_differing": 3
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0755685418844223,
+    "argmax_changes": 0
+   },
+   "session_oracle": {
+    "n_windows": 20,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0,
+    "decision_live": 1,
+    "decision_offline_same_windows": 1
+   },
+   "session_causal": {
+    "n_windows": 20,
+    "tensors": {
+     "ac": {
+      "max": 12.156412124633789,
+      "mean": 0.059107100518544516,
+      "n_differing": 17
+     },
+     "pros": {
+      "max": 0.10000038146972656,
+      "mean": 0.0005555576748318143,
+      "n_differing": 1
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.013762295246124268,
+    "argmax_changes": 0,
+    "decision_live": 1,
+    "decision_offline_same_windows": 1
+   }
+  },
+  "extra_yD9_30_70": {
+   "dur_s": 40.0,
+   "c_offline": 18.056411743164062,
+   "c_causal_final": 17.856412887573242,
+   "n_session_windows": 69,
+   "committed_frames": 3701,
+   "frame_rows_differing": 0,
+   "n_old_windows": 55,
+   "old_live": {
+    "n_windows": 55,
+    "tensors": {
+     "ac": {
+      "max": 1.1000003814697266,
+      "mean": 0.06355452742143111,
+      "n_differing": 51
+     },
+     "pros": {
+      "max": 93.82143640518188,
+      "mean": 1.007333987559935,
+      "n_differing": 16
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 1.0,
+      "mean": 0.021363636363636362,
+      "n_differing": 41
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.9506469368934631,
+    "argmax_changes": 2
+   },
+   "session_oracle": {
+    "n_windows": 69,
+    "tensors": {
+     "ac": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "pros": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.0,
+    "argmax_changes": 0
+   },
+   "session_causal": {
+    "n_windows": 69,
+    "tensors": {
+     "ac": {
+      "max": 1.5,
+      "mean": 0.05925651918862753,
+      "n_differing": 67
+     },
+     "pros": {
+      "max": 0.39999961853027344,
+      "mean": 0.009178750852839767,
+      "n_differing": 17
+     },
+     "ling": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lpos": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     },
+     "lmask": {
+      "max": 0.0,
+      "mean": 0.0,
+      "n_differing": 0
+     }
+    },
+    "max_prob_diff": 0.05803224444389343,
+    "argmax_changes": 1
+   }
+  }
+ },
+ "paths": {
+  "old_live": {
+   "n_windows": 192,
+   "tensors": {
+    "ac": {
+     "max": 21.45641326904297,
+     "mean": 0.044394008470508395,
+     "n_differing": 164
+    },
+    "pros": {
+     "max": 93.82143640518188,
+     "mean": 0.38105303973403615,
+     "n_differing": 106
+    },
+    "ling": {
+     "max": 0.0,
+     "mean": 0.0,
+     "n_differing": 0
+    },
+    "lpos": {
+     "max": 1.0,
+     "mean": 0.006640625,
+     "n_differing": 45
+    },
+    "lmask": {
+     "max": 0.0,
+     "mean": 0.0,
+     "n_differing": 0
+    }
+   },
+   "argmax_changes": 6,
+   "max_prob_diff": 0.9506469368934631,
+   "mean_prob_diff": 0.010005791903684743
+  },
+  "session_oracle": {
+   "n_windows": 622,
+   "tensors": {
+    "ac": {
+     "max": 0.0,
+     "mean": 0.0,
+     "n_differing": 0
+    },
+    "pros": {
+     "max": 0.0,
+     "mean": 0.0,
+     "n_differing": 0
+    },
+    "ling": {
+     "max": 0.0,
+     "mean": 0.0,
+     "n_differing": 0
+    },
+    "lpos": {
+     "max": 0.0,
+     "mean": 0.0,
+     "n_differing": 0
+    },
+    "lmask": {
+     "max": 0.0,
+     "mean": 0.0,
+     "n_differing": 0
+    }
+   },
+   "argmax_changes": 0,
+   "max_prob_diff": 0.0,
+   "mean_prob_diff": 0.0
+  },
+  "session_causal": {
+   "n_windows": 622,
+   "tensors": {
+    "ac": {
+     "max": 23.100000381469727,
+     "mean": 0.11274228502156775,
+     "n_differing": 577
+    },
+    "pros": {
+     "max": 5.499999761581421,
+     "mean": 0.0397731319200294,
+     "n_differing": 283
+    },
+    "ling": {
+     "max": 0.0,
+     "mean": 0.0,
+     "n_differing": 0
+    },
+    "lpos": {
+     "max": 0.0,
+     "mean": 0.0,
+     "n_differing": 0
+    },
+    "lmask": {
+     "max": 0.0,
+     "mean": 0.0,
+     "n_differing": 0
+    }
+   },
+   "argmax_changes": 20,
+   "max_prob_diff": 0.8886291980743408,
+   "mean_prob_diff": 0.005700769860981779
+  }
+ },
+ "pilot_grid_confusion": {
+  "offline": {
+   "TP": 3,
+   "FP": 1,
+   "FN": 13,
+   "TN": 15
+  },
+  "session_oracle": {
+   "TP": 3,
+   "FP": 1,
+   "FN": 13,
+   "TN": 15
+  },
+  "session_causal": {
+   "TP": 4,
+   "FP": 1,
+   "FN": 12,
+   "TN": 15
+  }
+ },
+ "pilot_decision_flips_vs_offline": {
+  "session_oracle": 0,
+  "session_causal": 1
+ },
+ "centre": [
+  {
+   "clip": "BAQ_001_03_16_a12",
+   "c_offline": 9.256413459777832,
+   "c_causal_final": 13.356412887573242
+  },
+  {
+   "clip": "BAQ_001_03_16_a23",
+   "c_offline": 12.256412506103516,
+   "c_causal_final": 11.206412315368652
+  },
+  {
+   "clip": "BAQ_001_03_16_a121",
+   "c_offline": 0.25641244649887085,
+   "c_causal_final": 0.45641177892684937
+  },
+  {
+   "clip": "BAQ_001_03_16_a160",
+   "c_offline": 15.456413269042969,
+   "c_causal_final": 15.256412506103516
+  },
+  {
+   "clip": "BUE_001_03_19_a126",
+   "c_offline": 14.2564115524292,
+   "c_causal_final": 14.956412315368652
+  },
+  {
+   "clip": "BUE_001_03_19_a106",
+   "c_offline": 15.756412506103516,
+   "c_causal_final": 15.756412506103516
+  },
+  {
+   "clip": "BUE_001_03_19_a194",
+   "c_offline": 13.956413269042969,
+   "c_causal_final": 14.056413650512695
+  },
+  {
+   "clip": "BUE_001_03_19_a227",
+   "c_offline": 13.756413459777832,
+   "c_causal_final": 13.856411933898926
+  },
+  {
+   "clip": "BUE_001_03_19_a203",
+   "c_offline": 9.856413841247559,
+   "c_causal_final": 9.656412124633789
+  },
+  {
+   "clip": "BUE_001_03_19_a272",
+   "c_offline": 13.556411743164062,
+   "c_causal_final": 12.956413269042969
+  },
+  {
+   "clip": "BUE_001_03_19_a476",
+   "c_offline": 13.956413269042969,
+   "c_causal_final": 13.356412887573242
+  },
+  {
+   "clip": "BUE_001_03_19_a533",
+   "c_offline": 13.956413269042969,
+   "c_causal_final": 13.856411933898926
+  },
+  {
+   "clip": "BUE_001_03_19_a678",
+   "c_offline": 12.556414604187012,
+   "c_causal_final": 12.456411361694336
+  },
+  {
+   "clip": "BUE_001_03_19_a880",
+   "c_offline": 12.356412887573242,
+   "c_causal_final": 12.556414604187012
+  },
+  {
+   "clip": "BUE_001_03_19_a868",
+   "c_offline": 10.856412887573242,
+   "c_causal_final": 10.956412315368652
+  },
+  {
+   "clip": "BUE_001_03_19_a1149",
+   "c_offline": 11.956413269042969,
+   "c_causal_final": 11.956413269042969
+  },
+  {
+   "clip": "HAV_001_02_12_a9",
+   "c_offline": 15.956413269042969,
+   "c_causal_final": 15.956413269042969
+  },
+  {
+   "clip": "HAV_001_02_12_a93",
+   "c_offline": 8.456413269042969,
+   "c_causal_final": 8.556413650512695
+  },
+  {
+   "clip": "HAV_001_02_12_a131",
+   "c_offline": 14.656414031982422,
+   "c_causal_final": 14.656414031982422
+  },
+  {
+   "clip": "HAV_001_02_12_a213",
+   "c_offline": 7.456412315368652,
+   "c_causal_final": 7.556413650512695
+  },
+  {
+   "clip": "HAV_001_02_12_a230",
+   "c_offline": 9.956413269042969,
+   "c_causal_final": 8.956413269042969
+  },
+  {
+   "clip": "HAV_001_02_12_a242",
+   "c_offline": 9.956413269042969,
+   "c_causal_final": 10.056412696838379
+  },
+  {
+   "clip": "HAV_001_02_12_a272",
+   "c_offline": 8.256413459777832,
+   "c_causal_final": 8.156413078308105
+  },
+  {
+   "clip": "HAV_001_02_12_a316",
+   "c_offline": 7.856412887573242,
+   "c_causal_final": 7.456412315368652
+  },
+  {
+   "clip": "MEX_001_02_15_a336",
+   "c_offline": 10.356412887573242,
+   "c_causal_final": 10.956412315368652
+  },
+  {
+   "clip": "MEX_001_02_15_a86",
+   "c_offline": 10.856412887573242,
+   "c_causal_final": 11.356412887573242
+  },
+  {
+   "clip": "MEX_001_02_15_a173",
+   "c_offline": 9.856413841247559,
+   "c_causal_final": 9.856413841247559
+  },
+  {
+   "clip": "MEX_001_02_15_a694",
+   "c_offline": 9.856413841247559,
+   "c_causal_final": 9.756412506103516
+  },
+  {
+   "clip": "MEX_001_02_15_a709",
+   "c_offline": 11.056412696838379,
+   "c_causal_final": 10.756413459777832
+  },
+  {
+   "clip": "MEX_001_02_15_a630",
+   "c_offline": 13.956413269042969,
+   "c_causal_final": 14.056413650512695
+  },
+  {
+   "clip": "MEX_001_02_15_a724",
+   "c_offline": 8.956413269042969,
+   "c_causal_final": 8.556413650512695
+  },
+  {
+   "clip": "MEX_001_02_15_a765",
+   "c_offline": 12.156412124633789,
+   "c_causal_final": 12.156412124633789
+  },
+  {
+   "clip": "extra_yD9_30_70",
+   "c_offline": 18.056411743164062,
+   "c_causal_final": 17.856412887573242
+  }
+ ],
+ "causal_by_window_start_s": {
+  "start_0_5": {
+   "n_windows": 330,
+   "argmax_changes": 13,
+   "max_ac_diff": 23.100000381469727,
+   "median_ac_diff": 0.7999992370605469,
+   "max_prob_diff": 0.8886291980743408
+  },
+  "start_5_10": {
+   "n_windows": 235,
+   "argmax_changes": 6,
+   "max_ac_diff": 10.499999046325684,
+   "median_ac_diff": 0.2499990463256836,
+   "max_prob_diff": 0.5363515615463257
+  },
+  "start_10_end": {
+   "n_windows": 57,
+   "argmax_changes": 1,
+   "max_ac_diff": 1.25,
+   "median_ac_diff": 0.3000011444091797,
+   "max_prob_diff": 0.05803224444389343
+  }
+ },
+ "committed_frames_total": 40101,
+ "committed_frame_rows_differing": 0,
+ "elapsed_s": 252.24767112731934
+}

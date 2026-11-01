@@ -1,0 +1,2582 @@
+diff --git a/frontend/.env.example b/frontend/.env.example
+index b4cc2a4..b468b9d 100644
+--- a/frontend/.env.example
++++ b/frontend/.env.example
+@@ -5,3 +5,7 @@ VITE_WS_URL=ws://localhost:8000/ws/session
+ # "true" registra las rutas del plano cientifico (/evaluacion,
+ # /instrumentos). Cualquier otro valor: esas rutas no existen (404).
+ VITE_RESEARCH_MODE=false
++
++# Servicio MRCD de disfluencias (repositorio aparte, `python -m mrcd.service serve`).
++# Solo desarrollo local, sin claves. Vacío = la sección queda "no disponible".
++VITE_MRCD_SERVICE_URL=
+diff --git a/frontend/src/contexts/feedback/components/DisfluencyEventsSection.test.tsx b/frontend/src/contexts/feedback/components/DisfluencyEventsSection.test.tsx
+new file mode 100644
+index 0000000..5b3e5de
+--- /dev/null
++++ b/frontend/src/contexts/feedback/components/DisfluencyEventsSection.test.tsx
+@@ -0,0 +1,159 @@
++// @vitest-environment jsdom
++/**
++ * Sección de disfluencias del reporte: clase, tiempos, puntaje "no calibrado",
++ * procedencia, advertencias y "No disponible" — sin porcentajes ni estados psicológicos.
++ */
++import { act } from "react";
++import { createRoot, type Root } from "react-dom/client";
++import { afterEach, describe, expect, it } from "vitest";
++
++import errorStereo from "../../../shared/api/__fixtures__/mrcd/error_stereo.json";
++import okP0 from "../../../shared/api/__fixtures__/mrcd/response_ok_p0_v0.json";
++import okP1 from "../../../shared/api/__fixtures__/mrcd/response_ok_p1_experimental.json";
++import { MrcdAnalysisSchema } from "../../../shared/api/mrcd-service";
++import { DisfluencyAnalysisView } from "./DisfluencyEventsSection";
++
++let roots: Root[] = [];
++
++function mount(element: React.ReactElement): HTMLElement {
++  const container = document.createElement("div");
++  document.body.appendChild(container);
++  const root = createRoot(container);
++  roots.push(root);
++  act(() => {
++    root.render(element);
++  });
++  return container;
++}
++
++afterEach(() => {
++  for (const root of roots) {
++    act(() => root.unmount());
++  }
++  roots = [];
++  document.body.innerHTML = "";
++});
++
++describe("DisfluencyAnalysisView", () => {
++  const analysis = MrcdAnalysisSchema.parse(okP0);
++
++  it("muestra por evento clase, inicio/fin y puntaje marcado como no calibrado", () => {
++    const view = mount(<DisfluencyAnalysisView analysis={analysis} />);
++    const rows = view.querySelectorAll("tbody tr");
++    expect(rows.length).toBe(analysis.events.length);
++    const first = analysis.events[0]!;
++    const text = rows[0]!.textContent ?? "";
++    expect(text).toContain(first.class);
++    expect(text).toContain(`${first.start_s.toFixed(1)} s`);
++    expect(text).toContain(`${first.end_s.toFixed(1)} s`);
++    expect(text).toContain(first.score.value.toFixed(2));
++    expect(text.toLowerCase()).toContain("no calibrado");
++    expect(view.textContent).toContain("no es una probabilidad de acierto");
++  });
++
++  it("marca las clases sin referencia humana como salida técnica sin validar", () => {
++    const view = mount(<DisfluencyAnalysisView analysis={analysis} />);
++    const rows = [...view.querySelectorAll("tbody tr")];
++    const unvalidated = new Set(["block", "rhetorical_pause", "neutral_pause", "revision"]);
++    expect(rows.length).toBeGreaterThan(0);
++    analysis.events.forEach((event, i) => {
++      const marked = (rows[i]!.textContent ?? "").includes("Salida técnica sin validar");
++      expect(marked).toBe(unvalidated.has(event.class));
++    });
++  });
++
++  it("muestra la tasa por minuto junto a la duración del audio", () => {
++    const view = mount(<DisfluencyAnalysisView analysis={analysis} />);
++    expect(view.textContent).toContain("Audio analizado: 36.0 s");
++  });
++
++  it("nunca presenta el puntaje como porcentaje", () => {
++    const view = mount(<DisfluencyAnalysisView analysis={analysis} />);
++    const table = view.querySelector("table")!.textContent ?? "";
++    expect(table).not.toMatch(/\d\s?%/);
++  });
++
++  it("declara el video como no disponible con su motivo", () => {
++    const view = mount(<DisfluencyAnalysisView analysis={analysis} />);
++    const text = view.textContent ?? "";
++    expect(text).toContain("Video:");
++    expect(text).toContain("No disponible");
++    expect(text).toContain(analysis.modalities.kinesic_video.reason!);
++  });
++
++  it("muestra la procedencia: checkpoint con hash corto, perfil ASR, cabeza y contrato", () => {
++    const view = mount(<DisfluencyAnalysisView analysis={analysis} />);
++    const provenance = view.querySelector("dl")!.textContent ?? "";
++    expect(provenance).toContain("ckpt_audio_text.pt");
++    expect(provenance).toContain(
++      String(analysis.provenance.checkpoint!.sha256).slice(0, 12),
++    );
++    expect(provenance).toContain("p0");
++    expect(provenance).toContain("ninguna (V0)");
++    expect(provenance).toContain("mrcd.analysis/v1");
++  });
++
++  it("lista las advertencias del motor", () => {
++    const view = mount(<DisfluencyAnalysisView analysis={analysis} />);
++    const warnings = view.querySelector(
++      "ul[aria-label='Advertencias del motor']",
++    )!;
++    expect(warnings.querySelectorAll("li").length).toBe(
++      analysis.warnings.length,
++    );
++    expect(warnings.textContent).toContain("scores_uncalibrated");
++  });
++
++  it("marca como experimental un resultado con perfil ASR P1", () => {
++    const view = mount(
++      <DisfluencyAnalysisView analysis={MrcdAnalysisSchema.parse(okP1)} />,
++    );
++    expect(view.textContent).toContain("Resultado experimental");
++    expect(view.textContent).toContain("asr_profile:p1_disfluent_prompt");
++  });
++
++  it("sin eventos no certifica fluidez y no rellena la tasa con 0", () => {
++    const empty = MrcdAnalysisSchema.parse({
++      ...okP0,
++      events: [],
++      summary: {
++        n_events: 0,
++        events_per_minute: {
++          available: false,
++          value: null,
++          unavailable_reason:
++            "audio shorter than 1 s: a per-minute rate is not meaningful",
++        },
++        counts_by_class: {},
++      },
++    });
++    const view = mount(<DisfluencyAnalysisView analysis={empty} />);
++    const text = view.textContent ?? "";
++    expect(text).toContain("no certifica un habla fluida");
++    expect(text).toContain("No disponible: audio shorter than 1 s");
++    expect(view.querySelector("table")).toBeNull();
++  });
++
++  it("un documento de error no inventa un resumen (todo queda no disponible)", () => {
++    const failed = MrcdAnalysisSchema.parse(errorStereo);
++    const view = mount(<DisfluencyAnalysisView analysis={failed} />);
++    const text = view.textContent ?? "";
++    expect(text).toContain("No disponible: sin resumen");
++    expect(view.querySelector("table")).toBeNull();
++  });
++
++  it("no contiene lenguaje de inferencia psicológica ni diagnóstico", () => {
++    const view = mount(<DisfluencyAnalysisView analysis={analysis} />);
++    const text = (view.textContent ?? "").toLowerCase();
++    for (const word of [
++      "ansiedad",
++      "nervios",
++      "duda",
++      "tartamud",
++      "diagnóstico",
++      "incierto",
++    ]) {
++      expect(text).not.toContain(word);
++    }
++  });
++});
+diff --git a/frontend/src/contexts/feedback/components/DisfluencyEventsSection.tsx b/frontend/src/contexts/feedback/components/DisfluencyEventsSection.tsx
+new file mode 100644
+index 0000000..29b8332
+--- /dev/null
++++ b/frontend/src/contexts/feedback/components/DisfluencyEventsSection.tsx
+@@ -0,0 +1,370 @@
++/**
++ * Disfluencias por evento (motor MRCD, contrato `mrcd.analysis/v1`).
++ *
++ * Qué muestra y qué NO afirma (reglas del proyecto, no negociables):
++ * - Cada evento trae clase, inicio/fin en segundos, puntaje con la marca "no calibrado"
++ *   y procedencia. El intervalo es la franja de decisión de la ventana, no una frontera
++ *   marcada por una persona.
++ * - El puntaje NO es un porcentaje ni una probabilidad de acierto: se muestra como número
++ *   crudo del modelo, siempre junto a "no calibrado".
++ * - Lo que falta se dice ("No disponible: motivo"); jamás se rellena con 0.
++ * - No se infiere ningún estado psicológico ni se diagnostica nada. La clase es la
++ *   etiqueta de una ventana del modelo, que fue entrenado con etiquetas heurísticas.
++ * - No hay estado "incierto": el motor no lo emite, así que esta pantalla tampoco lo inventa.
++ */
++import { useRef } from "react";
++
++import {
++  mrcdServiceUrl,
++  type MrcdAnalysis,
++  type MrcdEvent,
++} from "../../../shared/api/mrcd-service";
++import { useMrcdAnalysis } from "../lib/use-mrcd-analysis";
++
++/** Solo presentación: la clave interna (inglés) se conserva y se muestra al lado. */
++const CLASS_LABEL_ES: Record<string, string> = {
++  fluent: "fluido",
++  filler_word: "muletilla",
++  prolongation: "prolongación",
++  repetition: "repetición",
++  block: "bloqueo",
++  revision: "reparación",
++  rhetorical_pause: "pausa retórica",
++  neutral_pause: "pausa neutra",
++};
++
++const MODALITY_LABEL_ES = {
++  acoustic: "Acústica",
++  linguistic: "Lingüística (texto del ASR)",
++  kinesic_video: "Video",
++} as const;
++
++function classLabel(key: string): string {
++  return CLASS_LABEL_ES[key] ?? key;
++}
++
++function formatSeconds(value: number): string {
++  return `${value.toFixed(1)} s`;
++}
++
++function shortHash(value: unknown): string | null {
++  return typeof value === "string" && value.length >= 12
++    ? value.slice(0, 12)
++    : null;
++}
++
++function Unavailable({ reason }: { reason: string }) {
++  return (
++    <span className="text-ink-faint">
++      No disponible<span className="text-ink-soft">: {reason}</span>
++    </span>
++  );
++}
++
++/**
++ * Clases sin referencia humana compatible (contrato de integración B.6, regla 3): se muestran
++ * solo como salida técnica con esta marca, nunca como hallazgo validado.
++ */
++const UNVALIDATED_CLASSES = new Set([
++  "block",
++  "rhetorical_pause",
++  "neutral_pause",
++  "revision",
++]);
++
++function EventRow({ event }: { event: MrcdEvent }) {
++  return (
++    <tr className="border-t border-line align-top">
++      <td className="py-2 pr-4">
++        <span className="font-semibold text-ink">
++          {classLabel(event.class)}
++        </span>{" "}
++        <span className="font-mono text-[10px] text-ink-faint">
++          {event.class}
++        </span>
++        {UNVALIDATED_CLASSES.has(event.class) && (
++          <span className="ml-2 rounded border border-line px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-soft">
++            Salida técnica sin validar
++          </span>
++        )}
++        {event.experimental && (
++          <span className="ml-2 rounded border border-line px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-soft">
++            Experimental
++          </span>
++        )}
++        {event.validation && (
++          <p className="mt-1 max-w-prose text-[11px] leading-snug text-ink-soft">
++            {event.validation}
++          </p>
++        )}
++      </td>
++      <td className="py-2 pr-4 font-mono tabular-nums text-ink">
++        {formatSeconds(event.start_s)} – {formatSeconds(event.end_s)}
++      </td>
++      <td className="py-2 pr-4 font-mono tabular-nums text-ink">
++        {event.score.value.toFixed(2)}{" "}
++        <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
++          no calibrado
++        </span>
++      </td>
++      <td className="py-2 font-mono tabular-nums text-ink-soft">
++        {event.n_windows}
++      </td>
++    </tr>
++  );
++}
++
++export interface DisfluencyAnalysisViewProps {
++  analysis: MrcdAnalysis;
++}
++
++/** Vista pura de un análisis ya validado. */
++export function DisfluencyAnalysisView({
++  analysis,
++}: DisfluencyAnalysisViewProps) {
++  const { provenance, modalities, summary } = analysis;
++  const checkpoint = provenance.checkpoint;
++  const asr = provenance.asr;
++  const config = provenance.config;
++  const events = analysis.events;
++  const epm = summary?.events_per_minute;
++
++  return (
++    <div className="flex flex-col gap-5">
++      {analysis.experimental.active && (
++        <p
++          role="note"
++          className="rounded-lg border border-line bg-surface/70 px-4 py-3 text-[12px] leading-relaxed text-ink-soft"
++        >
++          <strong className="text-ink">Resultado experimental.</strong> Se
++          usaron componentes opcionales sin validar fuera de su corpus de
++          desarrollo:{" "}
++          <span className="font-mono">
++            {analysis.experimental.components.join(", ")}
++          </span>
++          .
++        </p>
++      )}
++
++      <div className="grid gap-3 sm:grid-cols-3">
++        <div className="rounded-lg border border-line bg-surface p-4">
++          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-faint">
++            Eventos
++          </p>
++          <p className="font-display mt-1.5 text-[28px] font-extrabold leading-none tabular-nums text-ink">
++            {summary ? summary.n_events : "—"}
++          </p>
++        </div>
++        <div className="rounded-lg border border-line bg-surface p-4">
++          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-faint">
++            Eventos por minuto
++          </p>
++          <p className="mt-1.5 text-[15px] font-semibold text-ink">
++            {epm?.available ? (
++              epm.value.toFixed(1)
++            ) : (
++              <Unavailable reason={epm?.unavailable_reason ?? "sin resumen"} />
++            )}
++          </p>
++          <p className="mt-1 text-[11px] text-ink-faint">
++            {analysis.request.audio_duration_s.available ? (
++              `Audio analizado: ${formatSeconds(analysis.request.audio_duration_s.value)}`
++            ) : (
++              <Unavailable
++                reason={analysis.request.audio_duration_s.unavailable_reason}
++              />
++            )}
++          </p>
++        </div>
++        <div className="rounded-lg border border-line bg-surface p-4">
++          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-faint">
++            Modalidades
++          </p>
++          <ul className="mt-1.5 space-y-1 text-[12px] text-ink-soft">
++            {(
++              Object.keys(
++                MODALITY_LABEL_ES,
++              ) as (keyof typeof MODALITY_LABEL_ES)[]
++            ).map((key) => {
++              const status = modalities[key];
++              return (
++                <li key={key}>
++                  <span className="font-semibold text-ink">
++                    {MODALITY_LABEL_ES[key]}:
++                  </span>{" "}
++                  {status.available ? (
++                    "disponible"
++                  ) : (
++                    <Unavailable reason={status.reason} />
++                  )}
++                </li>
++              );
++            })}
++          </ul>
++        </div>
++      </div>
++
++      {events.length === 0 ? (
++        <p className="text-sm text-ink-soft">
++          El motor no emitió eventos para este audio. Esto no certifica un habla
++          fluida.
++        </p>
++      ) : (
++        <div className="overflow-x-auto">
++          <table className="w-full text-left text-[13px]">
++            <caption className="sr-only">
++              Eventos de disfluencia por ventana
++            </caption>
++            <thead>
++              <tr className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint">
++                <th scope="col" className="pb-2 pr-4 font-medium">
++                  Clase
++                </th>
++                <th scope="col" className="pb-2 pr-4 font-medium">
++                  Franja de decisión
++                </th>
++                <th scope="col" className="pb-2 pr-4 font-medium">
++                  Puntaje del modelo
++                </th>
++                <th scope="col" className="pb-2 font-medium">
++                  Ventanas
++                </th>
++              </tr>
++            </thead>
++            <tbody>
++              {events.map((event) => (
++                <EventRow key={event.id} event={event} />
++              ))}
++            </tbody>
++          </table>
++          <p className="mt-2 text-[11px] leading-snug text-ink-faint">
++            La franja es la ventana de decisión del modelo, no una frontera
++            marcada por una persona. El puntaje es el máximo de la probabilidad
++            de clase en las ventanas del evento y no está calibrado: no es una
++            probabilidad de acierto.
++          </p>
++        </div>
++      )}
++
++      <dl
++        aria-label="Procedencia del análisis de disfluencias"
++        className="flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-ink-faint"
++      >
++        <div className="flex gap-1.5">
++          <dt className="font-semibold uppercase tracking-[0.12em]">
++            Checkpoint
++          </dt>
++          <dd className="font-mono">
++            {String(checkpoint?.file ?? "—")}
++            {shortHash(checkpoint?.sha256)
++              ? ` · ${shortHash(checkpoint?.sha256)}`
++              : ""}
++          </dd>
++        </div>
++        <div className="flex gap-1.5">
++          <dt className="font-semibold uppercase tracking-[0.12em]">ASR</dt>
++          <dd className="font-mono">{String(asr?.profile ?? "—")}</dd>
++        </div>
++        <div className="flex gap-1.5">
++          <dt className="font-semibold uppercase tracking-[0.12em]">Cabeza</dt>
++          <dd className="font-mono">
++            {analysis.request.head ?? "ninguna (V0)"}
++          </dd>
++        </div>
++        {config && (
++          <div className="flex gap-1.5">
++            <dt className="font-semibold uppercase tracking-[0.12em]">
++              Ventana
++            </dt>
++            <dd className="font-mono">
++              {String(config.window_s)} s / paso {String(config.stride_s)} s
++            </dd>
++          </div>
++        )}
++        <div className="flex gap-1.5">
++          <dt className="font-semibold uppercase tracking-[0.12em]">
++            Contrato
++          </dt>
++          <dd className="font-mono">{analysis.schema_version}</dd>
++        </div>
++      </dl>
++
++      {analysis.warnings.length > 0 && (
++        <ul
++          aria-label="Advertencias del motor"
++          className="space-y-1.5 rounded-lg border border-line bg-surface/70 px-4 py-3 text-[12px] leading-relaxed text-ink-soft"
++        >
++          {analysis.warnings.map((w) => (
++            <li key={w.code}>
++              <span className="font-mono text-[10px] text-ink-faint">
++                {w.code}
++              </span>{" "}
++              {w.message}
++            </li>
++          ))}
++        </ul>
++      )}
++    </div>
++  );
++}
++
++/** Panel con estado: elige un WAV, lo envía al servicio y muestra el resultado. */
++export function DisfluencyAnalysisPanel() {
++  const input = useRef<HTMLInputElement>(null);
++  const { analysis, error, pending, analyze, reset } = useMrcdAnalysis();
++
++  if (mrcdServiceUrl() === null) {
++    return (
++      <p className="text-sm text-ink-soft">
++        <Unavailable reason="el servicio de disfluencias no está configurado (VITE_MRCD_SERVICE_URL)." />
++      </p>
++    );
++  }
++
++  return (
++    <div className="flex flex-col gap-4">
++      <p className="max-w-prose text-[13px] leading-relaxed text-ink-soft">
++        Análisis experimental de disfluencias sobre un archivo de audio (WAV
++        mono, 16 kHz, 16 bits). El audio se envía solo al servicio local
++        configurado y no se guarda.
++      </p>
++      <div className="flex flex-wrap items-center gap-3">
++        <input
++          ref={input}
++          type="file"
++          accept="audio/wav,.wav"
++          aria-label="Archivo WAV para el análisis de disfluencias"
++          disabled={pending}
++          className="text-[13px] text-ink-soft"
++          onChange={(event) => {
++            const file = event.target.files?.[0];
++            if (file) analyze(file);
++          }}
++        />
++        {(analysis || error) && (
++          <button
++            type="button"
++            onClick={() => {
++              reset();
++              if (input.current) input.current.value = "";
++            }}
++            className="inline-flex h-9 items-center rounded-lg border border-line px-3 text-[13px] font-semibold text-ink-soft hover:border-line-strong hover:text-ink"
++          >
++            Limpiar
++          </button>
++        )}
++      </div>
++      {pending && (
++        <p role="status" className="text-[13px] text-ink-soft">
++          Analizando… puede tardar más que la duración del audio.
++        </p>
++      )}
++      {error && (
++        <p role="alert" className="text-[13px] text-ink">
++          No se pudo analizar el audio ({error.code}): {error.message}
++        </p>
++      )}
++      {analysis && <DisfluencyAnalysisView analysis={analysis} />}
++    </div>
++  );
++}
+diff --git a/frontend/src/contexts/feedback/lib/use-mrcd-analysis.ts b/frontend/src/contexts/feedback/lib/use-mrcd-analysis.ts
+new file mode 100644
+index 0000000..5b73f42
+--- /dev/null
++++ b/frontend/src/contexts/feedback/lib/use-mrcd-analysis.ts
+@@ -0,0 +1,42 @@
++/**
++ * Estado del análisis de disfluencias (servicio MRCD) para la pantalla de reporte.
++ *
++ * Es una mutación explícita (el usuario elige el archivo), no una consulta
++ * automática: el análisis tarda más que el audio y no debe dispararse solo.
++ */
++import { useMutation } from "@tanstack/react-query";
++
++import {
++  analyzeAudioWithMrcd,
++  MrcdServiceError,
++  type MrcdAnalysis,
++} from "../../../shared/api/mrcd-service";
++
++export interface MrcdAnalysisState {
++  analysis: MrcdAnalysis | null;
++  error: { code: string; message: string } | null;
++  pending: boolean;
++  analyze: (audio: Blob) => void;
++  reset: () => void;
++}
++
++export function useMrcdAnalysis(): MrcdAnalysisState {
++  const mutation = useMutation<MrcdAnalysis, Error, Blob>({
++    mutationFn: (audio) => analyzeAudioWithMrcd(audio),
++  });
++  const err = mutation.error;
++  return {
++    analysis: mutation.data ?? null,
++    error: err
++      ? err instanceof MrcdServiceError
++        ? { code: err.code, message: err.message }
++        : {
++            code: "client_unexpected",
++            message: "Fallo inesperado del cliente.",
++          }
++      : null,
++    pending: mutation.isPending,
++    analyze: (audio) => mutation.mutate(audio),
++    reset: () => mutation.reset(),
++  };
++}
+diff --git a/frontend/src/contexts/feedback/pages/ReportPage.tsx b/frontend/src/contexts/feedback/pages/ReportPage.tsx
+index 71d3b76..95b2634 100644
+--- a/frontend/src/contexts/feedback/pages/ReportPage.tsx
++++ b/frontend/src/contexts/feedback/pages/ReportPage.tsx
+@@ -19,6 +19,7 @@ import {
+ import { NotaProvenienciaAsr } from "../../../shared/ui/components/AsrProvenanceNote";
+ import { AvisoTranscripcionIncompleta } from "../../../shared/ui/components/IncompleteTranscriptNotice";
+ import { AuroraBackground } from "../components/AuroraBackground";
++import { DisfluencyAnalysisPanel } from "../components/DisfluencyEventsSection";
+ import { ImprovementCard } from "../components/ImprovementsList";
+ import {
+   InsightCarousel,
+@@ -218,6 +219,11 @@ export function ReportPage({ reportId }: ReportPageProps) {
+           </div>
+         )}
+ 
++        <div className="mt-12">
++          <SectionHeading>Disfluencias por evento (experimental)</SectionHeading>
++          <DisfluencyAnalysisPanel />
++        </div>
++
+         {nextSteps.length > 0 && (
+           <div className="mt-12">
+             <SectionHeading>Próximos pasos</SectionHeading>
+diff --git a/frontend/src/shared/api/__fixtures__/mrcd/error_audio_too_short.json b/frontend/src/shared/api/__fixtures__/mrcd/error_audio_too_short.json
+new file mode 100644
+index 0000000..652da81
+--- /dev/null
++++ b/frontend/src/shared/api/__fixtures__/mrcd/error_audio_too_short.json
+@@ -0,0 +1,70 @@
++{
++  "schema_version": "mrcd.analysis/v1",
++  "status": "failed",
++  "generated_at": "2026-10-31T20:21:00+00:00",
++  "error": {
++    "code": "audio_too_short",
++    "message": "Audio of 2.0 s; the engine needs at least 13 s.",
++    "retryable": false,
++    "details": {
++      "min_duration_s": 13.0,
++      "duration_s": 2.0
++    }
++  },
++  "request": {
++    "audio_sha256": "db5e16db15337c89ecdcd29c57e80df060ff7c8d53b3839e20bf6dd4af6df0da",
++    "audio_duration_s": {
++      "available": true,
++      "value": 2.0,
++      "unavailable_reason": null
++    },
++    "sample_rate_hz": {
++      "available": true,
++      "value": 16000,
++      "unavailable_reason": null
++    },
++    "channels": {
++      "available": true,
++      "value": 1,
++      "unavailable_reason": null
++    },
++    "asr_profile": "p0",
++    "head": null,
++    "include_text": false
++  },
++  "events": [],
++  "summary": null,
++  "modalities": {
++    "acoustic": {
++      "available": false,
++      "reason": "analysis did not run"
++    },
++    "linguistic": {
++      "available": false,
++      "reason": "analysis did not run"
++    },
++    "kinesic_video": {
++      "available": false,
++      "reason": "service v1 receives audio only; no video was provided or processed"
++    }
++  },
++  "provenance": {
++    "service": {
++      "name": "mrcd.service",
++      "contract": "mrcd.analysis/v1",
++      "mrcd_version": "0.3.0"
++    },
++    "checkpoint": null,
++    "asr": null,
++    "head": null,
++    "config": null,
++    "environment": null
++  },
++  "experimental": {
++    "active": false,
++    "components": []
++  },
++  "head_decision": null,
++  "transcript": null,
++  "warnings": []
++}
+diff --git a/frontend/src/shared/api/__fixtures__/mrcd/error_checkpoint_unavailable.json b/frontend/src/shared/api/__fixtures__/mrcd/error_checkpoint_unavailable.json
+new file mode 100644
+index 0000000..849cf7e
+--- /dev/null
++++ b/frontend/src/shared/api/__fixtures__/mrcd/error_checkpoint_unavailable.json
+@@ -0,0 +1,69 @@
++{
++  "schema_version": "mrcd.analysis/v1",
++  "status": "failed",
++  "generated_at": "2026-10-31T20:21:00+00:00",
++  "error": {
++    "code": "checkpoint_unavailable",
++    "message": "The engine checkpoint file was not found.",
++    "retryable": false,
++    "details": {
++      "checkpoint_file": "__does_not_exist__.pt"
++    }
++  },
++  "request": {
++    "audio_sha256": "6da1074a1e1f13aff5f416d9ddb78dbf5bc481d4da0c0e8eac311abf8a2c3bf3",
++    "audio_duration_s": {
++      "available": true,
++      "value": 20.0,
++      "unavailable_reason": null
++    },
++    "sample_rate_hz": {
++      "available": true,
++      "value": 16000,
++      "unavailable_reason": null
++    },
++    "channels": {
++      "available": true,
++      "value": 1,
++      "unavailable_reason": null
++    },
++    "asr_profile": "p0",
++    "head": null,
++    "include_text": false
++  },
++  "events": [],
++  "summary": null,
++  "modalities": {
++    "acoustic": {
++      "available": false,
++      "reason": "analysis did not run"
++    },
++    "linguistic": {
++      "available": false,
++      "reason": "analysis did not run"
++    },
++    "kinesic_video": {
++      "available": false,
++      "reason": "service v1 receives audio only; no video was provided or processed"
++    }
++  },
++  "provenance": {
++    "service": {
++      "name": "mrcd.service",
++      "contract": "mrcd.analysis/v1",
++      "mrcd_version": "0.3.0"
++    },
++    "checkpoint": null,
++    "asr": null,
++    "head": null,
++    "config": null,
++    "environment": null
++  },
++  "experimental": {
++    "active": false,
++    "components": []
++  },
++  "head_decision": null,
++  "transcript": null,
++  "warnings": []
++}
+diff --git a/frontend/src/shared/api/__fixtures__/mrcd/error_stereo.json b/frontend/src/shared/api/__fixtures__/mrcd/error_stereo.json
+new file mode 100644
+index 0000000..8df68d9
+--- /dev/null
++++ b/frontend/src/shared/api/__fixtures__/mrcd/error_stereo.json
+@@ -0,0 +1,69 @@
++{
++  "schema_version": "mrcd.analysis/v1",
++  "status": "failed",
++  "generated_at": "2026-10-31T20:21:00+00:00",
++  "error": {
++    "code": "audio_not_mono",
++    "message": "Mono audio is required; the file has 2 channels. Downmix before sending (the service never mixes channels silently).",
++    "retryable": false,
++    "details": {
++      "channels": 2
++    }
++  },
++  "request": {
++    "audio_sha256": "7a1306962eefbd5c6a4741daeb951ddb83a4ba9bf904bbd11b6b52b8aec2afab",
++    "audio_duration_s": {
++      "available": true,
++      "value": 20.0,
++      "unavailable_reason": null
++    },
++    "sample_rate_hz": {
++      "available": true,
++      "value": 16000,
++      "unavailable_reason": null
++    },
++    "channels": {
++      "available": true,
++      "value": 2,
++      "unavailable_reason": null
++    },
++    "asr_profile": "p0",
++    "head": null,
++    "include_text": false
++  },
++  "events": [],
++  "summary": null,
++  "modalities": {
++    "acoustic": {
++      "available": false,
++      "reason": "analysis did not run"
++    },
++    "linguistic": {
++      "available": false,
++      "reason": "analysis did not run"
++    },
++    "kinesic_video": {
++      "available": false,
++      "reason": "service v1 receives audio only; no video was provided or processed"
++    }
++  },
++  "provenance": {
++    "service": {
++      "name": "mrcd.service",
++      "contract": "mrcd.analysis/v1",
++      "mrcd_version": "0.3.0"
++    },
++    "checkpoint": null,
++    "asr": null,
++    "head": null,
++    "config": null,
++    "environment": null
++  },
++  "experimental": {
++    "active": false,
++    "components": []
++  },
++  "head_decision": null,
++  "transcript": null,
++  "warnings": []
++}
+diff --git a/frontend/src/shared/api/__fixtures__/mrcd/http_job_failed_invalid_audio.json b/frontend/src/shared/api/__fixtures__/mrcd/http_job_failed_invalid_audio.json
+new file mode 100644
+index 0000000..e56d3c0
+--- /dev/null
++++ b/frontend/src/shared/api/__fixtures__/mrcd/http_job_failed_invalid_audio.json
+@@ -0,0 +1,73 @@
++{
++  "schema_version": "mrcd.job/v1",
++  "job_id": "06de8d880f8f4c1ea64b5ecd71ffd269",
++  "status": "failed",
++  "created_at": "2026-10-31T20:21:48+00:00",
++  "result": {
++    "schema_version": "mrcd.analysis/v1",
++    "status": "failed",
++    "generated_at": "2026-10-31T20:21:48+00:00",
++    "error": {
++      "code": "invalid_audio_file",
++      "message": "The body is not a readable WAV file.",
++      "retryable": false,
++      "details": {}
++    },
++    "request": {
++      "audio_sha256": "4cd3dbe65af1de75e03d0f138cbc894e0ebf8ec42a108b8b54ecba958605b810",
++      "audio_duration_s": {
++        "available": false,
++        "value": null,
++        "unavailable_reason": "audio could not be read"
++      },
++      "sample_rate_hz": {
++        "available": false,
++        "value": null,
++        "unavailable_reason": "audio could not be read"
++      },
++      "channels": {
++        "available": false,
++        "value": null,
++        "unavailable_reason": "audio could not be read"
++      },
++      "asr_profile": "p0",
++      "head": null,
++      "include_text": false
++    },
++    "events": [],
++    "summary": null,
++    "modalities": {
++      "acoustic": {
++        "available": false,
++        "reason": "analysis did not run"
++      },
++      "linguistic": {
++        "available": false,
++        "reason": "analysis did not run"
++      },
++      "kinesic_video": {
++        "available": false,
++        "reason": "service v1 receives audio only; no video was provided or processed"
++      }
++    },
++    "provenance": {
++      "service": {
++        "name": "mrcd.service",
++        "contract": "mrcd.analysis/v1",
++        "mrcd_version": "0.3.0"
++      },
++      "checkpoint": null,
++      "asr": null,
++      "head": null,
++      "config": null,
++      "environment": null
++    },
++    "experimental": {
++      "active": false,
++      "components": []
++    },
++    "head_decision": null,
++    "transcript": null,
++    "warnings": []
++  }
++}
+diff --git a/frontend/src/shared/api/__fixtures__/mrcd/http_job_queued.json b/frontend/src/shared/api/__fixtures__/mrcd/http_job_queued.json
+new file mode 100644
+index 0000000..433a500
+--- /dev/null
++++ b/frontend/src/shared/api/__fixtures__/mrcd/http_job_queued.json
+@@ -0,0 +1,7 @@
++{
++  "schema_version": "mrcd.job/v1",
++  "job_id": "8ef3a0ded96b4bfc84d4a2b221334661",
++  "status": "queued",
++  "created_at": "2026-10-31T20:21:30+00:00",
++  "result": null
++}
+diff --git a/frontend/src/shared/api/__fixtures__/mrcd/response_ok_p0_v0.json b/frontend/src/shared/api/__fixtures__/mrcd/response_ok_p0_v0.json
+new file mode 100644
+index 0000000..2f8f503
+--- /dev/null
++++ b/frontend/src/shared/api/__fixtures__/mrcd/response_ok_p0_v0.json
+@@ -0,0 +1,519 @@
++{
++  "schema_version": "mrcd.analysis/v1",
++  "status": "completed",
++  "generated_at": "2026-10-31T20:20:02+00:00",
++  "error": null,
++  "request": {
++    "audio_sha256": "0362201d7f82f2b181d0e8de9013c1377ec137e670bd5c93ef41a65a5c2bcb63",
++    "audio_duration_s": {
++      "available": true,
++      "value": 36.0,
++      "unavailable_reason": null
++    },
++    "sample_rate_hz": {
++      "available": true,
++      "value": 16000,
++      "unavailable_reason": null
++    },
++    "channels": {
++      "available": true,
++      "value": 1,
++      "unavailable_reason": null
++    },
++    "asr_profile": "p0",
++    "head": null,
++    "include_text": false
++  },
++  "events": [
++    {
++      "id": "ev-0001",
++      "class": "rhetorical_pause",
++      "start_s": 0.0,
++      "end_s": 1.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.609209,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0002",
++      "class": "neutral_pause",
++      "start_s": 1.0,
++      "end_s": 2.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.626382,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0003",
++      "class": "rhetorical_pause",
++      "start_s": 2.0,
++      "end_s": 6.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.956699,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 9,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0004",
++      "class": "filler_word",
++      "start_s": 6.5,
++      "end_s": 8.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.913391,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 3,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0005",
++      "class": "filler_word",
++      "start_s": 8.5,
++      "end_s": 9.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.54446,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0006",
++      "class": "prolongation",
++      "start_s": 9.5,
++      "end_s": 11.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.56211,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 4,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0007",
++      "class": "prolongation",
++      "start_s": 12.0,
++      "end_s": 12.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.448764,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0008",
++      "class": "filler_word",
++      "start_s": 13.0,
++      "end_s": 13.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.529813,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0009",
++      "class": "rhetorical_pause",
++      "start_s": 14.5,
++      "end_s": 15.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.586851,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0010",
++      "class": "neutral_pause",
++      "start_s": 15.5,
++      "end_s": 17.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.891872,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 4,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0011",
++      "class": "rhetorical_pause",
++      "start_s": 17.5,
++      "end_s": 18.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.511654,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0012",
++      "class": "filler_word",
++      "start_s": 19.0,
++      "end_s": 22.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.942349,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 6,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0013",
++      "class": "neutral_pause",
++      "start_s": 22.0,
++      "end_s": 24.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.770086,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 5,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0014",
++      "class": "prolongation",
++      "start_s": 24.5,
++      "end_s": 25.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.665138,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0015",
++      "class": "prolongation",
++      "start_s": 26.5,
++      "end_s": 27.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.639225,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0016",
++      "class": "prolongation",
++      "start_s": 27.5,
++      "end_s": 28.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.582679,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    },
++    {
++      "id": "ev-0017",
++      "class": "block",
++      "start_s": 28.5,
++      "end_s": 31.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.997691,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 6,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": false
++    }
++  ],
++  "summary": {
++    "n_events": 17,
++    "events_per_minute": {
++      "available": true,
++      "value": 28.3333,
++      "unavailable_reason": null
++    },
++    "counts_by_class": {
++      "rhetorical_pause": 4,
++      "neutral_pause": 3,
++      "filler_word": 4,
++      "prolongation": 5,
++      "block": 1
++    }
++  },
++  "modalities": {
++    "acoustic": {
++      "available": true,
++      "reason": null
++    },
++    "linguistic": {
++      "available": true,
++      "reason": null
++    },
++    "kinesic_video": {
++      "available": false,
++      "reason": "service v1 receives audio only; no video was provided or processed"
++    }
++  },
++  "provenance": {
++    "service": {
++      "name": "mrcd.service",
++      "contract": "mrcd.analysis/v1",
++      "mrcd_version": "0.3.0"
++    },
++    "checkpoint": {
++      "file": "ckpt_audio_text.pt",
++      "sha256": "87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669",
++      "mode": "audio_text",
++      "labels": [
++        "fluent",
++        "filler_word",
++        "prolongation",
++        "repetition",
++        "block",
++        "revision",
++        "rhetorical_pause",
++        "neutral_pause"
++      ],
++      "checkpoint_notice": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"
++    },
++    "asr": {
++      "profile": "p0",
++      "experimental": false,
++      "validation": null,
++      "initial_prompt_sha256": "bd0bddb4329c6c75e2dd7c0b21366a418cc23314f8155357401a1577853b19fa",
++      "model": {
++        "model_size": "small",
++        "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
++        "compute_type": "int8",
++        "device": "cpu"
++      },
++      "language": "es",
++      "decode": {
++        "temperature": 0.0,
++        "beam_size": 5,
++        "condition_on_previous_text": false,
++        "vad_filter": false,
++        "word_timestamps": true,
++        "chunk_s_requested": 8.0
++      },
++      "profile_fingerprint": "efc7f5bfef4d5271862bcb4fe384a229314cb969293ed64d7f7d8a0503522558",
++      "anomalies": []
++    },
++    "head": null,
++    "config": {
++      "window_s": 3.0,
++      "stride_s": 0.5,
++      "terminal_window": false,
++      "span": null,
++      "asr_chunk_s": 8.0
++    },
++    "environment": {
++      "omp_num_threads": "4",
++      "omp_pin_opted_out": false,
++      "cpu_count_logical": 20,
++      "python": "3.12.10",
++      "platform": "Windows-11-10.0.26200-SP0",
++      "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
++      "faster_whisper": "1.2.1",
++      "ctranslate2": "4.8.2",
++      "numpy": "2.5.3",
++      "environment_is_pinned": true,
++      "omp_num_threads_at_mrcd_import": "4",
++      "numpy_imported_before_mrcd": false,
++      "set_before_numpy": true,
++      "assigned_after_import": false,
++      "effective": true,
++      "cpu_threads": {
++        "torch": 1,
++        "asr_cpu_threads_arg": 0
++      },
++      "asr": {
++        "model_size": "small",
++        "device": "cpu",
++        "compute_type": "int8"
++      }
++    }
++  },
++  "experimental": {
++    "active": false,
++    "components": []
++  },
++  "head_decision": null,
++  "transcript": null,
++  "warnings": [
++    {
++      "code": "scores_uncalibrated",
++      "message": "Scores are the maximum window class probability of an uncalibrated model; they are not probabilities of correctness."
++    },
++    {
++      "code": "no_human_validation",
++      "message": "Classes are window-level decisions of a model trained with weak (heuristic) supervision; agreement with human annotation has not been established."
++    },
++    {
++      "code": "engine_provenance",
++      "message": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"
++    },
++    {
++      "code": "class_block_not_measurable",
++      "message": "The 'block' class is not measurable with the development corpus (n=2); there is no evidence that a 'block' event is correct."
++    }
++  ]
++}
+diff --git a/frontend/src/shared/api/__fixtures__/mrcd/response_ok_p1_experimental.json b/frontend/src/shared/api/__fixtures__/mrcd/response_ok_p1_experimental.json
+new file mode 100644
+index 0000000..78e8747
+--- /dev/null
++++ b/frontend/src/shared/api/__fixtures__/mrcd/response_ok_p1_experimental.json
+@@ -0,0 +1,588 @@
++{
++  "schema_version": "mrcd.analysis/v1",
++  "status": "completed",
++  "generated_at": "2026-10-31T20:20:29+00:00",
++  "error": null,
++  "request": {
++    "audio_sha256": "0362201d7f82f2b181d0e8de9013c1377ec137e670bd5c93ef41a65a5c2bcb63",
++    "audio_duration_s": {
++      "available": true,
++      "value": 36.0,
++      "unavailable_reason": null
++    },
++    "sample_rate_hz": {
++      "available": true,
++      "value": 16000,
++      "unavailable_reason": null
++    },
++    "channels": {
++      "available": true,
++      "value": 1,
++      "unavailable_reason": null
++    },
++    "asr_profile": "p1_disfluent_prompt",
++    "head": null,
++    "include_text": false
++  },
++  "events": [
++    {
++      "id": "ev-0001",
++      "class": "rhetorical_pause",
++      "start_s": 0.0,
++      "end_s": 1.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.605549,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0002",
++      "class": "neutral_pause",
++      "start_s": 1.0,
++      "end_s": 2.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.713249,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0003",
++      "class": "rhetorical_pause",
++      "start_s": 2.0,
++      "end_s": 6.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.966378,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 9,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0004",
++      "class": "filler_word",
++      "start_s": 6.5,
++      "end_s": 9.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.967992,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 5,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0005",
++      "class": "prolongation",
++      "start_s": 9.0,
++      "end_s": 10.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.756457,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0006",
++      "class": "prolongation",
++      "start_s": 11.0,
++      "end_s": 11.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.587698,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0007",
++      "class": "prolongation",
++      "start_s": 12.0,
++      "end_s": 13.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.533026,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0008",
++      "class": "prolongation",
++      "start_s": 14.5,
++      "end_s": 15.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.285634,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0009",
++      "class": "rhetorical_pause",
++      "start_s": 15.0,
++      "end_s": 15.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.587347,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0010",
++      "class": "neutral_pause",
++      "start_s": 15.5,
++      "end_s": 17.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.845683,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 4,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0011",
++      "class": "rhetorical_pause",
++      "start_s": 17.5,
++      "end_s": 18.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.51492,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0012",
++      "class": "neutral_pause",
++      "start_s": 18.0,
++      "end_s": 18.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.608218,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0013",
++      "class": "neutral_pause",
++      "start_s": 19.0,
++      "end_s": 21.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.631813,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 4,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0014",
++      "class": "prolongation",
++      "start_s": 21.0,
++      "end_s": 22.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.496626,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0015",
++      "class": "neutral_pause",
++      "start_s": 22.0,
++      "end_s": 22.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.606249,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0016",
++      "class": "prolongation",
++      "start_s": 22.5,
++      "end_s": 23.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.65959,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0017",
++      "class": "neutral_pause",
++      "start_s": 23.5,
++      "end_s": 24.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.600203,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0018",
++      "class": "prolongation",
++      "start_s": 24.5,
++      "end_s": 25.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.707697,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 1,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0019",
++      "class": "prolongation",
++      "start_s": 26.0,
++      "end_s": 27.0,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.672174,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 2,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    },
++    {
++      "id": "ev-0020",
++      "class": "block",
++      "start_s": 28.5,
++      "end_s": 31.5,
++      "interval_semantics": "decision_stride_not_human_boundary",
++      "score": {
++        "value": 0.997626,
++        "kind": "max_window_class_probability",
++        "calibrated": false,
++        "label": "uncalibrated"
++      },
++      "n_windows": 6,
++      "modalities_used": [
++        "acoustic",
++        "linguistic"
++      ],
++      "text": null,
++      "validation": null,
++      "experimental": true
++    }
++  ],
++  "summary": {
++    "n_events": 20,
++    "events_per_minute": {
++      "available": true,
++      "value": 33.3333,
++      "unavailable_reason": null
++    },
++    "counts_by_class": {
++      "rhetorical_pause": 4,
++      "neutral_pause": 6,
++      "filler_word": 1,
++      "prolongation": 8,
++      "block": 1
++    }
++  },
++  "modalities": {
++    "acoustic": {
++      "available": true,
++      "reason": null
++    },
++    "linguistic": {
++      "available": true,
++      "reason": null
++    },
++    "kinesic_video": {
++      "available": false,
++      "reason": "service v1 receives audio only; no video was provided or processed"
++    }
++  },
++  "provenance": {
++    "service": {
++      "name": "mrcd.service",
++      "contract": "mrcd.analysis/v1",
++      "mrcd_version": "0.3.0"
++    },
++    "checkpoint": {
++      "file": "ckpt_audio_text.pt",
++      "sha256": "87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669",
++      "mode": "audio_text",
++      "labels": [
++        "fluent",
++        "filler_word",
++        "prolongation",
++        "repetition",
++        "block",
++        "revision",
++        "rhetorical_pause",
++        "neutral_pause"
++      ],
++      "checkpoint_notice": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"
++    },
++    "asr": {
++      "profile": "p1_disfluent_prompt",
++      "experimental": true,
++      "validation": "experimental; not validated outside DIHANA",
++      "initial_prompt_sha256": "fe49e930ccc9f94847b7bedaec65f8c347cecaccbcd7283545618bc194c6a8b2",
++      "model": {
++        "model_size": "small",
++        "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
++        "compute_type": "int8",
++        "device": "cpu"
++      },
++      "language": "es",
++      "decode": {
++        "temperature": 0.0,
++        "beam_size": 5,
++        "condition_on_previous_text": false,
++        "vad_filter": false,
++        "word_timestamps": true,
++        "chunk_s_requested": 8.0
++      },
++      "profile_fingerprint": "3939517c0c60fc7f0ad9ba972203330bee95265ebcd3743dbe26e3be854bb045",
++      "anomalies": []
++    },
++    "head": null,
++    "config": {
++      "window_s": 3.0,
++      "stride_s": 0.5,
++      "terminal_window": false,
++      "span": null,
++      "asr_chunk_s": 8.0
++    },
++    "environment": {
++      "omp_num_threads": "4",
++      "omp_pin_opted_out": false,
++      "cpu_count_logical": 20,
++      "python": "3.12.10",
++      "platform": "Windows-11-10.0.26200-SP0",
++      "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
++      "faster_whisper": "1.2.1",
++      "ctranslate2": "4.8.2",
++      "numpy": "2.5.3",
++      "environment_is_pinned": true,
++      "omp_num_threads_at_mrcd_import": "4",
++      "numpy_imported_before_mrcd": false,
++      "set_before_numpy": true,
++      "assigned_after_import": false,
++      "effective": true,
++      "cpu_threads": {
++        "torch": 1,
++        "asr_cpu_threads_arg": 0
++      },
++      "asr": {
++        "model_size": "small",
++        "device": "cpu",
++        "compute_type": "int8"
++      }
++    }
++  },
++  "experimental": {
++    "active": true,
++    "components": [
++      "asr_profile:p1_disfluent_prompt"
++    ]
++  },
++  "head_decision": null,
++  "transcript": null,
++  "warnings": [
++    {
++      "code": "scores_uncalibrated",
++      "message": "Scores are the maximum window class probability of an uncalibrated model; they are not probabilities of correctness."
++    },
++    {
++      "code": "no_human_validation",
++      "message": "Classes are window-level decisions of a model trained with weak (heuristic) supervision; agreement with human annotation has not been established."
++    },
++    {
++      "code": "engine_provenance",
++      "message": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia ASR profile 'p1_disfluent_prompt' is EXPERIMENTAL and NOT validated outside DIHANA. In the exploratory DIHANA experiment a fluent control prompt of equal length and domain did not reproduce its gain; which component of the prompt causes the effect is unknown. Downstream models were trained on P0 text and not retrained for P1."
++    },
++    {
++      "code": "class_block_not_measurable",
++      "message": "The 'block' class is not measurable with the development corpus (n=2); there is no evidence that a 'block' event is correct."
++    },
++    {
++      "code": "experimental_components",
++      "message": "Experimental, opt-in components were used: asr_profile:p1_disfluent_prompt. They are not validated outside their development corpus."
++    }
++  ]
++}
+diff --git a/frontend/src/shared/api/mrcd-service.test.ts b/frontend/src/shared/api/mrcd-service.test.ts
+new file mode 100644
+index 0000000..acdc152
+--- /dev/null
++++ b/frontend/src/shared/api/mrcd-service.test.ts
+@@ -0,0 +1,199 @@
++/**
++ * Cliente del servicio MRCD: validación del contrato v1 con respuestas REALES del motor
++ * (fixtures generados por `python -m mrcd.service`), flujo de sondeo y errores estructurados.
++ */
++import { describe, expect, it, vi } from "vitest";
++
++import errorAudioTooShort from "./__fixtures__/mrcd/error_audio_too_short.json";
++import errorStereo from "./__fixtures__/mrcd/error_stereo.json";
++import jobFailed from "./__fixtures__/mrcd/http_job_failed_invalid_audio.json";
++import jobQueued from "./__fixtures__/mrcd/http_job_queued.json";
++import okP0 from "./__fixtures__/mrcd/response_ok_p0_v0.json";
++import okP1 from "./__fixtures__/mrcd/response_ok_p1_experimental.json";
++import {
++  analyzeAudioWithMrcd,
++  MrcdAnalysisSchema,
++  MrcdJobSchema,
++  MrcdServiceError,
++} from "./mrcd-service";
++
++const BASE = "http://127.0.0.1:8765";
++
++function json(body: unknown, status = 200): Response {
++  return new Response(JSON.stringify(body), {
++    status,
++    headers: { "Content-Type": "application/json" },
++  });
++}
++
++describe("MrcdAnalysisSchema", () => {
++  it("acepta la respuesta real del motor con p0 y V0 por defecto", () => {
++    const parsed = MrcdAnalysisSchema.parse(okP0);
++    expect(parsed.status).toBe("completed");
++    expect(parsed.events.length).toBeGreaterThan(0);
++    for (const event of parsed.events) {
++      expect(event.score.calibrated).toBe(false);
++      expect(event.score.label).toBe("uncalibrated");
++    }
++    expect(parsed.experimental.active).toBe(false);
++    expect(parsed.modalities.kinesic_video.available).toBe(false);
++  });
++
++  it("marca como experimental el perfil ASR P1", () => {
++    const parsed = MrcdAnalysisSchema.parse(okP1);
++    expect(parsed.experimental).toEqual({
++      active: true,
++      components: ["asr_profile:p1_disfluent_prompt"],
++    });
++  });
++
++  it("acepta los documentos de error con su código estructurado", () => {
++    expect(MrcdAnalysisSchema.parse(errorStereo).error?.code).toBe(
++      "audio_not_mono",
++    );
++    expect(MrcdAnalysisSchema.parse(errorAudioTooShort).error?.code).toBe(
++      "audio_too_short",
++    );
++  });
++
++  it("una medida no disponible conserva null y el motivo, nunca 0", () => {
++    const failed = MrcdAnalysisSchema.parse(jobFailed.result);
++    expect(failed.request.audio_duration_s.available).toBe(false);
++    expect(failed.request.audio_duration_s.value).toBeNull();
++  });
++
++  it("rechaza un puntaje que se declare calibrado o sin la marca", () => {
++    const tampered = structuredClone(okP0);
++    tampered.events[0]!.score.calibrated = true as unknown as false;
++    expect(MrcdAnalysisSchema.safeParse(tampered).success).toBe(false);
++    const unlabeled = structuredClone(okP0);
++    unlabeled.events[0]!.score.label =
++      "calibrated" as unknown as "uncalibrated";
++    expect(MrcdAnalysisSchema.safeParse(unlabeled).success).toBe(false);
++  });
++
++  it("rechaza un valor 0 con available=false", () => {
++    const tampered = structuredClone(okP0) as unknown as {
++      summary: { events_per_minute: Record<string, unknown> };
++    };
++    tampered.summary.events_per_minute = {
++      available: false,
++      value: 0,
++      unavailable_reason: "x",
++    };
++    expect(MrcdAnalysisSchema.safeParse(tampered).success).toBe(false);
++  });
++
++  it("valida los estados de trabajo", () => {
++    expect(MrcdJobSchema.parse(jobQueued).status).toBe("queued");
++    expect(MrcdJobSchema.parse(jobFailed).result?.error?.code).toBe(
++      "invalid_audio_file",
++    );
++  });
++});
++
++describe("analyzeAudioWithMrcd", () => {
++  const audio = new Blob([new Uint8Array([1, 2, 3])], { type: "audio/wav" });
++
++  it("sin URL configurada falla como no disponible, sin red", async () => {
++    const fetchImpl = vi.fn();
++    await expect(
++      analyzeAudioWithMrcd(audio, { baseUrl: undefined, fetchImpl }),
++    ).rejects.toMatchObject({ code: "client_not_configured" });
++    expect(fetchImpl).not.toHaveBeenCalled();
++  });
++
++  it("envía el audio sin credenciales ni Authorization y espera el resultado", async () => {
++    const running = { ...jobQueued, status: "running" };
++    const done = {
++      ...jobQueued,
++      status: "completed",
++      result: okP0,
++    };
++    const fetchImpl = vi
++      .fn<typeof fetch>()
++      .mockResolvedValueOnce(json(jobQueued, 202))
++      .mockResolvedValueOnce(json(running))
++      .mockResolvedValueOnce(json(done));
++    const result = await analyzeAudioWithMrcd(audio, {
++      baseUrl: BASE,
++      fetchImpl,
++      pollIntervalMs: 1,
++    });
++    expect(result.status).toBe("completed");
++    const [firstUrl, firstInit] = fetchImpl.mock.calls[0]!;
++    expect(firstUrl).toBe(`${BASE}/v1/jobs`);
++    expect(firstInit?.method).toBe("POST");
++    expect(firstInit?.credentials).toBe("omit");
++    expect(new Headers(firstInit?.headers).has("Authorization")).toBe(false);
++    expect(fetchImpl).toHaveBeenCalledTimes(3);
++    expect(fetchImpl.mock.calls[2]![0]).toBe(
++      `${BASE}/v1/jobs/${jobQueued.job_id}`,
++    );
++  });
++
++  it("pasa el perfil ASR solo cuando se pide (el defecto p0 no se envía)", async () => {
++    const fetchImpl = vi
++      .fn<typeof fetch>()
++      .mockResolvedValueOnce(
++        json({ ...jobQueued, status: "completed", result: okP1 }, 202),
++      );
++    await analyzeAudioWithMrcd(audio, {
++      baseUrl: BASE,
++      fetchImpl,
++      asrProfile: "p1_disfluent_prompt",
++    });
++    expect(fetchImpl.mock.calls[0]![0]).toBe(
++      `${BASE}/v1/jobs?asr_profile=p1_disfluent_prompt`,
++    );
++  });
++
++  it("convierte un trabajo fallido en MrcdServiceError con el código del servicio", async () => {
++    const fetchImpl = vi
++      .fn<typeof fetch>()
++      .mockResolvedValueOnce(json(jobFailed, 202));
++    await expect(
++      analyzeAudioWithMrcd(audio, { baseUrl: BASE, fetchImpl }),
++    ).rejects.toMatchObject({ code: "invalid_audio_file", retryable: false });
++  });
++
++  it("convierte un HTTP 4xx con documento de error en MrcdServiceError", async () => {
++    const fetchImpl = vi
++      .fn<typeof fetch>()
++      .mockResolvedValueOnce(json(errorStereo, 422));
++    const promise = analyzeAudioWithMrcd(audio, { baseUrl: BASE, fetchImpl });
++    await expect(promise).rejects.toBeInstanceOf(MrcdServiceError);
++    await expect(promise).rejects.toMatchObject({ code: "audio_not_mono" });
++  });
++
++  it("informa servicio inalcanzable como reintentable", async () => {
++    const fetchImpl = vi
++      .fn<typeof fetch>()
++      .mockRejectedValue(new TypeError("fail"));
++    await expect(
++      analyzeAudioWithMrcd(audio, { baseUrl: BASE, fetchImpl }),
++    ).rejects.toMatchObject({ code: "client_unreachable", retryable: true });
++  });
++
++  it("rechaza una versión de contrato desconocida con un código propio", async () => {
++    const fetchImpl = vi
++      .fn<typeof fetch>()
++      .mockResolvedValueOnce(json({ ...jobQueued, schema_version: "mrcd.job/v2" }, 202));
++    await expect(
++      analyzeAudioWithMrcd(audio, { baseUrl: BASE, fetchImpl }),
++    ).rejects.toMatchObject({ code: "contract_version_unsupported" });
++  });
++
++  it("descarta una respuesta que viola el contrato en vez de mostrarla", async () => {
++    const bad = structuredClone(okP0);
++    bad.events[0]!.score.calibrated = true as unknown as false;
++    const fetchImpl = vi
++      .fn<typeof fetch>()
++      .mockResolvedValueOnce(
++        json({ ...jobQueued, status: "completed", result: bad }, 202),
++      );
++    await expect(
++      analyzeAudioWithMrcd(audio, { baseUrl: BASE, fetchImpl }),
++    ).rejects.toMatchObject({ code: "client_contract_violation" });
++  });
++});
+diff --git a/frontend/src/shared/api/mrcd-service.ts b/frontend/src/shared/api/mrcd-service.ts
+new file mode 100644
+index 0000000..24bf653
+--- /dev/null
++++ b/frontend/src/shared/api/mrcd-service.ts
+@@ -0,0 +1,293 @@
++/**
++ * Cliente del servicio MRCD (contrato `mrcd.analysis/v1`).
++ *
++ * El servicio MRCD vive en OTRO repositorio y proceso (`C:\zArnes-tesis\mrcd`,
++ * `python -m mrcd.service serve`). Este módulo solo habla su contrato HTTP; no
++ * importa nada del motor.
++ *
++ * Reglas que este cliente impone a propósito:
++ * - Sin credenciales: NO usa `apiFetch` (que adjunta el bearer de OratorIA) ni
++ *   envía cookies. La URL llega por `VITE_MRCD_SERVICE_URL`; no hay claves.
++ * - El puntaje se valida como `calibrated: false` / `label: "uncalibrated"`. Si el
++ *   servicio alguna vez dejara de decirlo, el esquema rechaza la respuesta
++ *   en vez de mostrar una certeza que el motor no respalda.
++ * - Una medida ausente es `{ available: false, value: null, unavailable_reason }`;
++ *   nunca se convierte en 0.
++ */
++import { z } from "zod";
++
++export const MRCD_ANALYSIS_VERSION = "mrcd.analysis/v1";
++export const MRCD_JOB_VERSION = "mrcd.job/v1";
++
++function measure<T extends z.ZodType>(value: T) {
++  return z.union([
++    z.object({
++      available: z.literal(true),
++      value,
++      unavailable_reason: z.null(),
++    }),
++    z.object({
++      available: z.literal(false),
++      value: z.null(),
++      unavailable_reason: z.string().min(1),
++    }),
++  ]);
++}
++
++const modalityStatus = z.union([
++  z.object({ available: z.literal(true), reason: z.null() }),
++  z.object({ available: z.literal(false), reason: z.string().min(1) }),
++]);
++
++const looseObject = z.record(z.string(), z.unknown());
++
++export const MrcdEventSchema = z.object({
++  id: z.string(),
++  class: z.string().min(1),
++  start_s: z.number().min(0),
++  end_s: z.number().min(0),
++  interval_semantics: z.literal("decision_stride_not_human_boundary"),
++  score: z.object({
++    value: z.number().min(0).max(1),
++    kind: z.enum(["max_window_softmax_score", "max_window_class_probability"]),
++    calibrated: z.literal(false),
++    label: z.literal("uncalibrated"),
++  }),
++  n_windows: z.number().int().min(1),
++  modalities_used: z.array(z.string()),
++  text: z.string().nullable(),
++  validation: z.string().nullable(),
++  experimental: z.boolean(),
++});
++export type MrcdEvent = z.infer<typeof MrcdEventSchema>;
++
++export const MrcdErrorSchema = z.object({
++  code: z.string().min(1),
++  message: z.string().min(1),
++  retryable: z.boolean(),
++  details: looseObject,
++});
++
++export const MrcdAnalysisSchema = z.object({
++  schema_version: z.literal(MRCD_ANALYSIS_VERSION),
++  status: z.enum(["completed", "failed"]),
++  generated_at: z.string(),
++  error: MrcdErrorSchema.nullable(),
++  request: z.object({
++    audio_sha256: z.string().nullable(),
++    audio_duration_s: measure(z.number()),
++    sample_rate_hz: measure(z.number().int()),
++    channels: measure(z.number().int()),
++    asr_profile: z.string(),
++    head: z.string().nullable(),
++    include_text: z.boolean(),
++  }),
++  events: z.array(MrcdEventSchema),
++  summary: z
++    .object({
++      n_events: z.number().int().min(0),
++      events_per_minute: measure(z.number()),
++      counts_by_class: z.record(z.string(), z.number().int()),
++    })
++    .nullable(),
++  modalities: z.object({
++    acoustic: modalityStatus,
++    linguistic: modalityStatus,
++    kinesic_video: modalityStatus,
++  }),
++  provenance: z.object({
++    service: looseObject,
++    checkpoint: looseObject.nullable(),
++    asr: looseObject.nullable(),
++    head: looseObject.nullable(),
++    config: looseObject.nullable(),
++    environment: looseObject.nullable(),
++  }),
++  experimental: z.object({
++    active: z.boolean(),
++    components: z.array(z.string()),
++  }),
++  head_decision: looseObject.nullable(),
++  transcript: z.string().nullable(),
++  warnings: z.array(z.object({ code: z.string(), message: z.string() })),
++});
++export type MrcdAnalysis = z.infer<typeof MrcdAnalysisSchema>;
++
++export const MrcdJobSchema = z.object({
++  schema_version: z.literal(MRCD_JOB_VERSION),
++  job_id: z.string(),
++  status: z.enum(["queued", "running", "completed", "failed"]),
++  created_at: z.string(),
++  result: MrcdAnalysisSchema.nullable(),
++});
++export type MrcdJob = z.infer<typeof MrcdJobSchema>;
++
++/** Error del servicio (contrato) o del cliente (`client_*`). */
++export class MrcdServiceError extends Error {
++  readonly code: string;
++  readonly retryable: boolean;
++
++  constructor(code: string, message: string, retryable = false) {
++    super(message);
++    this.name = "MrcdServiceError";
++    this.code = code;
++    this.retryable = retryable;
++  }
++}
++
++/** Base del servicio o `null` si no está configurado (la función queda "no disponible"). */
++export function mrcdServiceUrl(): string | null {
++  const raw = import.meta.env.VITE_MRCD_SERVICE_URL?.trim();
++  return raw ? raw.replace(/\/+$/, "") : null;
++}
++
++export interface AnalyzeOptions {
++  /** Perfil ASR. Por defecto el servicio usa `p0`; `p1_disfluent_prompt` es EXPERIMENTAL. */
++  asrProfile?: string;
++  signal?: AbortSignal;
++  pollIntervalMs?: number;
++  timeoutMs?: number;
++  baseUrl?: string;
++  fetchImpl?: typeof fetch;
++}
++
++function failureFrom(analysis: MrcdAnalysis): MrcdServiceError {
++  const e = analysis.error;
++  return new MrcdServiceError(
++    e?.code ?? "client_unknown_failure",
++    e?.message ?? "El servicio MRCD informó un fallo sin detalle.",
++    e?.retryable ?? false,
++  );
++}
++
++async function readJson(response: Response): Promise<unknown> {
++  try {
++    return await response.json();
++  } catch {
++    throw new MrcdServiceError(
++      "client_bad_response",
++      "El servicio MRCD respondió con un cuerpo que no es JSON.",
++    );
++  }
++}
++
++/**
++ * Envía el audio (WAV PCM16 mono 16 kHz) al servicio, espera el trabajo y devuelve el
++ * análisis validado. Lanza `MrcdServiceError` con el código estructurado del servicio.
++ */
++export async function analyzeAudioWithMrcd(
++  audio: Blob,
++  options: AnalyzeOptions = {},
++): Promise<MrcdAnalysis> {
++  const base = options.baseUrl ?? mrcdServiceUrl();
++  if (!base) {
++    throw new MrcdServiceError(
++      "client_not_configured",
++      "VITE_MRCD_SERVICE_URL no está configurada: el análisis de disfluencias no está disponible.",
++    );
++  }
++  const doFetch = options.fetchImpl ?? fetch;
++  const query = options.asrProfile
++    ? `?asr_profile=${encodeURIComponent(options.asrProfile)}`
++    : "";
++  const common: RequestInit = {
++    credentials: "omit",
++    signal: options.signal,
++  };
++
++  let created: Response;
++  try {
++    created = await doFetch(`${base}/v1/jobs${query}`, {
++      ...common,
++      method: "POST",
++      headers: { "Content-Type": "audio/wav" },
++      body: audio,
++    });
++  } catch {
++    throw new MrcdServiceError(
++      "client_unreachable",
++      "No se pudo contactar el servicio MRCD. ¿Está levantado y permite este origen (CORS)?",
++      true,
++    );
++  }
++  const createdBody = await readJson(created);
++  if (!created.ok) {
++    const failed = MrcdAnalysisSchema.safeParse(createdBody);
++    throw failed.success
++      ? failureFrom(failed.data)
++      : new MrcdServiceError(
++          "client_bad_response",
++          `Respuesta inesperada del servicio MRCD (HTTP ${created.status}).`,
++        );
++  }
++  let job = parseJob(createdBody);
++
++  const started = Date.now();
++  const timeoutMs = options.timeoutMs ?? 600_000;
++  const interval = options.pollIntervalMs ?? 1_000;
++  while (job.status === "queued" || job.status === "running") {
++    if (Date.now() - started > timeoutMs) {
++      throw new MrcdServiceError(
++        "client_timeout",
++        "El análisis MRCD no terminó en el tiempo esperado.",
++        true,
++      );
++    }
++    await new Promise((resolve) => setTimeout(resolve, interval));
++    let polled: Response;
++    try {
++      polled = await doFetch(`${base}/v1/jobs/${job.job_id}`, {
++        ...common,
++        method: "GET",
++      });
++    } catch {
++      throw new MrcdServiceError(
++        "client_unreachable",
++        "Se perdió la conexión con el servicio MRCD mientras se esperaba el resultado.",
++        true,
++      );
++    }
++    const body = await readJson(polled);
++    if (!polled.ok) {
++      const failed = MrcdAnalysisSchema.safeParse(body);
++      throw failed.success
++        ? failureFrom(failed.data)
++        : new MrcdServiceError(
++            "client_bad_response",
++            `Respuesta inesperada del servicio MRCD (HTTP ${polled.status}).`,
++          );
++    }
++    job = parseJob(body);
++  }
++  if (!job.result) {
++    throw new MrcdServiceError(
++      "client_bad_response",
++      "El trabajo terminó sin resultado.",
++    );
++  }
++  if (job.status === "failed" || job.result.status === "failed") {
++    throw failureFrom(job.result);
++  }
++  return job.result;
++}
++
++function parseJob(body: unknown): MrcdJob {
++  const parsed = MrcdJobSchema.safeParse(body);
++  if (!parsed.success) {
++    const version =
++      typeof body === "object" && body !== null && "schema_version" in body
++        ? String((body as { schema_version: unknown }).schema_version)
++        : "";
++    if (version !== MRCD_JOB_VERSION) {
++      throw new MrcdServiceError(
++        "contract_version_unsupported",
++        `Versión de contrato no soportada por este cliente: ${version || "desconocida"} (se esperaba ${MRCD_JOB_VERSION}).`,
++      );
++    }
++    throw new MrcdServiceError(
++      "client_contract_violation",
++      "La respuesta del servicio MRCD no cumple el contrato mrcd.job/v1; se descarta.",
++    );
++  }
++  return parsed.data;
++}
+diff --git a/frontend/src/vite-env.d.ts b/frontend/src/vite-env.d.ts
+index 9bd76e3..ff8ef34 100644
+--- a/frontend/src/vite-env.d.ts
++++ b/frontend/src/vite-env.d.ts
+@@ -20,6 +20,11 @@ interface ImportMetaEnv {
+   readonly VITE_MEDIAPIPE_WASM_BASE_URL?: string;
+   /** `modelAssetPath` del PoseLandmarker (`.task`). */
+   readonly VITE_MEDIAPIPE_POSE_MODEL_URL?: string;
++  /**
++   * Base del servicio MRCD de disfluencias (p. ej. http://127.0.0.1:8765). Sin claves. Si falta,
++   * la sección de disfluencias del reporte queda "no disponible".
++   */
++  readonly VITE_MRCD_SERVICE_URL?: string;
+ }
+ 
+ interface ImportMeta {

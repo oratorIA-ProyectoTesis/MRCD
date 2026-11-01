@@ -1,0 +1,26 @@
+[
+ {
+  "baseline_rc": 0,
+  "tail": [
+   "239 passed, 6 skipped in 14.18s"
+  ]
+ },
+ {
+  "mutant": "a_example_plain_check_removed",
+  "killed": true,
+  "tail": [
+   "FAILED tests/test_corpora_base.py::test_example_level_label_must_be_the_canonical_spelling_REVISION7_mutant_a",
+   "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!",
+   "1 failed, 214 passed in 0.44s"
+  ]
+ },
+ {
+  "mutant": "b_chunk_s_dropped_from_fingerprint",
+  "killed": true,
+  "tail": [
+   "FAILED tests/test_asr_profiles.py::test_engine_fingerprint_changes_with_chunk_s_REVISION7_mutant_b",
+   "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!",
+   "1 failed, 23 passed, 6 skipped in 12.53s"
+  ]
+ }
+]

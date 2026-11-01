@@ -1,0 +1,44 @@
+{
+  "tool": "docs/microphone-check/mic_check.py",
+  "status": "NOT_A_PHYSICAL_MICROPHONE_RESULT",
+  "simulated_input": true,
+  "started_utc": "2026-10-31T20:29:07+00:00",
+  "consent_acknowledged_utc": "2026-10-31T20:29:07+00:00",
+  "requested_duration_s": 40.0,
+  "sample_rate_hz": 16000,
+  "channels": 1,
+  "live_config": "live_cfg_v2",
+  "whisper_size": "small",
+  "checkpoint_file": "ckpt_audio_text.pt",
+  "checkpoint_sha256": "87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669",
+  "git_commit": "955d27c",
+  "keep_audio": false,
+  "keep_text": false,
+  "device": {
+    "simulated": "DNrrpE-sYnU_s00.wav"
+  },
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10",
+  "environment": {
+    "omp_num_threads": "4",
+    "omp_pin_opted_out": false,
+    "cpu_count_logical": 20,
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "faster_whisper": "1.2.1",
+    "ctranslate2": "4.8.2",
+    "numpy": "2.5.3",
+    "environment_is_pinned": true,
+    "omp_num_threads_at_mrcd_import": "4",
+    "numpy_imported_before_mrcd": true,
+    "set_before_numpy": null,
+    "assigned_after_import": false,
+    "effective": null,
+    "cpu_threads": {
+      "torch": 4,
+      "asr_cpu_threads_arg": null
+    }
+  },
+  "config_file": "config.json"
+}

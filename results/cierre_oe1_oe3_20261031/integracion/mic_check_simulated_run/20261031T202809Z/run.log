@@ -1,0 +1,13 @@
+20:28:09Z run folder: results\cierre_oe1_oe3_20261031\integracion\mic_check_simulated_run\20261031T202809Z
+20:28:11Z simulated_input=True keep_audio=False keep_text=False
+20:28:11Z loading engine (checkpoint + Whisper) ...
+20:28:55Z PASS signal: signal present
+20:28:55Z PASS clipping: no clipped samples
+20:28:55Z PASS level: peak -3.97 dBFS (warn below -30.0)
+20:28:55Z PASS noise_floor: p10 block level -52.03 dBFS
+20:28:55Z WARN silence_edges: leading 0.2s, trailing 0.1s (want >= 2.0s each)
+20:28:55Z PASS dc_offset: 1e-05
+20:28:55Z PASS dropped_blocks: 0 blocks flagged by the audio driver
+20:28:55Z PASS clock_drift: audio 34.75s vs wall 36.0s
+20:28:55Z rows=81 by_class={'neutral_pause': 14, 'rhetorical_pause': 8, 'fluent': 11, 'prolongation': 24, 'filler_word': 18, 'block': 6}
+20:28:55Z done. Review results\cierre_oe1_oe3_20261031\integracion\mic_check_simulated_run\20261031T202809Z\share_summary.json and complete results\cierre_oe1_oe3_20261031\integracion\mic_check_simulated_run\20261031T202809Z\RESULTS.md (state stays NO REALIZADA until you do).
