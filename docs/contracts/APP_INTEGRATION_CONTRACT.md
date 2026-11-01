@@ -52,7 +52,7 @@ Exact command that produced the real examples (after generating the excerpt, see
 1. Audio: PCM16 WAV, **mono, 16 000 Hz, 13 s or longer**. The service never downmixes or resamples (error codes `audio_not_mono`, `unsupported_sample_rate`, `unsupported_audio_format`, `invalid_audio_file`, `audio_not_finite`, `audio_too_short`, `audio_too_long`).
 2. **Contiguity.** Only audio that is contiguous in capture time may be submitted. If chunks are missing (`secuencia` gap), the app must either (a) submit the longest contiguous run(s) separately, each with its own binding, or (b) not submit and report `not_run` with the reason `audio gap`. It must **not** silently zero-fill and present the result as complete. Gaps are recorded in the binding (`gaps[]`). Zero-filling is a conscious option only if the binding says so.
 3. **No resampling in the integration.** The app already produces 16 kHz; if a different rate ever appears the request must fail with a visible reason.
-4. Options: `asr_profile` = `p0` (default). `p1_disfluent_prompt` is experimental and must never be the app default; `head=vc` is experimental and turn-level and must be requested explicitly. `include_text=false` by default (privacy); transcript text is only requested when the product needs it.
+4. Options: `asr_profile` = `p0` (default). `p1_disfluent_prompt` is experimental and must never be the app default; the service also accepts the experimental opt-in profiles `p0_noloop`, `p1_noloop`, `p0_cuda`, `p1_cuda` (marked experimental with specific warnings; GPU profiles return `asr_unavailable` instead of falling back to CPU; see `ASR_PROFILES_CONTRACT.md` section 1b), none of which may be the app default; `head=vc` is experimental and turn-level and must be requested explicitly. `include_text=false` by default (privacy); transcript text is only requested when the product needs it.
 5. No personal data in the request: no names, no `codigo_anonimo`, no session id. The only link is app-side (B.5).
 6. Video is not part of the request. There is no endpoint that accepts video or frames.
 
@@ -75,13 +75,23 @@ MRCD times are seconds from the first sample of the submitted audio. The app map
 
 The app stores a **binding** (`oratoria.mrcd-binding/v1`, schema `$defs.binding`, illustrative example `examples/app_session_binding_example.json`, placeholder ids): `session_id` (from `session_started`), `segment_index`, first/last `secuencia`, `t0_ms_first_chunk`, `n_chunks`, `duration_ms`, `sha256` of the submitted WAV, the MRCD `job_id`, `asr_profile`, `head`, `include_text`, `gaps[]`, and the capture conditions (`echo_cancellation`, `noise_suppression`, `auto_gain_control`, `resampler`). Integrity check: `binding.audio.sha256 == analysis.request.audio_sha256`; a mismatch invalidates the result. The binding is the only place where a session id and a MRCD result meet.
 
+### B.3b Contract revision 1.2 (additive, 2026-11-01, S3)
+
+`provenance.service.contract_revision = "1.2"`. Everything below is optional or backward compatible: a revision 1.1 document still validates.
+
+- **Output scope.** Default `request.output_scope = "evaluated"`: only `filler_word`, `prolongation`, `repetition` are emitted. `block`, `rhetorical_pause`, `neutral_pause` and `revision` appear only with the explicit option (`--include-out-of-scope`, `include_out_of_scope=true`, `output_scope="all"`); each such event has `in_scope: false`, `validation: "out_of_scope_unvalidated"`, `experimental: true`. They are never counted: `summary.n_events`, `summary.counts_by_class` and `summary.events_per_minute` cover in-scope events only; `summary.out_of_scope = {included, n_events, counts_by_class}` reports how many were detected (hidden or included). A `out_of_scope_hidden` / `out_of_scope_included` warning says which.
+- **Prolongation** events carry `validation: "observable lengthening; disfluent function not demonstrated"`.
+- **Optional three-state `decision`** (`decision=true`): `event.decision = {state: present|absent|uncertain, estimate, lo, hi, basis, calibration_claim: "none"}`. `estimate` is a development-fitted Platt mapping of the score; the abstention band `[lo, hi)` was chosen on DIHANA folds 1-4 (S3 E3). It is EXPERIMENTAL and never a demonstrated calibrated probability; `score.calibrated` stays `false`.
+- **Optional experimental text route** (`text_route="rep_ctx_p1"`): replaces the V0 `repetition` events with segments scored by a turn-level logistic model on P1 ASR text (`score.kind = "text_route_logistic_score"`, `modalities_used = ["linguistic"]`, `provenance.text_route`). Needs the engine's opt-in `analyze(return_words=True)`. **Unit (declared 2026-11-01, review S):** the model was trained and evaluated on whole DIHANA turns; the route applies it to ASR segments split at pauses >= 0.6 s or 30 words. That segment-level behaviour was **not evaluated**.
+- `scores_uncalibrated` now says "maximum window softmax score ... (softmax, not calibrated)". UI copy should read "score (softmax, no calibrado)", not "probabilidad de clase".
+
 ### B.6 What the report may show (`oratoria.mrcd-report/v1`)
 
 Schema `$defs.report_section`; reference mapping `build_report_section.py`; real examples `examples/app_report_section_example.json` (from the real success document) and `examples/app_report_section_failed_example.json`. Rules:
 
 1. Show the class, the session-time interval and the score **with the label "no calibrado"** (`score.label = "uncalibrated"`); never as a percentage of certainty or a probability.
 2. Show `warnings` (at least `scores_uncalibrated` and `no_human_validation`) and the `experimental` flag.
-3. For classes without a compatible human reference (`block`, `rhetorical_pause`, `neutral_pause`, `revision`) show them only as technical output with that qualifier, or hide them; never as a validated finding (see `DISAMBIGUATION_SPEC.md`).
+3. For classes without a compatible human reference (`block`, `rhetorical_pause`, `neutral_pause`, `revision`): since revision 1.2 the service hides them by default; when they are requested, show them only with the qualifier `out_of_scope_unvalidated`, outside totals and rates; never as a validated finding (see `DISAMBIGUATION_SPEC.md`).
 4. A missing measure is rendered as "no disponible" **with the reason**, never as `0`. A failed or not-run analysis renders its `unavailable_reason`.
 5. Rates per minute are not meaningful for short or padded audio; the service returns `events_per_minute` as a measure, and the UI must show its availability and audio duration next to it, never an unqualified number.
 6. Do not aggregate `todas_las_probabilidades` or window rows into counts, and do not subtract from composite criteria of the literature (project rule 5).

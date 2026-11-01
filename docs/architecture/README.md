@@ -23,9 +23,18 @@ Date: 2026-10-31. Scope: the four C4 levels of the system **as it exists in the 
 Renderer check on this machine (2026-10-31): `mmdc` not installed, `dot` (Graphviz) not installed, `plantuml` not installed (Java 24 exists but no PlantUML jar), `cairosvg` not installed. Node 22 and `npx` exist, but a Mermaid CLI would need to download Chromium, so nothing was installed. Therefore:
 
 - **SVG** is rendered by `c4_model.py` (standard library only; hand-rolled layout with absolute coordinates stored in the model; byte-identical on re-run).
-- **Mermaid sources (`.mmd`)** are generated from the same model (flowchart syntax with subgraphs for boundaries). **They were NOT render-tested**: no Mermaid renderer is installed. Treat the SVG as the rendered artifact and the `.mmd` as editable source that has not been compiled.
+- **Mermaid sources (`.mmd`)** are generated from the same model (flowchart syntax with subgraphs for boundaries). **They were NOT render-tested when first written** (no Mermaid renderer was installed). **Update 2026-11-01:** all four C4 `.mmd` files and `docs/contracts/disambiguation_states.mmd` were compiled with `@mermaid-js/mermaid-cli` 11.4.2 (bundled mermaid 11.17.2, Node 22.17.0, local Chrome, no web service): 5/5 compile with no syntax error, so no source change was needed. Re-check with `render_mermaid_check.sh` (see below). The SVG made by `c4_model.py` remains the primary rendered artifact.
 - **PNG** is a convenience raster of the SVG made with Chrome 156.0.8078.74 headless (`render_png.sh`); it is not part of the source of truth.
 - Nothing was installed; no model or corpus was touched.
+
+Mermaid compile check (local, no web service; one-time tool install outside the repo):
+
+```bash
+TOOLS=~/.cache/mrcd-mmdc; mkdir -p "$TOOLS" && (cd "$TOOLS" && PUPPETEER_SKIP_DOWNLOAD=1 npm i --prefix . @mermaid-js/mermaid-cli@11.4.2)
+bash docs/architecture/render_mermaid_check.sh /tmp/mmd_out   # renders every .mmd to SVG; exit 0 = all compile
+```
+
+It uses the locally installed Chrome (`CHROME` env var to override); `PUPPETEER_SKIP_DOWNLOAD=1` avoids downloading Chromium.
 
 Commands (repo root, Git Bash; Python 3.12.10 from `.venv`):
 

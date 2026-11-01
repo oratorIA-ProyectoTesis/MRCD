@@ -1,0 +1,667 @@
+{
+  "schema_version": "mrcd.analysis/v1",
+  "status": "completed",
+  "generated_at": "2026-11-01T06:43:23+00:00",
+  "error": null,
+  "request": {
+    "audio_sha256": "0362201d7f82f2b181d0e8de9013c1377ec137e670bd5c93ef41a65a5c2bcb63",
+    "audio_duration_s": {
+      "available": true,
+      "value": 36.0,
+      "unavailable_reason": null
+    },
+    "sample_rate_hz": {
+      "available": true,
+      "value": 16000,
+      "unavailable_reason": null
+    },
+    "channels": {
+      "available": true,
+      "value": 1,
+      "unavailable_reason": null
+    },
+    "asr_profile": "p1_disfluent_prompt",
+    "head": null,
+    "include_text": false,
+    "output_scope": "all",
+    "decision": true,
+    "text_route": "rep_ctx_p1"
+  },
+  "events": [
+    {
+      "id": "ev-0001",
+      "class": "rhetorical_pause",
+      "start_s": 0.0,
+      "end_s": 1.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.609209,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 2,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "out_of_scope_unvalidated",
+      "experimental": true,
+      "in_scope": false
+    },
+    {
+      "id": "ev-0002",
+      "class": "neutral_pause",
+      "start_s": 1.0,
+      "end_s": 2.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.698715,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 2,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "out_of_scope_unvalidated",
+      "experimental": true,
+      "in_scope": false
+    },
+    {
+      "id": "ev-0003",
+      "class": "rhetorical_pause",
+      "start_s": 2.0,
+      "end_s": 6.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.96572,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 9,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "out_of_scope_unvalidated",
+      "experimental": true,
+      "in_scope": false
+    },
+    {
+      "id": "ev-0004",
+      "class": "filler_word",
+      "start_s": 6.5,
+      "end_s": 9.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.978941,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 5,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": null,
+      "experimental": true,
+      "in_scope": true,
+      "decision": {
+        "state": "present",
+        "estimate": 0.659069,
+        "lo": 0.24,
+        "hi": 0.382859,
+        "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
+        "calibration_claim": "none"
+      }
+    },
+    {
+      "id": "ev-0005",
+      "class": "prolongation",
+      "start_s": 9.0,
+      "end_s": 10.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.749319,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 2,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "observable lengthening; disfluent function not demonstrated",
+      "experimental": true,
+      "in_scope": true,
+      "decision": {
+        "state": "present",
+        "estimate": 0.674495,
+        "lo": 0.3,
+        "hi": 0.473117,
+        "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
+        "calibration_claim": "none"
+      }
+    },
+    {
+      "id": "ev-0006",
+      "class": "prolongation",
+      "start_s": 11.0,
+      "end_s": 11.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.590754,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 1,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "observable lengthening; disfluent function not demonstrated",
+      "experimental": true,
+      "in_scope": true,
+      "decision": {
+        "state": "present",
+        "estimate": 0.610828,
+        "lo": 0.3,
+        "hi": 0.473117,
+        "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
+        "calibration_claim": "none"
+      }
+    },
+    {
+      "id": "ev-0007",
+      "class": "prolongation",
+      "start_s": 14.5,
+      "end_s": 15.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.290071,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 1,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "observable lengthening; disfluent function not demonstrated",
+      "experimental": true,
+      "in_scope": true,
+      "decision": {
+        "state": "present",
+        "estimate": 0.49228,
+        "lo": 0.3,
+        "hi": 0.473117,
+        "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
+        "calibration_claim": "none"
+      }
+    },
+    {
+      "id": "ev-0008",
+      "class": "rhetorical_pause",
+      "start_s": 15.0,
+      "end_s": 15.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.657522,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 1,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "out_of_scope_unvalidated",
+      "experimental": true,
+      "in_scope": false
+    },
+    {
+      "id": "ev-0009",
+      "class": "neutral_pause",
+      "start_s": 15.5,
+      "end_s": 17.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.835308,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 4,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "out_of_scope_unvalidated",
+      "experimental": true,
+      "in_scope": false
+    },
+    {
+      "id": "ev-0010",
+      "class": "rhetorical_pause",
+      "start_s": 17.5,
+      "end_s": 18.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.499648,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 1,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "out_of_scope_unvalidated",
+      "experimental": true,
+      "in_scope": false
+    },
+    {
+      "id": "ev-0011",
+      "class": "neutral_pause",
+      "start_s": 18.0,
+      "end_s": 18.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.554595,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 1,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "out_of_scope_unvalidated",
+      "experimental": true,
+      "in_scope": false
+    },
+    {
+      "id": "ev-0012",
+      "class": "rhetorical_pause",
+      "start_s": 19.0,
+      "end_s": 19.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.5088,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 1,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "out_of_scope_unvalidated",
+      "experimental": true,
+      "in_scope": false
+    },
+    {
+      "id": "ev-0013",
+      "class": "neutral_pause",
+      "start_s": 19.5,
+      "end_s": 21.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.633469,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 3,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "out_of_scope_unvalidated",
+      "experimental": true,
+      "in_scope": false
+    },
+    {
+      "id": "ev-0014",
+      "class": "prolongation",
+      "start_s": 21.0,
+      "end_s": 22.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.501682,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 2,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "observable lengthening; disfluent function not demonstrated",
+      "experimental": true,
+      "in_scope": true,
+      "decision": {
+        "state": "present",
+        "estimate": 0.577683,
+        "lo": 0.3,
+        "hi": 0.473117,
+        "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
+        "calibration_claim": "none"
+      }
+    },
+    {
+      "id": "ev-0015",
+      "class": "neutral_pause",
+      "start_s": 22.0,
+      "end_s": 22.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.608208,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 1,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "out_of_scope_unvalidated",
+      "experimental": true,
+      "in_scope": false
+    },
+    {
+      "id": "ev-0016",
+      "class": "prolongation",
+      "start_s": 22.5,
+      "end_s": 23.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.597734,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 2,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "observable lengthening; disfluent function not demonstrated",
+      "experimental": true,
+      "in_scope": true,
+      "decision": {
+        "state": "present",
+        "estimate": 0.613451,
+        "lo": 0.3,
+        "hi": 0.473117,
+        "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
+        "calibration_claim": "none"
+      }
+    },
+    {
+      "id": "ev-0017",
+      "class": "neutral_pause",
+      "start_s": 23.5,
+      "end_s": 24.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.583844,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 2,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "out_of_scope_unvalidated",
+      "experimental": true,
+      "in_scope": false
+    },
+    {
+      "id": "ev-0018",
+      "class": "prolongation",
+      "start_s": 24.5,
+      "end_s": 25.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.572801,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 1,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "observable lengthening; disfluent function not demonstrated",
+      "experimental": true,
+      "in_scope": true,
+      "decision": {
+        "state": "present",
+        "estimate": 0.604113,
+        "lo": 0.3,
+        "hi": 0.473117,
+        "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
+        "calibration_claim": "none"
+      }
+    },
+    {
+      "id": "ev-0019",
+      "class": "block",
+      "start_s": 28.5,
+      "end_s": 31.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.997381,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 6,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "out_of_scope_unvalidated",
+      "experimental": true,
+      "in_scope": false
+    }
+  ],
+  "summary": {
+    "n_events": 7,
+    "events_per_minute": {
+      "available": true,
+      "value": 11.6667,
+      "unavailable_reason": null
+    },
+    "counts_by_class": {
+      "filler_word": 1,
+      "prolongation": 6
+    },
+    "out_of_scope": {
+      "included": true,
+      "n_events": 12,
+      "counts_by_class": {
+        "rhetorical_pause": 5,
+        "neutral_pause": 6,
+        "block": 1
+      }
+    }
+  },
+  "modalities": {
+    "acoustic": {
+      "available": true,
+      "reason": null
+    },
+    "linguistic": {
+      "available": true,
+      "reason": null
+    },
+    "kinesic_video": {
+      "available": false,
+      "reason": "service v1 receives audio only; no video was provided or processed"
+    }
+  },
+  "provenance": {
+    "service": {
+      "name": "mrcd.service",
+      "contract": "mrcd.analysis/v1",
+      "contract_revision": "1.2",
+      "mrcd_version": "0.3.0"
+    },
+    "checkpoint": {
+      "file": "ckpt_audio_text.pt",
+      "sha256": "87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669",
+      "mode": "audio_text",
+      "labels": [
+        "fluent",
+        "filler_word",
+        "prolongation",
+        "repetition",
+        "block",
+        "revision",
+        "rhetorical_pause",
+        "neutral_pause"
+      ],
+      "checkpoint_notice": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"
+    },
+    "asr": {
+      "profile": "p1_disfluent_prompt",
+      "experimental": true,
+      "validation": "experimental; not validated outside DIHANA",
+      "initial_prompt_sha256": "fe49e930ccc9f94847b7bedaec65f8c347cecaccbcd7283545618bc194c6a8b2",
+      "model": {
+        "model_size": "small",
+        "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+        "compute_type": "int8",
+        "device": "cpu"
+      },
+      "language": "es",
+      "decode": {
+        "temperature": 0.0,
+        "beam_size": 5,
+        "condition_on_previous_text": false,
+        "vad_filter": false,
+        "word_timestamps": true,
+        "chunk_s_requested": 8.0
+      },
+      "profile_fingerprint": "3939517c0c60fc7f0ad9ba972203330bee95265ebcd3743dbe26e3be854bb045",
+      "anomalies": []
+    },
+    "head": null,
+    "config": {
+      "window_s": 3.0,
+      "stride_s": 0.5,
+      "terminal_window": false,
+      "span": null,
+      "asr_chunk_s": 8.0
+    },
+    "environment": {
+      "omp_num_threads": "4",
+      "omp_pin_opted_out": false,
+      "cpu_count_logical": 20,
+      "python": "3.12.10",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+      "faster_whisper": "1.2.1",
+      "ctranslate2": "4.8.2",
+      "numpy": "2.5.3",
+      "environment_is_pinned": true,
+      "omp_num_threads_at_mrcd_import": "4",
+      "numpy_imported_before_mrcd": false,
+      "set_before_numpy": true,
+      "assigned_after_import": false,
+      "effective": true,
+      "cpu_threads": {
+        "torch": 1,
+        "asr_cpu_threads_arg": 0
+      },
+      "asr": {
+        "model_size": "small",
+        "device": "cpu",
+        "compute_type": "int8"
+      }
+    },
+    "text_route": {
+      "name": "rep_ctx_p1",
+      "experimental": true,
+      "task": "rep_literal",
+      "trained_on_asr_profile": "p1_disfluent_prompt",
+      "note": "ctx_LR on P1 text, weighted frame of 1019 DIHANA folds 1-4 turns; EXPERIMENTAL; trained turn-level",
+      "unit": "turn-level model applied to ASR segments split at pauses >= 0.6 s",
+      "validated_outside_dihana": false
+    }
+  },
+  "experimental": {
+    "active": true,
+    "components": [
+      "asr_profile:p1_disfluent_prompt",
+      "text_route:rep_ctx_p1",
+      "decision:three_state"
+    ]
+  },
+  "head_decision": null,
+  "transcript": null,
+  "warnings": [
+    {
+      "code": "scores_uncalibrated",
+      "message": "Scores are the maximum window softmax score of an uncalibrated model (softmax, not calibrated); they are not probabilities of correctness."
+    },
+    {
+      "code": "no_human_validation",
+      "message": "Classes are window-level decisions of a model trained with weak (heuristic) supervision; agreement with human annotation has not been established."
+    },
+    {
+      "code": "engine_provenance",
+      "message": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia ASR profile 'p1_disfluent_prompt' is EXPERIMENTAL and NOT validated outside DIHANA. In the exploratory DIHANA experiment a fluent control prompt of equal length and domain did not reproduce its gain; which component of the prompt causes the effect is unknown. Downstream models were trained on P0 text and not retrained for P1."
+    },
+    {
+      "code": "out_of_scope_included",
+      "message": "Events of classes outside the evaluated scope are included on explicit request, marked out_of_scope_unvalidated and excluded from totals and rates."
+    },
+    {
+      "code": "class_block_not_measurable",
+      "message": "The 'block' class is not measurable with the development corpus (n=2); there is no evidence that a 'block' event is correct."
+    },
+    {
+      "code": "experimental_components",
+      "message": "Experimental, opt-in components were used: asr_profile:p1_disfluent_prompt, text_route:rep_ctx_p1, decision:three_state. They are not validated outside their development corpus."
+    }
+  ]
+}

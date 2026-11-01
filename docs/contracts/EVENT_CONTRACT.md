@@ -112,3 +112,7 @@ Tests: `tests/test_public_api.py` (grid, merge, serialisation, errors), `tests/t
 | `examples/error_short_audio.json` | 5 s input                                                | the only error format: an exception message                      |
 
 Command, excerpt hash, engine and checkpoint hashes: `examples/provenance.json` and the docstring of `examples/generate_examples.py`.
+
+## 10. Revision 1.2 of the service contract and `return_words` (S3, 2026-11-01)
+
+`AnalysisResult.words` (list of word dicts with timestamps) is `None` unless `analyze(..., return_words=True)` is passed; the default output is bit-identical (golden test `tests/test_s3_engine_words.py`). The service uses it only for the opt-in text route. See `APP_INTEGRATION_CONTRACT.md` B.3b for the additive `mrcd.analysis/v1` fields.

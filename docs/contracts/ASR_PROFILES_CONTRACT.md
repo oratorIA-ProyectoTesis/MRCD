@@ -17,6 +17,19 @@ Scope note: this is the ASR **inside MRCD** (local Faster-Whisper). It is unrela
 
 Why p1 is experimental (carry this wording): in the exploratory DIHANA experiment a fluent control prompt of equal length and domain did not reproduce the gain observed with P1; a written fluent prompt suppresses repetitions and P1 preserves them; which feature matters (oral vs written register, punctuation, domain overlap, the filler list already present in P0) is not proven. P0 is itself a prompt with a filler list; there is no no-prompt control; one control, one length. The WER improvement (0.153 to 0.130) is equal under the fluent control C1 (0.129) and is **not** evidence of recovery. Downstream models were trained on P0 text and were not retrained for P1.
 
+### 1b. Opt-in profiles added 2026-11-01 (S1 GPU, S2 loop re-decode)
+
+All four are **EXPERIMENTAL, opt-in, never selected by default**. They are registered in `PROFILES` and therefore **accepted by the service** (`asr_profile=` query parameter / `AnalysisOptions.asr_profile`); the service marks them experimental (`experimental.components` contains `asr_profile:<name>`, plus the `experimental_components` warning and a profile-specific warning, see section 5).
+
+| profile | base | differs from its base only in | caveat (carry this wording) |
+|---|---|---|---|
+| `p0_cuda` | `p0` | `device="cuda"`, `compute_type="float16"` | float16 text can differ from the CPU int8 text the models were trained on (S1: only 4/13 units identical to CPU); not validated against it |
+| `p1_cuda` | `p1_disfluent_prompt` | same | same, plus the P1 caveats of section 1 |
+| `p0_noloop` | `p0` | `loop_redecode=True` | a chunk whose text looks looped is re-decoded without the prompt (ladder: T=0; T=0.4 with `best_of=5`, seed 13). Rung 2 samples and is **NOT bit-reproducible**. Evidence is exploratory (4 AMERESCO recordings; the loop-rate reduction is not significant after Holm correction) |
+| `p1_noloop` | `p1_disfluent_prompt` | `loop_redecode=True` | same, plus the P1 caveats |
+
+Each replaced chunk is recorded in `metadata.asr_profile.loop_redecode.events` with `attempt` (1 or 2, `null` when unresolved), `chunk_offset_s` (start of the decoded chunk in the file), `audio_s`, `words_before/after` and `reproducible` (`false` only when the text came from the sampled rung). `loop_redecode.n_non_reproducible` and `loop_redecode.reproducible` summarise the run, and the `warning` says so. A chunk that stays looped keeps its ORIGINAL text. `describe()` and cache keys of `p0`, `p1_disfluent_prompt`, `p0_cuda`, `p1_cuda` are bit-identical to before (pinned by tests).
+
 ## 2. Inputs and outputs
 
 |               |                                                                                                                                                                                                                                                                    |
@@ -48,15 +61,24 @@ It is a **heuristic**; thresholds are conventions, not calibrated. The transcrip
 
 ## 5. Selection, fingerprint, failures
 
-- Selection: `DisfluencyEngine.load(..., asr_profile="p0"|"p1_disfluent_prompt")` or `VerbatimASR(profile=...)`. No environment variable. Unknown names raise `ValueError` before any model is loaded. A custom `ASRProfile` must have `experimental=True` unless it equals p0, and cannot reuse a registered name with different parameters.
+- Selection: `DisfluencyEngine.load(..., asr_profile="p0"|"p1_disfluent_prompt"|"p0_cuda"|"p1_cuda"|"p0_noloop"|"p1_noloop")` or `VerbatimASR(profile=...)`. No environment variable. Unknown names raise `ValueError` before any model is loaded (the service answers `invalid_request` with the allowed names). A custom `ASRProfile` must have `experimental=True` unless it equals p0, and cannot reuse a registered name with different parameters.
 - Fingerprint: `metadata.asr_profile.asr_fingerprint.profile_fingerprint` = sha256 of `{schema:1, profile, prompt_sha256, decode params, chunk_s, overlap_s, model.bin sha256, compute_type, device, OMP threads, audio sha256}`; namespace `<name>-<prompt sha12>`. **The engine has no ASR cache**; the fingerprint is the key a cache added by an integrator must use. `asr_cache.key` is a deprecated alias (`engine_cache: null`). With `model_bin_sha256 = null` the fingerprint contains no model identity beyond `compute_type/device`.
 - Environment: decode text depends on `OMP_NUM_THREADS`; it must be in the environment **before numpy is imported** (the engine warns, it does not change the environment). "Bit-identical" decodes hold only on an unloaded machine with `OMP_NUM_THREADS=4`; two concurrent slow suites produced 6 failures each. `omp_effective_verified` may be `null` (not verified).
-- Failures: CUDA libraries missing -> falls back to CPU int8 and prints `[asr] GPU no utilizable ...` to stdout (observed while generating the fixtures: `cublas64_12.dll` not found). `model_info()` cannot resolve/hash `model.bin` -> logged and exposed as `model_info_error`; the run continues. An ASR object without `.profile` -> `profile: "unknown"`, `experimental: null`. First load needs the model in the local Hugging Face cache; without network the process may stall on hub checks unless `HF_HUB_OFFLINE=1` is set (observed while generating the fixtures; root cause not investigated).
+- Failures and device (CORRECTED 2026-11-01: the earlier text claimed a CPU fallback for every profile, which is false for the GPU profiles):
+  - `p0` / `p1_disfluent_prompt` / `p0_noloop` / `p1_noloop` use `device="auto"` and **do fall back** to CPU int8 when CUDA cannot be used, printing `[asr] GPU no utilizable ...` to stdout (observed while generating the fixtures: `cublas64_12.dll` not found).
+  - `p0_cuda` / `p1_cuda` **never fall back**: if ctranslate2 reports no CUDA device, or loading/probing fails, loading raises `ASRDeviceUnavailable`. The service maps it to the structured error `asr_unavailable` with a message that names the missing CUDA device (details: `exception_type`, `asr_profile`). Passing `device="cpu"` with a GPU profile raises `ValueError`.
+  - **`device="auto"` is environment-dependent.** If ctranslate2 sees a CUDA device AND the CUDA DLLs (cuBLAS/cuDNN) are on `PATH`, the profiles above silently run on GPU float16 instead of CPU int8, and their text can differ from the CPU text (S1: 4/13 units identical). "Default = P0 CPU int8" therefore holds only when the CUDA DLLs are absent or `device="cpu"` is passed explicitly. When a profile that is documented as CPU (`device is None`) ends on CUDA, `metadata.asr_profile.device_warning` is added (and the service emits the warning `asr_device_auto_gpu`); on CPU the key is absent and the output is unchanged. `model.device` / `model.compute_type` in the metadata always record what actually ran.
+  - `model_info()` cannot resolve/hash `model.bin` -> logged and exposed as `model_info_error`; the run continues. An ASR object without `.profile` -> `profile: "unknown"`, `experimental: null`. First load needs the model in the local Hugging Face cache; without network the process may stall on hub checks unless `HF_HUB_OFFLINE=1` is set (observed while generating the fixtures; root cause not investigated).
+  - Process side effect: the re-decode profiles call `ctranslate2.set_random_seed(13)` (process-global) before each re-decode attempt.
 - Dependencies: `faster-whisper`, `ctranslate2`, `silero-vad` (core dependency of the acoustic extractor; `extract_acoustic` falls back to an energy VAD when it is not used, `acoustic.py:113-119`), `librosa` (pYIN), `torch`; no network call is made by MRCD code at inference.
+
+### Service behaviour for the opt-in profiles (2026-11-01 decision)
+
+Accepted, marked, never silent: besides `experimental_components`, the service adds `asr_gpu_text_unvalidated` (`*_cuda`), `asr_redecode_experimental` (`*_noloop`, with the count of non-reproducible chunks of the run) and `asr_device_auto_gpu` (auto ended on GPU). `p0` and `p1_disfluent_prompt` get none of these.
 
 ## 6. Tests
 
-`tests/test_asr_profiles.py` (p0 kwargs pinned, p1 only differs in prompt, hash pinned, unknown profile rejected, fingerprint differs between profiles and depends on prompt hash and `chunk_s`, anomaly cases including known false negatives/positives, events marked for p1 and not for p0, `unknown` profile, live rows marked), `tests/test_asr_chunking.py` (repetition preserved, no duplication across overlap, absolute monotone timestamps, short-audio fallback, chunk 0 disables), `tests/test_reproducibility.py`, `tests/test_omp_*`.
+`tests/test_asr_profiles.py` (p0 kwargs pinned, p1 only differs in prompt, hash pinned, unknown profile rejected, fingerprint differs between profiles and depends on prompt hash and `chunk_s`, anomaly cases including known false negatives/positives, events marked for p1 and not for p0, `unknown` profile, live rows marked), `tests/test_asr_chunking.py` (repetition preserved, no duplication across overlap, absolute monotone timestamps, short-audio fallback, chunk 0 disables), `tests/test_reproducibility.py`, `tests/test_omp_*`, `tests/test_asr_profiles_cuda.py`, `tests/test_asr_noloop_profile.py`, `tests/test_review_s_fixes.py` (service handling of the opt-in profiles, re-decode offset/reproducibility, auto-GPU warning).
 
 ## 7. What is NOT measured
 

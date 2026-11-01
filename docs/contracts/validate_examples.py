@@ -183,7 +183,12 @@ for name in (
 ):
     errs = validate(load(EX / name), app_schema)
     check(f"{name} matches app_integration.v1", not errs, errs[:3])
-for name in ("service_analysis_v1.json", "service_error_audio_too_short.json"):
+for name in (
+    "service_analysis_v1.json",
+    "service_error_audio_too_short.json",
+    "service_analysis_v1_2_default_scope.json",
+    "service_analysis_v1_2_p1_route_decision_all.json",
+):
     errs = validate_document(load(EX / name))
     check(f"{name} matches mrcd.analysis/v1 (service contract)", not errs, errs[:3])
 sec = load(EX / "app_report_section_example.json")
