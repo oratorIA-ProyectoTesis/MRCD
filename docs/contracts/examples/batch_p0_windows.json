@@ -1,0 +1,982 @@
+[
+  {
+    "start": 0.0,
+    "end": 3.0,
+    "label": "filler_word",
+    "confidence": 0.7619035243988037,
+    "probabilities": {
+      "fluent": 0.09670087695121765,
+      "filler_word": 0.7619035243988037,
+      "prolongation": 0.043454721570014954,
+      "repetition": 0.0008657081634737551,
+      "block": 0.0011694245040416718,
+      "revision": 0.00032961173565126956,
+      "rhetorical_pause": 0.0020088956225663424,
+      "neutral_pause": 0.09356726706027985
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.7412890195846558,
+        "prolongation": 0.6035782694816589,
+        "repetition": 0.3636668920516968
+      }
+    }
+  },
+  {
+    "start": 0.5,
+    "end": 3.5,
+    "label": "filler_word",
+    "confidence": 0.7721760869026184,
+    "probabilities": {
+      "fluent": 0.10879893600940704,
+      "filler_word": 0.7721760869026184,
+      "prolongation": 0.014005475677549839,
+      "repetition": 0.0005979639827273786,
+      "block": 0.0012696104822680354,
+      "revision": 0.0016285472083836794,
+      "rhetorical_pause": 0.003364465432241559,
+      "neutral_pause": 0.09815886616706848
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.6457953453063965,
+        "prolongation": 0.5019623041152954,
+        "repetition": 0.18916290998458862
+      }
+    }
+  },
+  {
+    "start": 1.0,
+    "end": 4.0,
+    "label": "filler_word",
+    "confidence": 0.7527590394020081,
+    "probabilities": {
+      "fluent": 0.05961925536394119,
+      "filler_word": 0.7527590394020081,
+      "prolongation": 0.005475229118019342,
+      "repetition": 0.0009896840201690793,
+      "block": 0.0001737738202791661,
+      "revision": 0.0005552873481065035,
+      "rhetorical_pause": 0.015202299691736698,
+      "neutral_pause": 0.1652253419160843
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.6592232584953308,
+        "prolongation": 0.49711012840270996,
+        "repetition": 0.2005995512008667
+      }
+    }
+  },
+  {
+    "start": 1.5,
+    "end": 4.5,
+    "label": "filler_word",
+    "confidence": 0.82206130027771,
+    "probabilities": {
+      "fluent": 0.07094011455774307,
+      "filler_word": 0.82206130027771,
+      "prolongation": 0.1040092259645462,
+      "repetition": 0.00034375349059700966,
+      "block": 1.5839079424040392e-05,
+      "revision": 8.688677189638838e-05,
+      "rhetorical_pause": 0.00010980301885865629,
+      "neutral_pause": 0.002433064626529813
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.7944216728210449,
+        "prolongation": 0.7863643765449524,
+        "repetition": 0.5502551794052124
+      }
+    }
+  },
+  {
+    "start": 2.0,
+    "end": 5.0,
+    "label": "prolongation",
+    "confidence": 0.3765338957309723,
+    "probabilities": {
+      "fluent": 0.08049402385950089,
+      "filler_word": 0.30289986729621887,
+      "prolongation": 0.3765338957309723,
+      "repetition": 0.006205572746694088,
+      "block": 0.003180427011102438,
+      "revision": 4.4384094508131966e-05,
+      "rhetorical_pause": 0.046711117029190063,
+      "neutral_pause": 0.18393072485923767
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.7692845463752747,
+        "prolongation": 0.8201026916503906,
+        "repetition": 0.45874202251434326
+      }
+    }
+  },
+  {
+    "start": 2.5,
+    "end": 5.5,
+    "label": "prolongation",
+    "confidence": 0.6393833756446838,
+    "probabilities": {
+      "fluent": 0.16504600644111633,
+      "filler_word": 0.013590524904429913,
+      "prolongation": 0.6393833756446838,
+      "repetition": 0.000749015889596194,
+      "block": 0.11609632521867752,
+      "revision": 4.263002483639866e-05,
+      "rhetorical_pause": 8.75500772963278e-05,
+      "neutral_pause": 0.0650046095252037
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.6914547681808472,
+        "prolongation": 0.7692104578018188,
+        "repetition": 0.3609189987182617
+      }
+    }
+  },
+  {
+    "start": 3.0,
+    "end": 6.0,
+    "label": "prolongation",
+    "confidence": 0.4494282603263855,
+    "probabilities": {
+      "fluent": 0.1878015697002411,
+      "filler_word": 0.18805384635925293,
+      "prolongation": 0.4494282603263855,
+      "repetition": 0.0017994616646319628,
+      "block": 0.03637988120317459,
+      "revision": 0.00011402019299566746,
+      "rhetorical_pause": 0.0008244485361501575,
+      "neutral_pause": 0.13559852540493011
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.8024380803108215,
+        "prolongation": 0.7203555703163147,
+        "repetition": 0.3781545162200928
+      }
+    }
+  },
+  {
+    "start": 3.5,
+    "end": 6.5,
+    "label": "prolongation",
+    "confidence": 0.5367558002471924,
+    "probabilities": {
+      "fluent": 0.26624658703804016,
+      "filler_word": 0.07719066739082336,
+      "prolongation": 0.5367558002471924,
+      "repetition": 0.0029942127875983715,
+      "block": 0.010349800810217857,
+      "revision": 0.00014660776650998741,
+      "rhetorical_pause": 0.0015743671683594584,
+      "neutral_pause": 0.10474194586277008
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.5631311535835266,
+        "prolongation": 0.6496875882148743,
+        "repetition": 0.4003794193267822
+      }
+    }
+  },
+  {
+    "start": 4.0,
+    "end": 7.0,
+    "label": "prolongation",
+    "confidence": 0.5681324601173401,
+    "probabilities": {
+      "fluent": 0.14345303177833557,
+      "filler_word": 0.15037302672863007,
+      "prolongation": 0.5681324601173401,
+      "repetition": 0.004336270038038492,
+      "block": 0.019727569073438644,
+      "revision": 0.0003165441448800266,
+      "rhetorical_pause": 0.0006905399495735765,
+      "neutral_pause": 0.11297061294317245
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.7587990760803223,
+        "prolongation": 0.7114954590797424,
+        "repetition": 0.4960693418979645
+      }
+    }
+  },
+  {
+    "start": 4.5,
+    "end": 7.5,
+    "label": "neutral_pause",
+    "confidence": 0.4039579927921295,
+    "probabilities": {
+      "fluent": 0.1897251307964325,
+      "filler_word": 0.03864928334951401,
+      "prolongation": 0.32125324010849,
+      "repetition": 0.03790869563817978,
+      "block": 0.002169486368075013,
+      "revision": 0.0024684532545506954,
+      "rhetorical_pause": 0.003867615945637226,
+      "neutral_pause": 0.4039579927921295
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.3745132386684418,
+        "prolongation": 0.3334311544895172,
+        "repetition": 0.6357005834579468
+      }
+    }
+  },
+  {
+    "start": 5.0,
+    "end": 8.0,
+    "label": "neutral_pause",
+    "confidence": 0.7240522503852844,
+    "probabilities": {
+      "fluent": 0.04802066832780838,
+      "filler_word": 0.0611376091837883,
+      "prolongation": 0.0641472116112709,
+      "repetition": 0.003121555084362626,
+      "block": 7.3292139859404415e-06,
+      "revision": 0.00010543842654442415,
+      "rhetorical_pause": 0.09940794855356216,
+      "neutral_pause": 0.7240522503852844
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.5612995028495789,
+        "prolongation": 0.4919052720069885,
+        "repetition": 0.4345424771308899
+      }
+    }
+  },
+  {
+    "start": 5.5,
+    "end": 8.5,
+    "label": "neutral_pause",
+    "confidence": 0.8011344075202942,
+    "probabilities": {
+      "fluent": 0.07590179890394211,
+      "filler_word": 0.006004704162478447,
+      "prolongation": 0.028349732980132103,
+      "repetition": 0.007960913702845573,
+      "block": 9.510089512332343e-06,
+      "revision": 0.00036966893821954727,
+      "rhetorical_pause": 0.08026926219463348,
+      "neutral_pause": 0.8011344075202942
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.36859166622161865,
+        "prolongation": 0.36591553688049316,
+        "repetition": 0.4361942708492279
+      }
+    }
+  },
+  {
+    "start": 6.0,
+    "end": 9.0,
+    "label": "neutral_pause",
+    "confidence": 0.7809298634529114,
+    "probabilities": {
+      "fluent": 0.029192766174674034,
+      "filler_word": 0.01420007087290287,
+      "prolongation": 0.01263967901468277,
+      "repetition": 0.002036651596426964,
+      "block": 1.1760314919229131e-05,
+      "revision": 0.00048131446237675846,
+      "rhetorical_pause": 0.1605079472064972,
+      "neutral_pause": 0.7809298634529114
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.5342864990234375,
+        "prolongation": 0.3439783453941345,
+        "repetition": 0.5822128653526306
+      }
+    }
+  },
+  {
+    "start": 6.5,
+    "end": 9.5,
+    "label": "rhetorical_pause",
+    "confidence": 0.6799632906913757,
+    "probabilities": {
+      "fluent": 0.002113367896527052,
+      "filler_word": 0.0012197354808449745,
+      "prolongation": 0.0009549116366542876,
+      "repetition": 0.0001741303422022611,
+      "block": 4.876522780250525e-06,
+      "revision": 2.655764365044888e-05,
+      "rhetorical_pause": 0.6799632906913757,
+      "neutral_pause": 0.3155430853366852
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.500460684299469,
+        "prolongation": 0.3373801112174988,
+        "repetition": 0.3687896132469177
+      }
+    }
+  },
+  {
+    "start": 7.0,
+    "end": 10.0,
+    "label": "rhetorical_pause",
+    "confidence": 0.54678875207901,
+    "probabilities": {
+      "fluent": 0.005189669318497181,
+      "filler_word": 0.0008071358315646648,
+      "prolongation": 0.0012590024853125215,
+      "repetition": 5.485289511852898e-05,
+      "block": 1.04681794255157e-05,
+      "revision": 3.659580761450343e-05,
+      "rhetorical_pause": 0.54678875207901,
+      "neutral_pause": 0.4458535313606262
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.2924782633781433,
+        "prolongation": 0.20088684558868408,
+        "repetition": 0.08550000190734863
+      }
+    }
+  },
+  {
+    "start": 7.5,
+    "end": 10.5,
+    "label": "neutral_pause",
+    "confidence": 0.6394351124763489,
+    "probabilities": {
+      "fluent": 0.006854368839412928,
+      "filler_word": 0.0009578815661370754,
+      "prolongation": 0.0011117815738543868,
+      "repetition": 8.502979471813887e-05,
+      "block": 2.8979841317777755e-06,
+      "revision": 2.304124973306898e-05,
+      "rhetorical_pause": 0.35152989625930786,
+      "neutral_pause": 0.6394351124763489
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.1570041924715042,
+        "prolongation": 0.16278961300849915,
+        "repetition": 0.028811899945139885
+      }
+    }
+  },
+  {
+    "start": 8.0,
+    "end": 11.0,
+    "label": "neutral_pause",
+    "confidence": 0.6112399101257324,
+    "probabilities": {
+      "fluent": 0.0014953201171010733,
+      "filler_word": 0.002318968530744314,
+      "prolongation": 0.00017427171405870467,
+      "repetition": 1.214415442518657e-05,
+      "block": 2.311179059688584e-06,
+      "revision": 1.0030537850980181e-05,
+      "rhetorical_pause": 0.3847470283508301,
+      "neutral_pause": 0.6112399101257324
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.5113543272018433,
+        "prolongation": 0.09860767424106598,
+        "repetition": 0.03829167038202286
+      }
+    }
+  },
+  {
+    "start": 8.5,
+    "end": 11.5,
+    "label": "neutral_pause",
+    "confidence": 0.7539008259773254,
+    "probabilities": {
+      "fluent": 0.0003769374452531338,
+      "filler_word": 0.00041164018330164254,
+      "prolongation": 1.3399618183029816e-05,
+      "repetition": 1.0380345884186681e-05,
+      "block": 1.8463972537574591e-06,
+      "revision": 1.8020524521489278e-06,
+      "rhetorical_pause": 0.24528315663337708,
+      "neutral_pause": 0.7539008259773254
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.34699106216430664,
+        "prolongation": 0.05099920928478241,
+        "repetition": 0.007805634755641222
+      }
+    }
+  },
+  {
+    "start": 9.0,
+    "end": 12.0,
+    "label": "neutral_pause",
+    "confidence": 0.7720209956169128,
+    "probabilities": {
+      "fluent": 0.0011603385210037231,
+      "filler_word": 6.962505722185597e-05,
+      "prolongation": 3.286396531620994e-05,
+      "repetition": 1.2248822713445406e-05,
+      "block": 1.393191155329987e-06,
+      "revision": 1.1439091167630977e-06,
+      "rhetorical_pause": 0.22670139372348785,
+      "neutral_pause": 0.7720209956169128
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.021364187821745872,
+        "prolongation": 0.04681755229830742,
+        "repetition": 0.0004779672890435904
+      }
+    }
+  },
+  {
+    "start": 9.5,
+    "end": 12.5,
+    "label": "neutral_pause",
+    "confidence": 0.6667670011520386,
+    "probabilities": {
+      "fluent": 0.0028415140695869923,
+      "filler_word": 0.00019026821246370673,
+      "prolongation": 0.00010349024523748085,
+      "repetition": 2.0450333977350965e-05,
+      "block": 7.613885372848017e-06,
+      "revision": 4.542852821032284e-06,
+      "rhetorical_pause": 0.3300651013851166,
+      "neutral_pause": 0.6667670011520386
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.043084900826215744,
+        "prolongation": 0.06745759397745132,
+        "repetition": 0.002217403380200267
+      }
+    }
+  },
+  {
+    "start": 10.0,
+    "end": 13.0,
+    "label": "rhetorical_pause",
+    "confidence": 0.5137679576873779,
+    "probabilities": {
+      "fluent": 0.0033910544589161873,
+      "filler_word": 0.0011795505415648222,
+      "prolongation": 0.0001810286776162684,
+      "repetition": 0.00011568998161237687,
+      "block": 1.6249148757196963e-05,
+      "revision": 4.290153810870834e-05,
+      "rhetorical_pause": 0.5137679576873779,
+      "neutral_pause": 0.4813055098056793
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.21882350742816925,
+        "prolongation": 0.10080397874116898,
+        "repetition": 0.05256461724638939
+      }
+    }
+  },
+  {
+    "start": 10.5,
+    "end": 13.5,
+    "label": "rhetorical_pause",
+    "confidence": 0.6193752884864807,
+    "probabilities": {
+      "fluent": 0.0037291974294930696,
+      "filler_word": 0.0027337567880749702,
+      "prolongation": 0.0005359185161069036,
+      "repetition": 0.0004495000757742673,
+      "block": 0.00015590005205012858,
+      "revision": 0.00018824156722985208,
+      "rhetorical_pause": 0.6193752884864807,
+      "neutral_pause": 0.3728322982788086
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.3005954921245575,
+        "prolongation": 0.21327362954616547,
+        "repetition": 0.36861732602119446
+      }
+    }
+  },
+  {
+    "start": 11.0,
+    "end": 14.0,
+    "label": "rhetorical_pause",
+    "confidence": 0.6625232100486755,
+    "probabilities": {
+      "fluent": 0.0030369553714990616,
+      "filler_word": 0.018030943349003792,
+      "prolongation": 0.0008344498346559703,
+      "repetition": 0.033517736941576004,
+      "block": 0.0014878736110404134,
+      "revision": 0.0016204009298235178,
+      "rhetorical_pause": 0.6625232100486755,
+      "neutral_pause": 0.2789483666419983
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.7510672807693481,
+        "prolongation": 0.4223211407661438,
+        "repetition": 0.7502423524856567
+      }
+    }
+  },
+  {
+    "start": 11.5,
+    "end": 14.5,
+    "label": "rhetorical_pause",
+    "confidence": 0.6331385374069214,
+    "probabilities": {
+      "fluent": 0.012050318531692028,
+      "filler_word": 0.016899436712265015,
+      "prolongation": 0.005038323812186718,
+      "repetition": 0.012388842180371284,
+      "block": 0.00045977579429745674,
+      "revision": 0.001201357925310731,
+      "rhetorical_pause": 0.6331385374069214,
+      "neutral_pause": 0.3188234269618988
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.623566210269928,
+        "prolongation": 0.3917660713195801,
+        "repetition": 0.6694931983947754
+      }
+    }
+  },
+  {
+    "start": 12.0,
+    "end": 15.0,
+    "label": "repetition",
+    "confidence": 0.9084919691085815,
+    "probabilities": {
+      "fluent": 0.0392569936811924,
+      "filler_word": 0.010289321653544903,
+      "prolongation": 0.03342588618397713,
+      "repetition": 0.9084919691085815,
+      "block": 6.957336040613882e-09,
+      "revision": 0.008505995385348797,
+      "rhetorical_pause": 3.4799487735881485e-08,
+      "neutral_pause": 2.9804255973431282e-05
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.794349193572998,
+        "prolongation": 0.6767886877059937,
+        "repetition": 0.9232860803604126
+      }
+    }
+  },
+  {
+    "start": 12.5,
+    "end": 15.5,
+    "label": "repetition",
+    "confidence": 0.9088334441184998,
+    "probabilities": {
+      "fluent": 0.039353616535663605,
+      "filler_word": 0.010028025135397911,
+      "prolongation": 0.02621970884501934,
+      "repetition": 0.9088334441184998,
+      "block": 1.1923850351536203e-08,
+      "revision": 0.0155398054048419,
+      "rhetorical_pause": 1.7855660061627532e-08,
+      "neutral_pause": 2.5339259082102217e-05
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.8019171357154846,
+        "prolongation": 0.6748141050338745,
+        "repetition": 0.9401715993881226
+      }
+    }
+  },
+  {
+    "start": 13.0,
+    "end": 16.0,
+    "label": "repetition",
+    "confidence": 0.6091821193695068,
+    "probabilities": {
+      "fluent": 0.24168874323368073,
+      "filler_word": 0.011896017007529736,
+      "prolongation": 0.11925090849399567,
+      "repetition": 0.6091821193695068,
+      "block": 2.5557957528121733e-08,
+      "revision": 0.017782216891646385,
+      "rhetorical_pause": 1.6171192385172617e-07,
+      "neutral_pause": 0.00019975434406660497
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.4953867793083191,
+        "prolongation": 0.5205695629119873,
+        "repetition": 0.8248013257980347
+      }
+    }
+  },
+  {
+    "start": 13.5,
+    "end": 16.5,
+    "label": "repetition",
+    "confidence": 0.8957889080047607,
+    "probabilities": {
+      "fluent": 0.04676837846636772,
+      "filler_word": 0.03265268728137016,
+      "prolongation": 0.008317586034536362,
+      "repetition": 0.8957889080047607,
+      "block": 2.7416086822995567e-07,
+      "revision": 0.016075357794761658,
+      "rhetorical_pause": 6.479623152699787e-06,
+      "neutral_pause": 0.0003901632153429091
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.5779523849487305,
+        "prolongation": 0.5285147428512573,
+        "repetition": 0.8593712449073792
+      }
+    }
+  },
+  {
+    "start": 14.0,
+    "end": 17.0,
+    "label": "fluent",
+    "confidence": 0.782150149345398,
+    "probabilities": {
+      "fluent": 0.782150149345398,
+      "filler_word": 0.016171695664525032,
+      "prolongation": 0.1848919689655304,
+      "repetition": 0.013109296560287476,
+      "block": 8.658919625759154e-08,
+      "revision": 0.002632356947287917,
+      "rhetorical_pause": 7.188153540482745e-05,
+      "neutral_pause": 0.0009725706186145544
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.27352482080459595,
+        "prolongation": 0.6269502639770508,
+        "repetition": 0.5610643029212952
+      }
+    }
+  },
+  {
+    "start": 14.5,
+    "end": 17.5,
+    "label": "fluent",
+    "confidence": 0.8243181705474854,
+    "probabilities": {
+      "fluent": 0.8243181705474854,
+      "filler_word": 0.009300597012043,
+      "prolongation": 0.14146827161312103,
+      "repetition": 0.02054242230951786,
+      "block": 1.428871172493018e-07,
+      "revision": 0.0030150737147778273,
+      "rhetorical_pause": 0.0001293496898142621,
+      "neutral_pause": 0.0012259659124538302
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.22783386707305908,
+        "prolongation": 0.5885418653488159,
+        "repetition": 0.6022467613220215
+      }
+    }
+  },
+  {
+    "start": 15.0,
+    "end": 18.0,
+    "label": "fluent",
+    "confidence": 0.7168582677841187,
+    "probabilities": {
+      "fluent": 0.7168582677841187,
+      "filler_word": 0.0312131866812706,
+      "prolongation": 0.2413824051618576,
+      "repetition": 0.007319380529224873,
+      "block": 9.24067080632085e-08,
+      "revision": 0.0023929171729832888,
+      "rhetorical_pause": 6.06323555985e-05,
+      "neutral_pause": 0.0007730005891062319
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.3396849036216736,
+        "prolongation": 0.6736196279525757,
+        "repetition": 0.5883913636207581
+      }
+    }
+  },
+  {
+    "start": 15.5,
+    "end": 18.5,
+    "label": "fluent",
+    "confidence": 0.7356443405151367,
+    "probabilities": {
+      "fluent": 0.7356443405151367,
+      "filler_word": 0.05247996374964714,
+      "prolongation": 0.18261584639549255,
+      "repetition": 0.02378426305949688,
+      "block": 2.6183840873272857e-07,
+      "revision": 0.0038679686840623617,
+      "rhetorical_pause": 0.0001397266169078648,
+      "neutral_pause": 0.0014676700811833143
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.40567806363105774,
+        "prolongation": 0.6733731627464294,
+        "repetition": 0.7025838494300842
+      }
+    }
+  },
+  {
+    "start": 16.0,
+    "end": 19.0,
+    "label": "neutral_pause",
+    "confidence": 0.5942761301994324,
+    "probabilities": {
+      "fluent": 0.031913649290800095,
+      "filler_word": 0.0017663623439148068,
+      "prolongation": 0.015418861992657185,
+      "repetition": 0.005114295985549688,
+      "block": 3.3409305615350604e-06,
+      "revision": 2.4299981305375695e-05,
+      "rhetorical_pause": 0.3514830768108368,
+      "neutral_pause": 0.5942761301994324
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.4547332525253296,
+        "prolongation": 0.384945809841156,
+        "repetition": 0.37461990118026733
+      }
+    }
+  },
+  {
+    "start": 16.5,
+    "end": 19.5,
+    "label": "neutral_pause",
+    "confidence": 0.5656837821006775,
+    "probabilities": {
+      "fluent": 0.2372289001941681,
+      "filler_word": 0.031043564900755882,
+      "prolongation": 0.08488516509532928,
+      "repetition": 0.06472636014223099,
+      "block": 1.8243661088490626e-06,
+      "revision": 0.0005425721174106002,
+      "rhetorical_pause": 0.015887821093201637,
+      "neutral_pause": 0.5656837821006775
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.6014612913131714,
+        "prolongation": 0.43145185708999634,
+        "repetition": 0.45454609394073486
+      }
+    }
+  },
+  {
+    "start": 17.0,
+    "end": 20.0,
+    "label": "neutral_pause",
+    "confidence": 0.4021236002445221,
+    "probabilities": {
+      "fluent": 0.37761732935905457,
+      "filler_word": 0.05814804509282112,
+      "prolongation": 0.13953188061714172,
+      "repetition": 0.004600948188453913,
+      "block": 1.3383559235080611e-05,
+      "revision": 0.0006448381463997066,
+      "rhetorical_pause": 0.01731995679438114,
+      "neutral_pause": 0.4021236002445221
+    },
+    "text": "[text withheld]",
+    "terminal": false,
+    "head_scores": {
+      "experimental": true,
+      "calibrated": false,
+      "head": "vc",
+      "scores": {
+        "filler_word": 0.39043155312538147,
+        "prolongation": 0.3898921310901642,
+        "repetition": 0.03502684086561203
+      }
+    }
+  }
+]

@@ -1,0 +1,173 @@
+{
+  "schema_version": "oratoria.mrcd-report/v1",
+  "session_id": "EXAMPLE-PLACEHOLDER-NOT-A-REAL-SESSION",
+  "segment_index": 0,
+  "status": "completed",
+  "unavailable_reason": null,
+  "source": {
+    "contract": "mrcd.analysis/v1",
+    "job_id": null,
+    "mrcd_version": "0.3.0",
+    "asr_profile": "p0",
+    "experimental": false,
+    "audio_sha256": "a19c7f534dfc29e440666b918b93aae89a560b95a7522bd56592f2ff4afa1763"
+  },
+  "audio": {
+    "start_session_ms": 0,
+    "duration_s": {
+      "available": true,
+      "value": 20.0,
+      "unavailable_reason": null
+    }
+  },
+  "events": [
+    {
+      "id": "ev-0001",
+      "class": "filler_word",
+      "start_session_ms": 0,
+      "end_session_ms": 2000,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.822061,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "experimental": false
+    },
+    {
+      "id": "ev-0002",
+      "class": "prolongation",
+      "start_session_ms": 2000,
+      "end_session_ms": 4500,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.639383,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "experimental": false
+    },
+    {
+      "id": "ev-0003",
+      "class": "neutral_pause",
+      "start_session_ms": 4500,
+      "end_session_ms": 6500,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.801134,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "experimental": false
+    },
+    {
+      "id": "ev-0004",
+      "class": "rhetorical_pause",
+      "start_session_ms": 6500,
+      "end_session_ms": 7500,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.679963,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "experimental": false
+    },
+    {
+      "id": "ev-0005",
+      "class": "neutral_pause",
+      "start_session_ms": 7500,
+      "end_session_ms": 10000,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.772021,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "experimental": false
+    },
+    {
+      "id": "ev-0006",
+      "class": "rhetorical_pause",
+      "start_session_ms": 10000,
+      "end_session_ms": 12000,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.662523,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "experimental": false
+    },
+    {
+      "id": "ev-0007",
+      "class": "repetition",
+      "start_session_ms": 12000,
+      "end_session_ms": 14000,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.908833,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "experimental": false
+    },
+    {
+      "id": "ev-0008",
+      "class": "neutral_pause",
+      "start_session_ms": 16000,
+      "end_session_ms": 17500,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.594276,
+        "kind": "max_window_class_probability",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "experimental": false
+    }
+  ],
+  "summary": {
+    "n_events": 8,
+    "events_per_minute": {
+      "available": true,
+      "value": 24.0,
+      "unavailable_reason": null
+    }
+  },
+  "modalities": {
+    "acoustic": {
+      "available": true,
+      "reason": null
+    },
+    "linguistic": {
+      "available": true,
+      "reason": null
+    },
+    "kinesic_video": {
+      "available": false,
+      "reason": "service v1 receives audio only; no video was provided or processed"
+    }
+  },
+  "warnings": [
+    {
+      "code": "scores_uncalibrated",
+      "message": "Scores are the maximum window class probability of an uncalibrated model; they are not probabilities of correctness."
+    },
+    {
+      "code": "no_human_validation",
+      "message": "Classes are window-level decisions of a model trained with weak (heuristic) supervision; agreement with human annotation has not been established."
+    },
+    {
+      "code": "engine_provenance",
+      "message": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"
+    }
+  ]
+}

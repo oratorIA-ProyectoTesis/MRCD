@@ -1,0 +1,194 @@
+{
+  "mode": "audio_text",
+  "duration": 20.0,
+  "warning": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia ASR profile 'p1_disfluent_prompt' is EXPERIMENTAL and NOT validated outside DIHANA. In the exploratory DIHANA experiment a fluent control prompt of equal length and domain did not reproduce its gain; which component of the prompt causes the effect is unknown. Downstream models were trained on P0 text and not retrained for P1.",
+  "transcript": "[text withheld]",
+  "metadata": {
+    "window_plan": {
+      "window_s": 3.0,
+      "stride_s": 0.5,
+      "terminal_window": false,
+      "span": null,
+      "asr_chunk_s": 8.0
+    },
+    "head": null,
+    "environment": {
+      "omp_num_threads": "4",
+      "omp_pin_opted_out": false,
+      "cpu_count_logical": 20,
+      "python": "3.12.10",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+      "faster_whisper": "1.2.1",
+      "ctranslate2": "4.8.2",
+      "numpy": "2.5.3",
+      "environment_is_pinned": true,
+      "omp_num_threads_at_mrcd_import": "4",
+      "numpy_imported_before_mrcd": true,
+      "set_before_numpy": null,
+      "assigned_after_import": false,
+      "effective": null,
+      "cpu_threads": {
+        "torch": 1,
+        "asr_cpu_threads_arg": 0
+      },
+      "asr": {
+        "model_size": "small",
+        "device": "cpu",
+        "compute_type": "int8"
+      }
+    },
+    "asr_profile": {
+      "name": "p1_disfluent_prompt",
+      "experimental": true,
+      "validation": "experimental; not validated outside DIHANA",
+      "initial_prompt": "Eh... yo quería, quería preguntar por el, por el... horario. Es que no, no sé si... si es el mismo. Perdone, digo, perdón. La mesa está en la ca... en la casa, o sea, en la casa de mi tía. Mmm, este... bueno, sí, sí.",
+      "initial_prompt_sha256": "fe49e930ccc9f94847b7bedaec65f8c347cecaccbcd7283545618bc194c6a8b2",
+      "temperature": 0.0,
+      "beam_size": 5,
+      "condition_on_previous_text": false,
+      "vad_filter": false,
+      "word_timestamps": true,
+      "suppress_tokens": [],
+      "chunk_s": 8.0,
+      "overlap_s": 2.0,
+      "model": {
+        "model_size": "small",
+        "model_dir": "<HOME>\\.cache\\huggingface\\hub\\models--Systran--faster-whisper-small\\snapshots\\536b0662742c02347bc0e980a01041f333bce120",
+        "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+        "compute_type": "int8",
+        "device": "cpu"
+      },
+      "language": "es",
+      "chunk_s_requested": 8.0,
+      "omp_num_threads_effective": "4",
+      "omp_effective_verified": null,
+      "asr_fingerprint": {
+        "profile_fingerprint": "25cd0adeafea9025f8c003a6dc3e018869aa2d6d3aa742fa0b507e8873cf471c",
+        "namespace": "p1_disfluent_prompt-fe49e930ccc9",
+        "note": "fingerprint of profile + decode parameters + model + environment + audio; the engine has NO ASR cache. Use it as the key of a cache you add."
+      },
+      "asr_cache": {
+        "engine_cache": null,
+        "namespace": "p1_disfluent_prompt-fe49e930ccc9",
+        "key": "25cd0adeafea9025f8c003a6dc3e018869aa2d6d3aa742fa0b507e8873cf471c",
+        "deprecated": "alias of asr_fingerprint.profile_fingerprint; the engine has no cache"
+      },
+      "anomalies": []
+    }
+  },
+  "events": [
+    {
+      "label": "filler_word",
+      "start": 0.0,
+      "end": 2.0,
+      "confidence": 0.82206130027771,
+      "n_windows": 4,
+      "text": "[text withheld]",
+      "modalities": [
+        "acoustic",
+        "linguistic"
+      ],
+      "asr_profile": "p1_disfluent_prompt",
+      "asr_experimental": true
+    },
+    {
+      "label": "prolongation",
+      "start": 2.0,
+      "end": 4.5,
+      "confidence": 0.6393833756446838,
+      "n_windows": 5,
+      "text": "[text withheld]",
+      "modalities": [
+        "acoustic",
+        "linguistic"
+      ],
+      "asr_profile": "p1_disfluent_prompt",
+      "asr_experimental": true
+    },
+    {
+      "label": "neutral_pause",
+      "start": 4.5,
+      "end": 6.5,
+      "confidence": 0.7931652069091797,
+      "n_windows": 4,
+      "text": "[text withheld]",
+      "modalities": [
+        "acoustic",
+        "linguistic"
+      ],
+      "asr_profile": "p1_disfluent_prompt",
+      "asr_experimental": true
+    },
+    {
+      "label": "rhetorical_pause",
+      "start": 6.5,
+      "end": 7.5,
+      "confidence": 0.6788145899772644,
+      "n_windows": 2,
+      "text": "[text withheld]",
+      "modalities": [
+        "acoustic",
+        "linguistic"
+      ],
+      "asr_profile": "p1_disfluent_prompt",
+      "asr_experimental": true
+    },
+    {
+      "label": "neutral_pause",
+      "start": 7.5,
+      "end": 10.0,
+      "confidence": 0.7998465895652771,
+      "n_windows": 5,
+      "text": "[text withheld]",
+      "modalities": [
+        "acoustic",
+        "linguistic"
+      ],
+      "asr_profile": "p1_disfluent_prompt",
+      "asr_experimental": true
+    },
+    {
+      "label": "rhetorical_pause",
+      "start": 10.0,
+      "end": 12.0,
+      "confidence": 0.5866015553474426,
+      "n_windows": 4,
+      "text": "[text withheld]",
+      "modalities": [
+        "acoustic",
+        "linguistic"
+      ],
+      "asr_profile": "p1_disfluent_prompt",
+      "asr_experimental": true
+    },
+    {
+      "label": "repetition",
+      "start": 12.0,
+      "end": 14.0,
+      "confidence": 0.912666916847229,
+      "n_windows": 4,
+      "text": "[text withheld]",
+      "modalities": [
+        "acoustic",
+        "linguistic"
+      ],
+      "asr_profile": "p1_disfluent_prompt",
+      "asr_experimental": true
+    },
+    {
+      "label": "neutral_pause",
+      "start": 16.0,
+      "end": 17.0,
+      "confidence": 0.5614473819732666,
+      "n_windows": 2,
+      "text": "[text withheld]",
+      "modalities": [
+        "acoustic",
+        "linguistic"
+      ],
+      "asr_profile": "p1_disfluent_prompt",
+      "asr_experimental": true
+    }
+  ]
+}

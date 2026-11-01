@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:mrcd:live:row:current",
+  "title": "One live row (LiveScorer._row) in mrcd 0.3.0. Spanish keys are historical and kept as is.",
+  "description": "v1 rows have only the first five keys. v2/v3 add status, emitted_at_s, f0_center_st, terminal (+ revises on re-scored rows). asr_profile/asr_experimental appear only for a non-default or unknown ASR profile. `confianza` is the softmax maximum of an uncalibrated model.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "timestamp",
+    "texto_ventana",
+    "clase",
+    "confianza",
+    "todas_las_probabilidades"
+  ],
+  "properties": {
+    "timestamp": { "type": "number", "minimum": 0 },
+    "texto_ventana": { "type": "string" },
+    "clase": {
+      "enum": [
+        "fluent",
+        "filler_word",
+        "prolongation",
+        "repetition",
+        "block",
+        "revision",
+        "rhetorical_pause",
+        "neutral_pause"
+      ]
+    },
+    "confianza": { "type": "number", "minimum": 0, "maximum": 1 },
+    "todas_las_probabilidades": {
+      "type": "object",
+      "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
+    },
+    "status": { "enum": ["provisional", "final"] },
+    "emitted_at_s": { "type": "number", "minimum": 0 },
+    "f0_center_st": { "type": "number" },
+    "terminal": { "type": "boolean" },
+    "revises": { "type": "number", "minimum": 0 },
+    "asr_profile": { "type": "string" },
+    "asr_experimental": { "type": ["boolean", "null"] }
+  }
+}

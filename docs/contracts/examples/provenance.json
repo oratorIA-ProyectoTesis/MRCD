@@ -1,0 +1,22 @@
+{
+  "command": "HF_HUB_OFFLINE=1 OMP_NUM_THREADS=4 .venv/Scripts/python.exe -u docs/contracts/examples/generate_examples.py --source data/clips/FIwdDFht7FE.wav --start 60.0 --dur 20.0 --out docs/contracts/examples --clip <scratch>/clip.wav",
+  "mrcd_version": "0.3.0",
+  "source_clip": "data/clips/FIwdDFht7FE.wav",
+  "excerpt": {
+    "start_s": 60.0,
+    "dur_s": 20.0,
+    "sha256": "a19c7f534dfc29e440666b918b93aae89a560b95a7522bd56592f2ff4afa1763"
+  },
+  "checkpoint_sha256": "87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669",
+  "omp_num_threads_env": "4",
+  "wall_times_s_one_run_machine_shared_with_other_jobs_not_a_benchmark": {
+    "load_engine_with_vc_s": 3.17,
+    "analyze_p0_vc_s": 18.2,
+    "analyze_p0_s": 11.4,
+    "analyze_p1_s": 12.83,
+    "replay_live_cfg_v1_s": 10.8,
+    "replay_live_cfg_v2_s": 15.24,
+    "replay_live_cfg_v3_s": 17.19
+  },
+  "live_replay_note": "no microphone; ASR words from offline transcribe_chunked(8 s, 2 s); 0.5 s ticks"
+}

@@ -1,0 +1,40 @@
+{
+  "schema_version": "oratoria.mrcd-report/v1",
+  "session_id": "EXAMPLE-PLACEHOLDER-NOT-A-REAL-SESSION",
+  "segment_index": 0,
+  "status": "failed",
+  "unavailable_reason": "Audio of 5.0 s; the engine needs at least 13 s.",
+  "source": {
+    "contract": "mrcd.analysis/v1",
+    "job_id": null,
+    "mrcd_version": "0.3.0",
+    "asr_profile": "p0",
+    "experimental": false,
+    "audio_sha256": "ee1bf52bb8b4cdb9f0d2c8a01f6da324ef3d76bbd73bff98fc51bbc3c07064ea"
+  },
+  "audio": {
+    "start_session_ms": 0,
+    "duration_s": {
+      "available": true,
+      "value": 5.0,
+      "unavailable_reason": null
+    }
+  },
+  "events": [],
+  "summary": null,
+  "modalities": {
+    "acoustic": {
+      "available": false,
+      "reason": "analysis did not run"
+    },
+    "linguistic": {
+      "available": false,
+      "reason": "analysis did not run"
+    },
+    "kinesic_video": {
+      "available": false,
+      "reason": "service v1 receives audio only; no video was provided or processed"
+    }
+  },
+  "warnings": []
+}

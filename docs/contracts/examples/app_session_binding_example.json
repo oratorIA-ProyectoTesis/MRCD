@@ -1,0 +1,29 @@
+{
+  "schema_version": "oratoria.mrcd-binding/v1",
+  "session_id": "EXAMPLE-PLACEHOLDER-NOT-A-REAL-SESSION",
+  "segment_index": 0,
+  "audio": {
+    "first_chunk_seq": 0,
+    "last_chunk_seq": 124,
+    "t0_ms_first_chunk": 0,
+    "n_chunks": 125,
+    "duration_ms": 20000,
+    "sample_rate_hz": 16000,
+    "channels": 1,
+    "sha256": "a19c7f534dfc29e440666b918b93aae89a560b95a7522bd56592f2ff4afa1763"
+  },
+  "mrcd": {
+    "contract": "mrcd.analysis/v1",
+    "job_id": null,
+    "asr_profile": "p0",
+    "head": null,
+    "include_text": false
+  },
+  "gaps": [],
+  "capture": {
+    "echo_cancellation": true,
+    "noise_suppression": true,
+    "auto_gain_control": true,
+    "resampler": "linear interpolation in AudioWorklet, no anti-alias filter"
+  }
+}

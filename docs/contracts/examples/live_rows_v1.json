@@ -1,0 +1,470 @@
+{
+  "config": "live_cfg_v1",
+  "gaps": [],
+  "rows": [
+    {
+      "timestamp": 0.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "filler_word",
+      "confianza": 0.773792564868927,
+      "todas_las_probabilidades": {
+        "fluent": 0.0905354842543602,
+        "filler_word": 0.773792564868927,
+        "prolongation": 0.031672850251197815,
+        "repetition": 0.0008055720245465636,
+        "block": 0.000884621636942029,
+        "revision": 0.00041250832146033645,
+        "rhetorical_pause": 0.0020531020127236843,
+        "neutral_pause": 0.0998433455824852
+      }
+    },
+    {
+      "timestamp": 0.5,
+      "texto_ventana": "[text withheld]",
+      "clase": "filler_word",
+      "confianza": 0.8045178651809692,
+      "todas_las_probabilidades": {
+        "fluent": 0.08697329461574554,
+        "filler_word": 0.8045178651809692,
+        "prolongation": 0.009260054677724838,
+        "repetition": 0.0005266162916086614,
+        "block": 0.0009101113537326455,
+        "revision": 0.0020309528335928917,
+        "rhetorical_pause": 0.0030116639100015163,
+        "neutral_pause": 0.09276945888996124
+      }
+    },
+    {
+      "timestamp": 1.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "filler_word",
+      "confianza": 0.7645734548568726,
+      "todas_las_probabilidades": {
+        "fluent": 0.05152829736471176,
+        "filler_word": 0.7645734548568726,
+        "prolongation": 0.004383990075439215,
+        "repetition": 0.0009228652343153954,
+        "block": 0.00017736628069542348,
+        "revision": 0.0005287543754093349,
+        "rhetorical_pause": 0.016081001609563828,
+        "neutral_pause": 0.16180431842803955
+      }
+    },
+    {
+      "timestamp": 1.5,
+      "texto_ventana": "[text withheld]",
+      "clase": "filler_word",
+      "confianza": 0.8666567206382751,
+      "todas_las_probabilidades": {
+        "fluent": 0.05487553030252457,
+        "filler_word": 0.8666567206382751,
+        "prolongation": 0.0758679136633873,
+        "repetition": 0.00027738724020309746,
+        "block": 1.3412437510851305e-05,
+        "revision": 8.423653343925253e-05,
+        "rhetorical_pause": 9.311604662798345e-05,
+        "neutral_pause": 0.0021317657083272934
+      }
+    },
+    {
+      "timestamp": 2.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "prolongation",
+      "confianza": 0.3666245639324188,
+      "todas_las_probabilidades": {
+        "fluent": 0.074392169713974,
+        "filler_word": 0.2993982434272766,
+        "prolongation": 0.3666245639324188,
+        "repetition": 0.0053563471883535385,
+        "block": 0.0024372946936637163,
+        "revision": 4.3898209696635604e-05,
+        "rhetorical_pause": 0.048833370208740234,
+        "neutral_pause": 0.20291419327259064
+      }
+    },
+    {
+      "timestamp": 2.5,
+      "texto_ventana": "[text withheld]",
+      "clase": "prolongation",
+      "confianza": 0.6730521321296692,
+      "todas_las_probabilidades": {
+        "fluent": 0.1669059693813324,
+        "filler_word": 0.017834309488534927,
+        "prolongation": 0.6730521321296692,
+        "repetition": 0.0008085869485512376,
+        "block": 0.07390914112329483,
+        "revision": 4.805175194633193e-05,
+        "rhetorical_pause": 9.720533125801012e-05,
+        "neutral_pause": 0.06734450161457062
+      }
+    },
+    {
+      "timestamp": 3.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "prolongation",
+      "confianza": 0.45753535628318787,
+      "todas_las_probabilidades": {
+        "fluent": 0.19481368362903595,
+        "filler_word": 0.16732347011566162,
+        "prolongation": 0.45753535628318787,
+        "repetition": 0.001892728148959577,
+        "block": 0.032636649906635284,
+        "revision": 0.00012060417793691158,
+        "rhetorical_pause": 0.0008143201121129096,
+        "neutral_pause": 0.14486318826675415
+      }
+    },
+    {
+      "timestamp": 3.5,
+      "texto_ventana": "[text withheld]",
+      "clase": "prolongation",
+      "confianza": 0.5205535888671875,
+      "todas_las_probabilidades": {
+        "fluent": 0.270229309797287,
+        "filler_word": 0.08356091380119324,
+        "prolongation": 0.5205535888671875,
+        "repetition": 0.0028361256700009108,
+        "block": 0.0073358588851988316,
+        "revision": 0.00015730528684798628,
+        "rhetorical_pause": 0.0014958451502025127,
+        "neutral_pause": 0.11383099108934402
+      }
+    },
+    {
+      "timestamp": 4.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "prolongation",
+      "confianza": 0.5394774675369263,
+      "todas_las_probabilidades": {
+        "fluent": 0.14955976605415344,
+        "filler_word": 0.17196761071681976,
+        "prolongation": 0.5394774675369263,
+        "repetition": 0.004035564139485359,
+        "block": 0.014915606938302517,
+        "revision": 0.0003467687638476491,
+        "rhetorical_pause": 0.0007011815905570984,
+        "neutral_pause": 0.11899606138467789
+      }
+    },
+    {
+      "timestamp": 4.5,
+      "texto_ventana": "[text withheld]",
+      "clase": "neutral_pause",
+      "confianza": 0.40728095173835754,
+      "todas_las_probabilidades": {
+        "fluent": 0.19068841636180878,
+        "filler_word": 0.0401495136320591,
+        "prolongation": 0.31918883323669434,
+        "repetition": 0.035233039408922195,
+        "block": 0.0014966204762458801,
+        "revision": 0.0023305038921535015,
+        "rhetorical_pause": 0.003632165724411607,
+        "neutral_pause": 0.40728095173835754
+      }
+    },
+    {
+      "timestamp": 5.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "neutral_pause",
+      "confianza": 0.7181236743927002,
+      "todas_las_probabilidades": {
+        "fluent": 0.04872262105345726,
+        "filler_word": 0.06608159840106964,
+        "prolongation": 0.06783662736415863,
+        "repetition": 0.003244097577407956,
+        "block": 6.490029591077473e-06,
+        "revision": 0.00010691706847865134,
+        "rhetorical_pause": 0.09587796777486801,
+        "neutral_pause": 0.7181236743927002
+      }
+    },
+    {
+      "timestamp": 5.5,
+      "texto_ventana": "[text withheld]",
+      "clase": "neutral_pause",
+      "confianza": 0.7987599968910217,
+      "todas_las_probabilidades": {
+        "fluent": 0.07468073815107346,
+        "filler_word": 0.006746090017259121,
+        "prolongation": 0.030807415023446083,
+        "repetition": 0.008435423485934734,
+        "block": 8.802860975265503e-06,
+        "revision": 0.0003742370172403753,
+        "rhetorical_pause": 0.08018724620342255,
+        "neutral_pause": 0.7987599968910217
+      }
+    },
+    {
+      "timestamp": 6.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "neutral_pause",
+      "confianza": 0.7819275856018066,
+      "todas_las_probabilidades": {
+        "fluent": 0.0294150672852993,
+        "filler_word": 0.01448739506304264,
+        "prolongation": 0.013164572417736053,
+        "repetition": 0.0020360425114631653,
+        "block": 1.1094681212853175e-05,
+        "revision": 0.000477913417853415,
+        "rhetorical_pause": 0.15848030149936676,
+        "neutral_pause": 0.7819275856018066
+      }
+    },
+    {
+      "timestamp": 6.5,
+      "texto_ventana": "[text withheld]",
+      "clase": "rhetorical_pause",
+      "confianza": 0.6730058193206787,
+      "todas_las_probabilidades": {
+        "fluent": 0.002154915826395154,
+        "filler_word": 0.0012549054808914661,
+        "prolongation": 0.000980424345470965,
+        "repetition": 0.0001794877025531605,
+        "block": 5.112402050144738e-06,
+        "revision": 2.8111349820392206e-05,
+        "rhetorical_pause": 0.6730058193206787,
+        "neutral_pause": 0.32239124178886414
+      }
+    },
+    {
+      "timestamp": 7.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "rhetorical_pause",
+      "confianza": 0.5378690361976624,
+      "todas_las_probabilidades": {
+        "fluent": 0.0053328643552958965,
+        "filler_word": 0.0007875184528529644,
+        "prolongation": 0.0012643418740481138,
+        "repetition": 5.464814603328705e-05,
+        "block": 1.1423214345995802e-05,
+        "revision": 3.86852007068228e-05,
+        "rhetorical_pause": 0.5378690361976624,
+        "neutral_pause": 0.4546414315700531
+      }
+    },
+    {
+      "timestamp": 7.5,
+      "texto_ventana": "[text withheld]",
+      "clase": "neutral_pause",
+      "confianza": 0.6505064368247986,
+      "todas_las_probabilidades": {
+        "fluent": 0.006583724170923233,
+        "filler_word": 0.0008946288726292551,
+        "prolongation": 0.0010471991263329983,
+        "repetition": 7.484840898541734e-05,
+        "block": 3.2597949939372484e-06,
+        "revision": 2.164462966902647e-05,
+        "rhetorical_pause": 0.3408683240413666,
+        "neutral_pause": 0.6505064368247986
+      }
+    },
+    {
+      "timestamp": 8.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "neutral_pause",
+      "confianza": 0.6184832453727722,
+      "todas_las_probabilidades": {
+        "fluent": 0.0014709202805534005,
+        "filler_word": 0.0024596117436885834,
+        "prolongation": 0.00015377999807242304,
+        "repetition": 1.1999473827017937e-05,
+        "block": 2.5340739284729352e-06,
+        "revision": 1.0614979146339465e-05,
+        "rhetorical_pause": 0.3774073123931885,
+        "neutral_pause": 0.6184832453727722
+      }
+    },
+    {
+      "timestamp": 8.5,
+      "texto_ventana": "[text withheld]",
+      "clase": "neutral_pause",
+      "confianza": 0.7539008259773254,
+      "todas_las_probabilidades": {
+        "fluent": 0.0003769374452531338,
+        "filler_word": 0.00041164018330164254,
+        "prolongation": 1.3399618183029816e-05,
+        "repetition": 1.0380345884186681e-05,
+        "block": 1.8463972537574591e-06,
+        "revision": 1.8020524521489278e-06,
+        "rhetorical_pause": 0.24528315663337708,
+        "neutral_pause": 0.7539008259773254
+      }
+    },
+    {
+      "timestamp": 9.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "neutral_pause",
+      "confianza": 0.7720209956169128,
+      "todas_las_probabilidades": {
+        "fluent": 0.0011603385210037231,
+        "filler_word": 6.962505722185597e-05,
+        "prolongation": 3.286396531620994e-05,
+        "repetition": 1.2248822713445406e-05,
+        "block": 1.393191155329987e-06,
+        "revision": 1.1439091167630977e-06,
+        "rhetorical_pause": 0.22670139372348785,
+        "neutral_pause": 0.7720209956169128
+      }
+    },
+    {
+      "timestamp": 9.5,
+      "texto_ventana": "[text withheld]",
+      "clase": "neutral_pause",
+      "confianza": 0.6677988171577454,
+      "todas_las_probabilidades": {
+        "fluent": 0.002867473056539893,
+        "filler_word": 0.00019135992624796927,
+        "prolongation": 0.00010561219824012369,
+        "repetition": 2.0913697881042026e-05,
+        "block": 7.645868208783213e-06,
+        "revision": 4.590214757627109e-06,
+        "rhetorical_pause": 0.32900363206863403,
+        "neutral_pause": 0.6677988171577454
+      }
+    },
+    {
+      "timestamp": 10.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "rhetorical_pause",
+      "confianza": 0.5141258239746094,
+      "todas_las_probabilidades": {
+        "fluent": 0.003392743179574609,
+        "filler_word": 0.0011749649420380592,
+        "prolongation": 0.00018085339979734272,
+        "repetition": 0.00011552957585081458,
+        "block": 1.6220725228777155e-05,
+        "revision": 4.287013507564552e-05,
+        "rhetorical_pause": 0.5141258239746094,
+        "neutral_pause": 0.48095089197158813
+      }
+    },
+    {
+      "timestamp": 10.5,
+      "texto_ventana": "[text withheld]",
+      "clase": "rhetorical_pause",
+      "confianza": 0.6226097345352173,
+      "todas_las_probabilidades": {
+        "fluent": 0.003761660773307085,
+        "filler_word": 0.0025867007207125425,
+        "prolongation": 0.0005387002020142972,
+        "repetition": 0.00044626902672462165,
+        "block": 0.00015179108595475554,
+        "revision": 0.00018397612439002842,
+        "rhetorical_pause": 0.6226097345352173,
+        "neutral_pause": 0.3697212040424347
+      }
+    },
+    {
+      "timestamp": 11.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "rhetorical_pause",
+      "confianza": 0.6564074754714966,
+      "todas_las_probabilidades": {
+        "fluent": 0.00320123671554029,
+        "filler_word": 0.020383914932608604,
+        "prolongation": 0.0009127783123403788,
+        "repetition": 0.042699094861745834,
+        "block": 0.0014926719013601542,
+        "revision": 0.0019153010798618197,
+        "rhetorical_pause": 0.6564074754714966,
+        "neutral_pause": 0.2729874849319458
+      }
+    },
+    {
+      "timestamp": 11.5,
+      "texto_ventana": "[text withheld]",
+      "clase": "rhetorical_pause",
+      "confianza": 0.6377472281455994,
+      "todas_las_probabilidades": {
+        "fluent": 0.01203593984246254,
+        "filler_word": 0.016509180888533592,
+        "prolongation": 0.004940023645758629,
+        "repetition": 0.012498537078499794,
+        "block": 0.0004468524712137878,
+        "revision": 0.0012036383850499988,
+        "rhetorical_pause": 0.6377472281455994,
+        "neutral_pause": 0.31461861729621887
+      }
+    },
+    {
+      "timestamp": 12.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "repetition",
+      "confianza": 0.9123080968856812,
+      "todas_las_probabilidades": {
+        "fluent": 0.03807787597179413,
+        "filler_word": 0.009891447611153126,
+        "prolongation": 0.03113950416445732,
+        "repetition": 0.9123080968856812,
+        "block": 6.946272446128887e-09,
+        "revision": 0.00855496060103178,
+        "rhetorical_pause": 3.3598198001527635e-08,
+        "neutral_pause": 2.8117670808569528e-05
+      }
+    },
+    {
+      "timestamp": 12.5,
+      "texto_ventana": "[text withheld]",
+      "clase": "repetition",
+      "confianza": 0.9057608246803284,
+      "todas_las_probabilidades": {
+        "fluent": 0.04075917974114418,
+        "filler_word": 0.010301181115210056,
+        "prolongation": 0.027648957446217537,
+        "repetition": 0.9057608246803284,
+        "block": 1.2128417381518375e-08,
+        "revision": 0.015503211878240108,
+        "rhetorical_pause": 1.8636896470525244e-08,
+        "neutral_pause": 2.672033770068083e-05
+      }
+    },
+    {
+      "timestamp": 13.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "repetition",
+      "confianza": 0.6091821193695068,
+      "todas_las_probabilidades": {
+        "fluent": 0.24168874323368073,
+        "filler_word": 0.011896017007529736,
+        "prolongation": 0.11925090849399567,
+        "repetition": 0.6091821193695068,
+        "block": 2.5557957528121733e-08,
+        "revision": 0.017782216891646385,
+        "rhetorical_pause": 1.6171192385172617e-07,
+        "neutral_pause": 0.00019975434406660497
+      }
+    },
+    {
+      "timestamp": 13.5,
+      "texto_ventana": "[text withheld]",
+      "clase": "repetition",
+      "confianza": 0.8957889080047607,
+      "todas_las_probabilidades": {
+        "fluent": 0.04676837846636772,
+        "filler_word": 0.03265268728137016,
+        "prolongation": 0.008317586034536362,
+        "repetition": 0.8957889080047607,
+        "block": 2.7416086822995567e-07,
+        "revision": 0.016075357794761658,
+        "rhetorical_pause": 6.479623152699787e-06,
+        "neutral_pause": 0.0003901632153429091
+      }
+    },
+    {
+      "timestamp": 14.0,
+      "texto_ventana": "[text withheld]",
+      "clase": "fluent",
+      "confianza": 0.7732845544815063,
+      "todas_las_probabilidades": {
+        "fluent": 0.7732845544815063,
+        "filler_word": 0.01734359934926033,
+        "prolongation": 0.19159959256649017,
+        "repetition": 0.014043335802853107,
+        "block": 8.736330414649274e-08,
+        "revision": 0.0026873915921896696,
+        "rhetorical_pause": 7.172278128564358e-05,
+        "neutral_pause": 0.0009696889319457114
+      }
+    }
+  ]
+}

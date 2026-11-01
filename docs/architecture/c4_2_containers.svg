@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 1330" width="1640" height="1330" font-family="Segoe UI, Arial, sans-serif">
+<title>C4 level 2 - Containers (as inspected; proposed integration dashed orange)</title>
+<defs>
+<marker id="ar_sync" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#333333"/></marker>
+<marker id="ar_live" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1565c0"/></marker>
+<marker id="ar_offline" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6a1b9a"/></marker>
+<marker id="ar_data" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#616161"/></marker>
+<marker id="ar_proposed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e65100"/></marker>
+</defs>
+<rect width="1640" height="1330" fill="#ffffff"/>
+<text x="20" y="26" font-size="16" font-weight="700" fill="#111">C4 level 2 - Containers (as inspected; proposed integration dashed orange)</text>
+<rect x="20" y="40" width="380" height="420" rx="8" fill="none" stroke="#b71c1c" stroke-width="1.6" stroke-dasharray="10 5"/>
+<text x="30" y="58" font-size="11.5" font-weight="600" fill="#b71c1c">Browser on the user device (video never leaves it) [trust boundary]</text>
+<rect x="520" y="40" width="760" height="630" rx="8" fill="none" stroke="#b71c1c" stroke-width="1.6" stroke-dasharray="10 5"/>
+<text x="530" y="58" font-size="11.5" font-weight="600" fill="#b71c1c">App backend (docker compose, local) [trust boundary]</text>
+<rect x="1310" y="40" width="300" height="200" rx="8" fill="none" stroke="#b71c1c" stroke-width="1.6" stroke-dasharray="10 5"/>
+<text x="1320" y="58" font-size="11.5" font-weight="600" fill="#b71c1c">Third-party cloud [trust boundary]</text>
+<rect x="20" y="720" width="1600" height="440" rx="8" fill="none" stroke="#b71c1c" stroke-width="1.6" stroke-dasharray="10 5"/>
+<text x="30" y="738" font-size="11.5" font-weight="600" fill="#b71c1c">MRCD local Python process / working tree [trust boundary]</text>
+<polyline points="370.0,132.0 550.0,128.6" fill="none" stroke="#1565c0" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_live)"/>
+<polyline points="210.0,290.0 210.0,180.0" fill="none" stroke="#616161" stroke-width="1.7" stroke-dasharray="2 3" marker-end="url(#ar_data)"/>
+<polyline points="865.7,154.0 720.1,290.0" fill="none" stroke="#1565c0" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_live)"/>
+<polyline points="665.0,393.0 665.0,490.0" fill="none" stroke="#1565c0" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_live)"/>
+<polyline points="780.0,311.8 1000.0,255.0 1290.0,255.0 1290.0,130.0 1330.0,129.6" fill="none" stroke="#1565c0" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_live)"/>
+<polyline points="934.9,154.0 1083.1,290.0" fill="none" stroke="#333333" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_sync)"/>
+<polyline points="900.0,154.0 900.0,770.0" fill="none" stroke="#e65100" stroke-width="1.7" stroke-dasharray="7 4" marker-end="url(#ar_proposed)"/>
+<polyline points="900.0,873.0 900.0,920.0" fill="none" stroke="#333333" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_sync)"/>
+<polyline points="640.0,960.9 750.0,962.6" fill="none" stroke="#1565c0" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_live)"/>
+<polyline points="1160.0,961.1 1050.0,962.7" fill="none" stroke="#6a1b9a" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_offline)"/>
+<polyline points="900.0,1010.0 900.0,1070.0" fill="none" stroke="#616161" stroke-width="1.7" stroke-dasharray="2 3" marker-end="url(#ar_data)"/>
+<polyline points="1330.0,997.0 1330.0,1070.0" fill="none" stroke="#616161" stroke-width="1.7" stroke-dasharray="2 3" marker-end="url(#ar_data)"/>
+<rect x="50" y="90" width="320" height="90" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.8" stroke-dasharray=""/>
+<text x="58" y="112" font-size="12.5" font-weight="700" fill="#111">Web SPA</text>
+<text x="58" y="125" font-size="9.5" font-style="italic" fill="#37474f">React 19, Vite, AudioWorklet, MediaPipe worker</text>
+<text x="58" y="141" font-size="10.5" fill="#222">getUserMedia mono; PCM16 16 kHz 160 ms chunks;</text>
+<text x="58" y="154" font-size="10.5" fill="#222">vision and prosody summaries (~1/s); report UI. No</text>
+<text x="58" y="167" font-size="10.5" fill="#222">video upload.</text>
+<rect x="50" y="290" width="320" height="77" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.8" stroke-dasharray=""/>
+<text x="58" y="312" font-size="12.5" font-weight="700" fill="#111">Local recording (research, optional)</text>
+<text x="58" y="325" font-size="9.5" font-style="italic" fill="#37474f">MediaRecorder</text>
+<text x="58" y="341" font-size="10.5" fill="#222">Records video+audio and only downloads it locally;</text>
+<text x="58" y="354" font-size="10.5" fill="#222">keeps a local reference.</text>
+<rect x="550" y="90" width="700" height="64" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.8" stroke-dasharray=""/>
+<text x="558" y="112" font-size="12.5" font-weight="700" fill="#111">Backend API</text>
+<text x="558" y="125" font-size="9.5" font-style="italic" fill="#37474f">FastAPI, WS /ws/session, REST /api/v1/sessions</text>
+<text x="558" y="141" font-size="10.5" fill="#222">Authenticates, frames audio, runs the ASR port, closes segments, stores transcript and report.</text>
+<rect x="550" y="290" width="230" height="103" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.8" stroke-dasharray=""/>
+<text x="558" y="312" font-size="12.5" font-weight="700" fill="#111">ASR adapter port</text>
+<text x="558" y="325" font-size="9.5" font-style="italic" fill="#37474f">SpeechRecognizer port</text>
+<text x="558" y="341" font-size="10.5" fill="#222">ORATORIA_ASR_ADAPTER: simulado</text>
+<text x="558" y="354" font-size="10.5" fill="#222">(default), gestionado,</text>
+<text x="558" y="367" font-size="10.5" fill="#222">whisper_http, speechmatics,</text>
+<text x="558" y="380" font-size="10.5" fill="#222">deepgram, oratoria_engine.</text>
+<rect x="550" y="490" width="230" height="90" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.8" stroke-dasharray=""/>
+<text x="558" y="512" font-size="12.5" font-weight="700" fill="#111">ORATORIA-ENGINE v0 (embedded)</text>
+<text x="558" y="525" font-size="9.5" font-style="italic" fill="#37474f">Python, separate repo</text>
+<text x="558" y="541" font-size="10.5" fill="#222">Detector v0 FP/REP/PRO,</text>
+<text x="558" y="554" font-size="10.5" fill="#222">uncalibrated. This is what the app</text>
+<text x="558" y="567" font-size="10.5" fill="#222">hosts today.</text>
+<rect x="1000" y="290" width="250" height="77" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.8" stroke-dasharray=""/>
+<text x="1008" y="312" font-size="12.5" font-weight="700" fill="#111">PostgreSQL</text>
+<text x="1008" y="325" font-size="9.5" font-style="italic" fill="#37474f">Database</text>
+<text x="1008" y="341" font-size="10.5" fill="#222">Sessions, transcript, report. No raw-</text>
+<text x="1008" y="354" font-size="10.5" fill="#222">audio persistence found on the WS path.</text>
+<rect x="1330" y="90" width="260" height="77" rx="6" fill="#eeeeee" stroke="#616161" stroke-width="1.8" stroke-dasharray=""/>
+<text x="1338" y="112" font-size="12.5" font-weight="700" fill="#111">ASR provider</text>
+<text x="1338" y="125" font-size="9.5" font-style="italic" fill="#37474f">External API</text>
+<text x="1338" y="141" font-size="10.5" fill="#222">Receives audio when a cloud adapter is</text>
+<text x="1338" y="154" font-size="10.5" fill="#222">configured.</text>
+<rect x="750" y="770" width="300" height="103" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.8" stroke-dasharray=""/>
+<text x="758" y="792" font-size="12.5" font-weight="700" fill="#111">MRCD service (dev server + CLI)</text>
+<text x="758" y="805" font-size="9.5" font-style="italic" fill="#37474f">mrcd/service, FastAPI loopback :8765 / CLI</text>
+<text x="758" y="821" font-size="10.5" fill="#222">File in, JSON out, contract mrcd.analysis/v1.</text>
+<text x="758" y="834" font-size="10.5" fill="#222">No auth, loopback only. Added in commit 955d27c</text>
+<text x="758" y="847" font-size="10.5" fill="#222">after the first inspection; the app has no</text>
+<text x="758" y="860" font-size="10.5" fill="#222">client for it.</text>
+<rect x="750" y="920" width="300" height="90" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.8" stroke-dasharray=""/>
+<text x="758" y="942" font-size="12.5" font-weight="700" fill="#111">mrcd library</text>
+<text x="758" y="955" font-size="9.5" font-style="italic" fill="#37474f">Python package mrcd 0.3.0</text>
+<text x="758" y="971" font-size="10.5" fill="#222">DisfluencyEngine.load/analyze/analyze_file -&gt;</text>
+<text x="758" y="984" font-size="10.5" fill="#222">AnalysisResult(Event, Window). Only supported</text>
+<text x="758" y="997" font-size="10.5" fill="#222">entry; everything else is internal.</text>
+<rect x="340" y="920" width="300" height="77" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.8" stroke-dasharray=""/>
+<text x="348" y="942" font-size="12.5" font-weight="700" fill="#111">Live demo</text>
+<text x="348" y="955" font-size="9.5" font-style="italic" fill="#37474f">scripts/live_demo.py, FastAPI :8001</text>
+<text x="348" y="971" font-size="10.5" fill="#222">Microphone -&gt; LiveScorer rows -&gt; WebSocket /ws</text>
+<text x="348" y="984" font-size="10.5" fill="#222">and dashboard. Not an API for other systems.</text>
+<rect x="1160" y="920" width="340" height="77" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.8" stroke-dasharray=""/>
+<text x="1168" y="942" font-size="12.5" font-weight="700" fill="#111">Research and batch scripts</text>
+<text x="1168" y="955" font-size="9.5" font-style="italic" fill="#37474f">scripts/*.py, argparse</text>
+<text x="1168" y="971" font-size="10.5" fill="#222">Dataset, training, parity, ASR recovery, audits. No</text>
+<text x="1168" y="984" font-size="10.5" fill="#222">console_scripts and no CLI around analyze_file.</text>
+<rect x="750" y="1070" width="300" height="77" rx="6" fill="#eeeeee" stroke="#616161" stroke-width="1.8" stroke-dasharray=""/>
+<text x="758" y="1092" font-size="12.5" font-weight="700" fill="#111">Model artifacts</text>
+<text x="758" y="1105" font-size="9.5" font-style="italic" fill="#37474f">Files</text>
+<text x="758" y="1121" font-size="10.5" fill="#222">models/ckpt_audio_text.pt, Vc head (sha256</text>
+<text x="758" y="1134" font-size="10.5" fill="#222">pinned), faster-whisper small cache.</text>
+<rect x="1160" y="1070" width="340" height="77" rx="6" fill="#eeeeee" stroke="#616161" stroke-width="1.8" stroke-dasharray=""/>
+<text x="1168" y="1092" font-size="12.5" font-weight="700" fill="#111">Results store</text>
+<text x="1168" y="1105" font-size="9.5" font-style="italic" fill="#37474f">results/ (git-ignored)</text>
+<text x="1168" y="1121" font-size="10.5" fill="#222">Reports, logs, JSON. Only force-added files are</text>
+<text x="1168" y="1134" font-size="10.5" fill="#222">versioned.</text>
+<rect x="393.9" y="116.3" width="132.2" height="28" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#1565c0" stroke-width="0.6"/>
+<text x="460.0" y="128.3" font-size="9.5" text-anchor="middle" fill="#1565c0">WS: PCM16 frames +</text>
+<text x="460.0" y="140.3" font-size="9.5" text-anchor="middle" fill="#1565c0">summaries; REST: report</text>
+<rect x="152.0" y="227.0" width="116.0" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#616161" stroke-width="0.6"/>
+<text x="210.0" y="239.0" font-size="9.5" text-anchor="middle" fill="#616161">local reference only</text>
+<rect x="756.5" y="214.0" width="72.8" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#1565c0" stroke-width="0.6"/>
+<text x="792.9" y="226.0" font-size="9.5" text-anchor="middle" fill="#1565c0">audio chunks</text>
+<rect x="598.9" y="433.5" width="132.2" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#1565c0" stroke-width="0.6"/>
+<text x="665.0" y="445.5" font-size="9.5" text-anchor="middle" fill="#1565c0">adapter oratoria_engine</text>
+<rect x="1070.8" y="247.0" width="148.4" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#1565c0" stroke-width="0.6"/>
+<text x="1145.0" y="259.0" font-size="9.5" text-anchor="middle" fill="#1565c0">audio (cloud adapter only)</text>
+<rect x="986.1" y="214.0" width="45.8" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#333333" stroke-width="0.6"/>
+<text x="1009.0" y="226.0" font-size="9.5" text-anchor="middle" fill="#333333">persist</text>
+<rect x="828.5" y="448.0" width="143.0" height="28" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#e65100" stroke-width="0.6"/>
+<text x="900.0" y="460.0" font-size="9.5" text-anchor="middle" fill="#e65100">PROPOSED: app client does</text>
+<text x="900.0" y="472.0" font-size="9.5" text-anchor="middle" fill="#e65100">not exist</text>
+<rect x="855.5" y="888.5" width="89.0" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#333333" stroke-width="0.6"/>
+<text x="900.0" y="900.5" font-size="9.5" text-anchor="middle" fill="#333333">in-process call</text>
+<rect x="650.5" y="953.8" width="89.0" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#1565c0" stroke-width="0.6"/>
+<text x="695.0" y="965.8" font-size="9.5" text-anchor="middle" fill="#1565c0">LiveScorer rows</text>
+<rect x="1030.8" y="953.9" width="148.4" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#6a1b9a" stroke-width="0.6"/>
+<text x="1105.0" y="965.9" font-size="9.5" text-anchor="middle" fill="#6a1b9a">analyze_file, feature code</text>
+<rect x="839.3" y="1026.0" width="121.4" height="28" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#616161" stroke-width="0.6"/>
+<text x="900.0" y="1038.0" font-size="9.5" text-anchor="middle" fill="#616161">loads checkpoint, Vc,</text>
+<text x="900.0" y="1050.0" font-size="9.5" text-anchor="middle" fill="#616161">Whisper</text>
+<rect x="1309.8" y="1025.5" width="40.4" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#616161" stroke-width="0.6"/>
+<text x="1330.0" y="1037.5" font-size="9.5" text-anchor="middle" fill="#616161">writes</text>
+<text x="20" y="1200" font-size="12" font-weight="700" fill="#111">Legend</text>
+<rect x="20" y="1210" width="22" height="14" rx="3" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.6" stroke-dasharray=""/>
+<text x="48" y="1222" font-size="10.5" fill="#222">exists in MRCD tree</text>
+<rect x="166.39999999999998" y="1210" width="22" height="14" rx="3" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.6" stroke-dasharray=""/>
+<text x="194.39999999999998" y="1222" font-size="10.5" fill="#222">exists in ORATORIA-PROYECTO (read-only inspection)</text>
+<rect x="486.4" y="1210" width="22" height="14" rx="3" fill="#eeeeee" stroke="#616161" stroke-width="1.6" stroke-dasharray=""/>
+<text x="514.4" y="1222" font-size="10.5" fill="#222">external / data</text>
+<rect x="610.4" y="1210" width="22" height="14" rx="3" fill="#fff8e1" stroke="#b28704" stroke-width="1.6" stroke-dasharray=""/>
+<text x="638.4" y="1222" font-size="10.5" fill="#222">person</text>
+<rect x="684.0" y="1210" width="22" height="14" rx="3" fill="#ffffff" stroke="#e65100" stroke-width="1.6" stroke-dasharray="7 4"/>
+<text x="712.0" y="1222" font-size="10.5" fill="#222">PROPOSED, does not exist</text>
+<line x1="20" y1="1248" x2="54" y2="1248" stroke="#333333" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_sync)"/>
+<text x="62" y="1252" font-size="10.5" fill="#222">request / response</text>
+<line x1="180.8" y1="1248" x2="214.8" y2="1248" stroke="#1565c0" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_live)"/>
+<text x="222.8" y="1252" font-size="10.5" fill="#222">live / streaming path</text>
+<line x1="358.4" y1="1248" x2="392.4" y2="1248" stroke="#6a1b9a" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_offline)"/>
+<text x="400.4" y="1252" font-size="10.5" fill="#222">offline / batch path</text>
+<line x1="530.4" y1="1248" x2="564.4" y2="1248" stroke="#616161" stroke-width="1.7" stroke-dasharray="2 3" marker-end="url(#ar_data)"/>
+<text x="572.4" y="1252" font-size="10.5" fill="#222">file or model read/write</text>
+<line x1="724.8" y1="1248" x2="758.8" y2="1248" stroke="#e65100" stroke-width="1.7" stroke-dasharray="7 4" marker-end="url(#ar_proposed)"/>
+<text x="766.8" y="1252" font-size="10.5" fill="#222">PROPOSED, not implemented</text>
+<line x1="20" y1="1274" x2="54" y2="1274" stroke="#b71c1c" stroke-width="1.6" stroke-dasharray="10 5"/>
+<text x="62" y="1278" font-size="10.5" fill="#222">trust boundary (red dashed); grey dotted frame = grouping only</text>
+<text x="20" y="1300" font-size="10" fill="#555">Architecture of the inspected tree (commit in README.md). Generated by docs/architecture/c4_model.py; do not edit by hand.</text>
+</svg>

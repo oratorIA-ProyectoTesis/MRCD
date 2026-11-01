@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 850" width="1200" height="850" font-family="Segoe UI, Arial, sans-serif">
+<title>C4 level 1 - System context (as inspected)</title>
+<defs>
+<marker id="ar_sync" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#333333"/></marker>
+<marker id="ar_live" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1565c0"/></marker>
+<marker id="ar_offline" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6a1b9a"/></marker>
+<marker id="ar_data" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#616161"/></marker>
+<marker id="ar_proposed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e65100"/></marker>
+</defs>
+<rect width="1200" height="850" fill="#ffffff"/>
+<text x="20" y="26" font-size="16" font-weight="700" fill="#111">C4 level 1 - System context (as inspected)</text>
+<rect x="20" y="40" width="860" height="640" rx="8" fill="none" stroke="#b71c1c" stroke-width="1.6" stroke-dasharray="10 5"/>
+<text x="30" y="58" font-size="11.5" font-weight="600" fill="#b71c1c">Local workstation (nothing MRCD processes leaves it) [trust boundary]</text>
+<rect x="910" y="40" width="270" height="230" rx="8" fill="none" stroke="#b71c1c" stroke-width="1.6" stroke-dasharray="10 5"/>
+<text x="920" y="58" font-size="11.5" font-weight="600" fill="#b71c1c">Third-party cloud (audio leaves the machine) [trust boundary]</text>
+<polyline points="250.0,145.0 380.0,145.0" fill="none" stroke="#333333" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_sync)"/>
+<polyline points="630.0,146.5 940.0,150.2" fill="none" stroke="#333333" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_sync)"/>
+<polyline points="250.0,471.5 380.0,471.5" fill="none" stroke="#6a1b9a" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_offline)"/>
+<polyline points="630.0,459.7 720.0,451.1" fill="none" stroke="#616161" stroke-width="1.7" stroke-dasharray="2 3" marker-end="url(#ar_data)"/>
+<polyline points="614.9,523.0 720.0,572.2" fill="none" stroke="#616161" stroke-width="1.7" stroke-dasharray="2 3" marker-end="url(#ar_data)"/>
+<polyline points="505.0,190.0 505.0,420.0" fill="none" stroke="#e65100" stroke-width="1.7" stroke-dasharray="7 4" marker-end="url(#ar_proposed)"/>
+<rect x="40" y="100" width="210" height="90" rx="6" fill="#fff8e1" stroke="#b28704" stroke-width="1.8" stroke-dasharray=""/>
+<text x="48" y="122" font-size="12.5" font-weight="700" fill="#111">Speaker</text>
+<text x="48" y="135" font-size="9.5" font-style="italic" fill="#37474f">Person</text>
+<text x="48" y="151" font-size="10.5" fill="#222">Records a speech with microphone</text>
+<text x="48" y="164" font-size="10.5" fill="#222">and camera in the browser. Does</text>
+<text x="48" y="177" font-size="10.5" fill="#222">not see MRCD output today.</text>
+<rect x="40" y="420" width="210" height="103" rx="6" fill="#fff8e1" stroke="#b28704" stroke-width="1.8" stroke-dasharray=""/>
+<text x="48" y="442" font-size="12.5" font-weight="700" fill="#111">Researcher / advisor</text>
+<text x="48" y="455" font-size="9.5" font-style="italic" fill="#37474f">Person</text>
+<text x="48" y="471" font-size="10.5" fill="#222">Runs MRCD scripts and the live</text>
+<text x="48" y="484" font-size="10.5" fill="#222">demo and reads results. OE1/OE2</text>
+<text x="48" y="497" font-size="10.5" fill="#222">approval is PENDING (no</text>
+<text x="48" y="510" font-size="10.5" fill="#222">signature).</text>
+<rect x="380" y="100" width="250" height="90" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.8" stroke-dasharray=""/>
+<text x="388" y="122" font-size="12.5" font-weight="700" fill="#111">ORATORIA-PROYECTO web app</text>
+<text x="388" y="135" font-size="9.5" font-style="italic" fill="#37474f">Software system (separate repo)</text>
+<text x="388" y="151" font-size="10.5" fill="#222">Practice sessions and report. Embeds</text>
+<text x="388" y="164" font-size="10.5" fill="#222">ORATORIA-ENGINE v0 (3 classes). It does</text>
+<text x="388" y="177" font-size="10.5" fill="#222">NOT call MRCD.</text>
+<rect x="380" y="420" width="250" height="103" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.8" stroke-dasharray=""/>
+<text x="388" y="442" font-size="12.5" font-weight="700" fill="#111">MRCD engine (this repo)</text>
+<text x="388" y="455" font-size="9.5" font-style="italic" fill="#37474f">Software system, Python 0.3.0</text>
+<text x="388" y="471" font-size="10.5" fill="#222">Experimental 7-class window classifier</text>
+<text x="388" y="484" font-size="10.5" fill="#222">over audio and ASR text. Offline files</text>
+<text x="388" y="497" font-size="10.5" fill="#222">and live replay. Scores are not</text>
+<text x="388" y="510" font-size="10.5" fill="#222">calibrated.</text>
+<rect x="720" y="380" width="140" height="129" rx="6" fill="#eeeeee" stroke="#616161" stroke-width="1.8" stroke-dasharray=""/>
+<text x="728" y="402" font-size="12.5" font-weight="700" fill="#111">Annotated corpora</text>
+<text x="728" y="415" font-size="9.5" font-style="italic" fill="#37474f">Files (git-ignored)</text>
+<text x="728" y="431" font-size="10.5" fill="#222">DIHANA, DIME,</text>
+<text x="728" y="444" font-size="10.5" fill="#222">ESLORA, own clips.</text>
+<text x="728" y="457" font-size="10.5" fill="#222">Offline evaluation</text>
+<text x="728" y="470" font-size="10.5" fill="#222">only; licences</text>
+<text x="728" y="483" font-size="10.5" fill="#222">restrict</text>
+<text x="728" y="496" font-size="10.5" fill="#222">redistribution.</text>
+<rect x="720" y="560" width="140" height="90" rx="6" fill="#eeeeee" stroke="#616161" stroke-width="1.8" stroke-dasharray=""/>
+<text x="728" y="582" font-size="12.5" font-weight="700" fill="#111">Model files</text>
+<text x="728" y="595" font-size="9.5" font-style="italic" fill="#37474f">Files</text>
+<text x="728" y="611" font-size="10.5" fill="#222">ckpt_audio_text.pt,</text>
+<text x="728" y="624" font-size="10.5" fill="#222">Vc head, faster-</text>
+<text x="728" y="637" font-size="10.5" fill="#222">whisper small cache.</text>
+<rect x="940" y="100" width="220" height="103" rx="6" fill="#eeeeee" stroke="#616161" stroke-width="1.8" stroke-dasharray=""/>
+<text x="948" y="122" font-size="12.5" font-weight="700" fill="#111">Cloud ASR providers</text>
+<text x="948" y="135" font-size="9.5" font-style="italic" fill="#37474f">External (optional)</text>
+<text x="948" y="151" font-size="10.5" fill="#222">Speechmatics, Deepgram or managed</text>
+<text x="948" y="164" font-size="10.5" fill="#222">ASR, only if selected by</text>
+<text x="948" y="177" font-size="10.5" fill="#222">ORATORIA_ASR_ADAPTER. Default is</text>
+<text x="948" y="190" font-size="10.5" fill="#222">simulado.</text>
+<rect x="248.9" y="131.0" width="132.2" height="28" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#333333" stroke-width="0.6"/>
+<text x="315.0" y="143.0" font-size="9.5" text-anchor="middle" fill="#333333">Speaks; audio and video</text>
+<text x="315.0" y="155.0" font-size="9.5" text-anchor="middle" fill="#333333">captured in the browser</text>
+<rect x="710.8" y="134.3" width="148.4" height="28" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#333333" stroke-width="0.6"/>
+<text x="785.0" y="146.3" font-size="9.5" text-anchor="middle" fill="#333333">Audio PCM16 (only if a</text>
+<text x="785.0" y="158.3" font-size="9.5" text-anchor="middle" fill="#333333">cloud adapter is selected)</text>
+<rect x="243.5" y="463.5" width="143.0" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#6a1b9a" stroke-width="0.6"/>
+<text x="315.0" y="475.5" font-size="9.5" text-anchor="middle" fill="#6a1b9a">Runs scripts, demo, tests</text>
+<rect x="630.5" y="447.4" width="89.0" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#616161" stroke-width="0.6"/>
+<text x="675.0" y="459.4" font-size="9.5" text-anchor="middle" fill="#616161">Reads (offline)</text>
+<rect x="650.0" y="539.6" width="35.0" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#616161" stroke-width="0.6"/>
+<text x="667.5" y="551.6" font-size="9.5" text-anchor="middle" fill="#616161">Loads</text>
+<rect x="430.8" y="285.0" width="148.4" height="40" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#e65100" stroke-width="0.6"/>
+<text x="505.0" y="297.0" font-size="9.5" text-anchor="middle" fill="#e65100">PROPOSED integration, not</text>
+<text x="505.0" y="309.0" font-size="9.5" text-anchor="middle" fill="#e65100">implemented: local file-in</text>
+<text x="505.0" y="321.0" font-size="9.5" text-anchor="middle" fill="#e65100">/ JSON-out</text>
+<text x="20" y="720" font-size="12" font-weight="700" fill="#111">Legend</text>
+<rect x="20" y="730" width="22" height="14" rx="3" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.6" stroke-dasharray=""/>
+<text x="48" y="742" font-size="10.5" fill="#222">exists in MRCD tree</text>
+<rect x="166.39999999999998" y="730" width="22" height="14" rx="3" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.6" stroke-dasharray=""/>
+<text x="194.39999999999998" y="742" font-size="10.5" fill="#222">exists in ORATORIA-PROYECTO (read-only inspection)</text>
+<rect x="486.4" y="730" width="22" height="14" rx="3" fill="#eeeeee" stroke="#616161" stroke-width="1.6" stroke-dasharray=""/>
+<text x="514.4" y="742" font-size="10.5" fill="#222">external / data</text>
+<rect x="610.4" y="730" width="22" height="14" rx="3" fill="#fff8e1" stroke="#b28704" stroke-width="1.6" stroke-dasharray=""/>
+<text x="638.4" y="742" font-size="10.5" fill="#222">person</text>
+<rect x="684.0" y="730" width="22" height="14" rx="3" fill="#ffffff" stroke="#e65100" stroke-width="1.6" stroke-dasharray="7 4"/>
+<text x="712.0" y="742" font-size="10.5" fill="#222">PROPOSED, does not exist</text>
+<line x1="20" y1="768" x2="54" y2="768" stroke="#333333" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_sync)"/>
+<text x="62" y="772" font-size="10.5" fill="#222">request / response</text>
+<line x1="180.8" y1="768" x2="214.8" y2="768" stroke="#1565c0" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_live)"/>
+<text x="222.8" y="772" font-size="10.5" fill="#222">live / streaming path</text>
+<line x1="358.4" y1="768" x2="392.4" y2="768" stroke="#6a1b9a" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_offline)"/>
+<text x="400.4" y="772" font-size="10.5" fill="#222">offline / batch path</text>
+<line x1="530.4" y1="768" x2="564.4" y2="768" stroke="#616161" stroke-width="1.7" stroke-dasharray="2 3" marker-end="url(#ar_data)"/>
+<text x="572.4" y="772" font-size="10.5" fill="#222">file or model read/write</text>
+<line x1="724.8" y1="768" x2="758.8" y2="768" stroke="#e65100" stroke-width="1.7" stroke-dasharray="7 4" marker-end="url(#ar_proposed)"/>
+<text x="766.8" y="772" font-size="10.5" fill="#222">PROPOSED, not implemented</text>
+<line x1="20" y1="794" x2="54" y2="794" stroke="#b71c1c" stroke-width="1.6" stroke-dasharray="10 5"/>
+<text x="62" y="798" font-size="10.5" fill="#222">trust boundary (red dashed); grey dotted frame = grouping only</text>
+<text x="20" y="820" font-size="10" fill="#555">Architecture of the inspected tree (commit in README.md). Generated by docs/architecture/c4_model.py; do not edit by hand.</text>
+</svg>

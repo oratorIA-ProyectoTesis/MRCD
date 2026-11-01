@@ -1,0 +1,281 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:oratoria:mrcd-integration:v1",
+  "title": "App <-> MRCD integration records, v1 (PROPOSED, not implemented in the app)",
+  "description": "Two records that live on the APP side. The MRCD side contract is mrcd.analysis/v1 (mrcd/service/contract.py, authoritative). binding = what the app stores to link one app session segment to one MRCD job. report_section = what a report page may render, derived mechanically from an mrcd.analysis/v1 document. Rules: a measure that is not available is {available:false, value:null, unavailable_reason:<text>} and never 0; every score is labelled uncalibrated; no field carries an inference about emotion, anxiety, doubt, intention or a diagnosis.",
+  "oneOf": [
+    { "$ref": "#/$defs/binding" },
+    { "$ref": "#/$defs/report_section" }
+  ],
+  "$defs": {
+    "measure": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["available", "value", "unavailable_reason"],
+          "properties": {
+            "available": { "const": true },
+            "value": { "type": "number" },
+            "unavailable_reason": { "type": "null" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["available", "value", "unavailable_reason"],
+          "properties": {
+            "available": { "const": false },
+            "value": { "type": "null" },
+            "unavailable_reason": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "session_id",
+        "segment_index",
+        "audio",
+        "mrcd",
+        "gaps",
+        "capture"
+      ],
+      "properties": {
+        "schema_version": { "const": "oratoria.mrcd-binding/v1" },
+        "session_id": { "type": "string", "minLength": 1 },
+        "segment_index": { "type": ["integer", "null"], "minimum": 0 },
+        "audio": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "first_chunk_seq",
+            "last_chunk_seq",
+            "t0_ms_first_chunk",
+            "n_chunks",
+            "duration_ms",
+            "sample_rate_hz",
+            "channels",
+            "sha256"
+          ],
+          "properties": {
+            "first_chunk_seq": { "type": "integer", "minimum": 0 },
+            "last_chunk_seq": { "type": "integer", "minimum": 0 },
+            "t0_ms_first_chunk": { "type": "integer", "minimum": 0 },
+            "n_chunks": { "type": "integer", "minimum": 1 },
+            "duration_ms": { "type": "integer", "minimum": 1 },
+            "sample_rate_hz": { "const": 16000 },
+            "channels": { "const": 1 },
+            "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+          }
+        },
+        "mrcd": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "contract",
+            "job_id",
+            "asr_profile",
+            "head",
+            "include_text"
+          ],
+          "properties": {
+            "contract": { "const": "mrcd.analysis/v1" },
+            "job_id": {
+              "type": ["string", "null"],
+              "pattern": "^[0-9a-f]{32}$"
+            },
+            "asr_profile": { "type": "string", "minLength": 1 },
+            "head": { "type": ["string", "null"] },
+            "include_text": { "type": "boolean" }
+          }
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "after_chunk_seq",
+              "missing_chunks",
+              "approx_missing_ms"
+            ],
+            "properties": {
+              "kind": { "enum": ["missing_chunks"] },
+              "after_chunk_seq": { "type": "integer", "minimum": 0 },
+              "missing_chunks": { "type": "integer", "minimum": 1 },
+              "approx_missing_ms": { "type": "integer", "minimum": 1 }
+            }
+          }
+        },
+        "capture": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "echo_cancellation",
+            "noise_suppression",
+            "auto_gain_control",
+            "resampler"
+          ],
+          "properties": {
+            "echo_cancellation": { "type": "boolean" },
+            "noise_suppression": { "type": "boolean" },
+            "auto_gain_control": { "type": "boolean" },
+            "resampler": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "report_event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "class",
+        "start_session_ms",
+        "end_session_ms",
+        "interval_semantics",
+        "score",
+        "experimental"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^ev-[0-9]{4,}$" },
+        "class": { "type": "string", "minLength": 1 },
+        "start_session_ms": { "type": "integer", "minimum": 0 },
+        "end_session_ms": { "type": "integer", "minimum": 0 },
+        "interval_semantics": { "const": "decision_stride_not_human_boundary" },
+        "score": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "kind", "calibrated", "label"],
+          "properties": {
+            "value": { "type": "number", "minimum": 0, "maximum": 1 },
+            "kind": { "type": "string", "minLength": 1 },
+            "calibrated": { "const": false },
+            "label": { "const": "uncalibrated" }
+          }
+        },
+        "experimental": { "type": "boolean" }
+      }
+    },
+    "report_section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "session_id",
+        "segment_index",
+        "status",
+        "unavailable_reason",
+        "source",
+        "audio",
+        "events",
+        "summary",
+        "modalities",
+        "warnings"
+      ],
+      "properties": {
+        "schema_version": { "const": "oratoria.mrcd-report/v1" },
+        "session_id": { "type": "string", "minLength": 1 },
+        "segment_index": { "type": ["integer", "null"], "minimum": 0 },
+        "status": { "enum": ["completed", "failed", "not_run"] },
+        "unavailable_reason": { "type": ["string", "null"] },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "contract",
+            "job_id",
+            "mrcd_version",
+            "asr_profile",
+            "experimental",
+            "audio_sha256"
+          ],
+          "properties": {
+            "contract": { "const": "mrcd.analysis/v1" },
+            "job_id": { "type": ["string", "null"] },
+            "mrcd_version": { "type": ["string", "null"] },
+            "asr_profile": { "type": ["string", "null"] },
+            "experimental": { "type": "boolean" },
+            "audio_sha256": { "type": ["string", "null"] }
+          }
+        },
+        "audio": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start_session_ms", "duration_s"],
+          "properties": {
+            "start_session_ms": { "type": "integer", "minimum": 0 },
+            "duration_s": { "$ref": "#/$defs/measure" }
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/report_event" }
+        },
+        "summary": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["n_events", "events_per_minute"],
+              "properties": {
+                "n_events": { "type": "integer", "minimum": 0 },
+                "events_per_minute": { "$ref": "#/$defs/measure" }
+              }
+            }
+          ]
+        },
+        "modalities": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["acoustic", "linguistic", "kinesic_video"],
+          "properties": {
+            "acoustic": { "$ref": "#/$defs/modality" },
+            "linguistic": { "$ref": "#/$defs/modality" },
+            "kinesic_video": { "$ref": "#/$defs/modality" }
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "message"],
+            "properties": {
+              "code": { "type": "string", "minLength": 1 },
+              "message": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "modality": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["available", "reason"],
+          "properties": {
+            "available": { "const": true },
+            "reason": { "type": "null" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["available", "reason"],
+          "properties": {
+            "available": { "const": false },
+            "reason": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    }
+  }
+}

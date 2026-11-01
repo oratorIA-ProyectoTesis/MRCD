@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:mrcd:engine:windows:current",
+  "title": "list of Window (dataclasses.asdict) as returned by analyze(keep_windows=True); NOT serialised by to_dict()",
+  "type": "array",
+  "items": { "$ref": "#/$defs/window" },
+  "$defs": {
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "end",
+        "label",
+        "confidence",
+        "probabilities",
+        "text",
+        "terminal",
+        "head_scores"
+      ],
+      "properties": {
+        "start": { "type": "number", "minimum": 0 },
+        "end": { "type": "number", "minimum": 0 },
+        "label": {
+          "enum": [
+            "fluent",
+            "filler_word",
+            "prolongation",
+            "repetition",
+            "block",
+            "revision",
+            "rhetorical_pause",
+            "neutral_pause"
+          ]
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "probabilities": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "text": { "type": "string" },
+        "terminal": { "type": "boolean" },
+        "head_scores": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["experimental", "calibrated", "head", "scores"],
+              "properties": {
+                "experimental": { "const": true },
+                "calibrated": { "const": false },
+                "head": { "type": "string" },
+                "scores": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

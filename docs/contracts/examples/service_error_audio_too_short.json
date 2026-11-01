@@ -1,0 +1,70 @@
+{
+  "schema_version": "mrcd.analysis/v1",
+  "status": "failed",
+  "generated_at": "2026-10-31T20:36:34+00:00",
+  "error": {
+    "code": "audio_too_short",
+    "message": "Audio of 5.0 s; the engine needs at least 13 s.",
+    "retryable": false,
+    "details": {
+      "min_duration_s": 13.0,
+      "duration_s": 5.0
+    }
+  },
+  "request": {
+    "audio_sha256": "ee1bf52bb8b4cdb9f0d2c8a01f6da324ef3d76bbd73bff98fc51bbc3c07064ea",
+    "audio_duration_s": {
+      "available": true,
+      "value": 5.0,
+      "unavailable_reason": null
+    },
+    "sample_rate_hz": {
+      "available": true,
+      "value": 16000,
+      "unavailable_reason": null
+    },
+    "channels": {
+      "available": true,
+      "value": 1,
+      "unavailable_reason": null
+    },
+    "asr_profile": "p0",
+    "head": null,
+    "include_text": false
+  },
+  "events": [],
+  "summary": null,
+  "modalities": {
+    "acoustic": {
+      "available": false,
+      "reason": "analysis did not run"
+    },
+    "linguistic": {
+      "available": false,
+      "reason": "analysis did not run"
+    },
+    "kinesic_video": {
+      "available": false,
+      "reason": "service v1 receives audio only; no video was provided or processed"
+    }
+  },
+  "provenance": {
+    "service": {
+      "name": "mrcd.service",
+      "contract": "mrcd.analysis/v1",
+      "mrcd_version": "0.3.0"
+    },
+    "checkpoint": null,
+    "asr": null,
+    "head": null,
+    "config": null,
+    "environment": null
+  },
+  "experimental": {
+    "active": false,
+    "components": []
+  },
+  "head_decision": null,
+  "transcript": null,
+  "warnings": []
+}

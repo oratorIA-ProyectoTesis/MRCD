@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:mrcd:engine:analysis-result:current",
+  "title": "AnalysisResult.to_dict() as emitted by mrcd 0.3.0 (current state, NOT a promise of stability)",
+  "description": "Describes what DisfluencyEngine.analyze()/analyze_file() emits today. Top level and events are closed (additionalProperties=false) so that any drift fails validation and forces this contract to be updated. `confidence` is a raw softmax maximum of an uncalibrated model, not a probability of presence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mode",
+    "duration",
+    "warning",
+    "transcript",
+    "metadata",
+    "events"
+  ],
+  "properties": {
+    "mode": { "enum": ["audio_only", "audio_text"] },
+    "duration": { "type": "number", "minimum": 0 },
+    "warning": { "type": ["string", "null"] },
+    "transcript": { "type": "string" },
+    "metadata": { "$ref": "#/$defs/metadata" },
+    "events": { "type": "array", "items": { "$ref": "#/$defs/event" } },
+    "head": { "$ref": "#/$defs/head_report" }
+  },
+  "$defs": {
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "start",
+        "end",
+        "confidence",
+        "n_windows",
+        "text",
+        "modalities"
+      ],
+      "properties": {
+        "label": {
+          "enum": [
+            "filler_word",
+            "prolongation",
+            "repetition",
+            "block",
+            "revision",
+            "rhetorical_pause",
+            "neutral_pause"
+          ]
+        },
+        "start": { "type": "number", "minimum": 0 },
+        "end": { "type": "number", "minimum": 0 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "n_windows": { "type": "integer", "minimum": 1 },
+        "text": { "type": "string" },
+        "modalities": {
+          "type": "array",
+          "items": { "enum": ["acoustic", "linguistic", "kinesic"] }
+        },
+        "validation": { "type": "string" },
+        "asr_profile": { "type": "string" },
+        "asr_experimental": { "const": true }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["window_plan", "head", "environment", "asr_profile"],
+      "properties": {
+        "window_plan": {
+          "type": "object",
+          "required": [
+            "window_s",
+            "stride_s",
+            "terminal_window",
+            "span",
+            "asr_chunk_s"
+          ],
+          "properties": {
+            "window_s": { "const": 3.0 },
+            "stride_s": { "const": 0.5 },
+            "terminal_window": { "type": "boolean" },
+            "span": {
+              "type": ["array", "null"],
+              "items": { "type": "number" }
+            },
+            "asr_chunk_s": { "type": "number", "minimum": 0 }
+          }
+        },
+        "head": { "type": ["string", "null"] },
+        "environment": { "type": "object" },
+        "asr_profile": {
+          "type": "object",
+          "required": [
+            "name",
+            "experimental",
+            "validation",
+            "model",
+            "language",
+            "chunk_s_requested",
+            "asr_cache",
+            "asr_fingerprint",
+            "anomalies"
+          ],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "experimental": { "type": ["boolean", "null"] },
+            "validation": { "type": ["string", "null"] },
+            "model": { "type": "object" },
+            "language": { "type": "string" },
+            "chunk_s_requested": { "type": "number" },
+            "asr_cache": { "type": ["object", "null"] },
+            "asr_fingerprint": { "type": ["object", "null"] },
+            "anomalies": { "type": "array", "items": { "type": "object" } }
+          }
+        }
+      }
+    },
+    "head_report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "experimental",
+        "provenance",
+        "unit",
+        "scores_calibrated",
+        "decision_rule",
+        "classes",
+        "unvalidated_classes"
+      ],
+      "properties": {
+        "experimental": { "const": true },
+        "provenance": { "type": "object" },
+        "unit": {
+          "type": "object",
+          "required": ["start", "end", "n_windows", "note"],
+          "properties": {
+            "start": { "type": "number" },
+            "end": { "type": "number" },
+            "n_windows": { "type": "integer", "minimum": 1 },
+            "note": { "type": "string" }
+          }
+        },
+        "scores_calibrated": { "const": false },
+        "decision_rule": { "type": "string" },
+        "classes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "score",
+              "threshold",
+              "present",
+              "experimental",
+              "calibrated",
+              "reference_tune_f1"
+            ],
+            "properties": {
+              "score": { "type": "number", "minimum": 0, "maximum": 1 },
+              "threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+              "present": { "type": "boolean" },
+              "experimental": { "const": true },
+              "calibrated": { "const": false },
+              "reference_tune_f1": { "type": ["number", "null"] }
+            }
+          }
+        },
+        "unvalidated_classes": { "type": "object" }
+      }
+    }
+  }
+}

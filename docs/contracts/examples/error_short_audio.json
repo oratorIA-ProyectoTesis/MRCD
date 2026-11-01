@@ -1,0 +1,4 @@
+{
+  "exception": "ValueError",
+  "message": "Audio de 5.0 s; se necesitan al menos 13 s. El ramal linguistico mira una ventana de contexto mas ancha que la de analisis y sin ella no hay decision que tomar."
+}

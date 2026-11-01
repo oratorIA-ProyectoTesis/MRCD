@@ -1,0 +1,24 @@
+%% Disambiguation state diagram, CURRENT behaviour (mrcd 0.3.0). Mermaid source; not render-tested locally.
+stateDiagram-v2
+    [*] --> InputChecked: audio 16 kHz mono finite >= 13 s
+    InputChecked --> Rejected: ValueError (no output)
+    InputChecked --> WindowGrid: ASR words + features
+    WindowGrid --> Scored: per 3 s window, 0.5 s stride (candidate = every window)
+    Scored --> Background: argmax = fluent
+    Scored --> ClassWindow: argmax = one of 7 classes
+    Background --> [*]: no event
+    ClassWindow --> RunMerge: same label and start gap <= 0.75 s
+    RunMerge --> AcceptedEvent: interval = first start .. last start + 0.5, score = max softmax
+    AcceptedEvent --> [*]
+    note right of AcceptedEvent
+      Accepted only means survived argmax and merge.
+      No uncertain state. No calibration. Not a human boundary.
+    end note
+
+%% ---- PROPOSED, NOT IMPLEMENTED (separate diagram; keep in a separate render) ----
+%% stateDiagram-v2
+%%     [*] --> EventScore: score of an event (uncalibrated today)
+%%     EventScore --> Uncertain: abstain (margin around a frozen per-class threshold)
+%%     EventScore --> Disfluent: score >= threshold + margin AND a compatible human reference exists
+%%     EventScore --> NotAssessed: class has no compatible human reference
+%%     EventScore --> Functional: only after a function-annotated reference exists
