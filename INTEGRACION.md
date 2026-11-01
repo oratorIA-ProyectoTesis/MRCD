@@ -1,10 +1,10 @@
-# Integración del avance MRCD Codex
+# Integración del avance MRCD
 
-Fecha de revisión: 30 de octubre de 2026. Este documento distingue cambios del motor, experimentos auxiliares y evidencia aún pendiente. La conversación de origen está en [el hilo compartido](https://chatgpt.com/share/6ae4b2b5-ebbc-83e8-87b3-37782822d488).
+Fecha de revisión: 30 de octubre de 2026. Este documento distingue cambios del motor, experimentos auxiliares y evidencia aún pendiente.
 
 ## Decisión de integración
 
-El motor de esta carpeta conserva su API y su clasificación de siete categorías. El paquete `../mrcd-codex/MRCD_Plan_Avance_20261030` trabaja principalmente con **presencia binaria de la notación FPAUSE por segmento**. Esa etiqueta no equivale a una clase funcional, a una frontera humana de evento ni a ausencia de todas las disfluencias. No se copian sus pesos o umbrales al clasificador multicategoría.
+El motor de esta carpeta conserva su API y su clasificación de siete categorías. El paquete `<plan-package>/MRCD_Plan_Avance_20261030` trabaja principalmente con **presencia binaria de la notación FPAUSE por segmento**. Esa etiqueta no equivale a una clase funcional, a una frontera humana de evento ni a ausencia de todas las disfluencias. No se copian sus pesos o umbrales al clasificador multicategoría.
 
 La variante experimental v4 de `<LEGACY_REPO_ROOT>\experiments\epic_f1_v4_20261029` reporta F1 positivo de 73,68 % sobre 41 segmentos externos, frente a 52,63 % de su v2. Los siete positivos corresponden a un solo hablante. La comparación con una regla ASR estrecha es cercana (F1 positivo 72,73 %; macro-F1 84,25 % frente a 82,87 % de v4). Audio/texto y trimodal empatan en 61,54 %. Además, la extracción desde medios todavía registra `PARITY_DIFFERENCE`. Estos resultados se conservan como experimento binario de EPIC, sin presentarlos como mejora validada del MRCD de siete clases o como aporte demostrado del video.
 

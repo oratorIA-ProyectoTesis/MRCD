@@ -8,7 +8,7 @@ tag `t28-freeze-20261030` (annotated, local, not pushed). Parent: `9afc399`.
   inference, reproducibility, windowing, `models/fusion.py`.
 - `tests/` (22 files), `scripts/` (incl. new `audit/`, `baselines/`, `parity/`, `improve/`,
   `asr_diag/`), `config/`, `pyproject.toml`, PowerShell runners, docs (`PREREGISTRO.md`,
-  `INTEGRACION_CODEX.md`, README).
+  `INTEGRACION.md`, README).
 - Small checkpoints (all < 500 KB), force-added despite `*.pt` ignore: `models/ckpt_audio_text.pt`
   (sha256 87f95108...b669), `models_stale/*.pt`, `results/mejoras_20261030/checkpoints/*.pt`.
 - Light results (md/json/csv/sh/txt, each <= 1 MB, 269 files, ~5 MB) from every `results/*` folder,

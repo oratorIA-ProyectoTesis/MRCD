@@ -130,7 +130,7 @@ disc = [
         "Do not mix bases; cite which file",
     ),
     (
-        "INTEGRACION_CODEX: v4 reports 41 external segments, 7 positives from a single speaker",
+        "INTEGRACION: v4 reports 41 external segments, 7 positives from a single speaker",
         "Not reproducible from audited files. The only EPIC reference set on disk is the 136-sentence set: test = 34 (17 pos / 17 neg, 13 speakers), 29 speakers total, disjoint across splits",
         "Locate the 41-segment set before citing it; its provenance is unverified here",
     ),
