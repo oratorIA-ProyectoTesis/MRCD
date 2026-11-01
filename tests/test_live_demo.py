@@ -5,14 +5,14 @@ import asyncio
 import numpy as np
 import pytest
 
-from core.constants import SAMPLE_RATE
-from core.dataset import acoustic_windows, center_f0, linguistic_windows
-from core.extractors.acoustic import extract_acoustic
-from core.extractors.linguistic import Word, word_features
-from core.extractors.prosody import prosody_windows, speaker_f0_center
-from core.live.mic_stream import AudioRingBuffer
-from core.live.streaming_asr import dedupe_words
-from core.live.window_builder import build_window
+from mrcd.constants import SAMPLE_RATE
+from mrcd.dataset import acoustic_windows, center_f0, linguistic_windows
+from mrcd.extractors.acoustic import extract_acoustic
+from mrcd.extractors.linguistic import Word, word_features
+from mrcd.extractors.prosody import prosody_windows, speaker_f0_center
+from mrcd.live.mic_stream import AudioRingBuffer
+from mrcd.live.streaming_asr import dedupe_words
+from mrcd.live.window_builder import build_window
 
 
 def _words() -> list[Word]:
@@ -73,6 +73,7 @@ def test_websocket_emits_prediction_schema():
         def stop(self): pass
 
     with TestClient(create_app(FakeEngine())) as client:
+        assert client.post("/control/start").json() == {"running": True}
         with client.websocket_connect("/ws") as ws:
             message = ws.receive_json()
     assert set(message) == {"timestamp", "texto_ventana", "clase", "confianza", "todas_las_probabilidades"}
@@ -100,3 +101,111 @@ def test_live_page_exposes_session_analysis_panels():
 
     for element_id in ("metrics", "probabilities", "distribution", "events"):
         assert f'id={element_id}' in PAGE
+
+
+# --------------------------------------------- grabacion de sesion para auditoria
+def test_session_recorder_keeps_whole_session_not_just_the_ring_buffer():
+    """El ring buffer retiene 13 s; la auditoria necesita la sesion entera.
+
+    Sin esto no se puede distinguir «el modelo no detecto la disfluencia» de
+    «el ASR la borro antes de que el modelo la viera».
+    """
+    import numpy as np
+
+    from mrcd.constants import CONTEXT_S, SAMPLE_RATE, WINDOW_S
+    from mrcd.live.mic_stream import MicrophoneStream
+
+    mic = MicrophoneStream(record=True)
+    total_s = (CONTEXT_S + WINDOW_S) * 3  # el triple de lo que retiene el buffer
+    chunk = np.zeros(SAMPLE_RATE, np.float32)
+    for i in range(int(total_s)):
+        chunk[:] = (i % 7) / 10.0
+        mic.buffer.append(chunk)
+        mic.recorder.append(chunk)
+
+    assert mic.buffer.duration_s == pytest.approx(total_s, abs=0.1)
+    assert mic.recorder.duration_s == pytest.approx(total_s, abs=0.1)
+    # el buffer solo CONSERVA la ventana de contexto; el grabador, todo
+    retained, _ = mic.buffer.latest()
+    assert len(retained) / SAMPLE_RATE <= CONTEXT_S + WINDOW_S + 1
+    assert len(mic.recorder.samples()) / SAMPLE_RATE == pytest.approx(total_s, abs=0.1)
+
+
+def test_recorder_emits_valid_wav_and_clips_overflow():
+    import io
+    import wave
+
+    import numpy as np
+
+    from mrcd.constants import SAMPLE_RATE
+    from mrcd.live.mic_stream import SessionRecorder
+
+    rec = SessionRecorder()
+    rec.append(np.array([0.0, 0.5, -0.5, 3.0, -3.0], np.float32))  # dos muestras desbordan
+    data = rec.to_wav_bytes()
+    with wave.open(io.BytesIO(data), "rb") as w:
+        assert w.getnchannels() == 1 and w.getsampwidth() == 2
+        assert w.getframerate() == SAMPLE_RATE
+        pcm = np.frombuffer(w.readframes(w.getnframes()), np.int16)
+    assert len(pcm) == 5
+    # recortado, no envuelto: un desbordamiento sonaria a chasquido y falsearia la evidencia
+    assert pcm[3] == 32767 and pcm[4] == -32767
+
+
+def test_recorder_clears_on_reset():
+    import numpy as np
+
+    from mrcd.live.mic_stream import MicrophoneStream
+
+    mic = MicrophoneStream(record=True)
+    mic.recorder.append(np.ones(1000, np.float32))
+    assert mic.recorder.duration_s > 0
+    mic.reset()
+    assert mic.recorder.duration_s == 0.0, "una sesion nueva no debe arrastrar audio de la anterior"
+
+
+def _upsert_js():
+    import re
+
+    from scripts.live_demo import PAGE
+
+    m = re.search(r"// UPSERT-BEGIN.*?\n(function upsert.*?)\r?\n// UPSERT-END", PAGE, re.S)
+    assert m, "the dashboard must keep the upsert block"
+    return m.group(1)
+
+
+def _run_upsert(rows_in):
+    import json
+    import shutil
+    import subprocess
+
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node is not available to execute the dashboard JS")
+    prog = _upsert_js() + (
+        f"\nconst rows=[];const added=[];for(const x of {json.dumps(rows_in)}){{added.push(upsert(rows,x))}}"
+        "\nconsole.log(JSON.stringify({rows,added}))"
+    )
+    out = subprocess.run([node, "-e", prog], capture_output=True, text=True, check=True).stdout
+    return json.loads(out)
+
+
+def test_dashboard_counts_each_window_once_when_the_stop_pass_revises_rows():
+    prov = [
+        {"timestamp": t, "status": "provisional", "clase": "none", "confianza": 0.5} for t in (0.0, 0.5, 1.0)
+    ]
+    revised = [
+        {"timestamp": t, "status": "final", "revises": t, "clase": "block", "confianza": 0.9} for t in (0.0, 0.5, 1.0)
+    ]
+    tail = {"timestamp": 1.5, "status": "final", "clase": "none", "confianza": 0.7}  # never had a provisional row
+    res = _run_upsert(prov + revised + [tail])
+    ts = [r["timestamp"] for r in res["rows"]]
+    assert ts == [0.0, 0.5, 1.0, 1.5]  # each window once, original order
+    assert [r["status"] for r in res["rows"]] == ["final"] * 4
+    assert [r["clase"] for r in res["rows"]][:3] == ["block"] * 3  # the revision replaced the row
+    assert res["added"] == [True] * 3 + [False] * 3 + [True]  # only new windows extend the transcript
+
+
+def test_dashboard_v1_rows_without_status_are_all_kept():
+    rows = [{"timestamp": t, "clase": "none", "confianza": 0.5} for t in (0.0, 0.5, 1.0)]
+    assert len(_run_upsert(rows)["rows"]) == 3

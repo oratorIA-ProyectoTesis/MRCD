@@ -37,9 +37,9 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from core.constants import SAMPLE_RATE, VIDEO_FPS  # noqa: E402
-from core.extractors.acoustic import extract_acoustic, load_wav  # noqa: E402
-from core.extractors.linguistic import VerbatimASR, word_features  # noqa: E402
+from mrcd.constants import SAMPLE_RATE, VIDEO_FPS  # noqa: E402
+from mrcd.extractors.acoustic import extract_acoustic, load_wav  # noqa: E402
+from mrcd.extractors.linguistic import VerbatimASR, word_features  # noqa: E402
 
 CASE = ROOT / "data/case"
 
@@ -172,7 +172,7 @@ def main() -> None:
 
     # -------------------------------------------- cinésica con seguimiento
     print("[ingesta] cinésica con seguimiento de identidad")
-    from core.extractors.kinesic import KinesicExtractor
+    from mrcd.extractors.kinesic import KinesicExtractor
 
     kx = KinesicExtractor(num_faces=3)  # detecta varias, sigue una
     try:

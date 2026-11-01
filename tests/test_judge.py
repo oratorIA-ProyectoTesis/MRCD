@@ -9,8 +9,8 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from core.constants import BACKGROUND, LABEL2ID, TAXONOMY
-from core.dataset import gold_windows
+from mrcd.constants import BACKGROUND, LABEL2ID, TAXONOMY
+from mrcd.dataset import gold_windows
 import scripts.llm_judge as lj
 import scripts.judge_agreement as ja
 

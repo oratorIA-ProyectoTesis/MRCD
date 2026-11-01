@@ -197,7 +197,7 @@ def test_report_excludes_frameless_judgments_from_the_video_verdict(tmp_path, mo
                   "predictions": {"audio_only": {"class": "fluent", "prob": .5},
                                   "audio_text": {"class": "neutral_pause", "prob": .5},
                                   "trimodal": {"class": "block", "prob": .5}}})
-    results = {"windows": W, "events": {m: [] for m in Q.MODES}, "labels": ["fluent", "block"],
+    results = {"windows": W, "events": {m: [] for m in Q.modes_in(W)}, "labels": ["fluent", "block"],
                "url": None, "title": "t", "duration_s": 60, "window_s": 3.0, "stride_s": 0.5,
                "window_disagreement_rate": 1.0, "model_provenance": {}}
     rp = tmp_path / "results_X.json"
@@ -342,7 +342,7 @@ def test_report_warns_that_the_queue_is_biased_toward_trimodal(tmp_path, monkeyp
                           "audio_text": {"class": "neutral_pause", "prob": .5},
                           "trimodal": {"class": "block", "prob": .5}}} for i in range(6)]
     rp = tmp_path / "r.json"
-    rp.write_text(json.dumps({"windows": W, "events": {m: [] for m in Q.MODES},
+    rp.write_text(json.dumps({"windows": W, "events": {m: [] for m in Q.modes_in(W)},
                               "labels": ["fluent", "block"], "url": None, "title": "t",
                               "duration_s": 60, "window_s": 3.0, "stride_s": 0.5,
                               "window_disagreement_rate": 1.0, "model_provenance": {}}),

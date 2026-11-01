@@ -1,6 +1,6 @@
 """Un test por clase crítica (escenas sintéticas con verdad conocida)."""
-from core.annotation.auto_labeler import label_recording
-from core.extractors.acoustic import extract_acoustic
+from mrcd.annotation.auto_labeler import label_recording
+from mrcd.extractors.acoustic import extract_acoustic
 from tests.synth import build
 
 W = lambda t, d=0.35, a=140, b=120: (t, d, a, b)   # palabra
@@ -75,7 +75,7 @@ def test_recall_mode_only_low_conf_source():
 
 def test_no_prolongation_when_asr_span_includes_silence():
     """Timestamp largo del ASR sobre una palabra corta seguida de pausa: NO es alargamiento."""
-    from core.extractors.linguistic import Word
+    from mrcd.extractors.linguistic import Word
     from tests.synth import build
     audio, words, kin = build([W("vamos"), W("a"), W("ver"), ("en", 0.25, 140, 128), P(0.7), W("casa"), W("nueva.")])
     ac = extract_acoustic(audio, use_silero=False)

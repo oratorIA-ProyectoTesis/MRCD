@@ -17,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from core.constants import TAXONOMY  # noqa: E402
+from mrcd.constants import TAXONOMY  # noqa: E402
 
 RARE = {"block": 3.0, "prolongation": 2.0, "repetition": 2.0, "revision": 2.0}
 

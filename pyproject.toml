@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mrcd"
+version = "0.3.0"
+description = "Motor de reconocimiento contextual por fusión multimodal para detección de disfluencias del habla en español"
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["disfluency", "speech", "spanish", "multimodal", "asr"]
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Natural Language :: Spanish",
+]
+
+# Núcleo: lo mínimo para el modo `audio_text`, que es el único con checkpoint
+# entrenado y el que usa la mayoría de integraciones. Deliberadamente NO incluye
+# mediapipe/opencv (solo hacen falta para la rama de vídeo, ~700 MB) ni fastapi
+# ni yt-dlp: un servicio que solo analiza audio no debe cargar con eso.
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "librosa>=0.10",
+    "soundfile>=0.12",
+    "silero-vad>=5.1",
+    "onnxruntime>=1.17",
+    "faster-whisper>=1.0",
+    "torch>=2.2",
+]
+
+[project.optional-dependencies]
+# Rama cinésica: MediaPipe Face Landmarker + decodificación de vídeo.
+# Necesario solo para los modos `trimodal` y `kinesic_only`.
+video = ["mediapipe>=0.10.14", "opencv-python-headless>=4.9"]
+
+# Entrenamiento y evaluación: métricas, particiones, bootstrap.
+train = ["scikit-learn>=1.4", "pyyaml>=6.0"]
+
+# Construcción del corpus desde fuentes públicas.
+mining = ["yt-dlp>=2024.8.6", "pyyaml>=6.0"]
+
+# Demo web de micrófono. No es parte del motor.
+demo = ["fastapi>=0.115", "uvicorn>=0.30", "websockets>=12", "sounddevice>=0.5"]
+
+# Rama sintáctica opcional con embeddings RoBERTa-BNE.
+roberta = ["transformers>=4.40"]
+
+dev = ["pytest>=8.0"]
+
+# Todo menos `dev`, para reproducir los experimentos de la tesis.
+all = [
+    "mrcd[video]", "mrcd[train]", "mrcd[mining]", "mrcd[demo]", "mrcd[roberta]",
+]
+
+[tool.setuptools.packages.find]
+# Solo la librería. `scripts/` y `tests/` son del repositorio, no del paquete:
+# quien instala `mrcd` no debe recibir herramientas de línea de comandos que
+# asumen rutas del repo ni dependencias que no declaró.
+include = ["mrcd*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

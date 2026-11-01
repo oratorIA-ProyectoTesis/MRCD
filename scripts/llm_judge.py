@@ -30,10 +30,10 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from core.constants import ACOUSTIC_HOP_S, BACKGROUND, RANDOM_SEED, TAXONOMY, WINDOW_S  # noqa: E402
+from mrcd.constants import ACOUSTIC_HOP_S, BACKGROUND, RANDOM_SEED, TAXONOMY, WINDOW_S  # noqa: E402
 
-JUDGE_DIR = ROOT / "data/judge"
-CACHE = JUDGE_DIR / "judgments.jsonl"
+JUDGE_DIR = ROOT / "data/judge"          # reasignable por --judge-dir
+CACHE = JUDGE_DIR / "judgments.jsonl"    # se deriva de JUDGE_DIR en main()
 ERRORS = JUDGE_DIR / "errors.jsonl"
 CLASSES = list(TAXONOMY) + [BACKGROUND]
 
@@ -436,9 +436,26 @@ def main():
     ap.add_argument("--seed", type=int, default=RANDOM_SEED)
     ap.add_argument("--sleep", type=float, default=0.3)
     ap.add_argument("--dry-run", action="store_true", help="solo muestra el muestreo y un prompt de ejemplo")
+    # ◆ El cache se indexa por (rid, start, end), SIN identificar el corpus. Dos
+    # extracciones distintas del mismo audio producen candidatos en intervalos
+    # distintos, pero algunos coinciden por azar: reutilizar el cache mezclaria
+    # juicios emitidos sobre un contexto con candidatos de otro. Cada corpus debe
+    # tener su propio --judge-dir.
+    ap.add_argument("--manifest", default=str(ROOT / "data/dataset_manifest.json"),
+                    help="manifest del corpus a juzgar")
+    ap.add_argument("--judge-dir", default=None,
+                    help="directorio de cache y salida del juez (por defecto data/judge). "
+                         "USA UNO DISTINTO POR CORPUS: el cache no distingue extracciones.")
     a = ap.parse_args()
 
-    man = json.loads((ROOT / "data/dataset_manifest.json").read_text(encoding="utf-8"))
+    global JUDGE_DIR, CACHE
+    if a.judge_dir:
+        JUDGE_DIR = (ROOT / a.judge_dir) if not Path(a.judge_dir).is_absolute() else Path(a.judge_dir)
+        CACHE = JUDGE_DIR / "judgments.jsonl"
+    man_path = (ROOT / a.manifest) if not Path(a.manifest).is_absolute() else Path(a.manifest)
+    print(f"[judge] manifest: {man_path}")
+    print(f"[judge] cache:    {CACHE}")
+    man = json.loads(man_path.read_text(encoding="utf-8"))
     recs = {r["recording_id"]: r for r in man["recordings"]}
     items = sample_items(man, a.per_class, a.low_conf, a.negatives, a.seed)
     if a.max_events:

@@ -17,7 +17,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from core.constants import (KINESIC_DIM, KINESIC_STEPS, MIN_KINESIC_FRAMES,
+from mrcd.constants import (KINESIC_DIM, KINESIC_STEPS, MIN_KINESIC_FRAMES,
                             SAMPLE_RATE, STRIDE_S, VIDEO_FPS, WINDOW_S)
 
 

@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import numpy as np
 
-from core.constants import SAMPLE_RATE, WINDOW_S
-from core.dataset import acoustic_windows, center_f0, linguistic_windows
-from core.extractors.acoustic import extract_acoustic
-from core.extractors.linguistic import Word, word_features
-from core.extractors.prosody import prosody_windows, speaker_f0_center
+from mrcd.constants import SAMPLE_RATE, WINDOW_S
+from mrcd.dataset import acoustic_windows, center_f0, linguistic_windows
+from mrcd.extractors.acoustic import extract_acoustic
+from mrcd.extractors.linguistic import Word, word_features
+from mrcd.extractors.prosody import prosody_windows, speaker_f0_center
 
 
 def _word_dicts(words: list[Word], offset_s: float = 0.0) -> list[dict]:
@@ -48,6 +48,11 @@ def build_latest_contextual_window(audio: np.ndarray, buffer_start_s: float, wor
 
     `linguistic_windows` looks five seconds ahead, therefore this window starts
     five seconds before the current end of the buffer.
+
+    NOT equivalent to offline extraction: VAD, F0 centre and frames are computed on the buffer slice
+    only (results/paridad_20261030/PARIDAD.md; measured again in results/paridad_live_20261030).
+    The live demo uses `mrcd.live.session_features.SessionFeatureTracker` instead; this function is
+    kept for the existing tests and for comparisons.
     """
     now_s = buffer_start_s + len(audio) / SAMPLE_RATE
     start_s = now_s - (5.0 if context else WINDOW_S)

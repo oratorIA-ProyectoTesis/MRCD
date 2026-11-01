@@ -1,0 +1,302 @@
+"""Extractor lingüístico: ASR verbatim (Faster-Whisper) + rasgos sintácticos.
+
+- Faster-Whisper INT8, word_timestamps=True, condition_on_previous_text=False
+  y initial_prompt cargado con muletillas (ver constants.WHISPER_INITIAL_PROMPT).
+- Rasgos por palabra ligeros (sin red) y, opcionalmente, embeddings de
+  RoBERTa-BNE (PlanTL-GOB-ES/roberta-base-bne) para la rama sintáctica.
+"""
+
+from __future__ import annotations
+
+import re
+import unicodedata
+from dataclasses import asdict, dataclass
+
+import numpy as np
+
+from mrcd.constants import (
+    EDIT_TERMS,
+    FILLER_LEXICON,
+    FUNCTION_WORDS,
+    SAMPLE_RATE,
+)
+from mrcd.asr_profiles import ASRProfile, get_profile
+
+
+@dataclass
+class Word:
+    text: str  # tal cual lo emitió el ASR
+    norm: str  # minúsculas, sin puntuación ni tildes
+    start: float  # s
+    end: float  # s
+    prob: float
+    punct_after: str  # puntuación que cerraba el token ('.', ',', '?', '...', '')
+
+    def to_dict(self):
+        return asdict(self)
+
+
+def normalize(tok: str) -> str:
+    tok = unicodedata.normalize("NFKD", tok.lower())
+    tok = "".join(c for c in tok if not unicodedata.combining(c))
+    return re.sub(r"[^a-zñ\- ]", "", tok).strip("- ").strip()
+
+
+def _punct(tok: str) -> str:
+    m = re.search(r"([.,;:?!…]+)\s*$", tok.strip())
+    return m.group(1) if m else ""
+
+
+# ------------------------------------------------------------------ ASR
+class VerbatimASR:
+    def __init__(
+        self,
+        model_size: str = "small",
+        device: str = "auto",
+        compute_type: str | None = None,
+        language: str = "es",
+        profile: "str | ASRProfile | None" = None,
+    ):
+        from faster_whisper import WhisperModel  # type: ignore
+
+        # ``None`` -> "p0": the historical decoding parameters, unchanged (see mrcd/asr_profiles.py).
+        self.profile = get_profile(profile)
+
+        if device == "auto":
+            try:
+                import ctranslate2  # type: ignore
+
+                device = "cuda" if ctranslate2.get_cuda_device_count() > 0 else "cpu"
+            except Exception:
+                device = "cpu"
+        compute_type = compute_type or ("float16" if device == "cuda" else "int8")
+        try:
+            self.model = WhisperModel(
+                model_size, device=device, compute_type=compute_type
+            )
+            if (
+                device == "cuda"
+            ):  # validar librerías CUDA (cuBLAS/cuDNN) con una inferencia mínima
+                list(
+                    self.model.transcribe(
+                        np.zeros(16000, np.float32), language=language
+                    )[0]
+                )
+        except Exception as exc:
+            if device != "cuda":
+                raise
+            print(f"[asr] GPU no utilizable ({str(exc)[:120]}); usando CPU int8")
+            device, compute_type = "cpu", "int8"
+            self.model = WhisperModel(
+                model_size, device=device, compute_type=compute_type
+            )
+        self.device, self.compute_type, self.model_size = (
+            device,
+            compute_type,
+            model_size,
+        )
+        self.language = language
+        self._model_bin_sha256: str | None = None
+        self._model_dir: str | None = None
+        self._model_info_done = False
+
+    def model_info(self) -> dict:
+        """Model folder and sha256 of ``model.bin`` (hashed once, lazily). None when it cannot be resolved."""
+        if not self._model_info_done:
+            from pathlib import Path
+
+            from mrcd.reproducibility import file_sha256
+
+            try:
+                d = Path(self.model_size)
+                if not d.is_dir():
+                    from faster_whisper.utils import download_model  # type: ignore
+
+                    d = Path(download_model(self.model_size, local_files_only=True))
+                mb = d / "model.bin"
+                self._model_dir = str(d)
+                self._model_bin_sha256 = file_sha256(mb) if mb.exists() else None
+            except Exception as exc:  # REVISION7 F-8: never swallow silently; log and expose it
+                import logging
+
+                self._model_info_error = f"{type(exc).__name__}: {exc}"
+                logging.getLogger(__name__).warning(
+                    "model_info: could not resolve/hash model.bin for %r (%s)", self.model_size, self._model_info_error
+                )
+            self._model_info_done = True
+        err = getattr(self, "_model_info_error", None)
+        return {
+            **({"model_info_error": err} if err else {}),
+            "model_size": self.model_size,
+            "model_dir": self._model_dir,
+            "model_bin_sha256": self._model_bin_sha256,
+            "compute_type": self.compute_type,
+            "device": self.device,
+        }
+
+    def detect_language(
+        self, audio: np.ndarray, seconds: float = 30.0
+    ) -> tuple[str, float]:
+        """Idioma dominante en los primeros `seconds` s -> (código, probabilidad)."""
+        seg = audio[: int(seconds * 16000)].astype(np.float32)
+        _, info = self.model.transcribe(
+            seg, language=None, beam_size=1, without_timestamps=True
+        )
+        return info.language, float(info.language_probability)
+
+    def transcribe(self, audio: np.ndarray) -> list[Word]:
+        segments, _ = self.model.transcribe(
+            audio.astype(np.float32),
+            # objects built without __init__ (test doubles) fall back to the default profile
+            **get_profile(getattr(self, "profile", None)).decode_kwargs(self.language),
+        )
+        words: list[Word] = []
+        for seg in segments:
+            for w in seg.words or []:
+                words.append(
+                    Word(
+                        w.word.strip(),
+                        normalize(w.word),
+                        float(w.start),
+                        float(w.end),
+                        float(w.probability),
+                        _punct(w.word),
+                    )
+                )
+        return [w for w in words if w.norm]
+
+    def transcribe_chunked(
+        self, audio: np.ndarray, chunk_s: float = 8.0, overlap_s: float = 2.0
+    ) -> list[Word]:
+        """Transcribe en trozos solapados y conserva solo la region nueva de cada uno.
+
+        Por que no transcribir el audio entero: Whisper se entrena para producir
+        texto legible, y cuanto mas contexto ve de una vez, mas «corrige» hacia
+        prosa fluida. Medido sobre una sesion de 90 s (results/asr_chunk_study.md):
+        con trozos de 8-13 s sobreviven las 2 repeticiones que el hablante dijo
+        realmente; con 30 s o con el archivo entero sobreviven 0. Las repeticiones
+        no las pierde el clasificador, las borra el ASR antes.
+
+        Importa para el entrenamiento: `detect_repetitions` opera sobre estas
+        palabras, asi que una repeticion que el ASR no transcribe no puede
+        etiquetarse, y la clase queda sub-representada en la supervision debil.
+
+        ◆ Deduplicacion por REGION, no por texto: una repeticion legitima («la la»)
+        es indistinguible de un duplicado de solape si se compara texto, y
+        deduplicar asi borraria justo el fenomeno a detectar. El solape solo da
+        contexto al ASR; esas palabras ya las aporto el trozo anterior.
+        """
+        if chunk_s <= 0 or len(audio) <= chunk_s * SAMPLE_RATE:
+            return self.transcribe(audio)
+
+        step = int((chunk_s - overlap_s) * SAMPLE_RATE)
+        size = int(chunk_s * SAMPLE_RATE)
+        out: list[Word] = []
+        for k, start in enumerate(range(0, len(audio), step)):
+            seg = audio[start : start + size]
+            if len(seg) < SAMPLE_RATE:  # < 1 s no aporta
+                break
+            offset = start / SAMPLE_RATE
+            new_from = 0.0 if k == 0 else overlap_s
+            for w in self.transcribe(seg):
+                if (w.start + w.end) / 2 < new_from:
+                    continue
+                out.append(
+                    Word(
+                        w.text,
+                        w.norm,
+                        w.start + offset,
+                        w.end + offset,
+                        w.prob,
+                        w.punct_after,
+                    )
+                )
+        out.sort(key=lambda w: w.start)
+        return out
+
+
+# ------------------------------------------------------ rasgos por palabra
+WORD_FEAT_NAMES = (
+    "is_filler",
+    "is_function_word",
+    "is_edit_term",
+    "repeats_prev",
+    "is_fragment",
+    "clause_end",
+    "log_duration",
+    "asr_prob",
+    "gap_before",
+    "gap_after",
+)
+WORD_FEAT_DIM = len(WORD_FEAT_NAMES)
+
+
+def lexicon_for(variety: str = "es-PE") -> set[str]:
+    lex = set(FILLER_LEXICON["es"])
+    lex |= FILLER_LEXICON.get(variety, set())
+    return lex
+
+
+def word_features(words: list[Word], variety: str = "es-PE") -> np.ndarray:
+    """Matriz (N, 10) de rasgos ligeros por palabra (sin red neuronal)."""
+    lex = lexicon_for(variety)
+    feats = np.zeros((len(words), WORD_FEAT_DIM), dtype=np.float32)
+    for i, w in enumerate(words):
+        prev = words[i - 1] if i else None
+        nxt = words[i + 1] if i + 1 < len(words) else None
+        bigram = f"{w.norm} {nxt.norm}" if nxt else ""
+        feats[i] = [
+            float(w.norm in lex or bigram in lex),
+            float(w.norm in FUNCTION_WORDS),
+            float(w.norm in EDIT_TERMS or bigram in EDIT_TERMS),
+            float(prev is not None and prev.norm == w.norm),
+            float(
+                w.text.endswith("-")
+                or (
+                    prev is not None
+                    and prev.norm
+                    and w.norm.startswith(prev.norm)
+                    and prev.norm != w.norm
+                )
+            ),
+            float(w.punct_after in {".", "?", "!", "…", "...", ";", ":"}),
+            np.log(max(w.end - w.start, 1e-2)),
+            w.prob,
+            (w.start - prev.end) if prev else 0.0,
+            (nxt.start - w.end) if nxt else 0.0,
+        ]
+    return feats
+
+
+class SyntacticEncoder:
+    """Embeddings contextuales RoBERTa-BNE por palabra (media de subtokens)."""
+
+    def __init__(
+        self, model_name: str = "PlanTL-GOB-ES/roberta-base-bne", device: str = "cpu"
+    ):
+        from transformers import AutoModel, AutoTokenizer  # type: ignore
+
+        self.tok = AutoTokenizer.from_pretrained(model_name, add_prefix_space=True)
+        self.model = AutoModel.from_pretrained(model_name).to(device).eval()
+        self.device = device
+
+    def encode(self, words: list[Word], max_words: int = 400) -> np.ndarray:
+        import torch
+
+        out = []
+        for s in range(0, len(words), max_words):
+            chunk = [w.text for w in words[s : s + max_words]]
+            enc = self.tok(
+                chunk, is_split_into_words=True, return_tensors="pt", truncation=True
+            )
+            with torch.no_grad():
+                h = self.model(
+                    **{k: v.to(self.device) for k, v in enc.items()}
+                ).last_hidden_state[0]
+            ids = enc.word_ids()
+            for wi in range(len(chunk)):
+                idx = [j for j, x in enumerate(ids) if x == wi]
+                out.append(
+                    h[idx].mean(0).cpu().numpy() if idx else np.zeros(h.shape[-1])
+                )
+        return np.asarray(out, dtype=np.float32)

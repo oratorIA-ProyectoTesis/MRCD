@@ -4,12 +4,12 @@ import xml.etree.ElementTree as ET
 import numpy as np
 import pytest
 
-from core.annotation.auto_labeler import label_recording, window_labels, write_eaf
-from core.constants import KINESIC_DIM, KINESIC_STEPS, SAMPLE_RATE, WINDOW_SAMPLES
-from core.dataset import read_human_events
-from core.extractors.acoustic import extract_acoustic
-from core.extractors.kinesic import result_to_vector, rotation_to_euler_deg
-from core.sync.buffer import SyncBuffer
+from mrcd.annotation.auto_labeler import label_recording, window_labels, write_eaf
+from mrcd.constants import KINESIC_DIM, KINESIC_STEPS, SAMPLE_RATE, WINDOW_SAMPLES
+from mrcd.dataset import read_human_events
+from mrcd.extractors.acoustic import extract_acoustic
+from mrcd.extractors.kinesic import result_to_vector, rotation_to_euler_deg
+from mrcd.sync.buffer import SyncBuffer
 from tests.synth import scene
 
 
@@ -162,7 +162,7 @@ def test_split_on_camera_jumps():
 
 
 def test_continuous_face_segments():
-    from core.extractors.kinesic import KinesicTrack, continuous_face_segments
+    from mrcd.extractors.kinesic import KinesicTrack, continuous_face_segments
     t = np.arange(0, 60, 0.2)
     det = np.ones(len(t), bool); det[(t > 20) & (t < 22)] = False     # hueco de 2 s -> corta
     det[(t > 40) & (t < 40.4)] = False                                  # hueco corto -> tolera
@@ -174,7 +174,7 @@ def test_continuous_face_segments():
 def test_signal_worker_and_insertion_rate(tmp_path, monkeypatch):
     import soundfile as sf
     import scripts.extract_and_label as xl
-    from core.extractors.linguistic import Word
+    from mrcd.extractors.linguistic import Word
     audio, words, _, _ = scene()
     monkeypatch.setattr(xl, "ROOT", tmp_path)
     sf.write(tmp_path / "a.wav", audio, SAMPLE_RATE, subtype="PCM_16")

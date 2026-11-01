@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from core.constants import (ACOUSTIC_HOP_S, PROSODY_DIM, PROSODY_POST_S, PROSODY_PRE_S,
+from mrcd.constants import (ACOUSTIC_HOP_S, PROSODY_DIM, PROSODY_POST_S, PROSODY_PRE_S,
                             WINDOW_S)
 
 

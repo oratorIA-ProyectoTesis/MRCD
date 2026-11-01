@@ -19,10 +19,10 @@ from pathlib import Path
 
 import numpy as np
 
-from core.constants import (BACKGROUND, CLASSIFICATION_OF, EDIT_TERMS, FUNCTION_WORDS, H,
+from mrcd.constants import (BACKGROUND, CLASSIFICATION_OF, EDIT_TERMS, FUNCTION_WORDS, H,
                             KIDX, STRIDE_S, TAXONOMY, WINDOW_S)
-from core.extractors.acoustic import AcousticTrack
-from core.extractors.linguistic import Word, lexicon_for
+from mrcd.extractors.acoustic import AcousticTrack
+from mrcd.extractors.linguistic import Word, lexicon_for
 
 CLAUSE_PUNCT = {".", "?", "!", "…", "...", ";", ":", ","}
 STRONG_PUNCT = {".", "?", "!", "…", "...", ";", ":"}

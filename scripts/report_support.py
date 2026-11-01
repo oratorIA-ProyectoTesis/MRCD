@@ -12,7 +12,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from core.constants import LABELS, SMOKE_HEADER, TAXONOMY  # noqa: E402
+from mrcd.constants import LABELS, SMOKE_HEADER, TAXONOMY  # noqa: E402
 
 WHY_ZERO = {  # hipótesis a verificar, no conclusiones
     "block": "Requiere pausa tras palabra funcional + tensión perioral o de entrecejo; es típica de habla tartamuda y rara en oradores entrenados. También depende de una buena detección facial durante el silencio.",
@@ -26,7 +26,10 @@ WHY_ZERO = {  # hipótesis a verificar, no conclusiones
 
 
 def main():
-    man = json.loads((ROOT / "data/dataset_manifest.json").read_text(encoding="utf-8"))
+    mpath = ROOT / "data/dataset_manifest.json"
+    if not mpath.exists():
+        sys.exit(f"missing {mpath}: this script needs the local dataset (data/ is not published). Run scripts/extract_and_label.py first.")
+    man = json.loads(mpath.read_text(encoding="utf-8"))
     recs = man["recordings"]
     ev_tot, low_tot = Counter(), Counter()
     per_spk = defaultdict(Counter)

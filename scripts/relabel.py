@@ -16,10 +16,10 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from core.annotation.auto_labeler import label_recording, window_labels, write_eaf  # noqa: E402
-from core.constants import ACOUSTIC_HOP_S, LABELS, TAXONOMY  # noqa: E402
-from core.extractors.acoustic import AcousticTrack, _complement, _mask_to_segments  # noqa: E402
-from core.extractors.linguistic import Word  # noqa: E402
+from mrcd.annotation.auto_labeler import label_recording, window_labels, write_eaf  # noqa: E402
+from mrcd.constants import ACOUSTIC_HOP_S, LABELS, TAXONOMY  # noqa: E402
+from mrcd.extractors.acoustic import AcousticTrack, _complement, _mask_to_segments  # noqa: E402
+from mrcd.extractors.linguistic import Word  # noqa: E402
 
 MANIFEST = ROOT / "data/dataset_manifest.json"
 
@@ -38,7 +38,7 @@ def rebuild(rid_npz: Path, duration_s: float, wav: Path | None = None) -> tuple[
         hf = z["hf_ratio"]
     elif wav is not None and wav.exists():          # recomputar solo la energía HF (barato)
         import librosa
-        from core.extractors.acoustic import load_wav
+        from mrcd.extractors.acoustic import load_wav
         audio, sr = load_wav(str(wav))
         hop = int(sr * ACOUSTIC_HOP_S)
         S = np.abs(librosa.stft(audio, n_fft=512, hop_length=hop, center=True)) ** 2

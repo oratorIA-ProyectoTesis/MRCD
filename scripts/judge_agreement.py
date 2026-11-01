@@ -22,7 +22,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from core.constants import BACKGROUND, RANDOM_SEED, TAXONOMY  # noqa: E402
+from mrcd.constants import BACKGROUND, RANDOM_SEED, TAXONOMY  # noqa: E402
 
 CLASSES = list(TAXONOMY) + [BACKGROUND]
 JUDGE_DIR = ROOT / "data/judge"
@@ -63,6 +63,10 @@ def main():
     ap.add_argument("--human", default=str(JUDGE_DIR / "human_check.csv"))
     ap.add_argument("--make-template", type=int, default=0, help="N ítems estratificados para revisión humana")
     ap.add_argument("--seed", type=int, default=RANDOM_SEED)
+    # Sin esto el informe se escribe siempre en results/ y una corrida sobre otro
+    # corpus sobrescribe en silencio la fiabilidad del anterior.
+    ap.add_argument("--out", default=str(ROOT / "results"),
+                    help="directorio del informe (por defecto results/)")
     a = ap.parse_args()
 
     jp = Path(a.judgments)
@@ -141,7 +145,8 @@ def main():
               "- **PENDIENTE**: sin ella no se puede afirmar que las etiquetas del juez aproximen la verdad.",
               "- Genera la plantilla: `python scripts/judge_agreement.py --make-template 60`", ""]
 
-    out = ROOT / "results"; out.mkdir(exist_ok=True)
+    out = Path(a.out) if Path(a.out).is_absolute() else (ROOT / a.out)
+    out.mkdir(parents=True, exist_ok=True)
     (out / "judge_agreement.md").write_text("\n".join(L) + "\n", encoding="utf-8")
     (out / "judge_agreement.json").write_text(json.dumps(res, indent=2, ensure_ascii=False), encoding="utf-8")
     print("\n".join(L[:12]))

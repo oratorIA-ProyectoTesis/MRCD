@@ -17,7 +17,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from core.constants import KINESIC_DIM, VIDEO_FPS
+from mrcd.constants import KINESIC_DIM, VIDEO_FPS
 
 BLENDSHAPE_MAP = {
     3: ("eyeLookInLeft",),
@@ -116,7 +116,7 @@ class KinesicExtractor:
         """
         import cv2
 
-        from core.extractors.face_tracking import FaceTracker, dominance_margin, result_to_faces
+        from mrcd.extractors.face_tracking import FaceTracker, dominance_margin, result_to_faces
 
         cap = cv2.VideoCapture(video_path)
         src_fps = cap.get(cv2.CAP_PROP_FPS) or target_fps

@@ -28,7 +28,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from core.constants import SAMPLE_RATE, VIDEO_FPS  # noqa: E402
+from mrcd.constants import SAMPLE_RATE, VIDEO_FPS  # noqa: E402
 
 DATA = ROOT / "data"
 RAW, CLIPS, SEGS = DATA / "raw", DATA / "clips", DATA / "segments"
@@ -179,7 +179,7 @@ _ASR = None
 def _asr(model: str):
     global _ASR
     if _ASR is None:
-        from core.extractors.linguistic import VerbatimASR
+        from mrcd.extractors.linguistic import VerbatimASR
         _ASR = VerbatimASR(model)
     return _ASR
 
@@ -268,8 +268,8 @@ def write_dynamic_crop(mp4: Path, out: Path, a: float, b: float, times, sboxes, 
 
 def extract_video(vid: str, st: dict, cfg: dict, whisper: str) -> bool:
     """Filtros de calidad + segmentación + recorte. True si produce >= 1 segmento."""
-    from core.extractors.acoustic import extract_acoustic, load_wav
-    from core.extractors.kinesic import KinesicExtractor, continuous_face_segments
+    from mrcd.extractors.acoustic import extract_acoustic, load_wav
+    from mrcd.extractors.kinesic import KinesicExtractor, continuous_face_segments
 
     q = cfg["quality"]
     ent = st.get(vid, {})

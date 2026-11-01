@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from core.constants import KIDX, KINESIC_DIM, SAMPLE_RATE
-from core.extractors.linguistic import Word, normalize
+from mrcd.constants import KIDX, KINESIC_DIM, SAMPLE_RATE
+from mrcd.extractors.linguistic import Word, normalize
 
 SR = SAMPLE_RATE
 

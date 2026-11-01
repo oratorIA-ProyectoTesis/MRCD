@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from core.constants import ACOUSTIC_HOP_S, SAMPLE_RATE
+from mrcd.constants import ACOUSTIC_HOP_S, SAMPLE_RATE
 
 
 @dataclass

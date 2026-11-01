@@ -5,17 +5,28 @@ distingue el fenómeno que dice distinguir: si `f0_reset` no separa una frontera
 de discurso de una suspensión disfluente, el rasgo no sirve aunque el vector
 tenga la longitud correcta.
 """
+
 from __future__ import annotations
 
 import numpy as np
 import torch
 
-from core.constants import (ACOUSTIC_HOP_S, CONTEXT_S, MAX_CONTEXT_WORDS, PROSODY_DIM,
-                            PROSODY_FIELDS, WINDOW_S)
-from core.dataset import center_f0, linguistic_windows
-from core.extractors.prosody import (boundary_features, longest_silence, prosody_windows,
-                                     speaker_f0_center)
-from core.models.fusion import MODES, CrossModalFusion
+from mrcd.constants import (
+    ACOUSTIC_HOP_S,
+    CONTEXT_S,
+    MAX_CONTEXT_WORDS,
+    PROSODY_DIM,
+    PROSODY_FIELDS,
+    WINDOW_S,
+)
+from mrcd.dataset import center_f0, linguistic_windows
+from mrcd.extractors.prosody import (
+    boundary_features,
+    longest_silence,
+    prosody_windows,
+    speaker_f0_center,
+)
+from mrcd.models.fusion import MODES, NO_PROSODY_MODES, CrossModalFusion
 
 PIDX = {n: i for i, n in enumerate(PROSODY_FIELDS)}
 HOP = ACOUSTIC_HOP_S
@@ -31,8 +42,18 @@ def _frames(segments) -> np.ndarray:
         n = int(round(dur / HOP))
         f0 = np.linspace(f0a, f0b, n) if voiced else np.zeros(n)
         rms = np.full(n, -1.0 if voiced else -5.0)
-        rows.append(np.stack([rms, f0, np.full(n, 1.0 if voiced else 0.0),
-                              np.full(n, 1.0 if voiced else 0.0), np.zeros(n)], 1))
+        rows.append(
+            np.stack(
+                [
+                    rms,
+                    f0,
+                    np.full(n, 1.0 if voiced else 0.0),
+                    np.full(n, 1.0 if voiced else 0.0),
+                    np.zeros(n),
+                ],
+                1,
+            )
+        )
     m = np.concatenate(rows, 0).astype(np.float32)
     m[:, 4] = np.concatenate([[0.0], np.diff(m[:, 1])])
     return m
@@ -40,10 +61,19 @@ def _frames(segments) -> np.ndarray:
 
 # ----------------------------------------------------------------- silencio
 def test_longest_silence_finds_the_gap():
-    f = _frames([(0.5, 3, 3, True), (0.8, 0, 0, False), (0.4, 3, 3, True),
-                 (0.2, 0, 0, False), (1.1, 3, 3, True)])
+    f = _frames(
+        [
+            (0.5, 3, 3, True),
+            (0.8, 0, 0, False),
+            (0.4, 3, 3, True),
+            (0.2, 0, 0, False),
+            (1.1, 3, 3, True),
+        ]
+    )
     a, b = longest_silence(f[:, 3])
-    assert abs((b - a) * HOP - 0.8) < 0.02, "debe elegir el silencio de 0.8 s, no el de 0.2 s"
+    assert abs((b - a) * HOP - 0.8) < 0.02, (
+        "debe elegir el silencio de 0.8 s, no el de 0.2 s"
+    )
     assert abs(a * HOP - 0.5) < 0.02
 
 
@@ -96,8 +126,17 @@ def test_prosody_windows_shape_and_alignment():
 def test_prosody_carries_no_heuristic_decision():
     """Los rasgos son descriptivos: ninguno codifica una etiqueta de la cascada."""
     joined = " ".join(PROSODY_FIELDS).lower()
-    for leak in ("filler", "prolong", "block", "repetition", "revision",
-                 "rhetorical", "neutral", "conf", "candidate"):
+    for leak in (
+        "filler",
+        "prolong",
+        "block",
+        "repetition",
+        "revision",
+        "rhetorical",
+        "neutral",
+        "conf",
+        "candidate",
+    ):
         assert leak not in joined
 
 
@@ -118,7 +157,9 @@ def test_centering_makes_two_speakers_comparable():
     g = center_f0(grave, speaker_f0_center(grave))
     a = center_f0(agudo, speaker_f0_center(agudo))
     gv, av = g[g[:, 3] > 0.5, 1], a[a[:, 3] > 0.5, 1]
-    assert abs(gv.mean() - av.mean()) < 0.2, "tras centrar, el nivel absoluto deja de separarlos"
+    assert abs(gv.mean() - av.mean()) < 0.2, (
+        "tras centrar, el nivel absoluto deja de separarlos"
+    )
     assert abs(gv.std() - av.std()) < 0.2, "el movimiento tonal se conserva"
 
 
@@ -130,8 +171,15 @@ def _words(times_texts):
 def test_context_window_sees_words_before_the_analysis_window():
     """El núcleo de la afirmación 'contextual': mirar más allá de los 3 s."""
     # ventana de análisis [6, 9]; ventana de contexto [1, 11]
-    words = _words([(1.5, 1.9, "porque"), (2.0, 2.4, "nunca"), (2.5, 2.9, "funciona"),
-                    (6.2, 6.6, "entonces"), (6.8, 7.2, "vamos")])
+    words = _words(
+        [
+            (1.5, 1.9, "porque"),
+            (2.0, 2.4, "nunca"),
+            (2.5, 2.9, "funciona"),
+            (6.2, 6.6, "entonces"),
+            (6.8, 7.2, "vamos"),
+        ]
+    )
     wf = np.zeros((len(words), 10), np.float32)
     starts = np.array([6.0])
 
@@ -146,7 +194,7 @@ def test_zone_marks_before_inside_after():
     words = _words([(2.5, 2.9, "antes"), (6.2, 6.6, "dentro"), (9.4, 9.8, "despues")])
     wf = np.zeros((len(words), 10), np.float32)
     L, _, mask = linguistic_windows(words, wf, np.array([6.0]), context=True)
-    zone = L[0, :int(mask[0].sum()), 10]
+    zone = L[0, : int(mask[0].sum()), 10]
     assert list(zone) == [-1.0, 0.0, 1.0]
 
 
@@ -154,11 +202,11 @@ def test_dangling_function_word_is_flagged():
     """Una pausa tras «de» rompe un constituyente: no es una frontera retórica."""
     words = _words([(1.0, 1.3, "cerca"), (1.35, 1.5, "de"), (2.4, 2.9, "casa")])
     wf = np.zeros((len(words), 10), np.float32)
-    wf[1, 1] = 1.0            # «de» es palabra funcional
-    wf[1, 9] = 0.90           # seguida de un hueco de 900 ms
+    wf[1, 1] = 1.0  # «de» es palabra funcional
+    wf[1, 9] = 0.90  # seguida de un hueco de 900 ms
     wf[0, 9] = 0.05
     L, _, mask = linguistic_windows(words, wf, np.array([0.5]), context=True)
-    dang = L[0, :int(mask[0].sum()), 11]
+    dang = L[0, : int(mask[0].sum()), 11]
     assert dang[1] == 1.0, "palabra funcional + hueco = constituyente suspendido"
     assert dang[0] == 0.0 and dang[2] == 0.0
 
@@ -176,17 +224,21 @@ def test_position_index_spans_the_context_not_only_the_window():
     wf = np.zeros((len(words), 10), np.float32)
     _, pos, mask = linguistic_windows(words, wf, np.array([10.0]), context=True)
     p = pos[0][mask[0]]
-    assert p.max() > 30, "las posiciones deben cubrir la ventana de contexto, no sólo 30 pasos"
+    assert p.max() > 30, (
+        "las posiciones deben cubrir la ventana de contexto, no sólo 30 pasos"
+    )
 
 
 # ----------------------------------------------------------------- el modelo
 def _batch(B=4, ling_dim=12):
     return dict(
-        ac=torch.randn(B, 300, 5), pros=torch.randn(B, PROSODY_DIM),
+        ac=torch.randn(B, 300, 5),
+        pros=torch.randn(B, PROSODY_DIM),
         ling=torch.randn(B, MAX_CONTEXT_WORDS, ling_dim),
         lpos=torch.randint(0, int(CONTEXT_S * 10), (B, MAX_CONTEXT_WORDS)),
         lmask=torch.ones(B, MAX_CONTEXT_WORDS, dtype=torch.bool),
-        kin=torch.randn(B, 30, 12), kmask=torch.ones(B, 30, dtype=torch.bool),
+        kin=torch.randn(B, 30, 12),
+        kmask=torch.ones(B, 30, dtype=torch.bool),
     )
 
 
@@ -212,14 +264,37 @@ def test_prosody_is_present_in_audio_only():
     assert not torch.allclose(base, moved), "audio_only debe reaccionar a la prosodia"
 
 
-def test_prosody_changes_predictions_in_every_mode():
+def test_prosody_changes_predictions_in_audio_modes():
+    """Todo modo con rama acústica debe reaccionar a la prosodia."""
     b = _batch()
     for mode in MODES:
+        if mode in NO_PROSODY_MODES:
+            continue
         net = CrossModalFusion(8, mode=mode).eval()
         with torch.no_grad():
             a = net(b)
             c = net({**b, "pros": torch.zeros_like(b["pros"])})
         assert not torch.allclose(a, c), f"{mode} ignora la rama prosódica"
+
+
+def test_kinesic_only_ignores_audio_entirely():
+    """`kinesic_only` responde a la pregunta «¿tiene información el video por sí solo?».
+
+    Si recibiera prosodia o acústica no respondería nada: cualquier resultado
+    positivo podría venir del audio. La independencia se verifica alterando cada
+    entrada de audio y comprobando que la salida NO se mueve.
+    """
+    b = _batch()
+    net = CrossModalFusion(8, mode="kinesic_only", pros_dim=9).eval()
+    assert net.pros is None, "kinesic_only no debe construir rama prosódica"
+    assert net.ac is None, "kinesic_only no debe construir rama acústica"
+    with torch.no_grad():
+        base = net(b)
+        for key in ("pros", "ac", "ling"):
+            altered = net({**b, key: b[key] + 5.0})
+            assert torch.allclose(base, altered), f"kinesic_only reacciona a '{key}'"
+        moved = net({**b, "kin": b["kin"] + 5.0})
+    assert not torch.allclose(base, moved), "kinesic_only debe reaccionar al video"
 
 
 def test_modality_weights_report_prosody():
@@ -237,10 +312,14 @@ def test_reset_survives_an_unvoiced_onset_after_the_pause():
     consonante sorda (/p/, /t/, /k/, /s/), que no produce F0. Exigir frames
     sonoros dentro de una franja fija de 300 ms dejaba `f0_reset` en cero en la
     mitad de las ventanas con silencio."""
-    f = _frames([(1.0, 6, 0, True),      # cae el tono
-                 (0.8, 0, 0, False),     # pausa
-                 (0.35, 0, 0, False),    # arranque sordo: sin F0
-                 (0.85, 6, 6, True)])    # y reinicia arriba
+    f = _frames(
+        [
+            (1.0, 6, 0, True),  # cae el tono
+            (0.8, 0, 0, False),  # pausa
+            (0.35, 0, 0, False),  # arranque sordo: sin F0
+            (0.85, 6, 6, True),
+        ]
+    )  # y reinicia arriba
     v = boundary_features(f)
     assert v[PIDX["reset_valid"]] == 1.0, "debe poder medirse pese al arranque sordo"
     assert v[PIDX["f0_reset"]] > 2.0, "el reinicio tonal sigue estando ahí"
@@ -252,7 +331,9 @@ def test_reset_valid_separates_no_reset_from_not_measurable():
     medible = _frames([(1.0, 3, 3, True), (0.8, 0, 0, False), (1.0, 3, 3, True)])
     v1 = boundary_features(medible)
     assert v1[PIDX["reset_valid"]] == 1.0
-    assert abs(v1[PIDX["f0_reset"]]) < 0.5, "suspensión real: reinicio nulo, pero medido"
+    assert abs(v1[PIDX["f0_reset"]]) < 0.5, (
+        "suspensión real: reinicio nulo, pero medido"
+    )
 
     sin_voz = _frames([(0.2, 0, 0, False), (2.0, 0, 0, False), (0.8, 0, 0, False)])
     v2 = boundary_features(sin_voz)
@@ -261,9 +342,9 @@ def test_reset_valid_separates_no_reset_from_not_measurable():
 
 
 def test_voiced_search_respects_its_distance_limit():
-    from core.extractors.prosody import _voiced_near
+    from mrcd.extractors.prosody import _voiced_near
 
     f0 = np.zeros(300, np.float32)
-    f0[290:295] = 5.0                       # voz a 1.9 s del borde
+    f0[290:295] = 5.0  # voz a 1.9 s del borde
     assert _voiced_near(f0, 100, back=False, max_s=0.8).size == 0, "demasiado lejos"
     assert _voiced_near(f0, 250, back=False, max_s=0.8).size > 0, "dentro del alcance"

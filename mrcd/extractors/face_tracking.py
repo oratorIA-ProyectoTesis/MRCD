@@ -27,8 +27,8 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from core.constants import KINESIC_DIM
-from core.extractors.kinesic import BLENDSHAPE_MAP, rotation_to_euler_deg
+from mrcd.constants import KINESIC_DIM
+from mrcd.extractors.kinesic import BLENDSHAPE_MAP, rotation_to_euler_deg
 
 IOU_MATCH = 0.30          # solapamiento mínimo para considerar la misma cara
 MAX_GAP_FRAMES = 5        # frames que una pista sobrevive sin detección

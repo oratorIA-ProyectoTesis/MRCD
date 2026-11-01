@@ -21,8 +21,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 import scripts.extract_and_label as xl  # noqa: E402
-from core.constants import KIDX, KINESIC_DIM  # noqa: E402
-from core.extractors.linguistic import Word, normalize  # noqa: E402
+from mrcd.constants import KIDX, KINESIC_DIM  # noqa: E402
+from mrcd.extractors.linguistic import Word, normalize  # noqa: E402
 from tests.synth import silence, voiced  # noqa: E402
 
 SR = 16000

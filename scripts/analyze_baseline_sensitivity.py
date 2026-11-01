@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from core.constants import EDIT_TERMS, FILLER_LEXICON  # noqa: E402
+from mrcd.constants import EDIT_TERMS, FILLER_LEXICON  # noqa: E402
 from scripts.qa_report import dedupe_judgments, load_jsonl, yt_link  # noqa: E402
 
 LEXICAL = {"filler_word", "repetition", "revision"}

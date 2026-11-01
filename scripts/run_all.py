@@ -16,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from core.constants import RANDOM_SEED, SMOKE_HEADER  # noqa: E402
+from mrcd.constants import RANDOM_SEED, SMOKE_HEADER  # noqa: E402
 
 PY = sys.executable
 LOG: list[dict] = []
