@@ -1,28 +1,46 @@
 # MRCD — Dataset, extracción y benchmark de ablación
 
 Motor de Reconocimiento Contextual mediante Fusión Multimodal para la Detección de
-Disfluencias del Habla en Español: módulos de datos, extracción de señales y spike
-experimental. Sin API web, UI ni Docker.
+Disfluencias del Habla en Español. El motor es un paquete de Python (`mrcd/`) que toma audio
+(y, opcionalmente, video), extrae señales acústicas, léxicas y visuales, las fusiona por ventanas
+y emite eventos de disfluencia con intervalos y puntajes. Incluye además las herramientas de
+datos, evaluación y reproducibilidad usadas para estudiarlo. Sin API web de producción ni Docker.
+
+> **Estado: resultados exploratorios.** Ninguna clase de disfluencia está confirmada como detectable
+> con evidencia suficiente, los puntajes del modelo **no están calibrados** (no son probabilidades) y
+> los umbrales son heurísticos preliminares. Las cifras de `results/` documentan corridas concretas y
+> sus límites; no deben citarse como desempeño validado.
+
+> **Licencia:** este repositorio todavía **no incluye un archivo `LICENSE`**; la decisión está pendiente El metadato de `pyproject.toml` tampoco declara licencia.
+> de los autores. Hasta entonces se aplican los derechos reservados por defecto. Los corpus de terceros
+> **no se redistribuyen**: ver [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) y [`docs/corpora/`](docs/corpora/README.md).
 
 ```
-config/sources.yaml            consultas de descubrimiento + criterios de inclusión
-core/constants.py              taxonomía (7 clases), vector 12-D canónico, umbrales heurísticos
-core/extractors/acoustic.py    Silero VAD + pYIN (F0) + RMS a 100 fps
-core/extractors/linguistic.py  Faster-Whisper verbatim + rasgos por palabra (+ RoBERTa-BNE opcional)
-core/extractors/kinesic.py     MediaPipe Face Landmarker -> vector 12-D + filtro de rostro continuo
-core/sync/buffer.py            buffer por timestamp de captura, jitter, offset A/V, interpolación lineal
-core/annotation/auto_labeler.py  cascada heurística -> candidatos, ventanas, export ELAN (.eaf)
-core/dataset.py                tensores por ventana; lectura de etiquetas humanas desde .eaf
-core/models/fusion.py          cross-attention (Q=acústica, K/V=[texto; cinésica]) + clasificador
-scripts/data_mining.py         discover / download / extract (yt-dlp + ffmpeg + filtro MediaPipe)
-scripts/extract_and_label.py   3 señales + pre-etiquetado + dataset_manifest.json + .eaf
-scripts/build_windows.py       ventanas 3 s / 500 ms -> windows_{auto|gold|human}.npz
-scripts/llm_judge.py           juez multimodal ciego -> etiquetas gold independientes
-scripts/judge_agreement.py     fiabilidad del juez (vs heurísticas, vs otro modelo, vs humano)
-scripts/relabel.py             re-etiqueta sin repetir ASR/MediaPipe
-scripts/run_ablation.py        audio_only vs audio_text vs trimodal, F1 por clase, IC 95 %
-tests/                         27 pruebas + corpus sintético end-to-end
+mrcd/                        paquete del motor (antes `core/`)
+  constants.py               taxonomía, vector 12-D canónico, umbrales heurísticos
+  extractors/                acústica (Silero VAD + pYIN + RMS), lingüística (Faster-Whisper), cinésica, prosodia
+  sync/ · live/              buffer por timestamp; sesión en vivo, ASR en streaming, pYIN reanudable
+  annotation/auto_labeler.py cascada heurística -> candidatos, ventanas, export ELAN (.eaf)
+  models/fusion.py           cross-attention (Q=acústica, K/V=[texto; cinésica]) + clasificador
+  engine.py · decision.py    inferencia por ventanas y decisión por eventos (3 estados)
+  asr_profiles.py · asr_recovery/   perfiles de ASR y experimento de recuperación
+  context_eval/ · corpora/   evaluación contextual e importadores de corpus (solo código)
+  service/                   servicio local (contrato mrcd.analysis/v1), CLI y servidor HTTP
+scripts/                     minería, extracción, ventanas, ablación, línea base, paridad, auditorías
+tests/                       ~800 pruebas (varias requieren datos locales y se omiten sin ellos)
+docs/contracts/              contratos de eventos, servicio, ASR y cabezal, con ejemplos validados
+docs/architecture/           modelo C4 (Mermaid/PNG/SVG) y verificador
+docs/corpora/                manifiestos, hashes SHA-256 y cómo obtener cada corpus
+docs/oe4/                    informe OE4 reducido (hojas de firma del asesor NO incluidas)
+results/                     informes y métricas agregadas (sin texto, etiquetas ni audio de terceros)
 ```
+
+Documentación: [contratos](docs/contracts/README.md) · [arquitectura](docs/architecture/README.md) ·
+[corpus](docs/corpora/README.md) · [informe OE4](docs/oe4/INFORME_OE4_REDUCIDO.md).
+
+Los ejemplos y *fixtures* de contratos tienen los campos de texto reemplazados por `[text withheld]`
+(el texto original procedía de un video de terceros). Las pruebas que necesitan datos locales (corpus,
+clips, cachés de ASR) se omiten con un mensaje explícito si esos datos no existen.
 
 ## Ejecución completa (Windows, un comando)
 
@@ -93,7 +111,7 @@ rasgos cinésicos y favorecerían al modo trimodal). `--allow-auto-labels` solo 
 ## Qué está verificado y qué no
 
 - Verificado (en entorno sin GPU):
-  - 10 pruebas unitarias: sync, acústica, cascada heurística, round-trip EAF, orden 12-D/Euler, ffmpeg, segmentos faciales.
+  - la suite de pruebas por defecto (ver abajo): sync, acústica, cascada heurística, round-trip EAF, orden 12-D/Euler, ffmpeg, segmentos faciales.
   - Corpus sintético end-to-end (`tests/smoke_synthetic_corpus.py`): recorre todo el pipeline, y el benchmark detecta
     una ganancia trimodal plantada por construcción (`results_smoke_synthetic/`). Esto valida el código, no el modelo.
 - **No verificado aquí**: descarga real de YouTube, Whisper y MediaPipe sobre video real. El entorno donde se
@@ -110,8 +128,86 @@ rasgos cinésicos y favorecerían al modo trimodal). `--allow-auto-labels` solo 
 - **Sesgo del corpus**: los oradores TEDx son fluidos y ensayados. Esperar pocos `block` y `prolongation`.
   Complementar con el corpus propio grabado con consentimiento.
 
+## El ASR borra disfluencias: transcribir por trozos
+
+Whisper se entrena para producir texto legible. Cuanto más contexto ve de una vez, más
+«corrige» hacia prosa fluida — y borra exactamente lo que este sistema debe detectar.
+
+Demostración causal sobre el mismo audio, mismo checkpoint, misma ventana (53.7 s):
+
+| ASR            | texto             | predicción              |
+| -------------- | ----------------- | ----------------------- |
+| archivo entero | «La primera»      | `prolongation` 44.0 %   |
+| trozos de 8 s  | «La… la… primera» | **`repetition` 94.8 %** |
+
+El clasificador no fallaba: nunca recibió la evidencia. Marcadores que sobreviven según
+el tamaño de trozo (`results/asr_chunk_study.md`, sesión de 90 s): 5 s → 5, **8 s → 6**,
+13 s → 6, 30 s → 4, entero → 3. Las 2 repeticiones que el hablante dijo realmente
+sobreviven con ≤ 13 s y se destruyen con ≥ 30 s.
+
+◆ **Afecta al corpus de entrenamiento**: la extracción transcribía segmentos enteros y
+**64 de 87 grabaciones superan los 30 s** (mediana 51 s). `detect_repetitions` opera
+sobre las palabras del ASR, así que una repetición que Whisper no transcribe no puede
+etiquetarse. Por defecto ahora `--asr-chunk-s 8`; `0` reproduce el comportamiento anterior.
+
+```powershell
+python scripts/asr_chunk_study.py --wav sesion.wav              # marcadores por tamaño de trozo
+python scripts/diagnose_session.py --wav sesion.wav --counterfactual   # capa ASR vs clasificador
+python scripts/compare_extractions.py --b data/v4/dataset_manifest.json
+```
+
+`diagnose_session.py --counterfactual` reevalúa cada ventana con la acústica intacta y el
+léxico sustituido por palabras neutras, conservando los tiempos. Si la clase se mantiene,
+la decisión venía de la señal acústica; si colapsa, el modelo leía palabras. Medido sobre
+la sesión de prueba: **27/30 sobreviven** — el modelo no reaprendió la cascada heurística.
+
+## Guardias de validez (el sistema no puede inflar una cifra en silencio)
+
+Medido con `scripts/identity_probe.py` sobre este corpus: una sonda **lineal** identifica cuál de
+17 charlas es una ventana de 3 s con **75 % de exactitud balanceada usando solo la cara** (12.8× el
+azar de 0.0588). La rama acústica llega a 10.9×; la prosódica, que ya se centraba por hablante, a 3.0×.
+Cualquier protocolo que deje material de la misma charla a ambos lados del corte le entrega esa señal
+al clasificador, y el F1 resultante mide reconocimiento de charla, no detección de disfluencias.
+
+De ahí estas guardias:
+
+| requisito                  | dónde                                       | comportamiento                                                                                                                             |
+| -------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Partición sin fuga         | `run_ablation.py --partition`               | `speaker` por defecto. `recording` y `window` **abortan** sin `--leaky-ok`, y con él escriben `ablation_table.LEAKY.md`, nunca la oficial. |
+| Normalización por hablante | `build_windows.py --kinesic-norm`           | `speaker` por defecto: z-score cinésico por canal. Baja la fuga de 12.8× a **4.0×**.                                                       |
+| Soporte mínimo             | `mrcd/constants.py::MIN_SUPPORT_FOR_METRIC` | Una clase con soporte < 10 sale como «sin datos suficientes» y queda fuera del macro-F1. `block` (n=2) ya no recibe un número.             |
+| Versión de esquema         | `mrcd/constants.py::FEATURE_SCHEMA_VERSION` | Se sella en cada `.npz` y `.pt`. `load_ckpt` **falla** ante versión ausente o distinta en vez de adaptarse.                                |
+| Modo solo-video            | `MODES` incluye `kinesic_only`              | Sin rama acústica ni prosódica, aunque se le pase `pros_dim`. Distingue «el video no tiene información» de «la fusión la ignora».          |
+
+Límites declarados, no resueltos:
+
+- La normalización por hablante **no elimina** la fuga. Con rasgos invariantes a transformación afín
+  (autocorrelación y correlación cruzada) la identificabilidad es **9.2× antes y después**: la dinámica
+  facial también identifica al hablante.
+- Tras el remedio, la rama **acústica** pasa a ser la peor fuga (10.9×). Solo se le centra el F0.
+- **No se aplica a la rama lingüística**: sus rasgos binarios dispersos empeoran (3.6× → 11.3×).
+- La calibración usa todo el material del hablante: es normalización **transductiva**. No toca
+  etiquetas y en despliegue ese material existe, pero no es un protocolo inductivo puro.
+
+[`PREREGISTRO.md`](PREREGISTRO.md) **no está congelado ni vigente**: conserva campos `[COMPLETAR]` y cubre una pregunta anterior (fuga intra-charla audiovisual). Es un documento histórico, pendiente de actualizar y ratificar con un commit real antes de citarlo como protocolo.
+
+Pruebas (todas con `OMP_NUM_THREADS=4`; detalle de quién midió qué en el addendum de la ronda 7 de `results/ejecucion_material4_20261030/INFORME_FINAL.md`):
+
+- Autor, árbol local, tras la ronda 7: 741 aprobadas y 9 omitidas por defecto; 750 aprobadas y 0 omitidas con `MRCD_SLOW=1` (ejecutado solo, sin otra carga). Autor, ronda 6 (histórico): 698 + 9 y 707 + 0; el revisor independiente reprodujo esas dos cifras.
+- Revisor independiente, árbol limpio en 4443d71 (sin datos ignorados por git), por defecto: 681 aprobadas y 26 omitidas. El autor no volvió a medir un árbol limpio tras la ronda 7. Las cifras antiguas de árbol limpio (639 + 17 / 641 + 15) son históricas.
+- Rama publicable (sin ningún dato local ni corpus de terceros), suite por defecto con `OMP_NUM_THREADS=4`: **797 aprobadas, 26 omitidas, 0 fallidas** (181 s). Las omisiones declaran su motivo (`pytest -rs`): datos de corpus ausentes (`material/`, DIHANA, AMERESCO, cachés de ASR) o suites lentas (`MRCD_SLOW=1`).
+- La diferencia entre árbol local y limpio son pruebas que requieren datos locales (DIHANA `turns.csv`, clips/caché de AMERESCO, clips ligados a checkpoints).
+- **"Bit-idéntico" solo se verifica en una máquina descargada con `OMP_NUM_THREADS=4` fijado antes de importar numpy.** Las pruebas lentas de decodificación comparan flotantes a 1e-6 y son sensibles a la carga: con dos suites concurrentes fallaron 6 en cada una. Ahora se omiten (no fallan) si la CPU está ocupada en más de 50 % o si `OMP_NUM_THREADS` no es 4; `MRCD_SKIP_LOAD_CHECK=1` fuerza la ejecución. No ejecutes la suite lenta junto con otro proceso pesado.
+
+```powershell
+python scripts/identity_probe.py                                     # R1: fuga por rama
+python scripts/identity_probe.py --features invariant                # R4: identidad residual
+python scripts/build_windows.py --labels auto --kinesic-norm speaker --out data/v3/windows_auto.npz
+python scripts/run_ablation.py --data data/v3/windows_auto.npz --test-data data/v3/windows_gold.npz
+```
+
 ## Umbrales
 
-Todos los valores de `core/constants.py::H` son «umbrales heurísticos de diseño preliminares propuestos
+Todos los valores de `mrcd/constants.py::H` son «umbrales heurísticos de diseño preliminares propuestos
 por el autor, sujetos a calibración experimental». El desfase A/V (`--av-offset-ms`) por defecto es 0:
 calíbralo con la prueba del aplauso.

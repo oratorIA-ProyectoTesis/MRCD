@@ -1,13 +1,16 @@
 .env*
 .venv/
-data/
-results/
+/data/
+/results/
 run_log.txt
 __pycache__/
 .pytest_cache/
-models/
-models_stale/
-results_smoke_synthetic/
+# Barra inicial OBLIGATORIA: un patron `models/` suelto casa con CUALQUIER
+# directorio llamado `models` a cualquier profundidad, y dejaba `core/models/`
+# —el codigo del modelo de fusion— fuera del control de versiones.
+/models/
+/models_stale/
+/results_smoke_synthetic/
 
 # Local model and media artifacts
 *.mp4
@@ -23,3 +26,27 @@ results_smoke_synthetic/
 *.pem
 *.key
 *.jsonl
+
+# Local, untracked on purpose (T28)
+grabaciones_descargadas/
+*.egg-info/
+.ruff_cache/
+asr_cache/
+features/
+
+# Third-party corpus data and large local media must never be committed
+/material/
+*.mp3
+*.flac
+*.m4a
+*.avi
+*.eaf
+*.TextGrid
+*.zip
+*.tgz
+*.tar.gz
+__pycache__/
+*.pyc
+
+# Local fixtures cut from third-party audio
+/tests/data/*.npy
