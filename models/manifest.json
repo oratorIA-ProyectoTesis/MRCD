@@ -1,0 +1,21 @@
+{
+  "created": "2026-09-24T10:00:04",
+  "label_source": "auto",
+  "n_windows": 18927,
+  "labels": [
+    "fluent",
+    "filler_word",
+    "prolongation",
+    "repetition",
+    "block",
+    "revision",
+    "rhetorical_pause",
+    "neutral_pause"
+  ],
+  "checkpoints": {
+    "audio_text": {
+      "path": "models\\ckpt_audio_text.pt",
+      "params": 75144
+    }
+  }
+}
