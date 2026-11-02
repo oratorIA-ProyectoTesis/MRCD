@@ -11,8 +11,10 @@ datos, evaluación y reproducibilidad usadas para estudiarlo. Sin API web de pro
 > los umbrales son heurísticos preliminares. Las cifras de `results/` documentan corridas concretas y
 > sus límites; no deben citarse como desempeño validado.
 
-> **Licencia:** este repositorio todavía **no incluye un archivo `LICENSE`**; la decisión está pendiente El metadato de `pyproject.toml` tampoco declara licencia.
-> de los autores. Hasta entonces se aplican los derechos reservados por defecto. Los corpus de terceros
+> **Licencia:** el **código** de este repositorio se distribuye bajo la licencia MIT (ver [`LICENSE`](LICENSE)).
+> Esa licencia cubre solo el código: los corpus (DIHANA, AMERESCO, EPIC, disfluentES, ES-Port, DIME, ESLORA,
+> SEP-28k, etc.), sus derivados y los pesos de modelos entrenados con ellos (`models/*.pt` y cabezas de
+> clasificación) siguen sujetos a las condiciones de sus fuentes y no se relicencian. Los corpus de terceros
 > **no se redistribuyen**: ver [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) y [`docs/corpora/`](docs/corpora/README.md).
 
 ```

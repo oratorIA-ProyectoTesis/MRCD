@@ -8,6 +8,7 @@ version = "0.3.0"
 description = "Motor de reconocimiento contextual por fusión multimodal para detección de disfluencias del habla en español"
 readme = "README.md"
 requires-python = ">=3.11"
+license = { text = "MIT" }
 keywords = ["disfluency", "speech", "spanish", "multimodal", "asr"]
 classifiers = [
     "Programming Language :: Python :: 3.11",

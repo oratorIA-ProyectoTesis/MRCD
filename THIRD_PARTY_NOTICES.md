@@ -37,4 +37,11 @@ Dependencies are listed in `requirements.txt` and keep their own licenses (faste
 
 ## License of this repository
 
-No `LICENSE` file is included yet: the choice of license is pending a decision of the authors. Until then all rights are reserved by default.
+The **source code** of this repository is licensed under the MIT License (see `LICENSE`). The MIT license covers only the repository code.
+
+It does **not** cover, and does not relicense:
+
+- the corpora listed above (DIHANA, AMERESCO, EPIC, disfluentES, ES-Port, DIME, ESLORA, SEP-28k, etc.) or any derivative of them;
+- model weights trained or tuned with those corpora (`models/*.pt` and the classification heads under `results/`), which remain subject to the conditions of their sources (including non-commercial and share-alike terms where they apply).
+
+Anyone reusing those materials must comply with each source's terms. This is a record of what the project documented, not legal advice.
