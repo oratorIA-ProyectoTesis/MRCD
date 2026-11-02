@@ -13,13 +13,13 @@ from tests.test_corpora_base import make_wav
 HDR = "MillisecondsPerFrame: 1.0\nEND OF HEADER\n"
 PAL = """0.000000 194.355194 .bn
 194.355194 288.011871 y
-288.011871 537.997803 ahora
-537.997803 641.512939 un
+288.011871 537.997803 luego
+537.997803 641.512939 el
 641.512939 909.103455 .sil
-909.103455 1042.898926 la
-1042.898926 1680.032104 estufa
-1680.032104 1812.573486 un
-1812.573486 3338.9375 poco
+909.103455 1042.898926 una
+1042.898926 1680.032104 lampara
+1680.032104 1812.573486 el
+1812.573486 3338.9375 casi
 """
 EST = "537.997803 641.512939 reparandum\n909.103455 1812.573486 alteracion\n"
 TIPO = '0.000000 3338.937500 " modification repair"\n'
@@ -49,8 +49,8 @@ def test_utt74_replica_maps_to_revision_with_second_units(muestras, tmp_path):
     assert r.proposed_class == "revision" and r.source_label == "modification repair"
     assert r.locator["reparandum"] == [0.537998, 0.641513]
     assert r.locator["alteration"] == [0.909103, 1.812573]
-    assert r.locator["reparandum_words"] == ["un"]
-    assert r.locator["alteration_words"] == ["la", "estufa", "un"]
+    assert r.locator["reparandum_words"] == ["el"]
+    assert r.locator["alteration_words"] == ["una", "lampara", "el"]
     sil = r.locator["editing_silence_s"]
     assert len(sil) == 1 and round(sil[0][1] - sil[0][0], 3) == 0.268
     assert e.audio_duration_s == 3.338938 and e.end_s == e.audio_duration_s
@@ -78,7 +78,7 @@ def test_utt74_replica_coverage_group_and_contract(muestras, tmp_path):
         a.source_label == "sil" and a.proposed_class is None
         for a in e.original_annotations
     )
-    assert e.input_view == "y ahora un la estufa un poco"
+    assert e.input_view == "y luego el una lampara el casi"
 
 
 def test_utt74_requires_audited_parent(muestras, tmp_path):
@@ -151,7 +151,8 @@ def test_real_utt74_matches_audit():
     e = import_utt74(MATERIAL / "DIME" / "muestras", MATERIAL, parents)
     r = [a for a in e.original_annotations if a.proposed_class][0]
     assert (r.start_s, r.end_s) == (0.537998, 1.812573)
-    assert e.input_view == "y ahora un la estufa un poco hacia el fregadero"
+    # real DIME text is rights-reserved: assert shape only, not the literal
+    assert len(e.input_view.split()) == 10
     assert e.group_id == "d12"
 
 

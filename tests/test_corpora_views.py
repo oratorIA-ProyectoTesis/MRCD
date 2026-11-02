@@ -19,9 +19,9 @@ from tests.test_corpora_base import ex, make_wav
 DIME_TXT = (
     "Dialogue: s6-t1-g1\nNumber of utterances files: 3\nLength of dialogue: 2.0\n"
     "Estimated number of turns: 2\n\n"
-    "utt1  : s:  mm bueno <ruido> <sil> por el momento\n"
+    "utt1  : s:  mm claro <ruido> <sil> sobre la mesa\n"
     "utt2  : u:  <no-vocal> bue-bueno + okey +\n"
-    "utt3  :     ne[ce]sito la la estufa <sil> la estufa ?\n"
+    "utt3  :     ne[ce]sito una una lampara <sil> una lampara ?\n"
 )
 
 
@@ -39,21 +39,21 @@ def dime_dir(tmp_path):
 # ------------------------------------------------------------------ DIME
 def test_dime_view_keeps_speech_and_drops_answers():
     assert (
-        dime_input_view("mm bueno <ruido> <sil> por el momento")
-        == "mm bueno por el momento"
+        dime_input_view("mm claro <ruido> <sil> sobre la mesa")
+        == "mm claro sobre la mesa"
     )
     assert dime_input_view("<no-vocal> bue-bueno + okey +") == "bue bueno okey"
     assert (
-        dime_input_view("ne[ce]sito la la estufa <sil> la estufa ?")
-        == "necesito la la estufa la estufa ?"
+        dime_input_view("ne[ce]sito una una lampara <sil> una lampara ?")
+        == "necesito una una lampara una lampara ?"
     )
 
 
 def test_dime_view_does_not_reconstruct_missing_disfluencies():
     # no <sil>, no lengthening mark in the TXT: the view cannot invent them
     assert (
-        dime_input_view("y ahora un la estufa un poco")
-        == "y ahora un la estufa un poco"
+        dime_input_view("y luego el una lampara el casi")
+        == "y luego el una lampara el casi"
     )
 
 
@@ -62,9 +62,9 @@ def test_dime_dialog_is_unlabeled_and_separated(dime_dir):
     assert set(e.coverage.values()) == {"unknown"}
     assert e.group_id == "d12" and e.speaker_id is None
     assert e.input_view.splitlines() == [
-        "mm bueno por el momento",
+        "mm claro sobre la mesa",
         "bue bueno okey",
-        "necesito la la estufa la estufa ?",
+        "necesito una una lampara una lampara ?",
     ]
     # answers live only in the separate structure
     labels = {a.source_label for a in e.original_annotations}
