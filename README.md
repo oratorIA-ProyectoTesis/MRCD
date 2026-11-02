@@ -49,7 +49,7 @@ clips, cachés de ASR) se omiten con un mensaje explícito si esos datos no exis
 ## Ejecución completa (Windows, un comando)
 
 ```powershell
-cd C:\zArnes-tesis\mrcd
+cd <repo>
 powershell -ExecutionPolicy Bypass -File .\setup_and_run.ps1
 ```
 
@@ -215,3 +215,7 @@ python scripts/run_ablation.py --data data/v3/windows_auto.npz --test-data data/
 Todos los valores de `mrcd/constants.py::H` son «umbrales heurísticos de diseño preliminares propuestos
 por el autor, sujetos a calibración experimental». El desfase A/V (`--av-offset-ms`) por defecto es 0:
 calíbralo con la prueba del aplauso.
+
+## License
+
+The **code** of this repository is released under the MIT License (see [`LICENSE`](LICENSE)). The license covers only the repository code. The corpora (DIHANA, AMERESCO, EPIC, disfluentES, ES-Port, DIME, ESLORA, SEP-28k, etc.), their derivatives, and model weights trained with them (`models/*.pt` and classification heads) remain subject to their sources' terms and are not relicensed; see [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).

@@ -1,0 +1,34 @@
+{
+  "results": [
+    {
+      "case": "c23_head_vc",
+      "pass": true,
+      "seconds": 30.0,
+      "offline_sha": "5b3cd0fdabfd94c2",
+      "incremental_sha": "5b3cd0fdabfd94c2",
+      "real_decodes": 5,
+      "expected_decodes": 5,
+      "cache": {
+        "hits": 1,
+        "misses": 4
+      },
+      "wall_offline_s": 12.81,
+      "wall_incremental_incl_send_s": 16.37
+    },
+    {
+      "case": "c23_text_route_rep_ctx_p1",
+      "pass": true,
+      "seconds": 30.0,
+      "offline_sha": "d2d9a45e61526e65",
+      "incremental_sha": "d2d9a45e61526e65",
+      "real_decodes": 5,
+      "expected_decodes": 5,
+      "cache": {
+        "hits": 1,
+        "misses": 4
+      },
+      "wall_offline_s": 17.53,
+      "wall_incremental_incl_send_s": 12.66
+    }
+  ]
+}

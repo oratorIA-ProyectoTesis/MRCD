@@ -1,0 +1,177 @@
+{
+ "id": "32c7c72f-9b1f-4830-98f2-952d17bf7d2f",
+ "type": "live",
+ "status": "completed",
+ "started_at": "2026-11-01T16:40:23.991000+00:00",
+ "ended_at": "2026-11-01T16:40:51.510000+00:00",
+ "duration_seconds": 28,
+ "context": {
+  "presentation_type": "Sustentación de tesis"
+ },
+ "transcript": "Buenos dias a todos. Hoy quiero presentarles el avance de mi proyecto . Este. El proyecto consiste en en en un sistema que ayuda a practicar exposiciones orales.",
+ "report": {
+  "score": 65,
+  "summary": "Tu principal oportunidad de mejora en esta sesión: Proyectar la voz con más energía. El volumen de la voz se mantuvo bajo durante buena parte del segmento.",
+  "strengths": [
+   {
+    "title": "Variar el tono para marcar énfasis",
+    "description": "El tono de voz se mantuvo prácticamente plano durante el segmento, sin variaciones notorias.",
+    "dimension": "vocal_delivery",
+    "evidence": "La variación tonal ayuda a marcar las ideas importantes y evita que el discurso suene monótono; un tono plano hace que toda la información se perciba con la misma importancia, y la audiencia pierde referencias para seguir el hilo."
+   },
+   {
+    "title": "Comunicación no verbal",
+    "description": "La detección corrió durante toda la sesión sin encontrar deficiencias en esta dimensión.",
+    "dimension": "nonverbal"
+   },
+   {
+    "title": "Expresión verbal",
+    "description": "La detección corrió durante toda la sesión sin encontrar deficiencias en esta dimensión.",
+    "dimension": "verbal_expression"
+   }
+  ],
+  "improvements": [
+   {
+    "title": "Proyectar la voz con más energía",
+    "description": "El volumen de la voz se mantuvo bajo durante buena parte del segmento.",
+    "dimension": "vocal_delivery",
+    "evidence": "Una voz con energía suficiente sostiene la atención de la audiencia y transmite convicción; un volumen bajo obliga a quien escucha a hacer un esfuerzo extra y puede interpretarse como falta de confianza en el contenido.",
+    "suggestion": "Retoma la idea que estabas exponiendo y repítela proyectando la voz un poco más fuerte de lo que te resulta natural, como si hablaras para el fondo de la sala."
+   }
+  ],
+  "paraverbal_metrics": {
+   "energia_vocal_baja": 0.361,
+   "variacion_tonal_baja": 0.344
+  },
+  "metrics": [
+   {
+    "metric_id": "words_per_minute",
+    "availability": "available",
+    "value": 60,
+    "confidence": null,
+    "unavailable_reason": null,
+    "windows": 0
+   },
+   {
+    "metric_id": "filler_words_count",
+    "availability": "available",
+    "value": 0,
+    "confidence": null,
+    "unavailable_reason": null,
+    "windows": 0
+   },
+   {
+    "metric_id": "filler_words_per_minute",
+    "availability": "available",
+    "value": 0,
+    "confidence": null,
+    "unavailable_reason": null,
+    "windows": 0
+   },
+   {
+    "metric_id": "pause_ratio",
+    "availability": "available",
+    "value": 0.4278,
+    "confidence": 0.572,
+    "unavailable_reason": null,
+    "windows": 15
+   },
+   {
+    "metric_id": "mean_pause_duration",
+    "availability": "unavailable",
+    "value": null,
+    "confidence": null,
+    "unavailable_reason": "El agregado de prosodia no conserva la duración de cada pausa individual.",
+    "windows": 0
+   },
+   {
+    "metric_id": "vocal_energy",
+    "availability": "available",
+    "value": 0.0596,
+    "confidence": 0.572,
+    "unavailable_reason": null,
+    "windows": 15
+   },
+   {
+    "metric_id": "pitch_variation",
+    "availability": "available",
+    "value": 31.2618,
+    "confidence": 0.572,
+    "unavailable_reason": null,
+    "windows": 15
+   },
+   {
+    "metric_id": "head_orientation_ratio",
+    "availability": "available",
+    "value": 0,
+    "confidence": 0,
+    "unavailable_reason": null,
+    "windows": 13
+   },
+   {
+    "metric_id": "posture_stability",
+    "availability": "available",
+    "value": 0,
+    "confidence": 0,
+    "unavailable_reason": null,
+    "windows": 13
+   },
+   {
+    "metric_id": "gesture_presence_ratio",
+    "availability": "available",
+    "value": 0,
+    "confidence": 0,
+    "unavailable_reason": null,
+    "windows": 13
+   },
+   {
+    "metric_id": "transcript_confidence",
+    "availability": "unavailable",
+    "value": null,
+    "confidence": null,
+    "unavailable_reason": "El reconocedor de habla no reporta confianza por palabra todavía.",
+    "windows": 0
+   }
+  ],
+  "next_steps": [
+   "Retoma la idea que estabas exponiendo y repítela proyectando la voz un poco más fuerte de lo que te resulta natural, como si hablaras para el fondo de la sala."
+  ],
+  "structured_pitch": null
+ },
+ "created_at": "2026-11-01T16:40:23.991000+00:00",
+ "audio_sin_procesar_ms": null,
+ "proveniencia_asr": null,
+ "mrcd_analysis": {
+  "schema": "oratoria.mrcd-session-analysis/v1",
+  "status": "unavailable",
+  "binding": {
+   "gaps": [],
+   "n_chunks": 100,
+   "session_id": "32c7c72f-9b1f-4830-98f2-952d17bf7d2f",
+   "last_sequence": 99,
+   "first_sequence": 0,
+   "t0_ms_first_chunk": 1793551226350,
+   "buffered_duration_s": 16
+  },
+  "analysis": null,
+  "calibrated": false,
+  "provenance": {
+   "source": "mrcd.service",
+   "privacy": "audio buffered in memory only and erased after analysis",
+   "contract": "mrcd.analysis/v1"
+  },
+  "updated_at": "2026-11-01T16:40:51.517719+00:00",
+  "asr_profile": "p0",
+  "unavailable": {
+   "code": "mrcd_unreachable",
+   "reason": "MRCD service is unreachable"
+  },
+  "output_scope": "evaluated",
+  "calibration_note": "Experimental and not calibrated: scores are raw softmax values, not probabilities.",
+  "classes_in_scope": [
+   "filler_word",
+   "prolongation",
+   "repetition"
+  ]
+ }
+}

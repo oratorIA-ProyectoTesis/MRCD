@@ -1,0 +1,53 @@
+DISFLUENCIAS POR EVENTO (EXPERIMENTAL)
+
+EVENTOS (DENTRO DE ALCANCE)
+
+9
+
+EVENTOS POR MINUTO
+
+11.5
+
+Audio analizado: 47.0 s
+
+MODALIDADES
+
+Acústica: disponible
+Lingüística (texto del ASR): disponible
+Video: No disponible: service v1 receives audio only; no video was provided or processed
+Eventos de disfluencia por ventana
+CLASE	FRANJA DE DECISIÓN	SCORE (SOFTMAX, NO CALIBRADO)	VENTANAS
+muletilla filler_word	2.5 s – 5.0 s	0.99 NO CALIBRADO	5
+repetición repetition	8.0 s – 14.0 s	0.99 NO CALIBRADO	12
+repetición repetition	18.0 s – 19.0 s	0.48 NO CALIBRADO	2
+muletilla filler_word	19.0 s – 21.5 s	0.88 NO CALIBRADO	5
+prolongación prolongation
+
+observable lengthening; disfluent function not demonstrated
+
+	23.0 s – 23.5 s	0.48 NO CALIBRADO	1
+repetición repetition	26.5 s – 30.0 s	0.99 NO CALIBRADO	7
+muletilla filler_word	36.0 s – 37.5 s	0.70 NO CALIBRADO	3
+muletilla filler_word	40.5 s – 42.5 s	1.00 NO CALIBRADO	4
+repetición repetition	42.5 s – 43.0 s	0.73 NO CALIBRADO	1
+
+La franja es la ventana de decisión del modelo, no una frontera marcada por una persona. El score es el máximo softmax del modelo en las ventanas del evento y no está calibrado: no es una probabilidad de acierto.
+
+Se ocultaron 19 evento(s) de clases fuera de alcance (sin referencia humana compatible). No se cuentan en los totales ni en las tasas.
+
+CHECKPOINT
+ckpt_audio_text.pt · 87f95108a765
+ASR
+p0
+CABEZA
+ninguna (V0)
+VENTANA
+3 s / paso 0.5 s
+CONTRATO
+mrcd.analysis/v1
+scores_uncalibrated Scores are the maximum window softmax score of an uncalibrated model (softmax, not calibrated); they are not probabilities of correctness.
+no_human_validation Classes are window-level decisions of a model trained with weak (heuristic) supervision; agreement with human annotation has not been established.
+engine_provenance PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia
+out_of_scope_hidden Classes outside the evaluated scope (no compatible human reference) were detected and hidden: neutral_pause=9, rhetorical_pause=10. They are not counted in totals or rates.
+
+Resultado experimental, no calibrado. Perfil ASR: p0 · Alcance: muletilla, prolongación, repetición. Procedencia: mrcd.service. El audio de la sesión se analiza desde la memoria del servidor y se descarta; solo se guarda este resultado.

@@ -1,0 +1,7 @@
+tsc -b:
+exit=0
+eslint:
+vitest:
+ Test Files  65 passed (65)
+      Tests  664 passed (664)
+   Duration  10.25s (transform 7.06s, setup 0ms, import 18.46s, tests 4.57s, environment 117.92s)

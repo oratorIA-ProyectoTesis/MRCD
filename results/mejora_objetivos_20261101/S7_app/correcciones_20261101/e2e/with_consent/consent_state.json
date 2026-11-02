@@ -1,0 +1,14 @@
+{
+ "consentDefaultChecked": false,
+ "consentChecked": true,
+ "consentApi": {
+  "granted": true,
+  "active": true,
+  "decided": true,
+  "stored_text_version": "2026-11-01-draft-1",
+  "current_text_version": "2026-11-01-draft-1",
+  "text_status": "draft_pending_ethics_and_advisor_review",
+  "decided_at_ms": 1793557562089,
+  "service_enabled": true
+ }
+}

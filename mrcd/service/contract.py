@@ -17,6 +17,7 @@ from __future__ import annotations
 
 ANALYSIS_SCHEMA_VERSION = "mrcd.analysis/v1"
 JOB_SCHEMA_VERSION = "mrcd.job/v1"
+SESSION_SCHEMA_VERSION = "mrcd.session/v1"
 
 #: error code -> (HTTP status the dev server uses, retryable)
 ERROR_CODES: dict[str, tuple[int, bool]] = {
@@ -36,13 +37,32 @@ ERROR_CODES: dict[str, tuple[int, bool]] = {
     "analysis_failed": (500, True),
     "job_not_found": (404, False),
     "queue_full": (429, True),
+    # rev 1.3 (incremental sessions)
+    "incremental_disabled": (404, False),
+    "session_not_found": (404, False),
+    "session_limit": (429, True),
+    "sequence_conflict": (409, False),
+    "offset_mismatch": (409, False),
+    "batch_too_large": (413, False),
+    "audio_gap": (409, False),
+    "close_mismatch": (409, False),
+    "session_closed": (409, False),
+    "session_expired": (410, False),
+    "profile_not_supported_incremental": (422, False),
 }
 
 JOB_STATUSES = ("queued", "running", "completed", "failed")
 
 NOT_CALIBRATED_LABEL = "uncalibrated"
 #: Revision of the v1 contract. 1.0 = original; 1.1 = additive: score.kind renamed (see SCORE_KIND_DEPRECATED).
-CONTRACT_REVISION = "1.2"
+CONTRACT_REVISION = "1.4"
+#: 1.4 = additive (O integration, 2026-11-02): ``request.decision_profile`` and ``provenance.decision_profile`` (profile
+#: name, status, per-class route, artifact sha256, calibration claim), and the event score kind
+#: ``unit_pipeline_model_score``. Service default profile ``o2026_11``; ``v0`` reproduces revision <= 1.3 events.
+#: Documents of revisions 1.0-1.3 (no such fields) still validate.
+#: 1.3 = additive (B incremental, 2026-11-01): ``/v1/sessions`` endpoints (schema ``mrcd.session/v1``) and the error codes
+#: ``incremental_disabled``, ``session_*``, ``sequence_conflict``, ``offset_mismatch``, ``batch_too_large``, ``audio_gap``,
+#: ``close_mismatch``, ``profile_not_supported_incremental``. ``mrcd.analysis/v1`` documents are unchanged.
 #: 1.2 = additive (S3, 2026-11-01): output scope (default = the three evaluated classes), optional three-state
 #: ``decision`` per event, optional experimental text route, ``summary.out_of_scope``, ``request.output_scope``.
 #: Raw, uncalibrated softmax maximum of the window head. NOT a probability.
@@ -52,6 +72,9 @@ SCORE_KIND = "max_window_softmax_score"
 SCORE_KIND_DEPRECATED = "max_window_class_probability"
 #: Score of the experimental text route: a logistic-regression output on text features. NOT a probability.
 SCORE_KIND_TEXT_ROUTE = "text_route_logistic_score"
+#: Score of the O-campaign per-class unit pipelines (decision profile o2026_11). NOT a probability.
+SCORE_KIND_UNIT_PIPELINE = "unit_pipeline_model_score"
+DECISION_PROFILE_NAMES = ("v0", "o2026_11")
 INTERVAL_SEMANTICS = "decision_stride_not_human_boundary"
 #: Classes with a compatible human reference (reduced OE4 scope). Everything else is out of scope.
 EVALUATED_CLASSES = ("filler_word", "prolongation", "repetition")
@@ -199,6 +222,7 @@ SCHEMA: dict = {
                 "output_scope": {"enum": list(OUTPUT_SCOPES)},
                 "decision": _BOOL,
                 "text_route": _NSTR,
+                "decision_profile": {"enum": list(DECISION_PROFILE_NAMES)},
                 "audio_sha256": {
                     "type": ["string", "null"],
                     "pattern": "^[0-9a-f]{64}$",
@@ -239,7 +263,14 @@ SCHEMA: dict = {
                     "required": ["value", "kind", "calibrated", "label"],
                     "properties": {
                         "value": {"type": "number", "minimum": 0, "maximum": 1},
-                        "kind": {"enum": [SCORE_KIND, SCORE_KIND_DEPRECATED, SCORE_KIND_TEXT_ROUTE]},
+                        "kind": {
+                            "enum": [
+                                SCORE_KIND,
+                                SCORE_KIND_DEPRECATED,
+                                SCORE_KIND_TEXT_ROUTE,
+                                SCORE_KIND_UNIT_PIPELINE,
+                            ]
+                        },
                         "calibrated": {"const": False},
                         "label": {"const": NOT_CALIBRATED_LABEL},
                     },
@@ -318,6 +349,20 @@ SCHEMA: dict = {
                 "config": {"type": ["object", "null"]},
                 "environment": {"type": ["object", "null"]},
                 "text_route": {"type": ["object", "null"]},
+                "decision_profile": {"$ref": "#/$defs/decision_profile"},
+            },
+        },
+        "decision_profile": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["name", "status", "classes", "calibration_claim"],
+            "properties": {
+                "name": {"enum": list(DECISION_PROFILE_NAMES)},
+                "status": {"enum": ["historical", "exploratory"]},
+                "classes": {"type": "object", "additionalProperties": {"type": "object"}},
+                "calibration_claim": {"const": "none"},
+                "pipelines_verified": {"type": ["boolean", "null"]},
+                "note": _STR,
             },
         },
         "experimental": {
@@ -347,3 +392,45 @@ def validate_document(doc: object) -> list[str]:
     from mrcd.service.validate import validate
 
     return validate(doc, SCHEMA)
+
+
+# ---------------------------------------------------------------------------------------------- sessions (rev 1.3)
+SESSION_STATUSES = ("open", "closing", "completed", "failed", "cancelled", "expired")
+SESSION_EVENT_TYPES = ("state", "asr_progress", "finalizing", "completed", "failed", "expired", "cancelled")
+#: Fields that must never appear in a session document or progress event (privacy: counts only, no content).
+SESSION_FORBIDDEN_KEYS = ("text", "words", "transcript")
+_INT = {"type": "integer", "minimum": 0}
+
+SESSION_SCHEMA: dict = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": SESSION_SCHEMA_VERSION,
+    "title": "MRCD incremental session state (rev 1.3)",
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["schema_version", "session_id", "status", "received_samples", "contiguous_samples", "chunks_decoded", "chunks_complete"],
+    "properties": {
+        "schema_version": {"const": SESSION_SCHEMA_VERSION},
+        "session_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{8,64}$"},
+        "status": {"enum": list(SESSION_STATUSES)},
+        "plan": {"type": "object"},
+        "limits": {"type": "object"},
+        "received_samples": _INT,
+        "contiguous_samples": _INT,
+        "batches_received": _INT,
+        "missing_seqs": {"type": "array", "items": _INT},
+        "chunks_decoded": _INT,
+        "chunks_complete": _INT,
+        "result": {"type": ["object", "null"]},
+    },
+}
+
+
+def validate_session_document(doc: object) -> list[str]:
+    """Validate a session state document; also rejects any content-bearing key (``text``, ``words``, ``transcript``)
+    outside the embedded analysis ``result``."""
+    from mrcd.service.validate import validate
+
+    errors = validate(doc, SESSION_SCHEMA)
+    if isinstance(doc, dict):
+        errors += [f"forbidden key {k!r}" for k in SESSION_FORBIDDEN_KEYS if k in doc]
+    return errors

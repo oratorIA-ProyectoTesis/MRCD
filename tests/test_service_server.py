@@ -32,7 +32,9 @@ def wait_done(client, job_id, timeout=20):
 
 def test_post_then_poll_returns_a_valid_completed_job_and_drops_the_audio():
     client, app = make_client()
-    r = client.post("/v1/jobs", content=wav(), headers={"Content-Type": "audio/wav"})
+    r = client.post(
+        "/v1/jobs?decision_profile=v0", content=wav(), headers={"Content-Type": "audio/wav"}
+    )
     assert r.status_code == 202
     queued = r.json()
     assert validate_document(queued) == [] and queued["status"] in (
@@ -126,6 +128,19 @@ def test_routes_expose_no_docs_or_openapi_and_no_keys_are_required():
     assert client.get("/v1/health").status_code == 200  # no Authorization header needed
 
 
+def test_docs_when_enabled_describe_the_wav_upload():
+    client, _ = make_client(enable_docs=True)
+    assert client.get("/docs").status_code == 200
+    spec = client.get("/openapi.json").json()
+    post = spec["paths"]["/v1/jobs"]["post"]
+    assert "audio/wav" in post["requestBody"]["content"]
+    assert {p["name"] for p in post["parameters"]} >= {
+        "asr_profile",
+        "include_out_of_scope",
+    }
+    assert client.get("/redoc").status_code == 404
+
+
 def test_cli_schema_and_validate_roundtrip(tmp_path, capsys):
     assert cli_main(["schema"]) == 0
     assert "mrcd.analysis/v1" in capsys.readouterr().out
@@ -154,4 +169,6 @@ def test_cors_preflight_for_the_browser_client_post_with_audio_content_type():
     assert r.status_code == 200
     assert r.headers["access-control-allow-origin"] == "http://localhost:5173"
     assert "POST" in r.headers["access-control-allow-methods"]
-    assert "access-control-allow-credentials" not in r.headers  # the client sends no credentials
+    assert (
+        "access-control-allow-credentials" not in r.headers
+    )  # the client sends no credentials

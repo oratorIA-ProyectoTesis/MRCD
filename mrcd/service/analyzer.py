@@ -10,6 +10,7 @@ that used them says so (``experimental``, per-event ``experimental`` and a warni
 
 from __future__ import annotations
 
+import copy
 import json
 import threading
 import traceback
@@ -29,6 +30,7 @@ from mrcd.service.audio_io import (
     decode_wav,
     inspect_header,
 )
+from mrcd.service import decision_profile as DP
 from mrcd.service.contract import (
     ANALYSIS_SCHEMA_VERSION,
     ERROR_CODES,
@@ -69,6 +71,8 @@ class AnalysisOptions:
     decision: bool = False
     #: experimental text route ("rep_ctx_p1") that replaces the V0 repetition events
     text_route: str | None = None
+    #: decision profile (contract rev 1.4): "o2026_11" (service default) or "v0" (historical engine decision)
+    decision_profile: str = DP.DEFAULT_DECISION_PROFILE
 
 
 def _now() -> str:
@@ -150,7 +154,16 @@ def error_document(
             "linguistic": _modality(False, "analysis did not run"),
             "kinesic_video": _modality(False, _VIDEO_REASON),
         },
-        "provenance": provenance or _provenance(None, None, None, None, None, None),
+        "provenance": provenance
+        or _provenance(
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            DP.profile_meta(options.decision_profile, applied=None),
+        ),
         "experimental": _experimental(options, None),
         "head_decision": None,
         "transcript": None,
@@ -172,6 +185,7 @@ def _request_block(options, digest, duration, rate, channels, reason) -> dict:
         "output_scope": options.output_scope,
         "decision": bool(options.decision),
         "text_route": options.text_route,
+        "decision_profile": options.decision_profile,
     }
 
 
@@ -186,7 +200,9 @@ def _service_block() -> dict:
     }
 
 
-def _provenance(checkpoint, asr, head, config, environment, text_route=None) -> dict:
+def _provenance(
+    checkpoint, asr, head, config, environment, text_route=None, decision_profile=None
+) -> dict:
     out = {
         "service": _service_block(),
         "checkpoint": checkpoint,
@@ -197,6 +213,8 @@ def _provenance(checkpoint, asr, head, config, environment, text_route=None) -> 
     }
     if text_route is not None:
         out["text_route"] = text_route
+    if decision_profile is not None:
+        out["decision_profile"] = decision_profile
     return out
 
 
@@ -289,8 +307,12 @@ def build_analysis(
     options: AnalysisOptions,
     audio: DecodedAudio | None,
     engine_info: dict,
+    profile_events: list[dict] | None = None,
 ) -> dict:
-    """Map an ``AnalysisResult`` to the v1 document. Pure function: no engine, no I/O."""
+    """Map an ``AnalysisResult`` to the v1 document. Pure function: no engine, no I/O.
+
+    ``profile_events`` (decision profile ``o2026_11``): events of the pipelined classes computed by the caller; the V0
+    events of those classes are dropped and these take their place."""
     meta = result.metadata or {}
     asr_meta = meta.get("asr_profile") or None
     experimental = _experimental(options, asr_meta)
@@ -320,6 +342,30 @@ def build_analysis(
                 "_basis": e.label,
             }
         )
+    if profile_events is not None:
+        raw = [r for r in raw if r["class"] not in DP.O_CLASSES]
+        for t in profile_events:
+            raw.append(
+                {
+                    "class": t["class"],
+                    "start_s": t["start_s"],
+                    "end_s": t["end_s"],
+                    "score": {
+                        "value": round(t["score"], 6),
+                        "kind": DP.SCORE_KIND_UNIT_PIPELINE,
+                        "calibrated": False,
+                        "label": NOT_CALIBRATED_LABEL,
+                    },
+                    "n_windows": t["n_windows"],
+                    "modalities_used": list(DP.MODALITIES),
+                    "text": t["text"] if options.include_text else None,
+                    "validation": DP.VALIDATION_TEXT,
+                    "experimental": False,
+                    "_basis": t["class"],
+                    "_decision": t["decision"],
+                }
+            )
+        raw.sort(key=lambda r: (r["start_s"], r["end_s"]))
     route_meta = None
     if options.text_route:
         from mrcd.service import s3_features as S3F
@@ -364,6 +410,7 @@ def build_analysis(
     events = []
     for i, r in enumerate(kept, start=1):
         basis = r.pop("_basis")
+        own_decision = r.pop("_decision", None)
         ev = {
             "id": f"ev-{i:04d}",
             "class": r.pop("class"),
@@ -375,7 +422,7 @@ def build_analysis(
         if options.decision and ev["in_scope"]:
             from mrcd.service import s3_features as S3F
 
-            d = S3F.decision_for(basis, ev["score"]["value"])
+            d = own_decision or S3F.decision_for(basis, ev["score"]["value"])
             if d is not None:
                 ev["decision"] = d
         events.append(ev)
@@ -461,6 +508,26 @@ def build_analysis(
                 + ". They are not validated outside their development corpus.",
             }
         )
+    dp_warning = DP.warning_for(options.decision_profile)
+    if dp_warning is not None:
+        warnings.append(dp_warning)
+        if options.asr_profile != "p0":
+            warnings.append(
+                {
+                    "code": "decision_profile_asr_mismatch",
+                    "message": "The o2026_11 pipelines were trained on P0 ASR text; this run used another ASR profile. "
+                    "The pipelines read the words of the REQUESTED profile (not rejected, not re-decoded as p0).",
+                }
+            )
+        if profile_events is not None and not (getattr(result, "words", None) or []):
+            warnings.append(
+                {
+                    "code": "decision_profile_no_words",
+                    "message": "Not available: the ASR returned no words, so the o2026_11 pipelines could not evaluate "
+                    "filler_word or prolongation (absence of events here does not mean absence of the phenomena; "
+                    "decision_profile=v0 uses the acoustic windows).",
+                }
+            )
     warnings.extend(_asr_profile_warnings(options, asr_meta))
     anomalies = (asr_meta or {}).get("anomalies") or []
     if anomalies:
@@ -527,6 +594,7 @@ def build_analysis(
             _jsonable(meta.get("window_plan")),
             env,
             route_meta,
+            DP.profile_meta(options.decision_profile),
         ),
         "experimental": experimental,
         "head_decision": head_decision,
@@ -613,6 +681,25 @@ class MrcdAnalyzer:
     def loaded(self) -> bool:
         return bool(self._engines)
 
+    def is_loaded(self, options: AnalysisOptions) -> bool:
+        return (options.asr_profile, options.head) in self._engines
+
+    def loaded_keys(self) -> list[str]:
+        return [p if h is None else f"{p}:{h}" for p, h in self._engines]
+
+    def preload(self, options: AnalysisOptions) -> None:
+        """Loads the engine of ``options`` now, with the SAME arguments the lazy first request would use."""
+        self.validate_options(options)
+        if options.decision_profile == DP.PROFILE_O:
+            DP.o_pipelines()  # fail at start, not at the first request, if an artifact was altered
+        with self._lock:
+            self._engine(options)
+
+    def asr_for(self, options: AnalysisOptions) -> Any:
+        """The (shared) ASR of an already loaded engine. Only the engine worker thread may call it."""
+        with self._lock:
+            return self._engine(options)[0]._asr
+
     # ------------------------------------------------------------------ options
     @staticmethod
     def validate_options(options: AnalysisOptions) -> None:
@@ -635,6 +722,12 @@ class MrcdAnalyzer:
                 "invalid_request",
                 f"Unknown output_scope {options.output_scope!r}.",
                 {"allowed": list(OUTPUT_SCOPES)},
+            )
+        if options.decision_profile not in DP.DECISION_PROFILES:
+            raise ServiceError(
+                "invalid_request",
+                f"Unknown decision_profile {options.decision_profile!r}.",
+                {"allowed": list(DP.DECISION_PROFILES)},
             )
         if options.text_route is not None and options.text_route not in TEXT_ROUTES:
             raise ServiceError(
@@ -680,15 +773,21 @@ class MrcdAnalyzer:
 
     # ------------------------------------------------------------------ entry points
     def analyze_bytes(
-        self, data: bytes, options: AnalysisOptions | None = None
+        self,
+        data: bytes,
+        options: AnalysisOptions | None = None,
+        *,
+        asr_wrapper: Callable[[Any], Any] | None = None,
     ) -> dict:
+        """``asr_wrapper`` (incremental sessions only) maps the engine's ASR to a wrapper that answers from a
+        per-chunk cache; every other step of the analysis is the unchanged offline code."""
         options = options or AnalysisOptions()
         header = inspect_header(data)
         digest = audio_sha256(data) if data else None
         try:
             self.validate_options(options)
             decoded = decode_wav(data)
-            return self._run(decoded, options)
+            return self._run(decoded, options, asr_wrapper=asr_wrapper)
         except ServiceError as err:
             return error_document(
                 err.code,
@@ -735,7 +834,12 @@ class MrcdAnalyzer:
             )
 
     # ------------------------------------------------------------------ core
-    def _run(self, audio: DecodedAudio, options: AnalysisOptions) -> dict:
+    def _run(
+        self,
+        audio: DecodedAudio,
+        options: AnalysisOptions,
+        asr_wrapper: Callable[[Any], Any] | None = None,
+    ) -> dict:
         from mrcd.engine import DisfluencyEngine
 
         header = {
@@ -761,9 +865,27 @@ class MrcdAnalyzer:
             )
         with self._lock:
             engine, info = self._engine(options)
+            if asr_wrapper is not None:
+                engine = copy.copy(engine)  # shallow: the shared engine and its ASR are never modified
+                engine._asr = asr_wrapper(engine._asr)
+            use_profile = options.decision_profile == DP.PROFILE_O
+            profile_events = None
             try:
-                kw = {"return_words": True} if options.text_route else {}
+                kw = {"return_words": True} if (options.text_route or use_profile) else {}
                 result = engine.analyze(audio.samples, sample_rate=audio.sample_rate, **kw)
+                if use_profile:
+                    profile_events = DP.apply_profile(
+                        engine, audio.samples, audio.sample_rate, getattr(result, "words", None)
+                    )
+            except DP.ProfileArtifactError as exc:
+                return error_document(
+                    "analysis_failed",
+                    "A decision-profile artifact failed its integrity check; use decision_profile=v0 or restore the artifacts.",
+                    details={"exception_type": type(exc).__name__},
+                    options=options,
+                    header=header,
+                    digest=audio.sha256,
+                )
             except Exception as exc:  # noqa: BLE001
                 err = ServiceError(
                     "analysis_failed",
@@ -781,4 +903,6 @@ class MrcdAnalyzer:
                         info.get("checkpoint"), None, None, None, None, None
                     ),
                 )
-        return build_analysis(result, options=options, audio=audio, engine_info=info)
+        return build_analysis(
+            result, options=options, audio=audio, engine_info=info, profile_events=profile_events
+        )

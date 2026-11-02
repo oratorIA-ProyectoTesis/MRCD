@@ -525,6 +525,53 @@ class DisfluencyEngine:
             pcm = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2")
         return self.analyze(pcm.astype(np.float32) / 32768.0, sample_rate=sr, **kw)
 
+    def unit_features(self, clip: np.ndarray, words: list[dict]) -> dict:
+        """Unit-level features of one short clip (a "turn"), with the recipe the optimised pipelines were trained on.
+
+        Additive and opt-in: ``analyze`` never calls it. ``clip`` is mono float32 at 16 kHz; ``words`` are ASR word
+        dicts with times RELATIVE to the clip. A clip shorter than one window is zero-padded at the end to one
+        window (``windowing.plan_unit``, pad mode ``zero``), features are extracted over the padded clip, and the
+        window probabilities and pooled head inputs are those of the base checkpoint. Returns ``probs`` (W, C),
+        ``pooled`` (W, H), ``pause`` (internal-pause stats over the UNPADDED frames) and ``n_samples`` (unpadded).
+        """
+        from mrcd.adaptation import predict_pooled
+        from mrcd.dataset import acoustic_windows, center_f0, linguistic_windows
+        from mrcd.extractors.acoustic import extract_acoustic
+        from mrcd.extractors.linguistic import Word, word_features
+        from mrcd.extractors.prosody import prosody_windows, speaker_f0_center
+        from mrcd.windowing import internal_pause_stats, pad_audio, plan_unit
+
+        clip = np.asarray(clip, dtype=np.float32)
+        if clip.ndim != 1 or not np.isfinite(clip).all():
+            raise ValueError("clip must be finite mono audio")
+        n = len(clip)
+        starts, _, n_extra, _ = plan_unit(n, 0.0, n / SAMPLE_RATE)
+        padded = pad_audio(clip, n_extra, "zero")
+        track = extract_acoustic(padded, use_silero=True)
+        frames = track.frame_matrix()
+        center = speaker_f0_center(frames)
+        ws = [Word(**w) for w in words]
+        ling, lpos, lmask = linguistic_windows(
+            [w.to_dict() for w in ws], word_features(ws), starts, context=self._context
+        )
+        tensors = {
+            "ac": acoustic_windows(center_f0(frames, center), starts),
+            "ling": ling[:, :, : self._ling_dim],
+            "lpos": lpos,
+            "lmask": lmask,
+        }
+        if self._include_pros:
+            tensors["pros"] = prosody_windows(frames, starts, center)
+        probs, pooled = predict_pooled(
+            self._net, self._norm, tensors, self._device, bs=1
+        )
+        return {
+            "probs": probs.astype(np.float32),
+            "pooled": pooled.astype(np.float32),
+            "pause": internal_pause_stats(track.vad, n_valid=int(np.ceil(n / 160))),
+            "n_samples": n,
+        }
+
     # ------------------------------------------------------------ interno
     def _evaluate(
         self,

@@ -1,10 +1,10 @@
 # MRCD C4 architecture (local, versioned, regenerable)
 
-Date: 2026-10-31. Scope: the four C4 levels of the system **as it exists in the inspected tree**, not a target design.
+Date: 2026-11-01. Scope: the four C4 levels plus two sequence diagrams of the system **as it exists in the inspected trees**, not a target design.
 
-> **Warning: this is the architecture of the inspected tree.** First inspection: commit `46b4d1dcc398eb95` (`main`). While this folder was being written another task committed `955d27c` (`mrcd/service`, contract v1); the diagrams and the verifier were updated to that tree (HEAD `955d27c673a039541dc400d773b4559e01c6b6cd`, plus an uncommitted edit to `tests/test_service_server.py` by that task). Anything committed later is not reflected. `python docs/architecture/verify_architecture.py` prints the HEAD it ran against; re-run it after any change to `mrcd/`.
+> **Inspected trees.** MRCD: `main` (HEAD printed by `verify_architecture.py`). App `ORATORIA-PROYECTO`: local branch `feat/mrcd-integration` (read-only, not merged). Anything committed later is not reflected; re-run the verifier after any change to `mrcd/` or to that branch.
 >
-> The web app (`ORATORIA-PROYECTO`, inspected read-only @ `f46a2b8638b221e44d3cf492cf517f33b68dd0cb`) **embeds ORATORIA-ENGINE v0 and does not call MRCD**. The integration app -> MRCD is drawn dashed orange as PROPOSED because no client for it exists in the app (checked by the verifier).
+> **What is current.** The app calls the MRCD service over loopback HTTP for accounts with an active, versioned consent. Default mode is `offline` (POST `/v1/jobs`); `incremental` (B incremental, `/v1/sessions`) and `incremental_verify` are opt-in. Tags in node titles: `[PRODUCT]` default path, `[OPT-IN]` only by explicit flag or parameter, `[RESEARCH]` kit or experiment that no product path imports.
 
 ## Files
 
@@ -14,33 +14,33 @@ Date: 2026-10-31. Scope: the four C4 levels of the system **as it exists in the 
 | `c4_2_containers.{mmd,svg,png}` | Level 2, containers: browser SPA, backend API, ASR port, embedded ENGINE v0, PostgreSQL, MRCD library, live demo, scripts, service, artifacts, results |
 | `c4_3_components.{mmd,svg,png}` | Level 3, components of package `mrcd`; edges are observed imports (offline path purple, live path blue)                                                |
 | `c4_4_code.{mmd,svg,png}`       | Level 4, code: central types and entry points; every class/function/method named is verified by AST                                                    |
+| `seq_b_original.{mmd,svg,png}`  | Sequence: B original (buffer in app memory, one WAV to `POST /v1/jobs` at close)                                                                        |
+| `seq_b_incremental.{mmd,svg,png}` | Sequence: B incremental (open session + token, `PUT audio/{seq}`, close, counts-only SSE, offline fallback)                                          |
+| `render_sequences.sh`           | Renders the `seq_*.mmd` to SVG/PNG with the local Mermaid CLI                                                                                          |
 | `c4_model.py`                   | **Single data model** of the four diagrams + deterministic renderer (SVG and Mermaid source from the same data)                                        |
 | `verify_architecture.py`        | Checks that diagrams do not contradict the code                                                                                                        |
 | `render_png.sh`                 | Optional PNG rasterisation with the locally installed Chrome (headless)                                                                                |
 
-## How they were produced (no remote service, no Figma, no mermaid.live)
+## How they were produced (no remote service)
 
-Renderer check on this machine (2026-10-31): `mmdc` not installed, `dot` (Graphviz) not installed, `plantuml` not installed (Java 24 exists but no PlantUML jar), `cairosvg` not installed. Node 22 and `npx` exist, but a Mermaid CLI would need to download Chromium, so nothing was installed. Therefore:
+- **C4 SVG** is rendered by `c4_model.py` (standard library only; absolute coordinates in the model; byte-identical on re-run). **C4 `.mmd`** come from the same model.
+- **Sequence `.mmd`** are written by `c4_model.py` (`SEQUENCES`); `render_sequences.sh` renders them with `@mermaid-js/mermaid-cli` 11.4.2 and the local Chrome.
+- All `.mmd` (C4, sequences, `docs/contracts/disambiguation_states.mmd`) compile locally: `render_mermaid_check.sh` reports 7/7 OK (2026-11-01).
+- **PNG** of the C4 diagrams is a convenience raster of the SVG (`render_png.sh`, headless Chrome); not a source.
 
-- **SVG** is rendered by `c4_model.py` (standard library only; hand-rolled layout with absolute coordinates stored in the model; byte-identical on re-run).
-- **Mermaid sources (`.mmd`)** are generated from the same model (flowchart syntax with subgraphs for boundaries). **They were NOT render-tested when first written** (no Mermaid renderer was installed). **Update 2026-11-01:** all four C4 `.mmd` files and `docs/contracts/disambiguation_states.mmd` were compiled with `@mermaid-js/mermaid-cli` 11.4.2 (bundled mermaid 11.17.2, Node 22.17.0, local Chrome, no web service): 5/5 compile with no syntax error, so no source change was needed. Re-check with `render_mermaid_check.sh` (see below). The SVG made by `c4_model.py` remains the primary rendered artifact.
-- **PNG** is a convenience raster of the SVG made with Chrome 156.0.8078.74 headless (`render_png.sh`); it is not part of the source of truth.
-- Nothing was installed; no model or corpus was touched.
-
-Mermaid compile check (local, no web service; one-time tool install outside the repo):
+One-time Mermaid CLI install (outside the repo, no Chromium download):
 
 ```bash
 TOOLS=~/.cache/mrcd-mmdc; mkdir -p "$TOOLS" && (cd "$TOOLS" && PUPPETEER_SKIP_DOWNLOAD=1 npm i --prefix . @mermaid-js/mermaid-cli@11.4.2)
-bash docs/architecture/render_mermaid_check.sh /tmp/mmd_out   # renders every .mmd to SVG; exit 0 = all compile
 ```
-
-It uses the locally installed Chrome (`CHROME` env var to override); `PUPPETEER_SKIP_DOWNLOAD=1` avoids downloading Chromium.
 
 Commands (repo root, Git Bash; Python 3.12.10 from `.venv`):
 
 ```bash
-.venv/Scripts/python.exe docs/architecture/c4_model.py          # writes the 4 .svg and 4 .mmd
-bash docs/architecture/render_png.sh                            # optional, writes the 4 .png (needs Chrome)
+.venv/Scripts/python.exe docs/architecture/c4_model.py          # writes the 4 C4 .svg/.mmd and the 2 seq_*.mmd
+bash docs/architecture/render_png.sh                            # optional, writes the 4 C4 .png (needs Chrome)
+bash docs/architecture/render_sequences.sh                      # writes seq_*.svg and seq_*.png (Mermaid CLI + Chrome)
+bash docs/architecture/render_mermaid_check.sh /tmp/mmd_out     # compile-checks every .mmd; exit 0 = all compile
 .venv/Scripts/python.exe docs/architecture/verify_architecture.py   # exit 0 = no contradiction found
 ```
 
@@ -52,24 +52,26 @@ Blue = exists in the MRCD tree; green = exists in the app repo (read-only inspec
 
 ## What the diagrams state (and what each claim rests on)
 
-| Claim drawn                                                                                           | Evidence                                                                                                                                                                                                                             |
-| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Trust boundaries: browser (video never leaves it), app backend, third-party cloud, MRCD local process | app capture sources (`APP_INTEGRATION_CONTRACT.md` Part A); the cloud boundary exists only if a cloud ASR adapter is configured (default `simulado`)                                                                                 |
-| Offline path: scripts -> `DisfluencyEngine.analyze_file` -> `AnalysisResult`                          | `mrcd/engine.py`; there is **no CLI around `analyze_file`** besides the new `mrcd.service`                                                                                                                                           |
-| Live path: microphone -> `LiveScorer` rows via `scripts/live_demo.py`                                 | `mrcd/live/*`, `scripts/live_demo.py` (port 8001, microphone-bound dashboard; not an API for other systems)                                                                                                                          |
-| Live rows are windows, not events; no event merge on the live path                                    | `INFORME_FINAL` section (g), `LIVE_CONTRACT.md`                                                                                                                                                                                      |
-| MRCD with video                                                                                       | `DisfluencyEngine.analyze` raises for visual modes; kinesic extractors, face tracking and the sync buffer are reachable only from offline video scripts; only the `audio_text` checkpoint exists locally (verifier checks all three) |
-| `decision.py` is not used by the engine                                                               | the verifier finds importers only in research kits (`context_eval`)                                                                                                                                                                  |
-| App hosts ORATORIA-ENGINE v0, not MRCD                                                                | app adapters (`oratoria_engine`); no occurrence of `mrcd` in the app source (verifier scans `backend/src`, `frontend/src`, `contracts`)                                                                                              |
-| Output/reports                                                                                        | engine returns JSON (`AnalysisResult.to_dict`), live rows and session JSON download; `ReportPage.tsx` has no disfluency section                                                                                                      |
+| Claim drawn | Evidence (checked by `verify_architecture.py`) |
+| --- | --- |
+| Service: `/v1/health`, `/v1/schema`, `POST /v1/jobs`, `GET /v1/jobs/{id}` (offline reference and fallback) | `mrcd/service/server.py` |
+| Incremental: `POST /v1/sessions` (returns `subscription_token`), `PUT .../audio/{seq}`, `POST .../close`, `GET .../events` (SSE, counts only), `DELETE` | `mrcd/service/incremental/routes.py`, `session.py` |
+| Per-session ASR chunk cache, never persisted; close reruns the offline path | `incremental/cache.py`, `cached_asr.py`, `session.py` |
+| Profiles: p0 default; p1, `*_cuda`, `*_noloop` opt-in; noloop and cuda refused in incremental | `mrcd/asr_profiles.py`, `SessionRegistry.open` |
+| Preload and `--warmup` at service start | `server.prepare`, `incremental/warmup.py`, `cli.py` |
+| App: consent versioned, mode default `offline`, profile p0, batch 2000 ms, `X-Session-Token`, SSE with fetch + Bearer, report scoped to 3 classes, HTTP only | app source on `feat/mrcd-integration` |
+| `av`, `context_ambiguity`, `recording_check` are imported by no engine, extractor, live or service module; `optimize` is imported only by `service/decision_profile.py` (through `safe_pipeline`, the pickle-free JSON loader); `fusion_text` and `calibration` reach the service only through `s3_features` | AST import scan |
+| `decision.py` is not used by the engine; analyze() rejects visual modes | AST scan; guard string in `engine.py` |
+| Live rows are windows, not events; no event merge on the live path | `LIVE_CONTRACT.md` |
+| Trust boundaries: video never leaves the browser; MRCD process is local; cloud only if a cloud adapter is configured (configuration used: Speechmatics ASR, OpenAI LLM) | app capture sources; `ORATORIA_ASR_ADAPTER` code default `simulado`, local compose default `whisper_http` |
 
 ## Verification result (this run)
 
-`verify_architecture.py`: every `modules` path exists; every named symbol exists in its file (AST); every edge marked `import` has at least one real import between the two components (top-level or lazy); negative claims hold; the app has no MRCD client; every library module belongs to a drawn component. See the script output for the count and the HEAD it ran against.
+`verify_architecture.py`: every `modules` path exists; every named symbol exists (AST); every `import` edge has a real import; the negative and package-tag claims above hold; the app-side and service-side facts match the source; no proposed node remains; every library module belongs to a component. Output: 202 checks passed, 0 failed.
 
 ## Limits
 
 - The layout is hand-placed: edge crossings are minimised but not optimal; labels sit on the longest segment.
 - Components at level 3 group modules by responsibility as written in `results/cierre_oe1_oe3_20261031/inventario_modulos.md`; that grouping is a reading aid, not a package structure.
-- Research kits (`annotation`, `corpora`, `context_eval`, `asr_recovery`) are shown for completeness; they are not part of the engine path.
+- Research kits (`annotation`, `corpora`, `context_eval`, `asr_recovery`, `av`, `optimize`, `context_ambiguity`) are shown for completeness; they are not part of the engine path. Some import edges between far-apart level 3 components (service to warm-up and `s3_features`, cache to `VerbatimASR`, `s3_features` to `calibration`, `optimize` to `fusion_text`) are verified but not drawn, to keep the diagram readable.
 - Performance, thread model and deployment topology are out of scope.

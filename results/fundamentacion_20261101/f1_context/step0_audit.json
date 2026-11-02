@@ -1,0 +1,88 @@
+{
+  "n_turns": 5056,
+  "n_speakers": 180,
+  "folds": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "d_token_totals": {
+    "abrir": 507,
+    "rellenar": 271,
+    "cerrar": 736,
+    "pedir": 326,
+    "aceptar": 108,
+    "editar": 38,
+    "exclamar": 5,
+    "rechazar": 24
+  },
+  "per_form": {
+    "a ver": {
+      "n": 37,
+      "d:rellenar": 16,
+      "d:NONE": 19,
+      "adjacent_f": 5,
+      "d:editar": 2,
+      "speakers": 22
+    },
+    "bueno": {
+      "n": 32,
+      "d:aceptar": 17,
+      "d:rellenar": 9,
+      "adjacent_f": 8,
+      "d:NONE": 4,
+      "d:abrir": 2,
+      "speakers": 16
+    },
+    "eh": {
+      "n": 6,
+      "d:pedir": 5,
+      "d:exclamar": 1,
+      "speakers": 2
+    },
+    "entonces": {
+      "n": 16,
+      "d:rellenar": 9,
+      "adjacent_f": 4,
+      "d:NONE": 6,
+      "d:editar": 1,
+      "speakers": 12
+    },
+    "este": {
+      "n": 59,
+      "d:NONE": 59,
+      "adjacent_f": 5,
+      "speakers": 36
+    },
+    "mira/mire": {
+      "n": 42,
+      "d:rellenar": 38,
+      "d:NONE": 4,
+      "adjacent_f": 4,
+      "speakers": 19
+    },
+    "o sea": {
+      "n": 11,
+      "d:editar": 7,
+      "d:rellenar": 3,
+      "d:NONE": 1,
+      "adjacent_f": 1,
+      "speakers": 9
+    },
+    "pues": {
+      "n": 159,
+      "d:rellenar": 152,
+      "adjacent_f": 23,
+      "d:NONE": 7,
+      "speakers": 54
+    },
+    "vale": {
+      "n": 15,
+      "d:aceptar": 6,
+      "d:NONE": 8,
+      "d:pedir": 1,
+      "speakers": 12
+    }
+  }
+}

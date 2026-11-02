@@ -1,0 +1,18 @@
+{
+  "av_gate_config_hash": "2357f15a17599d9293c0d3ed6047926b7b4748861dafb558e99bcd3d53e2a213",
+  "config_hash": "446931faf81d421ee690c797aa83542b4020e915cb459073a42968c5ff420eec",
+  "files_sha256": {
+    "docs/via-b/PREREGISTRO_TECNICO.md": "e4b6f6021c979fe0088ae84829372b40d0be7b7707ece9f9750511e575b98551",
+    "mrcd/av/config.py": "4ac3184abd9b0d59065a595a89325d41220535671dc0c6979ea433ba1a65420d",
+    "mrcd/av/gate.py": "1de40411e4c8e56c8d2a93a23c7ae138591a6cf6f56af1c8cc1ecce564dd5c78",
+    "mrcd/recording_check/config.py": "a718acce0133ece77d673ea117e00881fd0bd8acd3853aaea6a2016ca386177e",
+    "mrcd/recording_check/stats.py": "6f182f30a6295dcca44af645e541efab2b81fac514e0ce5c5297f8eb27bdba29",
+    "mrcd/recording_check/technical.py": "62e39c061aa3834573f0439e8a16d67e08d40d2d906f7ced807787209507cf13",
+    "mrcd/recording_check/verify_recording.py": "02202f6f5d86c52d4f7978c489fbd802ab5b93008e7044d1fadf59aec62a0ea8"
+  },
+  "frozen_at_utc": "2026-11-01T20:16:19Z",
+  "frozen_files_uncommitted": false,
+  "git_head": "0f6639f51706d68dbd0e1e4b4f0029a96988d2cc",
+  "note": "",
+  "tag": "preregistro-tecnico"
+}

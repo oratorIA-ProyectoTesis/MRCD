@@ -1,0 +1,188 @@
+{
+ "checks": {
+  "outcome": "unavailable",
+  "report_url": "http://localhost:5173/reports/64a4565c-f029-4358-a983-e6d69acaa06b",
+  "session_id": "64a4565c-f029-4358-a983-e6d69acaa06b",
+  "ws_sent_binary_frames": 56,
+  "ws_sent_binary_bytes": 287392,
+  "ws_sent_audio_seconds_estimate": 9,
+  "ws_received_types": [
+   "session_hello",
+   "authenticated",
+   "session_started",
+   "audience",
+   "asr_partial",
+   "interventions",
+   "session_closed"
+  ],
+  "ws_sent_text_types": [
+   "authenticate",
+   "start_session",
+   "prosody_summary",
+   "t6",
+   "vision_summary",
+   "close_segment",
+   "close_session"
+  ],
+  "percent_sign_in_section": false,
+  "has_softmax_label": false,
+  "has_unavailable_marker": true
+ },
+ "log": {
+  "console": [
+   "warning: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 ",
+   "warning: W1101 16:34:50.615000 2196592 gl_context.cc:1119] OpenGL error checking is disabled"
+  ],
+  "ws": {
+   "url": "ws://localhost:8000/ws/session",
+   "sent_binary_frames": 56,
+   "sent_binary_bytes": 287392,
+   "sent_text": [
+    "authenticate",
+    "authenticate",
+    "start_session",
+    "prosody_summary",
+    "t6",
+    "prosody_summary",
+    "t6",
+    "t6",
+    "t6",
+    "t6",
+    "t6",
+    "vision_summary",
+    "t6",
+    "prosody_summary",
+    "vision_summary",
+    "prosody_summary",
+    "t6",
+    "vision_summary",
+    "t6",
+    "prosody_summary",
+    "t6",
+    "vision_summary",
+    "prosody_summary",
+    "vision_summary",
+    "prosody_summary",
+    "vision_summary",
+    "prosody_summary",
+    "close_segment",
+    "t6",
+    "close_session",
+    "t6",
+    "authenticate"
+   ],
+   "received": [
+    "session_hello",
+    "authenticated",
+    "session_hello",
+    "authenticated",
+    "session_started",
+    "audience",
+    "asr_partial",
+    "asr_partial",
+    "audience",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "audience",
+    "audience",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "audience",
+    "audience",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "audience",
+    "asr_partial",
+    "audience",
+    "asr_partial",
+    "asr_partial",
+    "audience",
+    "audience",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "asr_partial",
+    "audience",
+    "audience",
+    "audience",
+    "audience",
+    "asr_partial",
+    "interventions",
+    "asr_partial",
+    "session_closed",
+    "session_hello",
+    "authenticated"
+   ]
+  },
+  "detail_polls": [
+   {
+    "t_s": 114.5,
+    "status": 200,
+    "mrcd_status": "unavailable"
+   }
+  ],
+  "timeline": [
+   {
+    "t_s": 1.1,
+    "what": "registered"
+   },
+   {
+    "t_s": 91.9,
+    "what": "ws closed"
+   },
+   {
+    "t_s": 91.9,
+    "what": "clicked start"
+   },
+   {
+    "t_s": 94.3,
+    "what": "recording"
+   },
+   {
+    "t_s": 103.5,
+    "what": "stopped recording"
+   },
+   {
+    "t_s": 111.1,
+    "what": "clicked close session"
+   },
+   {
+    "t_s": 111.7,
+    "what": "ws closed"
+   },
+   {
+    "t_s": 114.5,
+    "what": "report page"
+   },
+   {
+    "t_s": 114.5,
+    "what": "ws closed"
+   },
+   {
+    "t_s": 114.5,
+    "what": "disfluency section visible"
+   },
+   {
+    "t_s": 116.4,
+    "what": "analysis unavailable"
+   }
+  ],
+  "session_id": "64a4565c-f029-4358-a983-e6d69acaa06b"
+ }
+}

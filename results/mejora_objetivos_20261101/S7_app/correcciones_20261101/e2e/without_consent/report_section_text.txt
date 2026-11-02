@@ -1,0 +1,7 @@
+DISFLUENCIAS POR EVENTO (EXPERIMENTAL)
+
+No disponible: sin consentimiento para análisis de audiono_consent
+
+Puedes activar el análisis de audio para tus próximas sesiones en Privacidad.
+
+Resultado experimental, no calibrado. Perfil ASR: p0 · Alcance: muletilla, prolongación, repetición. Procedencia: mrcd.service. El audio de la sesión se analiza desde la memoria del servidor y se libera al terminar; solo se guarda este resultado.

@@ -1,0 +1,573 @@
+{
+ "id": "35a7a4f9-f708-4311-9bfb-251f85ecf826",
+ "type": "live",
+ "status": "completed",
+ "started_at": "2026-11-01T18:27:34.381000+00:00",
+ "ended_at": "2026-11-01T18:28:34.466000+00:00",
+ "duration_seconds": 60,
+ "context": {
+  "presentation_type": "Sustentación de tesis"
+ },
+ "transcript": "Buenos dias a todos. Hoy quiero presentarles el avance de mi proyecto. Este. El proyecto consiste en en en un sistema que ayuda a practicar exposiciones orales . Eh, Primero voy a explicar el problema y luego este la solución. Superíndice tres n que propongo. El problema es que muchas personas, eh, no saben k superíndice tres como mejorar su forma de hablar. Por eso, por eso quiero mostrar una herramienta sencilla, eh? Gracias por su Atencia superíndice tres n .",
+ "report": {
+  "score": 61,
+  "summary": "Tu principal oportunidad de mejora en esta sesión: Variar el tono para marcar énfasis. El tono de voz se mantuvo prácticamente plano durante el segmento, sin variaciones notorias.",
+  "strengths": [
+   {
+    "title": "Reemplazar muletillas por pausas breves",
+    "description": "Aparecieron varias muletillas (como 'eh', 'este', 'o sea') a lo largo del segmento.",
+    "dimension": "verbal_expression",
+    "evidence": "Las muletillas frecuentes distraen a la audiencia y pueden dar la impresión de que las ideas no están del todo organizadas; una pausa breve y silenciosa cumple la misma función de ganar tiempo para pensar, sin restar claridad al discurso."
+   },
+   {
+    "title": "Comunicación no verbal",
+    "description": "La detección corrió durante toda la sesión sin encontrar deficiencias en esta dimensión.",
+    "dimension": "nonverbal"
+   }
+  ],
+  "improvements": [
+   {
+    "title": "Variar el tono para marcar énfasis",
+    "description": "El tono de voz se mantuvo prácticamente plano durante el segmento, sin variaciones notorias.",
+    "dimension": "vocal_delivery",
+    "evidence": "La variación tonal ayuda a marcar las ideas importantes y evita que el discurso suene monótono; un tono plano hace que toda la información se perciba con la misma importancia, y la audiencia pierde referencias para seguir el hilo.",
+    "suggestion": "Elige la idea más importante de lo que sigue exponiendo y marca, con un cambio de tono hacia arriba o hacia abajo, el momento exacto en que la dices."
+   },
+   {
+    "title": "Proyectar la voz con más energía",
+    "description": "El volumen de la voz se mantuvo bajo durante buena parte del segmento.",
+    "dimension": "vocal_delivery",
+    "evidence": "Una voz con energía suficiente sostiene la atención de la audiencia y transmite convicción; un volumen bajo obliga a quien escucha a hacer un esfuerzo extra y puede interpretarse como falta de confianza en el contenido.",
+    "suggestion": "Retoma la idea que estabas exponiendo y repítela proyectando la voz un poco más fuerte de lo que te resulta natural, como si hablaras para el fondo de la sala."
+   }
+  ],
+  "paraverbal_metrics": {
+   "energia_vocal_baja": 0.388,
+   "variacion_tonal_baja": 0.561,
+   "muletillas_por_minuto": 0.206
+  },
+  "metrics": [
+   {
+    "metric_id": "words_per_minute",
+    "availability": "available",
+    "value": 81,
+    "confidence": null,
+    "unavailable_reason": null,
+    "windows": 0
+   },
+   {
+    "metric_id": "filler_words_count",
+    "availability": "available",
+    "value": 3,
+    "confidence": null,
+    "unavailable_reason": null,
+    "windows": 0
+   },
+   {
+    "metric_id": "filler_words_per_minute",
+    "availability": "available",
+    "value": 3,
+    "confidence": null,
+    "unavailable_reason": null,
+    "windows": 0
+   },
+   {
+    "metric_id": "pause_ratio",
+    "availability": "available",
+    "value": 0.4475,
+    "confidence": 0.5525,
+    "unavailable_reason": null,
+    "windows": 46
+   },
+   {
+    "metric_id": "mean_pause_duration",
+    "availability": "unavailable",
+    "value": null,
+    "confidence": null,
+    "unavailable_reason": "El agregado de prosodia no conserva la duración de cada pausa individual.",
+    "windows": 0
+   },
+   {
+    "metric_id": "vocal_energy",
+    "availability": "available",
+    "value": 0.0523,
+    "confidence": 0.5525,
+    "unavailable_reason": null,
+    "windows": 46
+   },
+   {
+    "metric_id": "pitch_variation",
+    "availability": "available",
+    "value": 34.4651,
+    "confidence": 0.5525,
+    "unavailable_reason": null,
+    "windows": 46
+   },
+   {
+    "metric_id": "head_orientation_ratio",
+    "availability": "available",
+    "value": 0,
+    "confidence": 0,
+    "unavailable_reason": null,
+    "windows": 43
+   },
+   {
+    "metric_id": "posture_stability",
+    "availability": "available",
+    "value": 0,
+    "confidence": 0,
+    "unavailable_reason": null,
+    "windows": 43
+   },
+   {
+    "metric_id": "gesture_presence_ratio",
+    "availability": "available",
+    "value": 0,
+    "confidence": 0,
+    "unavailable_reason": null,
+    "windows": 43
+   },
+   {
+    "metric_id": "transcript_confidence",
+    "availability": "unavailable",
+    "value": null,
+    "confidence": null,
+    "unavailable_reason": "El reconocedor de habla no reporta confianza por palabra todavía.",
+    "windows": 0
+   }
+  ],
+  "next_steps": [
+   "Elige la idea más importante de lo que sigue exponiendo y marca, con un cambio de tono hacia arriba o hacia abajo, el momento exacto en que la dices.",
+   "Retoma la idea que estabas exponiendo y repítela proyectando la voz un poco más fuerte de lo que te resulta natural, como si hablaras para el fondo de la sala."
+  ],
+  "structured_pitch": null
+ },
+ "created_at": "2026-11-01T18:27:34.381000+00:00",
+ "audio_sin_procesar_ms": null,
+ "proveniencia_asr": null,
+ "mrcd_analysis": {
+  "schema": "oratoria.mrcd-session-analysis/v1",
+  "status": "completed",
+  "binding": {
+   "gaps": [],
+   "n_chunks": 293,
+   "session_id": "35a7a4f9-f708-4311-9bfb-251f85ecf826",
+   "audio_sha256": "a2c8f25e5b397205d4ea49cb4d80dfd2604b06af0eabbcddea4d7f385e655ea3",
+   "last_sequence": 292,
+   "first_sequence": 0,
+   "t0_ms_first_chunk": 1793557656754,
+   "buffered_duration_s": 46.88
+  },
+  "consent": {
+   "text_version": "2026-11-01-draft-1"
+  },
+  "analysis": {
+   "error": null,
+   "events": [
+    {
+     "id": "ev-0001",
+     "text": null,
+     "class": "filler_word",
+     "end_s": 5,
+     "score": {
+      "kind": "max_window_softmax_score",
+      "label": "uncalibrated",
+      "value": 0.996068,
+      "calibrated": false
+     },
+     "start_s": 2.5,
+     "in_scope": true,
+     "n_windows": 5,
+     "validation": null,
+     "experimental": false,
+     "modalities_used": [
+      "acoustic",
+      "linguistic"
+     ],
+     "interval_semantics": "decision_stride_not_human_boundary"
+    },
+    {
+     "id": "ev-0002",
+     "text": null,
+     "class": "repetition",
+     "end_s": 14,
+     "score": {
+      "kind": "max_window_softmax_score",
+      "label": "uncalibrated",
+      "value": 0.995249,
+      "calibrated": false
+     },
+     "start_s": 8,
+     "in_scope": true,
+     "n_windows": 12,
+     "validation": null,
+     "experimental": false,
+     "modalities_used": [
+      "acoustic",
+      "linguistic"
+     ],
+     "interval_semantics": "decision_stride_not_human_boundary"
+    },
+    {
+     "id": "ev-0003",
+     "text": null,
+     "class": "filler_word",
+     "end_s": 21.5,
+     "score": {
+      "kind": "max_window_softmax_score",
+      "label": "uncalibrated",
+      "value": 0.921673,
+      "calibrated": false
+     },
+     "start_s": 19,
+     "in_scope": true,
+     "n_windows": 5,
+     "validation": null,
+     "experimental": false,
+     "modalities_used": [
+      "acoustic",
+      "linguistic"
+     ],
+     "interval_semantics": "decision_stride_not_human_boundary"
+    },
+    {
+     "id": "ev-0004",
+     "text": null,
+     "class": "prolongation",
+     "end_s": 23,
+     "score": {
+      "kind": "max_window_softmax_score",
+      "label": "uncalibrated",
+      "value": 0.75873,
+      "calibrated": false
+     },
+     "start_s": 22.5,
+     "in_scope": true,
+     "n_windows": 1,
+     "validation": "observable lengthening; disfluent function not demonstrated",
+     "experimental": false,
+     "modalities_used": [
+      "acoustic",
+      "linguistic"
+     ],
+     "interval_semantics": "decision_stride_not_human_boundary"
+    },
+    {
+     "id": "ev-0005",
+     "text": null,
+     "class": "repetition",
+     "end_s": 30,
+     "score": {
+      "kind": "max_window_softmax_score",
+      "label": "uncalibrated",
+      "value": 0.995652,
+      "calibrated": false
+     },
+     "start_s": 26.5,
+     "in_scope": true,
+     "n_windows": 7,
+     "validation": null,
+     "experimental": false,
+     "modalities_used": [
+      "acoustic",
+      "linguistic"
+     ],
+     "interval_semantics": "decision_stride_not_human_boundary"
+    },
+    {
+     "id": "ev-0006",
+     "text": null,
+     "class": "filler_word",
+     "end_s": 31,
+     "score": {
+      "kind": "max_window_softmax_score",
+      "label": "uncalibrated",
+      "value": 0.324198,
+      "calibrated": false
+     },
+     "start_s": 30.5,
+     "in_scope": true,
+     "n_windows": 1,
+     "validation": null,
+     "experimental": false,
+     "modalities_used": [
+      "acoustic",
+      "linguistic"
+     ],
+     "interval_semantics": "decision_stride_not_human_boundary"
+    },
+    {
+     "id": "ev-0007",
+     "text": null,
+     "class": "repetition",
+     "end_s": 31.5,
+     "score": {
+      "kind": "max_window_softmax_score",
+      "label": "uncalibrated",
+      "value": 0.655338,
+      "calibrated": false
+     },
+     "start_s": 31,
+     "in_scope": true,
+     "n_windows": 1,
+     "validation": null,
+     "experimental": false,
+     "modalities_used": [
+      "acoustic",
+      "linguistic"
+     ],
+     "interval_semantics": "decision_stride_not_human_boundary"
+    },
+    {
+     "id": "ev-0008",
+     "text": null,
+     "class": "filler_word",
+     "end_s": 37.5,
+     "score": {
+      "kind": "max_window_softmax_score",
+      "label": "uncalibrated",
+      "value": 0.808436,
+      "calibrated": false
+     },
+     "start_s": 36.5,
+     "in_scope": true,
+     "n_windows": 2,
+     "validation": null,
+     "experimental": false,
+     "modalities_used": [
+      "acoustic",
+      "linguistic"
+     ],
+     "interval_semantics": "decision_stride_not_human_boundary"
+    },
+    {
+     "id": "ev-0009",
+     "text": null,
+     "class": "filler_word",
+     "end_s": 42.5,
+     "score": {
+      "kind": "max_window_softmax_score",
+      "label": "uncalibrated",
+      "value": 0.974656,
+      "calibrated": false
+     },
+     "start_s": 40.5,
+     "in_scope": true,
+     "n_windows": 4,
+     "validation": null,
+     "experimental": false,
+     "modalities_used": [
+      "acoustic",
+      "linguistic"
+     ],
+     "interval_semantics": "decision_stride_not_human_boundary"
+    },
+    {
+     "id": "ev-0010",
+     "text": null,
+     "class": "repetition",
+     "end_s": 43,
+     "score": {
+      "kind": "max_window_softmax_score",
+      "label": "uncalibrated",
+      "value": 0.303836,
+      "calibrated": false
+     },
+     "start_s": 42.5,
+     "in_scope": true,
+     "n_windows": 1,
+     "validation": null,
+     "experimental": false,
+     "modalities_used": [
+      "acoustic",
+      "linguistic"
+     ],
+     "interval_semantics": "decision_stride_not_human_boundary"
+    }
+   ],
+   "status": "completed",
+   "request": {
+    "head": null,
+    "channels": {
+     "value": 1,
+     "available": true,
+     "unavailable_reason": null
+    },
+    "decision": false,
+    "text_route": null,
+    "asr_profile": "p0",
+    "audio_sha256": "a2c8f25e5b397205d4ea49cb4d80dfd2604b06af0eabbcddea4d7f385e655ea3",
+    "include_text": false,
+    "output_scope": "evaluated",
+    "sample_rate_hz": {
+     "value": 16000,
+     "available": true,
+     "unavailable_reason": null
+    },
+    "audio_duration_s": {
+     "value": 46.88,
+     "available": true,
+     "unavailable_reason": null
+    }
+   },
+   "summary": {
+    "n_events": 10,
+    "out_of_scope": {
+     "included": false,
+     "n_events": 11,
+     "counts_by_class": {
+      "neutral_pause": 5,
+      "rhetorical_pause": 6
+     }
+    },
+    "counts_by_class": {
+     "repetition": 4,
+     "filler_word": 5,
+     "prolongation": 1
+    },
+    "events_per_minute": {
+     "value": 12.7986,
+     "available": true,
+     "unavailable_reason": null
+    }
+   },
+   "warnings": [
+    {
+     "code": "scores_uncalibrated",
+     "message": "Scores are the maximum window softmax score of an uncalibrated model (softmax, not calibrated); they are not probabilities of correctness."
+    },
+    {
+     "code": "no_human_validation",
+     "message": "Classes are window-level decisions of a model trained with weak (heuristic) supervision; agreement with human annotation has not been established."
+    },
+    {
+     "code": "engine_provenance",
+     "message": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"
+    },
+    {
+     "code": "out_of_scope_hidden",
+     "message": "Classes outside the evaluated scope (no compatible human reference) were detected and hidden: neutral_pause=5, rhetorical_pause=6. They are not counted in totals or rates."
+    }
+   ],
+   "modalities": {
+    "acoustic": {
+     "reason": null,
+     "available": true
+    },
+    "linguistic": {
+     "reason": null,
+     "available": true
+    },
+    "kinesic_video": {
+     "reason": "service v1 receives audio only; no video was provided or processed",
+     "available": false
+    }
+   },
+   "provenance": {
+    "asr": {
+     "model": {
+      "device": "cpu",
+      "model_size": "small",
+      "compute_type": "int8",
+      "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671"
+     },
+     "decode": {
+      "beam_size": 5,
+      "vad_filter": false,
+      "temperature": 0,
+      "word_timestamps": true,
+      "chunk_s_requested": 8,
+      "condition_on_previous_text": false
+     },
+     "profile": "p0",
+     "language": "es",
+     "anomalies": [],
+     "validation": null,
+     "experimental": false,
+     "profile_fingerprint": "6d6423d8738edea482b7ed1009ac85d23ca206702348843dc81c0359c417579b",
+     "initial_prompt_sha256": "bd0bddb4329c6c75e2dd7c0b21366a418cc23314f8155357401a1577853b19fa"
+    },
+    "head": null,
+    "config": {
+     "span": null,
+     "stride_s": 0.5,
+     "window_s": 3,
+     "asr_chunk_s": 8,
+     "terminal_window": false
+    },
+    "service": {
+     "name": "mrcd.service",
+     "contract": "mrcd.analysis/v1",
+     "mrcd_version": "0.3.0",
+     "contract_revision": "1.2"
+    },
+    "checkpoint": {
+     "file": "ckpt_audio_text.pt",
+     "mode": "audio_text",
+     "labels": [
+      "fluent",
+      "filler_word",
+      "prolongation",
+      "repetition",
+      "block",
+      "revision",
+      "rhetorical_pause",
+      "neutral_pause"
+     ],
+     "sha256": "87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669",
+     "checkpoint_notice": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"
+    },
+    "environment": {
+     "asr": {
+      "device": "cpu",
+      "model_size": "small",
+      "compute_type": "int8"
+     },
+     "numpy": "2.5.3",
+     "python": "3.12.10",
+     "platform": "Windows-11-10.0.26200-SP0",
+     "effective": true,
+     "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+     "cpu_threads": {
+      "torch": 1,
+      "asr_cpu_threads_arg": 0
+     },
+     "ctranslate2": "4.8.2",
+     "faster_whisper": "1.2.1",
+     "omp_num_threads": "4",
+     "set_before_numpy": true,
+     "cpu_count_logical": 20,
+     "omp_pin_opted_out": false,
+     "assigned_after_import": false,
+     "environment_is_pinned": true,
+     "numpy_imported_before_mrcd": false,
+     "omp_num_threads_at_mrcd_import": "4"
+    }
+   },
+   "transcript": null,
+   "experimental": {
+    "active": false,
+    "components": []
+   },
+   "generated_at": "2026-11-01T18:28:48+00:00",
+   "head_decision": null,
+   "schema_version": "mrcd.analysis/v1"
+  },
+  "calibrated": false,
+  "provenance": {
+   "source": "mrcd.service",
+   "privacy": "audio kept in server memory only while the session runs and the analysis is submitted, then released; only this JSON result is stored",
+   "contract": "mrcd.analysis/v1"
+  },
+  "updated_at": "2026-11-01T18:28:49.582118+00:00",
+  "asr_profile": "p0",
+  "unavailable": null,
+  "output_scope": "evaluated",
+  "calibration_note": "Experimental and not calibrated: scores are raw softmax values, not probabilities.",
+  "classes_in_scope": [
+   "filler_word",
+   "prolongation",
+   "repetition"
+  ]
+ }
+}

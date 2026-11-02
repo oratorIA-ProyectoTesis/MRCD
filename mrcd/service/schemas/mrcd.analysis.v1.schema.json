@@ -158,18 +158,29 @@
           "enum": [
             "analysis_failed",
             "asr_unavailable",
+            "audio_gap",
             "audio_not_finite",
             "audio_not_mono",
             "audio_too_long",
             "audio_too_short",
+            "batch_too_large",
             "checkpoint_unavailable",
+            "close_mismatch",
             "engine_load_failed",
             "head_unavailable",
+            "incremental_disabled",
             "invalid_audio_file",
             "invalid_request",
             "job_not_found",
+            "offset_mismatch",
             "payload_too_large",
+            "profile_not_supported_incremental",
             "queue_full",
+            "sequence_conflict",
+            "session_closed",
+            "session_expired",
+            "session_limit",
+            "session_not_found",
             "unsupported_audio_format",
             "unsupported_sample_rate"
           ]
@@ -212,6 +223,12 @@
           "type": [
             "string",
             "null"
+          ]
+        },
+        "decision_profile": {
+          "enum": [
+            "v0",
+            "o2026_11"
           ]
         },
         "audio_sha256": {
@@ -425,7 +442,8 @@
               "enum": [
                 "max_window_softmax_score",
                 "max_window_class_probability",
-                "text_route_logistic_score"
+                "text_route_logistic_score",
+                "unit_pipeline_model_score"
               ]
             },
             "calibrated": {
@@ -773,6 +791,51 @@
             "object",
             "null"
           ]
+        },
+        "decision_profile": {
+          "$ref": "#/$defs/decision_profile"
+        }
+      }
+    },
+    "decision_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "status",
+        "classes",
+        "calibration_claim"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "v0",
+            "o2026_11"
+          ]
+        },
+        "status": {
+          "enum": [
+            "historical",
+            "exploratory"
+          ]
+        },
+        "classes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
+        },
+        "calibration_claim": {
+          "const": "none"
+        },
+        "pipelines_verified": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "note": {
+          "type": "string"
         }
       }
     },

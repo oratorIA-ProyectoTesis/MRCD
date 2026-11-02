@@ -1,0 +1,239 @@
+{
+ "error": null,
+ "events": [
+  {
+   "class": "filler_word",
+   "decision": {
+    "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
+    "calibration_claim": "none",
+    "estimate": 0.484779,
+    "hi": 0.382859,
+    "lo": 0.24,
+    "state": "present"
+   },
+   "end_s": 2.0,
+   "experimental": false,
+   "id": "ev-0001",
+   "in_scope": true,
+   "interval_semantics": "decision_stride_not_human_boundary",
+   "modalities_used": [
+    "acoustic",
+    "linguistic"
+   ],
+   "n_windows": 2,
+   "score": {
+    "calibrated": false,
+    "kind": "max_window_softmax_score",
+    "label": "uncalibrated",
+    "value": 0.8
+   },
+   "start_s": 1.0,
+   "text": null,
+   "validation": null
+  },
+  {
+   "class": "prolongation",
+   "decision": {
+    "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
+    "calibration_claim": "none",
+    "estimate": 0.65341,
+    "hi": 0.473117,
+    "lo": 0.3,
+    "state": "present"
+   },
+   "end_s": 4.0,
+   "experimental": false,
+   "id": "ev-0002",
+   "in_scope": true,
+   "interval_semantics": "decision_stride_not_human_boundary",
+   "modalities_used": [
+    "acoustic",
+    "linguistic"
+   ],
+   "n_windows": 2,
+   "score": {
+    "calibrated": false,
+    "kind": "max_window_softmax_score",
+    "label": "uncalibrated",
+    "value": 0.7
+   },
+   "start_s": 3.0,
+   "text": null,
+   "validation": "observable lengthening; disfluent function not demonstrated"
+  },
+  {
+   "class": "repetition",
+   "decision": {
+    "basis": "platt_fit_on_dihana_folds_1_4_cross_fitted_band_experimental",
+    "calibration_claim": "none",
+    "estimate": 0.25461,
+    "hi": 0.793564,
+    "lo": 0.28,
+    "state": "absent"
+   },
+   "end_s": 6.0,
+   "experimental": false,
+   "id": "ev-0003",
+   "in_scope": true,
+   "interval_semantics": "decision_stride_not_human_boundary",
+   "modalities_used": [
+    "acoustic",
+    "linguistic"
+   ],
+   "n_windows": 2,
+   "score": {
+    "calibrated": false,
+    "kind": "max_window_softmax_score",
+    "label": "uncalibrated",
+    "value": 0.6
+   },
+   "start_s": 5.0,
+   "text": null,
+   "validation": null
+  },
+  {
+   "class": "block",
+   "end_s": 8.0,
+   "experimental": true,
+   "id": "ev-0004",
+   "in_scope": false,
+   "interval_semantics": "decision_stride_not_human_boundary",
+   "modalities_used": [
+    "acoustic",
+    "linguistic"
+   ],
+   "n_windows": 2,
+   "score": {
+    "calibrated": false,
+    "kind": "max_window_softmax_score",
+    "label": "uncalibrated",
+    "value": 0.5
+   },
+   "start_s": 7.0,
+   "text": null,
+   "validation": "out_of_scope_unvalidated"
+  }
+ ],
+ "experimental": {
+  "active": true,
+  "components": [
+   "decision:three_state"
+  ]
+ },
+ "head_decision": null,
+ "modalities": {
+  "acoustic": {
+   "available": true,
+   "reason": null
+  },
+  "kinesic_video": {
+   "available": false,
+   "reason": "service v1 receives audio only; no video was provided or processed"
+  },
+  "linguistic": {
+   "available": true,
+   "reason": null
+  }
+ },
+ "provenance": {
+  "asr": {
+   "anomalies": [],
+   "decode": {
+    "beam_size": null,
+    "chunk_s_requested": null,
+    "condition_on_previous_text": null,
+    "temperature": null,
+    "vad_filter": null,
+    "word_timestamps": null
+   },
+   "experimental": false,
+   "initial_prompt_sha256": null,
+   "language": null,
+   "model": {},
+   "profile": "p0",
+   "profile_fingerprint": null,
+   "validation": null
+  },
+  "checkpoint": null,
+  "config": {},
+  "environment": null,
+  "head": null,
+  "service": {
+   "contract": "mrcd.analysis/v1",
+   "name": "mrcd.service"
+  }
+ },
+ "request": {
+  "asr_profile": "p0",
+  "audio_duration_s": {
+   "available": true,
+   "unavailable_reason": null,
+   "value": 20.0
+  },
+  "audio_sha256": null,
+  "channels": {
+   "available": true,
+   "unavailable_reason": null,
+   "value": 1
+  },
+  "decision": true,
+  "head": null,
+  "include_text": true,
+  "output_scope": "all",
+  "sample_rate_hz": {
+   "available": true,
+   "unavailable_reason": null,
+   "value": 16000
+  },
+  "text_route": null
+ },
+ "schema_version": "mrcd.analysis/v1",
+ "status": "completed",
+ "summary": {
+  "counts_by_class": {
+   "filler_word": 1,
+   "prolongation": 1,
+   "repetition": 1
+  },
+  "events_per_minute": {
+   "available": true,
+   "unavailable_reason": null,
+   "value": 9.0
+  },
+  "n_events": 3,
+  "out_of_scope": {
+   "counts_by_class": {
+    "block": 1
+   },
+   "included": true,
+   "n_events": 1
+  }
+ },
+ "transcript": "eh",
+ "warnings": [
+  {
+   "code": "scores_uncalibrated",
+   "message": "Scores are the maximum window softmax score of an uncalibrated model (softmax, not calibrated); they are not probabilities of correctness."
+  },
+  {
+   "code": "no_human_validation",
+   "message": "Classes are window-level decisions of a model trained with weak (heuristic) supervision; agreement with human annotation has not been established."
+  },
+  {
+   "code": "engine_provenance",
+   "message": "weak supervision"
+  },
+  {
+   "code": "out_of_scope_included",
+   "message": "Events of classes outside the evaluated scope are included on explicit request, marked out_of_scope_unvalidated and excluded from totals and rates."
+  },
+  {
+   "code": "class_block_not_measurable",
+   "message": "The 'block' class is not measurable with the development corpus (n=2); there is no evidence that a 'block' event is correct."
+  },
+  {
+   "code": "experimental_components",
+   "message": "Experimental, opt-in components were used: decision:three_state. They are not validated outside their development corpus."
+  }
+ ]
+}

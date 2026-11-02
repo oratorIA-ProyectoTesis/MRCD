@@ -1,0 +1,3 @@
+# Annex 2026-11-01 (2): progress logging and detached launch (no protocol change)
+* The first full launch died silently when its parent shell ended (no traceback; log only held the header line). Relaunched as a detached hidden process (PowerShell Start-Process, stdout/stderr to run_classes.log / run_classes.err); runs are resumable per fold.
+* Code change after freezing: `mrcd/optimize/search.py` now prints one progress line per evaluated configuration (no change to selection logic). New sha256 (LF-normalised): 639b2acfbb9bb1ac9ec1b4db59ff24607423e72ce949a264b3268aea17d2ddf9. Tests: tests/test_o_campaign_search.py 8 passed.

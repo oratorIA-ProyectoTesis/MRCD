@@ -1,0 +1,3 @@
+# sha256-pinned service artifacts must keep their exact bytes on every platform
+mrcd/service/profiles/** -text
+tests/data/v0_frozen_document.json -text

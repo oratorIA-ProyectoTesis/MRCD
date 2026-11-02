@@ -6,7 +6,8 @@ Run (repo root, standard library only, no network, no browser, no Node):
 
 Writes c4_1_context / c4_2_containers / c4_3_components / c4_4_code as .mmd (Mermaid flowchart source) and .svg.
 The SVG is produced by this script (hand-rolled layout, absolute coordinates stored below); the .mmd files are
-generated from the SAME model, but no Mermaid renderer exists on this machine, so the .mmd were NOT render-tested.
+generated from the SAME model. Two sequence diagrams (seq_b_original / seq_b_incremental) are emitted as Mermaid
+sequenceDiagram sources only; render them with render_sequences.sh (compile-check every .mmd with render_mermaid_check.sh).
 Nothing here is random: same model -> byte-identical output.
 
 Conventions
@@ -15,7 +16,9 @@ Conventions
 * kind="app"      : exists in ORATORIA-PROYECTO (separate repo, read-only inspection) -- green.
 * kind="external" : third party / data not owned by either repo -- grey.
 * kind="person"   : human actor -- yellow.
-* kind="proposed" : does NOT exist; part of the proposed integration -- dashed orange.
+* kind="proposed" : does NOT exist; kept in the legend only (no proposed node or edge remains).
+* Title tags: [PRODUCT] on the default path; [OPT-IN] reachable only by an explicit flag/parameter; [RESEARCH] kit
+  or experiment that no product path imports.
 * edge style: "sync" (request/response), "live" (live/streaming path), "offline" (batch path),
   "data" (file/model read), "proposed" (not implemented).
 * edge `check="import"`: verify_architecture.py must find an import between the two components' modules.
@@ -73,7 +76,7 @@ DIAGRAMS = {}
 
 # ---- Level 1: system context -----------------------------------------------------------------
 DIAGRAMS["c4_1_context"] = dict(
-    title="C4 level 1 - System context (as inspected)",
+    title="C4 level 1 - System context (current: MRCD service integrated in the app on feat/mrcd-integration)",
     width=1200,
     height=700,
     groups=[
@@ -88,7 +91,7 @@ DIAGRAMS["c4_1_context"] = dict(
         ),
         G(
             "cloud",
-            "Third-party cloud (audio leaves the machine)",
+            "Third-party cloud",
             910,
             40,
             270,
@@ -101,7 +104,7 @@ DIAGRAMS["c4_1_context"] = dict(
             "speaker",
             "Speaker",
             "Person",
-            "Records a speech with microphone and camera in the browser. Does not see MRCD output today.",
+            "Records a speech with microphone and camera in the browser. Sees the MRCD disfluency section in the report only after an explicit, versioned opt-in.",
             40,
             100,
             210,
@@ -112,7 +115,7 @@ DIAGRAMS["c4_1_context"] = dict(
             "researcher",
             "Researcher / advisor",
             "Person",
-            "Runs MRCD scripts and the live demo and reads results. OE1/OE2 approval is PENDING (no signature).",
+            "Runs MRCD scripts, the service and the live demo and reads results. Advisor approvals are PENDING (no signature).",
             40,
             420,
             210,
@@ -123,7 +126,7 @@ DIAGRAMS["c4_1_context"] = dict(
             "app",
             "ORATORIA-PROYECTO web app",
             "Software system (separate repo)",
-            "Practice sessions and report. Embeds ORATORIA-ENGINE v0 (3 classes). It does NOT call MRCD.",
+            "Practice sessions and report. Embeds ORATORIA-ENGINE v0 and, on branch feat/mrcd-integration (published, not merged), calls the MRCD service for consenting accounts.",
             380,
             100,
             250,
@@ -133,8 +136,8 @@ DIAGRAMS["c4_1_context"] = dict(
         N(
             "mrcd",
             "MRCD engine (this repo)",
-            "Software system, Python 0.3.0",
-            "Experimental 7-class window classifier over audio and ASR text. Offline files and live replay. Scores are not calibrated.",
+            "Software system, Python package mrcd",
+            "Experimental 7-class window classifier over audio and ASR text. Local HTTP service (offline jobs + incremental sessions), library, live replay. Scores are not calibrated.",
             380,
             420,
             250,
@@ -165,9 +168,9 @@ DIAGRAMS["c4_1_context"] = dict(
         ),
         N(
             "asr",
-            "Cloud ASR providers",
-            "External (optional)",
-            "Speechmatics, Deepgram or managed ASR, only if selected by ORATORIA_ASR_ADAPTER. Default is simulado.",
+            "Cloud ASR and LLM providers",
+            "External (as configured)",
+            "Configuration used: Speechmatics ASR (session audio) and OpenAI LLM (transcript text). Local alternative: Whisper + Ollama, the local compose default.",
             940,
             100,
             220,
@@ -177,24 +180,28 @@ DIAGRAMS["c4_1_context"] = dict(
     ],
     edges=[
         E("speaker", "app", "Speaks; audio and video captured in the browser"),
-        E("app", "asr", "Audio PCM16 (only if a cloud adapter is selected)"),
+        E(
+            "app",
+            "asr",
+            "Session audio (ASR) and transcript text (LLM) leave the machine",
+        ),
         E("researcher", "mrcd", "Runs scripts, demo, tests", "offline"),
         E("mrcd", "corpora", "Reads (offline)", "data"),
         E("mrcd", "models", "Loads", "data"),
         E(
             "app",
             "mrcd",
-            "PROPOSED integration, not implemented: local file-in / JSON-out",
-            "proposed",
+            "WAV in memory over loopback HTTP (offline job or incremental batches); counts-only SSE back",
+            "live",
         ),
     ],
 )
 
 # ---- Level 2: containers ---------------------------------------------------------------------
 DIAGRAMS["c4_2_containers"] = dict(
-    title="C4 level 2 - Containers (as inspected; proposed integration dashed orange)",
+    title="C4 level 2 - Containers (current; app side = branch feat/mrcd-integration, read-only inspection)",
     width=1640,
-    height=1180,
+    height=1270,
     groups=[
         G(
             "browser",
@@ -213,7 +220,7 @@ DIAGRAMS["c4_2_containers"] = dict(
             20,
             720,
             1600,
-            440,
+            530,
             True,
         ),
     ],
@@ -222,14 +229,17 @@ DIAGRAMS["c4_2_containers"] = dict(
             "spa",
             "Web SPA",
             "React 19, Vite, AudioWorklet, MediaPipe worker",
-            "getUserMedia mono; PCM16 16 kHz 160 ms chunks; vision and prosody summaries (~1/s); report UI. No video upload.",
+            "getUserMedia mono; PCM16 16 kHz 160 ms chunks; vision and prosody summaries (~1/s); opt-in consent UI; ReportPage with the MRCD section (3 classes by default); progress via fetch + Bearer SSE. No video upload.",
             50,
             90,
             320,
             "app",
             "browser",
             app_paths=[
-                "frontend/src/contexts/speech-analysis/hooks/use-audio-capture.ts"
+                "frontend/src/contexts/speech-analysis/hooks/use-audio-capture.ts",
+                "frontend/src/shared/api/mrcd-progress.ts",
+                "frontend/src/shared/api/mrcd-consent.ts",
+                "frontend/src/contexts/feedback/components/DisfluencyEventsSection.tsx",
             ],
         ),
         N(
@@ -248,7 +258,7 @@ DIAGRAMS["c4_2_containers"] = dict(
             "api",
             "Backend API",
             "FastAPI, WS /ws/session, REST /api/v1/sessions",
-            "Authenticates, frames audio, runs the ASR port, closes segments, stores transcript and report.",
+            "Authenticates, frames audio, runs the ASR port, closes segments, stores transcript and report. Hands the session PCM to the MRCD integration only for accounts with an active consent.",
             550,
             90,
             700,
@@ -260,7 +270,7 @@ DIAGRAMS["c4_2_containers"] = dict(
             "asrport",
             "ASR adapter port",
             "SpeechRecognizer port",
-            "ORATORIA_ASR_ADAPTER: simulado (default), gestionado, whisper_http, speechmatics, deepgram, oratoria_engine.",
+            "ORATORIA_ASR_ADAPTER: speechmatics (configuration used), whisper_http (local compose default), simulado (code default), gestionado, deepgram, oratoria_engine.",
             550,
             290,
             230,
@@ -280,10 +290,31 @@ DIAGRAMS["c4_2_containers"] = dict(
             "backend",
         ),
         N(
+            "mrcdint",
+            "MRCD integration (platform/mrcd)",
+            "Python, in-process in the backend",
+            "Versioned opt-in consent; SessionAudioBuffer in RAM only (option B); capacity limits; mode incremental (default since app commit 960c351) | offline (fallback) | incremental_verify; HttpMrcdClient; IncrementalUploader (B incremental); result allow-list (text always null); ProgressHub SSE (counts only) behind the app's Bearer auth. Falls back to the offline job on any incremental failure.",
+            820,
+            440,
+            430,
+            "app",
+            "backend",
+            app_paths=[
+                "backend/src/oratoria/platform/mrcd/analysis.py",
+                "backend/src/oratoria/platform/mrcd/audio_buffer.py",
+                "backend/src/oratoria/platform/mrcd/incremental.py",
+                "backend/src/oratoria/platform/mrcd/client.py",
+                "backend/src/oratoria/platform/mrcd/consent.py",
+                "backend/src/oratoria/platform/mrcd/progress.py",
+                "backend/src/oratoria/platform/mrcd/result_schema.py",
+                "backend/src/oratoria/bootstrap/mrcd_http.py",
+            ],
+        ),
+        N(
             "db",
             "PostgreSQL",
             "Database",
-            "Sessions, transcript, report. No raw-audio persistence found on the WS path.",
+            "Sessions, transcript, report, consent decision (date + text version) and the sanitized MRCD document. No raw-audio persistence.",
             1000,
             290,
             250,
@@ -306,24 +337,40 @@ DIAGRAMS["c4_2_containers"] = dict(
         ),
         N(
             "svc",
-            "MRCD service (dev server + CLI)",
+            "[PRODUCT] MRCD service (offline jobs + CLI)",
             "mrcd/service, FastAPI loopback :8765 / CLI",
-            "File in, JSON out, contract mrcd.analysis/v1. No auth, loopback only. Added in commit 955d27c after the first inspection; the app has no client for it.",
-            750,
+            "GET /v1/health, /v1/schema; POST /v1/jobs + GET /v1/jobs/{id} (offline reference and the app's fallback); contract mrcd.analysis/v1. One engine worker thread, priority queue. No auth, loopback only. Preloads enabled ASR profiles and optionally warms up at start.",
+            700,
             770,
-            300,
+            330,
             "current",
             "mrcdp",
-            modules=["mrcd/service/"],
+            modules=[
+                "mrcd/service/server.py",
+                "mrcd/service/analyzer.py",
+                "mrcd/service/cli.py",
+            ],
+        ),
+        N(
+            "incr",
+            "[OPT-IN] Incremental sessions",
+            "mrcd/service/incremental, /v1/sessions",
+            "POST /v1/sessions (returns subscription_token once); PUT /audio/{seq} (idempotent PCM16 batches); POST /close; GET /events (SSE, counts only); GET state; DELETE. Per-session ChunkCache of 8 s ASR fragments. Profiles p0/p1 on CPU only; noloop and cuda are refused (offline job instead).",
+            1060,
+            770,
+            440,
+            "current",
+            "mrcdp",
+            modules=["mrcd/service/incremental/"],
         ),
         N(
             "lib",
             "mrcd library",
             "Python package mrcd 0.3.0",
-            "DisfluencyEngine.load/analyze/analyze_file -> AnalysisResult(Event, Window). Only supported entry; everything else is internal.",
-            750,
-            920,
-            300,
+            "DisfluencyEngine.load/analyze/analyze_file -> AnalysisResult(Event, Window). Only supported entry; everything else is internal. Also holds the opt-in and research packages (av, optimize, context_ambiguity, recording_check, calibration, fusion_text), see level 3.",
+            700,
+            940,
+            330,
             "current",
             "mrcdp",
             modules=["mrcd/"],
@@ -357,9 +404,9 @@ DIAGRAMS["c4_2_containers"] = dict(
             "Model artifacts",
             "Files",
             "models/ckpt_audio_text.pt, Vc head (sha256 pinned), faster-whisper small cache.",
-            750,
-            1070,
-            300,
+            700,
+            1130,
+            330,
             "external",
             "mrcdp",
             modules=["models/ckpt_audio_text.pt"],
@@ -381,9 +428,39 @@ DIAGRAMS["c4_2_containers"] = dict(
         E("rec", "spa", "local reference only", "data"),
         E("api", "asrport", "audio chunks", "live"),
         E("asrport", "engine0", "adapter oratoria_engine", "live"),
-        E("asrport", "cloudasr", "audio (cloud adapter only)", "live", via=[(1000, 255), (1290, 255), (1290, 130)]),
+        E(
+            "asrport",
+            "cloudasr",
+            "audio (cloud adapter only)",
+            "live",
+            via=[(1000, 255), (1290, 255), (1290, 130)],
+        ),
         E("api", "db", "persist"),
-        E("api", "svc", "PROPOSED: app client does not exist", "proposed"),
+        E(
+            "api",
+            "mrcdint",
+            "PCM chunks (consenting accounts)",
+            "live",
+            via=[(790, 300), (790, 420)],
+        ),
+        E("mrcdint", "db", "sanitized document", "data"),
+        E(
+            "mrcdint",
+            "spa",
+            "SSE: status and counts only",
+            "live",
+            via=[(790, 640), (470, 640), (470, 200)],
+        ),
+        E("mrcdint", "svc", "offline: POST /v1/jobs, poll (loopback)", "offline"),
+        E(
+            "mrcdint",
+            "incr",
+            "incremental: /v1/sessions, token header",
+            "live",
+            via=[(1270, 600), (1270, 760)],
+        ),
+        E("svc", "incr", "mounts session routes", "sync", "import"),
+        E("incr", "lib", "engine on the shared worker", "sync", "import"),
         E("svc", "lib", "in-process call", "sync", "import"),
         E("demo", "lib", "LiveScorer rows", "live", "import"),
         E("scripts", "lib", "analyze_file, feature code", "offline", "import"),
@@ -397,13 +474,29 @@ _ROWS = [90, 260, 430, 600, 770, 940]
 DIAGRAMS["c4_3_components"] = dict(
     title="C4 level 3 - Components of the mrcd package (edges = observed imports unless noted)",
     width=1840,
-    height=1500,
+    height=2080,
     groups=[
         G("feat", "Feature extraction (shared by offline and live)", 20, 40, 340, 1070),
         G("api", "Public API and constants", 700, 40, 300, 700),
         G("model", "Model, ASR profile and head", 1080, 40, 340, 1070),
         G("kit", "Research kits (not imported by the engine)", 1460, 40, 340, 790),
         G("live", "Live path (testable without a microphone)", 20, 1140, 1420, 340),
+        G(
+            "svcinc",
+            "Service: decision profile (default), incremental sessions and opt-in text route",
+            20,
+            1510,
+            900,
+            540,
+        ),
+        G(
+            "optin",
+            "Research and opt-in packages (the service imports only optimize.safe_pipeline, via decision_profile)",
+            950,
+            1510,
+            850,
+            540,
+        ),
     ],
     nodes=[
         N(
@@ -504,15 +597,24 @@ DIAGRAMS["c4_3_components"] = dict(
         ),
         N(
             "service",
-            "Service surface",
-            "service/*",
-            "analyzer.py, contract.py (mrcd.analysis/v1), server.py (dev), cli.py. Wraps DisfluencyEngine; not imported by the engine.",
+            "[PRODUCT] Service surface",
+            "service/{analyzer,contract,server,cli,audio_io,validate}.py",
+            "Offline job API on loopback (mrcd.analysis/v1, ASR profile and options per request). Wraps DisfluencyEngine; not imported by the engine.",
             720,
             560,
             260,
             "current",
             "api",
-            modules=["mrcd/service/"],
+            modules=[
+                "mrcd/service/analyzer.py",
+                "mrcd/service/audio_io.py",
+                "mrcd/service/cli.py",
+                "mrcd/service/contract.py",
+                "mrcd/service/server.py",
+                "mrcd/service/validate.py",
+                "mrcd/service/__init__.py",
+                "mrcd/service/__main__.py",
+            ],
         ),
         N(
             "fusion",
@@ -566,7 +668,7 @@ DIAGRAMS["c4_3_components"] = dict(
             "profiles",
             "ASR profiles",
             "asr_profiles.py",
-            "p0 (default), p1_disfluent_prompt (experimental), fingerprint, anomaly heuristics.",
+            "p0 (default); opt-in experimental: p1_disfluent_prompt, p0/p1_noloop (loop re-decode, not bit-reproducible), p0/p1_cuda; fingerprint, asr_cache_key, anomaly heuristics.",
             1100,
             _ROWS[4],
             300,
@@ -694,18 +796,200 @@ DIAGRAMS["c4_3_components"] = dict(
             "live",
             modules=["mrcd/live/window_builder.py"],
         ),
+        N(
+            "incr",
+            "[OPT-IN] Incremental session",
+            "service/incremental/{session,routes,plan}.py",
+            "SessionRegistry/IncrementalSession (token, seq gap check, byte budget, idle sweep), /v1/sessions routes, integer chunk plan (8 s fragments, 6 s step). Close reruns the OFFLINE path over the canonical WAV.",
+            40,
+            1540,
+            270,
+            "current",
+            "svcinc",
+            modules=[
+                "mrcd/service/incremental/session.py",
+                "mrcd/service/incremental/routes.py",
+                "mrcd/service/incremental/plan.py",
+                "mrcd/service/incremental/__init__.py",
+            ],
+        ),
+        N(
+            "ccache",
+            "[OPT-IN] Chunk cache + CachedASR",
+            "service/incremental/{cache,cached_asr}.py",
+            "In-memory per-session cache keyed by ASR namespace, position and sha256 of the fragment; CachedASR inherits the unchanged transcribe_chunked, so a miss only costs latency. Never persisted.",
+            330,
+            1540,
+            270,
+            "current",
+            "svcinc",
+            modules=[
+                "mrcd/service/incremental/cache.py",
+                "mrcd/service/incremental/cached_asr.py",
+            ],
+        ),
+        N(
+            "warm",
+            "[PRODUCT] Preload and warm-up",
+            "service/incremental/warmup.py",
+            "One analysis of a fixed synthetic 13 s signal per preloaded profile, result discarded; makes process state identical for offline and incremental runs.",
+            620,
+            1540,
+            270,
+            "current",
+            "svcinc",
+            modules=["mrcd/service/incremental/warmup.py"],
+        ),
+        N(
+            "s3feat",
+            "[OPT-IN] S3 service features",
+            "service/s3_features.py",
+            "Experimental P1 text route and optional three-state decision; calibration_claim none; only when requested.",
+            40,
+            1710,
+            270,
+            "current",
+            "svcinc",
+            modules=["mrcd/service/s3_features.py"],
+        ),
+        N(
+            "dprof",
+            "[DEFAULT] Decision profile o2026_11",
+            "service/decision_profile.py",
+            "Service default (contract rev 1.4): filler_word / prolongation from the O-campaign pipelines on pause-delimited ASR segments; repetition keeps the engine decision. sha256-pinned plain-JSON artifacts, no pickle. v0 = historical, explicit.",
+            40,
+            1880,
+            270,
+            "current",
+            "svcinc",
+            modules=["mrcd/service/decision_profile.py"],
+        ),
+        N(
+            "fustext",
+            "[OPT-IN] Text fusion route",
+            "fusion_text.py",
+            "Weighted LR text route (ctx_LR), rule+model fusion, serialisable route artifact.",
+            330,
+            1710,
+            270,
+            "current",
+            "svcinc",
+            modules=["mrcd/fusion_text.py"],
+        ),
+        N(
+            "calib",
+            "[OPT-IN] Score calibration",
+            "calibration.py",
+            "Platt/isotonic, grouped cross-fitting, Brier/ECE, three-state decision. A score is not called calibrated without a separated check.",
+            620,
+            1710,
+            270,
+            "current",
+            "svcinc",
+            modules=["mrcd/calibration.py"],
+        ),
+        N(
+            "av",
+            "[RESEARCH] A/V evidence gate",
+            "av/*",
+            "Technical admission gate (active speaker, identity, synchrony) and observable lip/face traits. Absence is an exclusion with a reason, never 0. No psychological inference.",
+            970,
+            1540,
+            260,
+            "current",
+            "optin",
+            modules=["mrcd/av/"],
+        ),
+        N(
+            "recchk",
+            "[OPT-IN] Recording check kit",
+            "recording_check/*",
+            "Technical validation of own recordings (video gate, AV sync, microphone, robustness). Produces no accuracy evidence; reads no labels.",
+            1250,
+            1540,
+            260,
+            "current",
+            "optin",
+            modules=["mrcd/recording_check/"],
+        ),
+        N(
+            "ctxamb",
+            "[RESEARCH] Context ambiguity",
+            "context_ambiguity/*",
+            "Occurrences of ambiguous forms in DIHANA turns; reference kept apart from the input view.",
+            1530,
+            1540,
+            250,
+            "current",
+            "optin",
+            modules=["mrcd/context_ambiguity/"],
+        ),
+        N(
+            "optim",
+            "[RESEARCH] Classifier optimisation",
+            "optimize/*",
+            "Nested speaker-grouped search for filler/prolongation/repetition classifiers; product_pipeline packages them hash-verified as pickles (opt-in, DEFAULT_PIPELINE False); safe_pipeline exports the LR ones to JSON, which the service profile o2026_11 loads.",
+            970,
+            1710,
+            260,
+            "current",
+            "optin",
+            modules=["mrcd/optimize/"],
+        ),
     ],
     edges=[
         E("pub", "consts", "constants", "offline", "import"),
         E("service", "pub", "DisfluencyEngine", "sync", "import"),
+        E(
+            "service",
+            "incr",
+            "mounts /v1/sessions routes",
+            "sync",
+            "import",
+            via=[(690, 740), (175, 1500)],
+        ),
+        E("incr", "ccache", "CachedASR, ChunkCache", "sync", "import"),
+        E("s3feat", "fustext", "TextRoute", "sync", "import"),
+        E("dprof", "optim", "safe_pipeline (JSON)", "sync", "import"),
+        E("dprof", "s3feat", "segments_from_words", "sync", "import"),
+        E("recchk", "av", "gate + evidence", "sync", "import"),
+        E("optim", "calib", "CAL", "sync", "import"),
         E("pub", "acoustic", "extract_acoustic", "offline", "import"),
         E("pub", "prosody", "prosody_windows", "offline", "import"),
         E("pub", "windows", "window tensors", "offline", "import"),
-        E("pub", "ling", "VerbatimASR", "offline", "import", via=[(640, 600), (520, 995)]),
+        E(
+            "pub",
+            "ling",
+            "VerbatimASR",
+            "offline",
+            "import",
+            via=[(640, 600), (520, 995)],
+        ),
         E("pub", "infer", "predict", "offline", "import"),
-        E("pub", "head", "opt-in Vc (lazy import)", "offline", "import", via=[(1040, 485)]),
-        E("pub", "profiles", "profile + anomalies", "offline", "import", via=[(1000, 480), (1040, 825)]),
-        E("pub", "repro", "environment record", "offline", "import", via=[(1000, 480), (1040, 995)]),
+        E(
+            "pub",
+            "head",
+            "opt-in Vc (lazy import)",
+            "offline",
+            "import",
+            via=[(1040, 485)],
+        ),
+        E(
+            "pub",
+            "profiles",
+            "profile + anomalies",
+            "offline",
+            "import",
+            via=[(1000, 480), (1040, 825)],
+        ),
+        E(
+            "pub",
+            "repro",
+            "environment record",
+            "offline",
+            "import",
+            via=[(1000, 480), (1040, 995)],
+        ),
         E("infer", "fusion", "builds the net", "offline", "import"),
         E("head", "infer", "BATCH_KEYS", "offline", "import"),
         E("windows", "prosody", "speaker_f0_center", "offline", "import"),
@@ -729,7 +1013,7 @@ DIAGRAMS["c4_3_components"] = dict(
 DIAGRAMS["c4_4_code"] = dict(
     title="C4 level 4 - Code: central types and entry points (every symbol verified by AST)",
     width=1800,
-    height=1000,
+    height=1180,
     groups=[
         G(
             "batch",
@@ -741,6 +1025,14 @@ DIAGRAMS["c4_4_code"] = dict(
         ),
         G("livep", "Live path: mrcd/live/*", 950, 40, 830, 560),
         G("aux", "ASR, head and network", 20, 640, 1760, 200),
+        G(
+            "incg",
+            "Incremental sessions: mrcd/service/incremental/* (server) and the app uploader (client)",
+            20,
+            880,
+            1760,
+            260,
+        ),
     ],
     nodes=[
         N(
@@ -986,6 +1278,96 @@ DIAGRAMS["c4_4_code"] = dict(
                 )
             ],
         ),
+        N(
+            "c_reg",
+            "SessionRegistry",
+            "class, session.py",
+            "open(options) refuses cuda and loop_redecode profiles; get; cancel; sweep (idle timeout); byte budget shared by all sessions.",
+            40,
+            930,
+            330,
+            "current",
+            "incg",
+            symbols=[
+                ("mrcd/service/incremental/session.py", "SessionRegistry"),
+                ("mrcd/service/incremental/session.py", "SessionRegistry.open"),
+                ("mrcd/service/incremental/session.py", "SessionRegistry.get"),
+                ("mrcd/service/incremental/session.py", "SessionRegistry.cancel"),
+                ("mrcd/service/incremental/session.py", "SessionRegistry.sweep"),
+            ],
+            app_paths=[],
+        ),
+        N(
+            "c_sess",
+            "IncrementalSession",
+            "class, session.py",
+            "token_ok (constant time); put(seq) idempotent; missing_seqs; close(total_samples, wav_sha256, last_seq) -> offline analysis with the cache; SSE events carry counts only.",
+            390,
+            930,
+            360,
+            "current",
+            "incg",
+            symbols=[
+                ("mrcd/service/incremental/session.py", "IncrementalSession"),
+                ("mrcd/service/incremental/session.py", "IncrementalSession.token_ok"),
+                ("mrcd/service/incremental/session.py", "IncrementalSession.put"),
+                ("mrcd/service/incremental/session.py", "IncrementalSession.close"),
+                (
+                    "mrcd/service/incremental/session.py",
+                    "IncrementalSession.missing_seqs",
+                ),
+                ("mrcd/service/incremental/session.py", "canonical_wav"),
+            ],
+            app_paths=[],
+        ),
+        N(
+            "c_plan",
+            "complete_chunks / final_plan",
+            "functions, plan.py",
+            "Integer plan of the 8 s fragments (6 s step); decides only WHICH fragment may be decoded early.",
+            770,
+            930,
+            300,
+            "current",
+            "incg",
+            symbols=[
+                ("mrcd/service/incremental/plan.py", "complete_chunks"),
+                ("mrcd/service/incremental/plan.py", "final_plan"),
+            ],
+            app_paths=[],
+        ),
+        N(
+            "c_cache",
+            "ChunkCache / CachedASR",
+            "cache.py, cached_asr.py",
+            "segment_key = (namespace, start, length, sha256); CachedASR.transcribe answers from the cache, else decodes as offline.",
+            1090,
+            930,
+            330,
+            "current",
+            "incg",
+            symbols=[
+                ("mrcd/service/incremental/cache.py", "ChunkCache"),
+                ("mrcd/service/incremental/cache.py", "segment_key"),
+                ("mrcd/service/incremental/cached_asr.py", "CachedASR"),
+                ("mrcd/service/incremental/cached_asr.py", "CachedASR.transcribe"),
+                ("mrcd/service/incremental/cached_asr.py", "asr_namespace"),
+            ],
+            app_paths=[],
+        ),
+        N(
+            "c_up",
+            "IncrementalUploader (app)",
+            "class, ORATORIA-PROYECTO platform/mrcd/incremental.py",
+            "start, notify (cheap, from the WS loop), finish(wav_sha256): sends the rest, closes, waits for counts-only SSE; any failure degrades and the caller uses the offline job.",
+            1440,
+            930,
+            320,
+            "app",
+            "incg",
+            symbols=[],
+            app_paths=["backend/src/oratoria/platform/mrcd/incremental.py"],
+        ),
     ],
     edges=[
         E("c_engine", "c_result", "returns", "offline"),
@@ -997,8 +1379,96 @@ DIAGRAMS["c4_4_code"] = dict(
         E("c_scorer", "c_tracker", "tracker.window()", "live"),
         E("c_scorer", "c_sasr", "words (via the driver)", "live"),
         E("c_tracker", "c_mic", "audio chunks (via the driver)", "live"),
+        E("c_reg", "c_sess", "creates", "live"),
+        E("c_sess", "c_plan", "which fragments are complete", "live"),
+        E("c_sess", "c_cache", "decode early / reuse", "live"),
+        E("c_up", "c_sess", "HTTP: PUT audio, POST close, GET events", "live"),
     ],
 )
+
+# ---- sequence diagrams (Mermaid sequenceDiagram source; rendered by render_sequences.sh) --------------
+SEQUENCES = {}
+SEQUENCES[
+    "seq_b_original"
+] = """%% B original: the backend buffers the PCM in memory and sends one WAV to MRCD when the session closes.
+%% Generated by docs/architecture/c4_model.py. Endpoints verified against mrcd/service/server.py and the app branch feat/mrcd-integration.
+sequenceDiagram
+  autonumber
+  actor U as Speaker (browser)
+  participant API as App backend (WS /ws/session)
+  participant AN as MrcdSessionAnalysis
+  participant SVC as MRCD service :8765
+  participant W as Engine worker (1 thread)
+  participant UI as ReportPage
+  U->>API: PCM16 16 kHz chunks (160 ms)
+  API->>AN: open_buffer(account): consent active for the CURRENT text version?
+  alt consent active and capacity available
+    API->>AN: append chunk to SessionAudioBuffer (RAM only)
+  else no consent or no capacity
+    Note over API,AN: nothing is buffered, MRCD is never called, the report says "not available" with the reason
+  end
+  U->>API: end of session (or disconnect)
+  API->>AN: submit(buffer): store pending, release buffer in all cases
+  AN->>SVC: POST /v1/jobs?asr_profile=p0&include_text=false (canonical WAV, in memory)
+  SVC-->>AN: 202 job status (job_id)
+  SVC->>W: queue job (priority 3, promoted after 20 s)
+  W->>W: full offline analysis: ASR 8 s / 2 s fragments, features, windows, events
+  loop every 1 s
+    AN->>SVC: GET /v1/jobs/{job_id}
+  end
+  SVC-->>AN: mrcd.analysis/v1 document
+  AN->>AN: verify audio_sha256, apply allow-list (text always null), persist document
+  AN-->>UI: SSE status events (counts only) then terminal completed or unavailable
+  UI->>API: GET session document (authorised route)
+  API-->>UI: events of the 3 default classes, summary, provenance
+"""
+SEQUENCES[
+    "seq_b_incremental"
+] = """%% B incremental (default app mode, mrcd_mode=incremental; needs the service started with --incremental): same audio, in memory, sent in batches while the session runs.
+%% Generated by docs/architecture/c4_model.py. Endpoints verified against mrcd/service/incremental/routes.py and the app branch feat/mrcd-integration.
+sequenceDiagram
+  autonumber
+  actor U as Speaker (browser)
+  participant API as App backend (WS /ws/session)
+  participant UP as IncrementalUploader
+  participant SVC as MRCD service :8765
+  participant W as Engine worker (1 thread)
+  participant UI as ReportPage
+  U->>API: PCM16 16 kHz chunks (160 ms)
+  API->>API: SessionAudioBuffer (RAM) stays the source of truth
+  API->>UP: notify() on each chunk (never blocks the loop)
+  UP->>SVC: POST /v1/sessions?asr_profile=p0 (p0/p1 on CPU only)
+  SVC-->>UP: 201 session_id, subscription_token (shown once), plan 8 s / 2 s, limits
+  loop every mrcd_incremental_batch_ms (2000 ms)
+    UP->>SVC: PUT /v1/sessions/{id}/audio/{seq} (PCM16 batch, X-Session-Token)
+    SVC-->>UP: received_samples, chunks_decoded, duplicate (idempotent by seq)
+    SVC->>W: decode each complete 8 s fragment (priority 2)
+    W->>W: ChunkCache.put(namespace, start, sha256, words)
+  end
+  U->>API: end of session
+  API->>UP: finish(wav_sha256)
+  UP->>SVC: PUT remaining batches
+  UP->>SVC: POST /v1/sessions/{id}/close {total_samples, wav_sha256, last_seq}
+  alt audio_gap
+    SVC-->>UP: missing_seqs
+    UP->>SVC: PUT only the missing batches, then close again
+  end
+  SVC->>W: close (priority 0): OFFLINE path over the canonical WAV, ASR answered from the cache
+  UP->>SVC: GET /v1/sessions/{id}/events (SSE: state, asr_progress, counts only)
+  W-->>SVC: mrcd.analysis/v1 document (kept server-side)
+  SVC-->>UP: terminal event: completed + result_available
+  UP->>SVC: GET /v1/sessions/{id} (result)
+  Note over SVC: on completion MRCD zeroes its audio copy and drops the chunk cache
+  UP-->>API: document
+  API->>API: verify audio_sha256, allow-list (text null), persist
+  API-->>UI: app SSE (Bearer): counts only, then terminal
+  UI->>API: GET session document (authorised route)
+  alt any failure (gap, limit, network, MRCD restart, noloop/cuda profile)
+    UP->>SVC: DELETE /v1/sessions/{id} (cancel, zeroes audio and cache)
+    API->>SVC: POST /v1/jobs with the complete buffer (offline path, as in B original)
+  end
+  Note over API,SVC: mrcd_mode=incremental_verify also runs the offline job, stores the OFFLINE result and records only whether both documents are equal
+"""
 
 # ---- styling ---------------------------------------------------------------------------------
 STYLE = {
@@ -1191,7 +1661,7 @@ def render_mmd(key, d):
 
     o = [
         f"%% {d['title']}",
-        "%% Generated by docs/architecture/c4_model.py from the same model as the SVG. NOT render-tested locally (no Mermaid renderer installed).",
+        "%% Generated by docs/architecture/c4_model.py from the same model as the SVG. Compile-checked with render_mermaid_check.sh.",
         "flowchart LR",
     ]
     for g in d["groups"]:
@@ -1224,6 +1694,9 @@ def render_mmd(key, d):
 
 
 def main():
+    for key, text in SEQUENCES.items():
+        (OUT / f"{key}.mmd").write_text(text, encoding="utf-8", newline="\n")
+        print("wrote", key)
     for key, d in DIAGRAMS.items():
         (OUT / f"{key}.svg").write_text(
             render_svg(key, d), encoding="utf-8", newline="\n"

@@ -1,0 +1,2 @@
+killing MRCD pid 29792 at 15:24:40
+MRCD restarted at 15:24:43

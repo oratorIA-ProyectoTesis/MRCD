@@ -1,0 +1,184 @@
+{
+ "id": "37185c49-4501-491c-9568-b98d142483a2",
+ "type": "live",
+ "status": "completed",
+ "started_at": "2026-11-01T18:30:34.376000+00:00",
+ "ended_at": "2026-11-01T18:31:34.892000+00:00",
+ "duration_seconds": 61,
+ "context": {
+  "presentation_type": "Sustentación de tesis"
+ },
+ "transcript": "Buenos dias a todos. Hoy quiero presentarles el avance de mi proyecto . Este. El proyecto consiste en en en un sistema que ayuda a practicar exposiciones orales. Ehh. Primero voy a explicar el problema y luego este la solución Superíndice tres n que propongo. El problema es que muchas personas, eh, no saben k superíndice tres Como mejorar su forma de hablar. Por eso, por eso quiero mostrar una herramienta sencilla eh? Gracias por su Atencia superíndice tres n .",
+ "report": {
+  "score": 67,
+  "summary": "Tu principal oportunidad de mejora en esta sesión: Variar el tono para marcar énfasis. El tono de voz se mantuvo prácticamente plano durante el segmento, sin variaciones notorias.",
+  "strengths": [
+   {
+    "title": "Reemplazar muletillas por pausas breves",
+    "description": "Aparecieron varias muletillas (como 'eh', 'este', 'o sea') a lo largo del segmento.",
+    "dimension": "verbal_expression",
+    "evidence": "Las muletillas frecuentes distraen a la audiencia y pueden dar la impresión de que las ideas no están del todo organizadas; una pausa breve y silenciosa cumple la misma función de ganar tiempo para pensar, sin restar claridad al discurso."
+   },
+   {
+    "title": "Comunicación no verbal",
+    "description": "La detección corrió durante toda la sesión sin encontrar deficiencias en esta dimensión.",
+    "dimension": "nonverbal"
+   }
+  ],
+  "improvements": [
+   {
+    "title": "Variar el tono para marcar énfasis",
+    "description": "El tono de voz se mantuvo prácticamente plano durante el segmento, sin variaciones notorias.",
+    "dimension": "vocal_delivery",
+    "evidence": "La variación tonal ayuda a marcar las ideas importantes y evita que el discurso suene monótono; un tono plano hace que toda la información se perciba con la misma importancia, y la audiencia pierde referencias para seguir el hilo.",
+    "suggestion": "Elige la idea más importante de lo que sigue exponiendo y marca, con un cambio de tono hacia arriba o hacia abajo, el momento exacto en que la dices."
+   },
+   {
+    "title": "Proyectar la voz con más energía",
+    "description": "El volumen de la voz se mantuvo bajo durante buena parte del segmento.",
+    "dimension": "vocal_delivery",
+    "evidence": "Una voz con energía suficiente sostiene la atención de la audiencia y transmite convicción; un volumen bajo obliga a quien escucha a hacer un esfuerzo extra y puede interpretarse como falta de confianza en el contenido.",
+    "suggestion": "Retoma la idea que estabas exponiendo y repítela proyectando la voz un poco más fuerte de lo que te resulta natural, como si hablaras para el fondo de la sala."
+   }
+  ],
+  "paraverbal_metrics": {
+   "energia_vocal_baja": 0.367,
+   "variacion_tonal_baja": 0.423,
+   "muletillas_por_minuto": 0.206
+  },
+  "metrics": [
+   {
+    "metric_id": "words_per_minute",
+    "availability": "available",
+    "value": 79.6721,
+    "confidence": null,
+    "unavailable_reason": null,
+    "windows": 0
+   },
+   {
+    "metric_id": "filler_words_count",
+    "availability": "available",
+    "value": 3,
+    "confidence": null,
+    "unavailable_reason": null,
+    "windows": 0
+   },
+   {
+    "metric_id": "filler_words_per_minute",
+    "availability": "available",
+    "value": 2.9508,
+    "confidence": null,
+    "unavailable_reason": null,
+    "windows": 0
+   },
+   {
+    "metric_id": "pause_ratio",
+    "availability": "available",
+    "value": 0.4236,
+    "confidence": 0.5764,
+    "unavailable_reason": null,
+    "windows": 45
+   },
+   {
+    "metric_id": "mean_pause_duration",
+    "availability": "unavailable",
+    "value": null,
+    "confidence": null,
+    "unavailable_reason": "El agregado de prosodia no conserva la duración de cada pausa individual.",
+    "windows": 0
+   },
+   {
+    "metric_id": "vocal_energy",
+    "availability": "available",
+    "value": 0.0559,
+    "confidence": 0.5764,
+    "unavailable_reason": null,
+    "windows": 45
+   },
+   {
+    "metric_id": "pitch_variation",
+    "availability": "available",
+    "value": 32.8464,
+    "confidence": 0.5764,
+    "unavailable_reason": null,
+    "windows": 45
+   },
+   {
+    "metric_id": "head_orientation_ratio",
+    "availability": "available",
+    "value": 0,
+    "confidence": 0,
+    "unavailable_reason": null,
+    "windows": 43
+   },
+   {
+    "metric_id": "posture_stability",
+    "availability": "available",
+    "value": 0,
+    "confidence": 0,
+    "unavailable_reason": null,
+    "windows": 43
+   },
+   {
+    "metric_id": "gesture_presence_ratio",
+    "availability": "available",
+    "value": 0,
+    "confidence": 0,
+    "unavailable_reason": null,
+    "windows": 43
+   },
+   {
+    "metric_id": "transcript_confidence",
+    "availability": "unavailable",
+    "value": null,
+    "confidence": null,
+    "unavailable_reason": "El reconocedor de habla no reporta confianza por palabra todavía.",
+    "windows": 0
+   }
+  ],
+  "next_steps": [
+   "Elige la idea más importante de lo que sigue exponiendo y marca, con un cambio de tono hacia arriba o hacia abajo, el momento exacto en que la dices.",
+   "Retoma la idea que estabas exponiendo y repítela proyectando la voz un poco más fuerte de lo que te resulta natural, como si hablaras para el fondo de la sala."
+  ],
+  "structured_pitch": null
+ },
+ "created_at": "2026-11-01T18:30:34.376000+00:00",
+ "audio_sin_procesar_ms": null,
+ "proveniencia_asr": null,
+ "mrcd_analysis": {
+  "schema": "oratoria.mrcd-session-analysis/v1",
+  "status": "unavailable",
+  "binding": {
+   "gaps": [],
+   "n_chunks": 0,
+   "session_id": "37185c49-4501-491c-9568-b98d142483a2",
+   "last_sequence": null,
+   "first_sequence": null,
+   "t0_ms_first_chunk": null,
+   "buffered_duration_s": null
+  },
+  "consent": {
+   "text_version": "2026-11-01-draft-1"
+  },
+  "analysis": null,
+  "calibrated": false,
+  "provenance": {
+   "source": "mrcd.service",
+   "privacy": "audio kept in server memory only while the session runs and the analysis is submitted, then released; only this JSON result is stored",
+   "contract": "mrcd.analysis/v1"
+  },
+  "updated_at": "2026-11-01T18:31:34.894915+00:00",
+  "asr_profile": "p0",
+  "unavailable": {
+   "code": "no_consent",
+   "reason": "The account has not consented to the audio analysis; no audio was kept."
+  },
+  "output_scope": "evaluated",
+  "calibration_note": "Experimental and not calibrated: scores are raw softmax values, not probabilities.",
+  "classes_in_scope": [
+   "filler_word",
+   "prolongation",
+   "repetition"
+  ]
+ }
+}

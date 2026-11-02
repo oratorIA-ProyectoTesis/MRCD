@@ -1,0 +1,19 @@
+{
+  "results": [
+    {
+      "case": "c08_599.9s|p0",
+      "pass": true,
+      "seconds": 599.9,
+      "offline_sha": "26b20b606e4aae93",
+      "incremental_sha": "26b20b606e4aae93",
+      "real_decodes": 100,
+      "expected_decodes": 100,
+      "cache": {
+        "hits": 1,
+        "misses": 99
+      },
+      "wall_offline_s": 209.51,
+      "wall_incremental_incl_send_s": 219.14
+    }
+  ]
+}

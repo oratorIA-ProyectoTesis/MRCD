@@ -1,0 +1,43 @@
+{
+ "latency_after_close_s": 8.7,
+ "detail_reads_after_close": 2,
+ "sse_requests": 1,
+ "binding_mode": "incremental",
+ "binding_fallback": null,
+ "binding_verify": null,
+ "progress_push": true,
+ "n_events": 11,
+ "consent_mode": "with",
+ "consent_default_checked": false,
+ "consent_active_api": true,
+ "unavailable_code": null,
+ "binding_n_chunks": 293,
+ "has_no_consent_text": false,
+ "outcome": "completed",
+ "report_url": "http://localhost:5173/reports/cb37fafc-68de-4fdd-82da-474b63d13edc",
+ "session_id": "cb37fafc-68de-4fdd-82da-474b63d13edc",
+ "ws_sent_binary_frames": 293,
+ "ws_sent_binary_bytes": 1503676,
+ "ws_sent_audio_seconds_estimate": 47,
+ "ws_received_types": [
+  "session_hello",
+  "authenticated",
+  "session_started",
+  "audience",
+  "asr_partial",
+  "interventions",
+  "session_closed"
+ ],
+ "ws_sent_text_types": [
+  "authenticate",
+  "start_session",
+  "prosody_summary",
+  "t6",
+  "vision_summary",
+  "close_segment",
+  "close_session"
+ ],
+ "percent_sign_in_section": false,
+ "has_softmax_label": true,
+ "has_unavailable_marker": true
+}

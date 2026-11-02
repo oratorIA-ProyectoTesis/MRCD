@@ -275,9 +275,9 @@ def test_score_kind_is_not_called_probability_and_legacy_alias_still_validates()
 
     assert SCORE_KIND == "max_window_softmax_score"
     assert SCORE_KIND_DEPRECATED == "max_window_class_probability"
-    assert CONTRACT_REVISION == "1.2"
+    assert CONTRACT_REVISION == "1.4"
     doc = _doc()
-    assert doc["provenance"]["service"]["contract_revision"] == "1.2"
+    assert doc["provenance"]["service"]["contract_revision"] == "1.4"
     assert doc["provenance"]["service"]["contract"] == "mrcd.analysis/v1"
     # old consumers' documents (revision 1.0) keep validating through the deprecated alias
     doc["events"][0]["score"]["kind"] = SCORE_KIND_DEPRECATED

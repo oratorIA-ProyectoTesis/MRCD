@@ -1,0 +1,5 @@
+540 files already formatted
+All checks passed!
+Success: no issues found in 345 source files
+Contracts: 18 kept, 0 broken.
+1460 passed, 92 skipped, 6 warnings in 26.16s

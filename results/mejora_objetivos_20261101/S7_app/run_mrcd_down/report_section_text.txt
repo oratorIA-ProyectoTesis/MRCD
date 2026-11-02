@@ -1,0 +1,5 @@
+DISFLUENCIAS POR EVENTO (EXPERIMENTAL)
+
+No disponible: MRCD service is unreachablemrcd_unreachable
+
+Resultado experimental, no calibrado. Perfil ASR: p0 · Alcance: muletilla, prolongación, repetición. Procedencia: mrcd.service. El audio de la sesión se analiza desde la memoria del servidor y se descarta; solo se guarda este resultado.

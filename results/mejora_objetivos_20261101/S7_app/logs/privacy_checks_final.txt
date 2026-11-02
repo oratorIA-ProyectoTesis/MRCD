@@ -1,0 +1,10 @@
+== docker diff oratoria-local-backend-1 (container writable layer changes) ==
+== backend log: lines matching RIFF/WAVE/PCM/base64 audio markers ==
+== backend log: lines mentioning mrcd ==
+backend-1  | MRCD unavailable for session 32c7c72f-9b1f-4830-98f2-952d17bf7d2f: mrcd_unreachable
+== DB: sessions with mrcd_analysis ==
+8b0ea063|completed||3829
+8cd52f28|completed||3418
+64a4565c|unavailable|audio_too_short|913
+4e6be8c1|completed||3832
+32c7c72f|unavailable|mrcd_unreachable|889

@@ -45,6 +45,7 @@ The excerpt is seconds 60-80 of `data/clips/FIwdDFht7FE.wav` (git-ignored source
 1. The plan names `DisfluencyEvent` and a `disfluent/functional/uncertain` output; neither exists in the engine.
 2. RESOLVED (revision 1.1, additive): the score kind is now `max_window_softmax_score`; `max_window_class_probability` stays as a deprecated alias accepted by the schema (historical fixtures in `examples/` keep the old value on purpose).
 2b. REVISION 1.2 (additive, S3): output scope, optional three-state `decision`, experimental text route; see `APP_INTEGRATION_CONTRACT.md` B.3b. New real fixtures: `examples/service_analysis_v1_2_*.json`.
+2c. REVISION 1.4 (additive, O integration): decision profiles `o2026_11` (service default) and `v0`; see `APP_INTEGRATION_CONTRACT.md` B.3c. New real fixtures: `examples/service_analysis_v1_4_*.json`.
 3. NaN handling differs between `decision.three_state` (`uncertain`) and Vc `unit_decision` (`present=False`); unreachable through `analyze`.
 4. `README.md` at the repo root describes an older layout (`core/`, 27 tests, "no API web"); not touched here.
 5. A tail of less than 1 s is not transcribed by `transcribe_chunked`, and ASR with no words is not flagged; no dedicated tests found for either.

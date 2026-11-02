@@ -1,0 +1,29 @@
+{
+ "outcome": "unavailable",
+ "report_url": "http://localhost:5173/reports/32c7c72f-9b1f-4830-98f2-952d17bf7d2f",
+ "session_id": "32c7c72f-9b1f-4830-98f2-952d17bf7d2f",
+ "ws_sent_binary_frames": 100,
+ "ws_sent_binary_bytes": 513200,
+ "ws_sent_audio_seconds_estimate": 16,
+ "ws_received_types": [
+  "session_hello",
+  "authenticated",
+  "session_started",
+  "audience",
+  "asr_partial",
+  "interventions",
+  "session_closed"
+ ],
+ "ws_sent_text_types": [
+  "authenticate",
+  "start_session",
+  "prosody_summary",
+  "t6",
+  "vision_summary",
+  "close_segment",
+  "close_session"
+ ],
+ "percent_sign_in_section": false,
+ "has_softmax_label": false,
+ "has_unavailable_marker": true
+}

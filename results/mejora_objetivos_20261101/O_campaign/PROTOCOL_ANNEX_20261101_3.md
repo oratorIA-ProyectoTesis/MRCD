@@ -1,0 +1,3 @@
+# Annex 2026-11-01 (3): weight-alignment tolerance (no protocol change)
+* Diagnosis: the assertion compared the exact inverse-sampling weights of the frame (e.g. 1.31818...) with the S3 predictions.csv, which stores 4 decimals (1.3182); 104 of 1019 rows differ by at most 4.3e-5, same units, same order, same labels. Sum of weights 3413.0 vs 3412.9988.
+* Fix: tolerance atol=1e-4 in the comparator weight check of scripts/o_campaign/run_campaign.py (sha256 LF-normalised 3167a7e054d5189b4c2a65b906e5f5ad83d036d4316a94aa3af6adacda5aa920). The campaign itself always used the exact weights, so repetition fold0-4 and lc0-4 pickles are valid and were kept.

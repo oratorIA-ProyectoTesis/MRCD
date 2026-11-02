@@ -1,0 +1,257 @@
+{
+  "schema_version": "mrcd.analysis/v1",
+  "status": "completed",
+  "generated_at": "2026-11-02T05:09:23+00:00",
+  "error": null,
+  "request": {
+    "audio_sha256": "a19c7f534dfc29e440666b918b93aae89a560b95a7522bd56592f2ff4afa1763",
+    "audio_duration_s": {
+      "available": true,
+      "value": 20.0,
+      "unavailable_reason": null
+    },
+    "sample_rate_hz": {
+      "available": true,
+      "value": 16000,
+      "unavailable_reason": null
+    },
+    "channels": {
+      "available": true,
+      "value": 1,
+      "unavailable_reason": null
+    },
+    "asr_profile": "p0",
+    "head": null,
+    "include_text": false,
+    "output_scope": "evaluated",
+    "decision": false,
+    "text_route": null,
+    "decision_profile": "v0"
+  },
+  "events": [
+    {
+      "id": "ev-0001",
+      "class": "filler_word",
+      "start_s": 0.0,
+      "end_s": 2.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.826882,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 4,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": null,
+      "experimental": false,
+      "in_scope": true
+    },
+    {
+      "id": "ev-0002",
+      "class": "prolongation",
+      "start_s": 2.0,
+      "end_s": 4.5,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.63862,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 5,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": "observable lengthening; disfluent function not demonstrated",
+      "experimental": false,
+      "in_scope": true
+    },
+    {
+      "id": "ev-0003",
+      "class": "repetition",
+      "start_s": 12.0,
+      "end_s": 14.0,
+      "interval_semantics": "decision_stride_not_human_boundary",
+      "score": {
+        "value": 0.910253,
+        "kind": "max_window_softmax_score",
+        "calibrated": false,
+        "label": "uncalibrated"
+      },
+      "n_windows": 4,
+      "modalities_used": [
+        "acoustic",
+        "linguistic"
+      ],
+      "text": null,
+      "validation": null,
+      "experimental": false,
+      "in_scope": true
+    }
+  ],
+  "summary": {
+    "n_events": 3,
+    "events_per_minute": {
+      "available": true,
+      "value": 9.0,
+      "unavailable_reason": null
+    },
+    "counts_by_class": {
+      "filler_word": 1,
+      "prolongation": 1,
+      "repetition": 1
+    },
+    "out_of_scope": {
+      "included": false,
+      "n_events": 5,
+      "counts_by_class": {
+        "neutral_pause": 3,
+        "rhetorical_pause": 2
+      }
+    }
+  },
+  "modalities": {
+    "acoustic": {
+      "available": true,
+      "reason": null
+    },
+    "linguistic": {
+      "available": true,
+      "reason": null
+    },
+    "kinesic_video": {
+      "available": false,
+      "reason": "service v1 receives audio only; no video was provided or processed"
+    }
+  },
+  "provenance": {
+    "service": {
+      "name": "mrcd.service",
+      "contract": "mrcd.analysis/v1",
+      "contract_revision": "1.4",
+      "mrcd_version": "0.3.0"
+    },
+    "checkpoint": {
+      "file": "ckpt_audio_text.pt",
+      "sha256": "87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669",
+      "mode": "audio_text",
+      "labels": [
+        "fluent",
+        "filler_word",
+        "prolongation",
+        "repetition",
+        "block",
+        "revision",
+        "rhetorical_pause",
+        "neutral_pause"
+      ],
+      "checkpoint_notice": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"
+    },
+    "asr": {
+      "profile": "p0",
+      "experimental": false,
+      "validation": null,
+      "initial_prompt_sha256": "bd0bddb4329c6c75e2dd7c0b21366a418cc23314f8155357401a1577853b19fa",
+      "model": {
+        "model_size": "small",
+        "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+        "compute_type": "int8",
+        "device": "cpu"
+      },
+      "language": "es",
+      "decode": {
+        "temperature": 0.0,
+        "beam_size": 5,
+        "condition_on_previous_text": false,
+        "vad_filter": false,
+        "word_timestamps": true,
+        "chunk_s_requested": 8.0
+      },
+      "profile_fingerprint": "31efb338718c65eaf6eccc4df6327d6d924de6de09fa0af40ba20d2a5f854b5e",
+      "anomalies": []
+    },
+    "head": null,
+    "config": {
+      "window_s": 3.0,
+      "stride_s": 0.5,
+      "terminal_window": false,
+      "span": null,
+      "asr_chunk_s": 8.0
+    },
+    "environment": {
+      "omp_num_threads": "4",
+      "omp_pin_opted_out": false,
+      "cpu_count_logical": 20,
+      "python": "3.12.10",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+      "faster_whisper": "1.2.1",
+      "ctranslate2": "4.8.2",
+      "numpy": "2.5.3",
+      "environment_is_pinned": true,
+      "omp_num_threads_at_mrcd_import": "4",
+      "numpy_imported_before_mrcd": false,
+      "set_before_numpy": true,
+      "assigned_after_import": false,
+      "effective": true,
+      "cpu_threads": {
+        "torch": 1,
+        "asr_cpu_threads_arg": 0
+      },
+      "asr": {
+        "model_size": "small",
+        "device": "cpu",
+        "compute_type": "int8"
+      }
+    },
+    "decision_profile": {
+      "name": "v0",
+      "status": "historical",
+      "classes": {
+        "filler_word": {
+          "route": "engine_v0_window_events"
+        },
+        "prolongation": {
+          "route": "engine_v0_window_events"
+        },
+        "repetition": {
+          "route": "engine_v0_window_events"
+        }
+      },
+      "calibration_claim": "none",
+      "pipelines_verified": null,
+      "note": "engine decision of every class (window argmax events); identical to contract revisions <= 1.3"
+    }
+  },
+  "experimental": {
+    "active": false,
+    "components": []
+  },
+  "head_decision": null,
+  "transcript": null,
+  "warnings": [
+    {
+      "code": "scores_uncalibrated",
+      "message": "Scores are the maximum window softmax score of an uncalibrated model (softmax, not calibrated); they are not probabilities of correctness."
+    },
+    {
+      "code": "no_human_validation",
+      "message": "Classes are window-level decisions of a model trained with weak (heuristic) supervision; agreement with human annotation has not been established."
+    },
+    {
+      "code": "engine_provenance",
+      "message": "PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"
+    },
+    {
+      "code": "out_of_scope_hidden",
+      "message": "Classes outside the evaluated scope (no compatible human reference) were detected and hidden: neutral_pause=3, rhetorical_pause=2. They are not counted in totals or rates."
+    }
+  ]
+}

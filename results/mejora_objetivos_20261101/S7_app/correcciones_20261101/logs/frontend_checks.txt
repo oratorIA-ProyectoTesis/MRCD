@@ -1,0 +1,7 @@
+tsc -b:
+exit=0
+eslint:
+exit=0
+vitest:
+ Test Files  68 passed (68)
+      Tests  677 passed (677)

@@ -1,0 +1,21 @@
+{
+  "results": [
+    {
+      "case": "c08_599.9s|p0",
+      "pass": true,
+      "seconds": 599.9,
+      "offline_sha": "f7c7bde1ff1c55ac",
+      "profile_events_offline": 100,
+      "profile_events_incremental": 100,
+      "incremental_sha": "f7c7bde1ff1c55ac",
+      "real_decodes": 100,
+      "expected_decodes": 100,
+      "cache": {
+        "hits": 1,
+        "misses": 99
+      },
+      "wall_offline_s": 257.24,
+      "wall_incremental_incl_send_s": 278.37
+    }
+  ]
+}

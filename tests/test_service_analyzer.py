@@ -86,15 +86,34 @@ def analyzer(**kw):
     return a
 
 
-def test_defaults_are_p0_and_v0_and_the_engine_is_called_the_normal_way():
+def test_decision_profile_v0_is_the_historical_normal_engine_call():
     a = analyzer()
-    doc = a.analyze_bytes(wav())
+    doc = a.analyze_bytes(wav(), AnalysisOptions(decision_profile="v0"))
     assert validate_document(doc) == [] and doc["status"] == "completed"
-    assert a.seen == [AnalysisOptions(asr_profile="p0", head=None, include_text=False)]
+    assert a.seen == [AnalysisOptions(asr_profile="p0", head=None, include_text=False, decision_profile="v0")]
     ((engine, _info),) = a._engines.values()
     # only sample_rate is passed: asr_chunk_s / terminal_window / span keep the engine defaults
     assert engine.calls == [(20 * 16000, {"sample_rate": 16000})]
     assert doc["experimental"]["active"] is False and doc["request"]["head"] is None
+    assert doc["request"]["decision_profile"] == "v0"
+    assert doc["provenance"]["decision_profile"]["name"] == "v0"
+    assert [e["class"] for e in doc["events"]] == ["filler_word"]
+
+
+def test_service_default_is_the_o2026_11_profile_and_v0_stays_one_option_away():
+    assert AnalysisOptions().decision_profile == "o2026_11"
+    a = analyzer()
+    doc = a.analyze_bytes(wav())
+    assert validate_document(doc) == [] and doc["status"] == "completed"
+    assert doc["request"]["decision_profile"] == "o2026_11"
+    assert doc["provenance"]["decision_profile"]["name"] == "o2026_11"
+    assert doc["provenance"]["decision_profile"]["pipelines_verified"] is True
+    assert "decision_profile_exploratory" in [w["code"] for w in doc["warnings"]]
+    ((engine, _info),) = a._engines.values()
+    # the profile needs the ASR words; everything else is the normal engine call
+    assert engine.calls == [(20 * 16000, {"sample_rate": 16000, "return_words": True})]
+    # no ASR words -> no unit -> the pipelined classes yield no event (V0 filler event is replaced, not kept)
+    assert doc["events"] == []
 
 
 def test_engine_load_defaults_were_not_changed_by_the_service():
@@ -309,7 +328,7 @@ def test_real_engine_service_events_equal_the_direct_engine_path(tmp_path):
     engine = DisfluencyEngine.load(ckpt)
     direct = engine.analyze_file(clip)
     a = MrcdAnalyzer(ckpt, engine_factory=lambda o: engine)
-    doc = a.analyze_file(clip)
+    doc = a.analyze_file(clip, AnalysisOptions(decision_profile="v0"))
     assert validate_document(doc) == [] and doc["status"] == "completed"
     got = [
         (e["class"], e["start_s"], e["end_s"], e["score"]["value"])
@@ -318,5 +337,11 @@ def test_real_engine_service_events_equal_the_direct_engine_path(tmp_path):
     want = [
         (e.label, round(e.start, 3), round(e.end, 3), round(e.confidence, 6))
         for e in direct.events
+        if e.label in ("filler_word", "prolongation", "repetition")  # rev 1.2: default output scope
     ]
     assert got == want
+    # the default profile (o2026_11) keeps the engine decision for every class it does not replace
+    prof = a.analyze_file(clip)
+    assert validate_document(prof) == [] and prof["status"] == "completed"
+    keep = lambda d: [(e["class"], e["start_s"], e["end_s"], e["score"]["value"]) for e in d["events"] if e["class"] == "repetition"]
+    assert keep(prof) == keep(doc)

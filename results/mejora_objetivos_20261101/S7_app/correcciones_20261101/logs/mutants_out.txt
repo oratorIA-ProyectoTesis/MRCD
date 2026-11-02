@@ -1,0 +1,21 @@
+BASELINE backend: PASS
+BASELINE front: PASS
+[killed] B2 WAV written to a temp file with a CONSTANT name
+[killed] B4a transcript copied into the stored JSON
+[killed] B4b allow-list bypassed (raw MRCD result stored)
+[killed] B4c sanitizer keeps events[].text
+[killed] B4d sanitizer keeps the transcript
+[killed] B10 handler does not release the buffer when the feature is off / no session
+[killed] B13 discard() does not zero the bytes
+[killed] F5 shows 0 instead of a dash without summary
+[killed] C1 open_buffer ignores the consent
+[killed] C2 submit does not re-check the consent
+[killed] C3 consent store failure fails OPEN
+[killed] C4 a consent for an old text version still counts
+[killed] P2 memory cap not enforced
+[SURVIVED] P3 client ignores the cancellation event while polling
+[killed] P5 orphans are never expired
+[killed] P6 done-callback does not release the buffer
+[killed] S2 redirects are followed
+[killed] S2b job_id not validated
+[killed] S2c plain http to a remote host accepted without opt-in

@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 from mrcd.service.analyzer import DEFAULT_CHECKPOINT, AnalysisOptions, MrcdAnalyzer
+from mrcd.service.decision_profile import DECISION_PROFILES, DEFAULT_DECISION_PROFILE
 from mrcd.service.contract import SCHEMA, validate_document
 
 
@@ -27,6 +28,12 @@ def _add_engine_args(p: argparse.ArgumentParser) -> None:
         help="Whisper model size; must already be in the local cache",
     )
     p.add_argument("--max-duration-s", type=float, default=600.0)
+    p.add_argument(
+        "--device",
+        default=None,
+        choices=["cpu"],
+        help="pin the ASR device (default: auto, which falls back to CPU int8); required by --incremental",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -69,6 +76,12 @@ def main(argv: list[str] | None = None) -> int:
         choices=["rep_ctx_p1"],
         help="EXPERIMENTAL: text route for repetition (best with --asr-profile p1_disfluent_prompt)",
     )
+    a.add_argument(
+        "--decision-profile",
+        default=DEFAULT_DECISION_PROFILE,
+        choices=list(DECISION_PROFILES),
+        help="o2026_11 (service default: O-campaign pipelines for filler_word / prolongation) or v0 (historical engine decision)",
+    )
     _add_engine_args(a)
 
     s = sub.add_parser("serve", help="local development HTTP server (loopback only)")
@@ -81,6 +94,25 @@ def main(argv: list[str] | None = None) -> int:
         help="allowed browser origin, e.g. http://localhost:5173",
     )
     s.add_argument("--allow-non-loopback", action="store_true")
+    s.add_argument(
+        "--no-docs",
+        action="store_true",
+        help="disable Swagger UI (/docs); docs are always off with --allow-non-loopback",
+    )
+    s.add_argument(
+        "--incremental",
+        action="store_true",
+        help="enable /v1/sessions (B incremental). Requires --device cpu, --preload and --warmup",
+    )
+    s.add_argument(
+        "--preload",
+        default="",
+        help="comma-separated profiles (or profile:head) to load at start, e.g. p0 or p0,p1_disfluent_prompt",
+    )
+    s.add_argument("--warmup", action="store_true", help="run one synthetic analysis per preloaded profile before serving")
+    s.add_argument("--max-sessions", type=int, default=4)
+    s.add_argument("--session-idle-timeout-s", type=float, default=120.0)
+    s.add_argument("--max-session-seconds", type=float, default=600.0)
     _add_engine_args(s)
 
     v = sub.add_parser("validate", help="validate a JSON file against the v1 contract")
@@ -102,10 +134,30 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if not errors else 1
 
     analyzer = MrcdAnalyzer(
-        args.ckpt, whisper_size=args.whisper, max_duration_s=args.max_duration_s
+        args.ckpt,
+        whisper_size=args.whisper,
+        device=args.device,
+        max_duration_s=args.max_duration_s,
     )
     if args.cmd == "serve":
+        from mrcd.service.incremental.session import IncrementalConfig
         from mrcd.service.server import serve
+
+        preload = []
+        for item in [x.strip() for x in args.preload.split(",") if x.strip()]:
+            prof, _, head = item.partition(":")
+            preload.append(AnalysisOptions(asr_profile=prof, head=head or None))
+        if args.incremental and not (args.device == "cpu" and preload and args.warmup):
+            parser.error("--incremental requires --device cpu, --preload <profiles> and --warmup (deterministic process state)")
+        incremental = (
+            IncrementalConfig(
+                max_sessions=args.max_sessions,
+                idle_timeout_s=args.session_idle_timeout_s,
+                max_session_seconds=args.max_session_seconds,
+            )
+            if args.incremental
+            else None
+        )
 
         print(
             f"MRCD service (development) on http://{args.host}:{args.port}  - no auth, loopback only",
@@ -117,6 +169,10 @@ def main(argv: list[str] | None = None) -> int:
             args.port,
             tuple(args.cors_origin),
             args.allow_non_loopback,
+            enable_docs=not (args.no_docs or args.allow_non_loopback),
+            incremental=incremental,
+            preload=tuple(preload),
+            warmup=args.warmup,
         )
         return 0
 
@@ -129,6 +185,7 @@ def main(argv: list[str] | None = None) -> int:
             output_scope="all" if args.include_out_of_scope else "evaluated",
             decision=args.decision,
             text_route=args.text_route,
+            decision_profile=args.decision_profile,
         ),
     )
     errors = validate_document(doc)

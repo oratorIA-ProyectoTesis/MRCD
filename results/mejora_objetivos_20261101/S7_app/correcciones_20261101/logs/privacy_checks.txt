@@ -1,0 +1,13 @@
+S7 corrections (2026-11-01): privacy checks after the real E2E (consent with / without). Self-review; read from the running stack before `docker compose down`.
+
+1. docker diff of the backend container (files created or changed in its layer): EMPTY (no output).
+2. Matches for RIFF / WAVE / data:audio / pcm16 in the backend log: 0.
+3. MRCD-related backend log lines: see backend_log_mrcd_lines.txt (the plain-http opt-in warning at start-up and the consent endpoints; no content, no audio, no job text).
+4. Database (psql inside the postgres container):
+   - mrcd_consent: granted=true, text_version=2026-11-01-draft-1 -> 2 rows (the two accounts that ticked the box: one aborted first attempt and the E2E run "with consent"); the "without consent" account has no row.
+   - practice_session.mrcd_analysis, newest first:
+       unavailable | no_consent          | 1025 bytes   (E2E without consent; binding.n_chunks = 0)
+       completed   |                     | 3988 bytes   (E2E with consent; 10 events, transcript null, events[].text null)
+       completed   |                     | 3557 bytes   (earlier S7 session, before the allow-list)
+       unavailable | mrcd_unreachable    | 889 bytes    (earlier S7 session)
+5. Not verifiable from the MRCD service log: the development service does not log requests (one start-up line only), so "MRCD was never called without consent" rests on the document (n_chunks = 0, no_consent), on the integration test (client.received == []) and on the absence of a job for that session; it is not proven by a service-side request count.

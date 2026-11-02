@@ -1,0 +1,8 @@
+MRCD over plain http to host.docker.internal (explicit opt-in): audio is not encrypted in transit
+INFO:     172.21.0.1:52926 - "OPTIONS /api/v1/users/me/mrcd-consent HTTP/1.1" 200 OK
+INFO:     172.21.0.1:52912 - "PUT /api/v1/users/me/mrcd-consent HTTP/1.1" 200 OK
+INFO:     172.21.0.1:52928 - "GET /api/v1/users/me/mrcd-consent HTTP/1.1" 200 OK
+INFO:     172.21.0.1:58542 - "OPTIONS /api/v1/users/me/mrcd-consent HTTP/1.1" 200 OK
+INFO:     172.21.0.1:58526 - "PUT /api/v1/users/me/mrcd-consent HTTP/1.1" 200 OK
+INFO:     172.21.0.1:58544 - "GET /api/v1/users/me/mrcd-consent HTTP/1.1" 200 OK
+INFO:     172.21.0.1:37516 - "GET /api/v1/users/me/mrcd-consent HTTP/1.1" 200 OK

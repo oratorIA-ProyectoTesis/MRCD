@@ -1,0 +1,17 @@
+{
+ "calibration_claim": "none",
+ "files": {
+  "filler_word.json": {
+   "sha256": "2a07b50c156bd8e064f6703b38c78dd85b1b853a6ad4a5e0e3be354a80858c1e",
+   "source_pickle": "o_pipeline_filler_word.pkl",
+   "source_pickle_sha256": "787828317c87b188469f09bec03d6fd3c633e8b1af2a7d2dff84725936064c91"
+  },
+  "prolongation.json": {
+   "sha256": "d6230ed2e8b930e1cd930c89b1d74769310f7068c65c3070f75faee83ab7a96a",
+   "source_pickle": "o_pipeline_prolongation.pkl",
+   "source_pickle_sha256": "ba2f253648717a0671cf7f15d833bd466327b8f07db34ad43f471975b38f3f21"
+  }
+ },
+ "profile": "o2026_11",
+ "source_manifest_version": "o-campaign/1"
+}

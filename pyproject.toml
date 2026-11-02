@@ -49,7 +49,7 @@ demo = ["fastapi>=0.115", "uvicorn>=0.30", "websockets>=12", "sounddevice>=0.5"]
 # Rama sintáctica opcional con embeddings RoBERTa-BNE.
 roberta = ["transformers>=4.40"]
 
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "pytest-timeout>=2.3"]
 
 # Todo menos `dev`, para reproducir los experimentos de la tesis.
 all = [
@@ -61,6 +61,10 @@ all = [
 # quien instala `mrcd` no debe recibir herramientas de línea de comandos que
 # asumen rutas del repo ni dependencias que no declaró.
 include = ["mrcd*"]
+
+[tool.setuptools.package-data]
+# Service artifacts: plain JSON, sha256-pinned in mrcd/service/decision_profile.py
+"mrcd.service" = ["schemas/*.json", "experimental/*.json", "profiles/*/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

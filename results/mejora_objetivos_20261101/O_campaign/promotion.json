@@ -1,0 +1,181 @@
+{
+ "promotion": {
+  "promote": true,
+  "superior_in": [
+   "filler_word",
+   "prolongation",
+   "repetition"
+  ],
+  "worse_or_unevaluable_in": [],
+  "per_class": {
+   "filler_word": {
+    "delta": 0.1299078019306228,
+    "ci": [
+     0.0996865588566166,
+     0.16081068896502887
+    ],
+    "p_holm": 0.0011997600479904018,
+    "superior": true,
+    "not_worse": true,
+    "evaluable": true
+   },
+   "prolongation": {
+    "delta": 0.16033333333333338,
+    "ci": [
+     0.12224080127144336,
+     0.19757236645904858
+    ],
+    "p_holm": 0.0011997600479904018,
+    "superior": true,
+    "not_worse": true,
+    "evaluable": true
+   },
+   "repetition": {
+    "delta": 0.1646742004899504,
+    "ci": [
+     0.0887051686719184,
+     0.2413966161003387
+    ],
+    "p_holm": 0.0011997600479904018,
+    "superior": true,
+    "not_worse": true,
+    "evaluable": true
+   }
+  },
+  "reason": "promoted"
+ },
+ "manifest": {
+  "version": "o-campaign/1",
+  "default": false,
+  "calibration_claim": "none",
+  "files": {
+   "o_pipeline_filler_word.pkl": {
+    "sha256": "787828317c87b188469f09bec03d6fd3c633e8b1af2a7d2dff84725936064c91",
+    "bytes": 2686,
+    "config": {
+     "cls": "filler_word",
+     "profile": "p0",
+     "blocks": [
+      "rule",
+      "v0",
+      "ctxfill",
+      "sig",
+      "pause"
+     ],
+     "model": "lr",
+     "hp": {
+      "C": 3.0
+     },
+     "fusion": "or_rule",
+     "key": "1d4eacf1bca1"
+    },
+    "note": "fit on DIHANA folds 1-4 (5056 rows); search stop=patience, n=24"
+   },
+   "o_pipeline_prolongation.pkl": {
+    "sha256": "ba2f253648717a0671cf7f15d833bd466327b8f07db34ad43f471975b38f3f21",
+    "bytes": 8700,
+    "config": {
+     "cls": "prolongation",
+     "profile": "p0",
+     "blocks": [
+      "v0",
+      "sig",
+      "lenx",
+      "pause",
+      "emb"
+     ],
+     "model": "lr",
+     "hp": {
+      "C": 0.03
+     },
+     "fusion": "none",
+     "key": "715d593f0c72"
+    },
+    "note": "fit on DIHANA folds 1-4 (5056 rows); search stop=patience, n=23"
+   },
+   "o_pipeline_repetition.pkl": {
+    "sha256": "e2c6e0a5e4e3b5e3fe72a21f7382c54ba2d8e4fafb4ca0a798b3877a25fbccb3",
+    "bytes": 82998,
+    "config": {
+     "cls": "repetition",
+     "profile": "p1",
+     "blocks": [
+      "reptxt",
+      "rule",
+      "loop",
+      "sig"
+     ],
+     "model": "hgb",
+     "hp": {
+      "max_depth": 2,
+      "max_iter": 100
+     },
+     "fusion": "none",
+     "key": "699c8750dc7a"
+    },
+    "note": "fit on DIHANA folds 1-4 (1019 rows); search stop=patience, n=32"
+   }
+  },
+  "space_sha256": "15d5ab2ed4eee85ee8751552989ae2a40ba77d3c61aac238e68c386705550759",
+  "promotion": {
+   "promote": true,
+   "superior_in": [
+    "filler_word",
+    "prolongation",
+    "repetition"
+   ],
+   "worse_or_unevaluable_in": [],
+   "per_class": {
+    "filler_word": {
+     "delta": 0.1299078019306228,
+     "ci": [
+      0.0996865588566166,
+      0.16081068896502887
+     ],
+     "p_holm": 0.0011997600479904018,
+     "superior": true,
+     "not_worse": true,
+     "evaluable": true
+    },
+    "prolongation": {
+     "delta": 0.16033333333333338,
+     "ci": [
+      0.12224080127144336,
+      0.19757236645904858
+     ],
+     "p_holm": 0.0011997600479904018,
+     "superior": true,
+     "not_worse": true,
+     "evaluable": true
+    },
+    "repetition": {
+     "delta": 0.1646742004899504,
+     "ci": [
+      0.0887051686719184,
+      0.2413966161003387
+     ],
+     "p_holm": 0.0011997600479904018,
+     "superior": true,
+     "not_worse": true,
+     "evaluable": true
+    }
+   },
+   "reason": "promoted"
+  },
+  "protocol_sha256": "6e9e2b6032f5ea4cc1d6122ad17ce94bb7a7cf5bedcdcd170db37a7d4fa10213",
+  "code_sha256": {
+   "mrcd/optimize/__init__.py": "48b288a16454c302db1e3cca87afc8fbc497769923992dbc15028baee7388471",
+   "mrcd/optimize/blocks.py": "a75c2079bca040eb02e8621fb39e34949f201d8a603e8571feb844f6b3be70c4",
+   "mrcd/optimize/data.py": "569aed09b9dc325a05d6ca2c1aaed69142a09a4f24094cc4e7d6309e986f5548",
+   "mrcd/optimize/evaluate.py": "d59956273255402a86bbf0a9211e3fa3982bb3d5725517aa9ff57ab412d96ba1",
+   "mrcd/optimize/models.py": "dff68dbc53a6bf4a5953caf5d3f7b3247560c353e536031f5d5bbbaa40a09d99",
+   "mrcd/optimize/product_pipeline.py": "9d5e9407101dd8d016015e9258931c8c7484fb34c39300e02fbf358f93373e9d",
+   "mrcd/optimize/search.py": "639b2acfbb9bb1ac9ec1b4db59ff24607423e72ce949a264b3268aea17d2ddf9",
+   "mrcd/optimize/space.py": "839949b161a7720a2591851fdc07f6de481f20fbde03b511b6172e7f5ce759c4"
+  },
+  "git_head": "722f5dd31e11d916170a382d7d394e49083e4f54",
+  "status": "promoted-candidate",
+  "caveat": "exploratory; DIHANA folds 1-4 only; scores are not calibrated probabilities",
+  "manifest_sha256": "3d69475f4860813e2e4088b66ac2b119933092eadbf27bc652bb1790d31c70e0"
+ }
+}
