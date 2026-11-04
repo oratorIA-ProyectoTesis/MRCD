@@ -4,7 +4,7 @@ Motor de Reconocimiento Contextual mediante Fusión Multimodal para la Detecció
 Disfluencias del Habla en Español. El motor es un paquete de Python (`mrcd/`) que toma audio
 (y, opcionalmente, video), extrae señales acústicas, léxicas y visuales, las fusiona por ventanas
 y emite eventos de disfluencia con intervalos y puntajes. Incluye además las herramientas de
-datos, evaluación y reproducibilidad usadas para estudiarlo. Incluye un servicio HTTP local (sin autenticación) y una imagen Docker para integrarlo; ver *Quickstart*.
+datos, evaluación y reproducibilidad usadas para estudiarlo. Incluye un servicio HTTP local (sin autenticación) y una imagen Docker para integrarlo; ver _Quickstart_.
 
 > **Estado: resultados exploratorios.** Ninguna clase de disfluencia está confirmada como detectable
 > con evidencia suficiente, los puntajes del modelo **no están calibrados** (no son probabilidades) y
@@ -42,14 +42,14 @@ results/                     informes y métricas agregadas (sin texto, etiqueta
 Documentación: [contratos](docs/contracts/README.md) · [arquitectura](docs/architecture/README.md) ·
 [corpus](docs/corpora/README.md) · [informe OE4](docs/oe4/INFORME_OE4_REDUCIDO.md).
 
-Los ejemplos y *fixtures* de contratos tienen los campos de texto reemplazados por `[text withheld]`
+Los ejemplos y _fixtures_ de contratos tienen los campos de texto reemplazados por `[text withheld]`
 (el texto original procedía de un video de terceros). Las pruebas que necesitan datos locales (corpus,
 clips, cachés de ASR) se omiten con un mensaje explícito si esos datos no existen.
 
 ## Quickstart (service for integrating developers)
 
 The engine runs as a local HTTP service (contract `mrcd.analysis/v1`). Full guide in Spanish: [`INTEGRACION.md`](INTEGRACION.md).
-The trained checkpoint `ckpt_audio_text.pt` is **not** inside the image: mount it at `/models`. Without it the container
+The trained checkpoint `ckpt_audio_text.pt` is **not** inside the image or the repository (available on request, see [`models/README.md`](models/README.md)): mount it at `/models`. Without it the container
 starts and `/v1/health` answers, but analysis jobs fail with `checkpoint_unavailable`.
 The image is published to `ghcr.io` only after a `v*` tag; until then build it locally with `docker build -t mrcd .`.
 
@@ -57,8 +57,9 @@ The image is published to `ghcr.io` only after a `v*` tag; until then build it l
 # 1. Docker
 docker run --rm -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" ghcr.io/oratoria-proyectotesis/mrcd:latest
 
-# 2. Docker Compose (CPU; `--profile gpu` for the CUDA variant)
+# 2. Docker Compose (CPU; mounts ./models read-only)
 docker compose up --build
+#    GPU: docker compose --profile gpu up --build mrcd-gpu
 
 # 3. pip, no Docker (Python >= 3.11)
 pip install "mrcd[service] @ git+https://github.com/oratorIA-ProyectoTesis/MRCD@<tag>"

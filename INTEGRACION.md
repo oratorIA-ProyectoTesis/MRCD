@@ -11,14 +11,14 @@ Esta guía es para quien quiere llamar al motor MRCD desde otra aplicación. El 
 | Requisito  | Detalle                                                                                                  |
 | ---------- | -------------------------------------------------------------------------------------------------------- |
 | Audio      | WAV mono, 16 kHz, PCM de 16 bits, entre 13 s y 600 s. Otro formato se rechaza con un error del contrato. |
-| Checkpoint | `ckpt_audio_text.pt`. **No está dentro de la imagen Docker.** Se monta como volumen (ver más abajo).     |
+| Checkpoint | `ckpt_audio_text.pt`. **No está dentro de la imagen ni del repositorio**: se entrega bajo solicitud, solo para investigación no comercial (ver [`models/README.md`](models/README.md)). Se monta como volumen (ver más abajo). |
 | Docker     | Docker Engine 24 o superior (o Docker Desktop). Para GPU, además NVIDIA Container Toolkit.               |
 
 El servicio **no tiene autenticación**. Publique el puerto solo en el loopback del equipo (`127.0.0.1`); si necesita exponerlo, colóquelo detrás de su propio proxy con autenticación.
 
 ## Tres formas de instalarlo
 
-> La imagen en `ghcr.io` se publica **solo cuando se crea una etiqueta `v*`** en el repositorio. Mientras no exista, construya la imagen localmente (`docker build -t mrcd .`) y use `mrcd` en lugar de `ghcr.io/oratoria-proyectotesis/mrcd:latest`.
+> La imagen en `ghcr.io` se publica **solo cuando se crea una etiqueta `v*`** en el repositorio (el primer paquete nace privado: quien publica debe hacerlo público una vez desde los ajustes del paquete en GitHub). Mientras no exista, construya la imagen localmente (`docker build -t mrcd .`) y use `mrcd` en lugar de `ghcr.io/oratoria-proyectotesis/mrcd:latest`.
 
 ### 1. `docker run`
 
@@ -28,13 +28,13 @@ docker run --rm -p 127.0.0.1:8765:8765 \
   ghcr.io/oratoria-proyectotesis/mrcd:latest
 ```
 
-`./models` debe contener `ckpt_audio_text.pt`. Whisper (`small`) ya viene dentro de la imagen y el contenedor no accede a la red al ejecutarse.
+`./models` debe contener `ckpt_audio_text.pt`. En PowerShell use `${PWD}` en lugar de `$PWD` (`-v "${PWD}/models:/models:ro"`). Whisper (`small`) ya viene dentro de la imagen y el servicio no descarga nada al ejecutarse (`HF_HUB_OFFLINE=1`). Eso no aísla la red del contenedor; si lo necesita, use reglas de firewall o una red Docker interna.
 
 ### 2. Docker Compose
 
 ```bash
 git clone https://github.com/oratorIA-ProyectoTesis/MRCD.git && cd MRCD
-# Descomente "volumes: ./models:/models:ro" en docker-compose.yml y coloque el checkpoint en ./models
+# Coloque el checkpoint en ./models (docker-compose.yml ya monta esa carpeta como solo lectura)
 docker compose up --build            # CPU
 docker compose --profile gpu up --build mrcd-gpu    # GPU (ver más abajo)
 ```
