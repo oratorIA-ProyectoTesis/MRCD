@@ -1,4 +1,4 @@
-# Pins for the Docker images (pip install -c). Derived from the 0.4.0 image freeze (2026-11-02) of the main line.
+# Pins for the Docker images (pip install -c). Derived from an image freeze (2026-11-02) of the main line; not yet re-frozen on this branch (0.3.0).
 # torch is NOT pinned here: the Dockerfiles install it first from the PyTorch CPU index (ARG TORCH_VERSION), because
 # the aarch64 wheels carry no '+cpu' local version and a '==X+cpu' constraint would break linux/arm64 builds.
 # Regenerate after a deliberate dependency upgrade (inside a built image: pip freeze --exclude mrcd).

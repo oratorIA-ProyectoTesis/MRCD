@@ -26,6 +26,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     HF_HOME=/opt/hf \
     OMP_NUM_THREADS=4 \
+    NUMBA_CACHE_DIR=/tmp/numba \
     MRCD_CKPT=/models/ckpt_audio_text.pt \
     MRCD_DEVICE=cpu \
     MRCD_PRELOAD=p0
@@ -49,8 +50,9 @@ COPY docker/entrypoint.sh /usr/local/bin/mrcd-entrypoint
 RUN chmod 0755 /usr/local/bin/mrcd-entrypoint
 
 # Whisper baked into the image: no download at run time; HF_HUB_OFFLINE forbids any network access afterwards.
-# (Silero VAD ships inside the silero-vad wheel.)
-RUN python -c "from faster_whisper import WhisperModel; WhisperModel('${WHISPER_SIZE}', device='cpu', compute_type='int8')" \
+# (download_model fetches into $HF_HOME/hub without loading ctranslate2, so it also works under QEMU arm64.
+# Silero VAD ships inside the silero-vad wheel.)
+RUN python -c "from faster_whisper.utils import download_model; download_model('${WHISPER_SIZE}')" \
  && chown -R mrcd:mrcd /opt/hf
 ENV HF_HUB_OFFLINE=1
 

@@ -10,6 +10,9 @@
 #  - Only the ASR (faster-whisper / CTranslate2) uses the GPU. The models that classify run on CPU torch.
 #  - GPU float16 text can differ from the CPU int8 text the models were trained on: p0_cuda is EXPERIMENTAL and the
 #    service says so in `warnings`. With device auto, the default profile p0 also resolves to CUDA when one is visible.
+# NOTE: tag-pinned, not digest-pinned (digest not verifiable offline). Pin it once built:
+#   docker buildx imagetools inspect nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04   -> FROM ...@sha256:<digest>
+# Dependabot (docker ecosystem) proposes digest/tag updates.
 FROM nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04
 
 ARG MRCD_VERSION=0.3.0
@@ -29,6 +32,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     HF_HOME=/opt/hf \
     OMP_NUM_THREADS=4 \
+    NUMBA_CACHE_DIR=/tmp/numba \
     VIRTUAL_ENV=/opt/venv \
     PATH=/opt/venv/bin:$PATH \
     MRCD_CKPT=/models/ckpt_audio_text.pt \
@@ -58,7 +62,7 @@ COPY docker/entrypoint.sh /usr/local/bin/mrcd-entrypoint
 RUN chmod 0755 /usr/local/bin/mrcd-entrypoint
 
 # Whisper baked in (downloaded on CPU; the same files serve CPU and CUDA). No network access at run time.
-RUN python -c "from faster_whisper import WhisperModel; WhisperModel('${WHISPER_SIZE}', device='cpu', compute_type='int8')" \
+RUN python -c "from faster_whisper.utils import download_model; download_model('${WHISPER_SIZE}')" \
  && chown -R mrcd:mrcd /opt/hf
 ENV HF_HUB_OFFLINE=1
 
