@@ -21,7 +21,7 @@ Use when changing MRCD code, docs or images, or releasing a version.
 ## Execution Steps
 
 1. Setup: `python -m venv .venv`, activate, `pip install -e ".[service,dev]"` (Python >= 3.11).
-2. Fast tests: `python -m pytest tests/test_service_server.py tests/test_service_contract.py -q`. Full: `python -m pytest -q` (many tests need local data and skip without it).
+2. Fast tests: `python -m pytest tests/test_service_server.py tests/test_service_contract.py -q`. Full: `python -m pytest -q` (many tests need local data and skip without it). CI (`.github/workflows/tests.yml`) runs the full suite, including `tests/test_agent_docs.py` (docs drift guard), on every PR and on pushes to `main` / `mrcd-oe-closure`, on Python 3.11 and 3.12 with `OMP_NUM_THREADS=4`; run it locally before pushing.
 3. Image smoke test: `docker build -t mrcd:ci .`, `docker run -d -p 127.0.0.1:8765:8765 mrcd:ci`, `python scripts/docker_smoke.py --expect checkpoint_unavailable`.
 4. CI (`.github/workflows/docker.yml`): PRs and pushes to `main` / `mrcd-oe-closure` build the CPU image and smoke-test it (the checkpoint path only if `models/ckpt_audio_text.pt` exists); CUDA is build-only; arm64 build runs on PRs.
 5. Release: set the new version in `mrcd/__init__.py` (`__version__`), `pyproject.toml` (and the `MRCD_VERSION` default in the Dockerfiles, which CI overrides with a build-arg); merge; tag `vX.Y.Z` (or `vX.Y.Z-rc1`, which never moves `:latest`). The tag guard fails if the tag, minus any suffix, differs from `mrcd.__version__`. The publish job pushes `:X.Y.Z`, `:latest`, `:X.Y.Z-cuda`, `:latest-cuda` to GHCR.
