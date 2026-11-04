@@ -43,6 +43,10 @@ train = ["scikit-learn>=1.4", "pyyaml>=6.0"]
 # Construcción del corpus desde fuentes públicas.
 mining = ["yt-dlp>=2024.8.6", "pyyaml>=6.0"]
 
+# Servicio HTTP (`python -m mrcd.service serve`, contrato mrcd.analysis/v1) y su imagen Docker.
+# scikit-learn: lo importan los perfiles de decisión del servicio (mrcd.calibration).
+service = ["fastapi>=0.115", "uvicorn>=0.30", "scikit-learn>=1.4"]
+
 # Demo web de micrófono. No es parte del motor.
 demo = ["fastapi>=0.115", "uvicorn>=0.30", "websockets>=12", "sounddevice>=0.5"]
 
