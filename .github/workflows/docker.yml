@@ -1,0 +1,150 @@
+name: docker
+
+# Pull requests and branch pushes: build the CPU image, run it and smoke-test the HTTP contract.
+# Tags v*: same test, then publish ghcr.io/oratoria-proyectotesis/mrcd:{version} + :latest (linux/amd64, linux/arm64)
+# and the CUDA variant :{version}-cuda + :latest-cuda (linux/amd64 only).
+on:
+  pull_request:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/oratoria-proyectotesis/mrcd
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build CPU image (amd64, loaded into the local daemon)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: mrcd:ci
+          cache-from: type=gha,scope=cpu-amd64
+          cache-to: type=gha,scope=cpu-amd64,mode=max
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install smoke-test dependency
+        run: python -m pip install jsonschema
+
+      - name: Smoke test without checkpoint (contract error path)
+        run: |
+          docker run -d --name mrcd-nockpt -p 127.0.0.1:8765:8765 mrcd:ci
+          python scripts/docker_smoke.py --url http://127.0.0.1:8765 --expect checkpoint_unavailable --job-timeout-s 120 \
+            || { docker logs mrcd-nockpt; exit 1; }
+          docker rm -f mrcd-nockpt
+
+      - name: Smoke test with the repository checkpoint mounted (if present)
+        run: |
+          if [ ! -f models/ckpt_audio_text.pt ]; then
+            echo "models/ckpt_audio_text.pt not in this checkout; skipping the full analysis test."
+            exit 0
+          fi
+          docker run -d --name mrcd-ckpt -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" mrcd:ci
+          python scripts/docker_smoke.py --url http://127.0.0.1:8765 --expect completed \
+            || { docker logs mrcd-ckpt; exit 1; }
+          docker inspect --format '{{.State.Health.Status}}' mrcd-ckpt
+          docker rm -f mrcd-ckpt
+
+  build-cuda:
+    # Build-only check of the GPU image (the runners have no GPU).
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.cuda
+          platforms: linux/amd64
+          push: false
+          cache-from: type=gha,scope=cuda-amd64
+          cache-to: type=gha,scope=cuda-amd64,mode=max
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test, build-cuda]
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-qemu-action@v3
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Metadata (CPU image)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=raw,value=latest
+
+      - name: Push CPU image (amd64 + arm64)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: MRCD_VERSION=${{ steps.meta.outputs.version }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=cpu-multiarch
+          cache-to: type=gha,scope=cpu-multiarch,mode=max
+
+      - name: Metadata (CUDA image)
+        id: meta-cuda
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          flavor: |
+            latest=false
+            suffix=-cuda,onlatest=true
+          tags: |
+            type=semver,pattern={{version}}
+            type=raw,value=latest
+
+      - name: Push CUDA image (amd64)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.cuda
+          platforms: linux/amd64
+          push: true
+          build-args: MRCD_VERSION=${{ steps.meta-cuda.outputs.version }}
+          tags: ${{ steps.meta-cuda.outputs.tags }}
+          labels: ${{ steps.meta-cuda.outputs.labels }}
+          cache-from: type=gha,scope=cuda-amd64
+          cache-to: type=gha,scope=cuda-amd64,mode=max
