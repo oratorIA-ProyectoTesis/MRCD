@@ -255,8 +255,14 @@ def _clips(n):
     return [m for m in man if m["in_pilot32"]][:n]
 
 
+def _clip_id(m):
+    # With no data _clips() is empty and pytest calls the id function with its NOTSET
+    # placeholder (before real_data skips the test), so it must not index blindly.
+    return m["unit_id"] if isinstance(m, dict) else "no-data"
+
+
 @real_data
-@pytest.mark.parametrize("m", _clips(3), ids=lambda m: m["unit_id"])
+@pytest.mark.parametrize("m", _clips(3), ids=_clip_id)
 def test_real_clip_frames_and_tensors_match_offline(m):
     import soundfile as sf
 

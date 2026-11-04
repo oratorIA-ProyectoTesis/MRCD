@@ -1,0 +1,46 @@
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main, mrcd-oe-closure]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    env:
+      # The suite compares floats to 1e-6; its docs pin 4 threads before numpy loads.
+      OMP_NUM_THREADS: "4"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: System libraries
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg libsndfile1 ripgrep
+
+      - name: Install (CPU torch first, so pip does not pull the CUDA wheels)
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[service,dev]"
+
+      # Slow suites (MRCD_SLOW=1, real Whisper) and corpus-dependent tests skip with a declared reason.
+      - name: Run the full suite (includes tests/test_agent_docs.py, the docs drift guard)
+        run: python -m pytest -q -rs --timeout=900
