@@ -6,6 +6,10 @@ Esta guía es para quien quiere llamar al motor MRCD desde otra aplicación. El 
 >
 > Las notas históricas de integración del motor (octubre de 2026) se conservan en [`docs/INTEGRACION_AVANCE_20261030.md`](docs/INTEGRACION_AVANCE_20261030.md).
 
+## Uso con un asistente de IA
+
+Si clonó este repositorio, puede pedirle a su agente de código (Claude Code, Codex, Cursor, Copilot) que instale, ejecute, integre o diagnostique MRCD. El agente lee [`AGENTS.md`](AGENTS.md) y las guías en [`.claude/skills/`](.claude/skills/). Las reglas (sin autenticación, sin pesos ni audio en el repositorio, puntajes sin calibrar) aplican igual.
+
 ## Qué necesita antes de empezar
 
 | Requisito  | Detalle                                                                                                  |
