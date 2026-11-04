@@ -25,7 +25,7 @@ Use when the user wants to get the MRCD service running. For failures after star
 | Default, any OS                       | Docker CPU: `docker run --rm -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" ghcr.io/oratoria-proyectotesis/mrcd:latest` |
 | Linux/Windows+WSL2 with NVIDIA GPU    | Docker GPU: add `--gpus all`, image `:latest-cuda` (amd64 only; experimental profile `p0_cuda`; no `/v1/sessions`)          |
 | Repo cloned, want hardened defaults   | `docker compose up --build` (GPU: `docker compose --profile gpu up --build mrcd-gpu`)                                       |
-| No Docker, need to import the package | `pip install "mrcd[service] @ git+https://github.com/oratorIA-ProyectoTesis/MRCD@<tag>"` (Python >= 3.11)                   |
+| No Docker, need to import the package | `pip install "mrcd[service] @ git+https://github.com/oratorIA-ProyectoTesis/MRCD@v0.3.0"` (Python >= 3.11). From a clone: `pip install ".[service]"`                   |
 
 ## Execution Steps
 
@@ -35,6 +35,7 @@ Use when the user wants to get the MRCD service running. For failures after star
 4. pip path only: warm Whisper once, then serve:
    `python -c "from faster_whisper import WhisperModel; WhisperModel('small', device='cpu', compute_type='int8')"`
    `OMP_NUM_THREADS=4 python -m mrcd.service serve --ckpt ./models/ckpt_audio_text.pt --device cpu --preload p0 --warmup --incremental`
+   PowerShell: `$env:OMP_NUM_THREADS=4` first, then the same `python -m mrcd.service serve ...` command.
 5. Verify: `curl -sf http://127.0.0.1:8765/v1/health` returns `"status":"ok"`; with a checkpoint wait for `engine_loaded` and `warmed_up` to be true (first start can take minutes).
 6. End to end: `pip install jsonschema && python scripts/docker_smoke.py --url http://127.0.0.1:8765 --expect completed` (use `--expect checkpoint_unavailable` when no checkpoint is mounted).
 

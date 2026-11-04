@@ -25,8 +25,8 @@ docker run --rm --gpus all -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" gh
 # Compose
 docker compose up --build                          # CPU
 docker compose --profile gpu up --build mrcd-gpu   # GPU
-# pip from a git tag (Python >= 3.11)
-pip install "mrcd[service] @ git+https://github.com/oratorIA-ProyectoTesis/MRCD@<tag>"
+# pip from a git tag (Python >= 3.11); from a clone: pip install ".[service]"
+pip install "mrcd[service] @ git+https://github.com/oratorIA-ProyectoTesis/MRCD@v0.3.0"
 python -m mrcd.service serve --ckpt ./models/ckpt_audio_text.pt --device cpu --preload p0 --warmup --incremental
 # Dev + tests
 pip install -e ".[service,dev]" && python -m pytest tests/test_service_server.py tests/test_service_contract.py -q
