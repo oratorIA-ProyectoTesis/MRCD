@@ -5,7 +5,7 @@
     python scripts/docker_smoke.py --expect checkpoint_unavailable      # container started without the checkpoint
 
 Steps: wait for GET /v1/health == 200, POST a synthetic 16 kHz mono PCM16 WAV to /v1/jobs, poll the job, validate the
-job and its result against mrcd/service/schemas/mrcd.analysis/v1.schema.json (needs `pip install jsonschema`).
+job and its result against mrcd/service/schemas/mrcd.analysis.v1.schema.json (needs `pip install jsonschema`).
 The WAV is generated here (harmonic tone + seeded noise, 13 s): no recorded voice is involved. Standard library only,
 apart from jsonschema.
 """
