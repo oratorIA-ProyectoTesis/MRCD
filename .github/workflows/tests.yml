@@ -33,7 +33,7 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - name: System libraries
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg libsndfile1
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg libsndfile1 ripgrep
 
       - name: Install (CPU torch first, so pip does not pull the CUDA wheels)
         run: |
