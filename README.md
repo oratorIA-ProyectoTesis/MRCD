@@ -72,6 +72,10 @@ curl http://127.0.0.1:8765/v1/jobs/<job_id>
 
 The service has no authentication: publish the port on `127.0.0.1` only.
 
+## Using an AI assistant
+
+Cloning this repo? Ask your coding agent (Claude Code, Codex, Cursor, Copilot) to install, run, integrate or troubleshoot MRCD. It reads [`AGENTS.md`](AGENTS.md) and the skills in [`.claude/skills/`](.claude/skills/) (index in `llms.txt`).
+
 ## Ejecución completa (Windows, un comando)
 
 ```powershell
