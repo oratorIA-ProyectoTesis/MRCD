@@ -1,0 +1,28 @@
+# MRCD
+
+> Local HTTP service and Python package (contract `mrcd.analysis/v1`) that detects filler words, prolongations and repetitions in Spanish speech from a mono 16 kHz PCM16 WAV. Exploratory results: scores are not calibrated. The trained checkpoint is not distributed (available on request).
+
+## Start here
+
+- [AGENTS.md](AGENTS.md): commands, contract summary, hard rules, skills index
+- [INTEGRACION.md](INTEGRACION.md): integration guide (Spanish): install, endpoints, examples, GPU, troubleshooting
+- [README.md](README.md): project overview and quickstart
+- [models/README.md](models/README.md): why the checkpoint is not distributed and how to request it
+
+## Contract
+
+- [JSON Schema mrcd.analysis.v1](mrcd/service/schemas/mrcd.analysis.v1.schema.json): response and job format
+- [Contract source and error codes](mrcd/service/contract.py): `ERROR_CODES` with HTTP status and retryable flag
+- [Server routes](mrcd/service/server.py): `/v1/health`, `/v1/schema`, `/v1/jobs`
+
+## Examples
+
+- [curl](examples/curl.sh)
+- [Python (stdlib)](examples/python_client.py)
+- [Node.js](examples/analyze.mjs)
+- [Smoke test](scripts/docker_smoke.py)
+
+## Optional
+
+- [Agent skills](.claude/skills): install, integrate, troubleshoot, contribute
+- [Third-party notices](THIRD_PARTY_NOTICES.md)
