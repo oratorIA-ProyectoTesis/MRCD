@@ -1,0 +1,48 @@
+# docker compose up --build                  -> CPU service (without --build it pulls ghcr.io/oratoria-proyectotesis/mrcd:latest,
+#                                               which exists only after a v* tag is published)
+# docker compose --profile gpu up --build mrcd-gpu   -> CUDA variant (NVIDIA Container Toolkit required)
+#
+# Answers on http://127.0.0.1:8765 (GET /v1/health). The trained checkpoint is NOT in the image and is obtained on
+# request (see models/README.md): put ckpt_audio_text.pt in ./models. Without it analysis jobs fail with
+# `checkpoint_unavailable` (health still answers 200).
+#
+# Hardening: the service keeps jobs in memory and writes no files; /tmp (numba cache) and the home are tmpfs.
+x-hardening: &hardening
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  tmpfs: ["/tmp", "/home/mrcd"]
+
+services:
+  mrcd:
+    <<: *hardening
+    image: ghcr.io/oratoria-proyectotesis/mrcd:latest
+    build: .
+    ports:
+      # host loopback only: the service has no authentication
+      - "127.0.0.1:8765:8765"
+    volumes:
+      - ./models:/models:ro
+    # Allow a browser page on another origin:
+    # command: ["--cors-origin", "http://localhost:5173"]
+    restart: unless-stopped
+
+  mrcd-gpu:
+    <<: *hardening
+    profiles: ["gpu"]
+    image: ghcr.io/oratoria-proyectotesis/mrcd:latest-cuda
+    build:
+      context: .
+      dockerfile: Dockerfile.cuda
+    ports:
+      - "127.0.0.1:8765:8765"
+    volumes:
+      - ./models:/models:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped

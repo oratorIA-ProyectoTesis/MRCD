@@ -1,30 +1,176 @@
-# Integración del avance MRCD
+# Guía de integración del servicio MRCD
 
-Fecha de revisión: 30 de octubre de 2026. Este documento distingue cambios del motor, experimentos auxiliares y evidencia aún pendiente.
+Esta guía es para quien quiere llamar al motor MRCD desde otra aplicación. El motor se ejecuta como un servicio HTTP local (contrato `mrcd.analysis/v1`) que recibe un WAV y devuelve eventos de muletilla, prolongación y repetición con su intervalo y puntaje.
 
-## Decisión de integración
+> Resultados exploratorios: los puntajes **no están calibrados** (no son probabilidades) y las clases no están confirmadas como detectables con evidencia suficiente. Consulte el [README](README.md) antes de mostrar cifras a usuarios finales.
+>
+> Las notas históricas de integración del motor (octubre de 2026) se conservan en [`docs/INTEGRACION_AVANCE_20261030.md`](docs/INTEGRACION_AVANCE_20261030.md).
 
-El motor de esta carpeta conserva su API y su clasificación de siete categorías. El paquete `<plan-package>/MRCD_Plan_Avance_20261030` trabaja principalmente con **presencia binaria de la notación FPAUSE por segmento**. Esa etiqueta no equivale a una clase funcional, a una frontera humana de evento ni a ausencia de todas las disfluencias. No se copian sus pesos o umbrales al clasificador multicategoría.
+## Qué necesita antes de empezar
 
-La variante experimental v4 de `<LEGACY_REPO_ROOT>\experiments\epic_f1_v4_20261029` reporta F1 positivo de 73,68 % sobre 41 segmentos externos, frente a 52,63 % de su v2. Los siete positivos corresponden a un solo hablante. La comparación con una regla ASR estrecha es cercana (F1 positivo 72,73 %; macro-F1 84,25 % frente a 82,87 % de v4). Audio/texto y trimodal empatan en 61,54 %. Además, la extracción desde medios todavía registra `PARITY_DIFFERENCE`. Estos resultados se conservan como experimento binario de EPIC, sin presentarlos como mejora validada del MRCD de siete clases o como aporte demostrado del video.
+| Requisito  | Detalle                                                                                                  |
+| ---------- | -------------------------------------------------------------------------------------------------------- |
+| Audio      | WAV mono, 16 kHz, PCM de 16 bits, entre 13 s y 600 s. Otro formato se rechaza con un error del contrato. |
+| Checkpoint | `ckpt_audio_text.pt`. **No está dentro de la imagen ni del repositorio**: se entrega bajo solicitud, solo para investigación no comercial (ver [`models/README.md`](models/README.md)). Se monta como volumen (ver más abajo). |
+| Docker     | Docker Engine 24 o superior (o Docker Desktop). Para GPU, además NVIDIA Container Toolkit.               |
 
-## Mejoras incorporadas al motor actual
+El servicio **no tiene autenticación**. Publique el puerto solo en el loopback del equipo (`127.0.0.1`); si necesita exponerlo, colóquelo detrás de su propio proxy con autenticación.
 
-| Área | Cambio | Alcance de la comprobación |
-| --- | --- | --- |
-| Inferencia de archivo | La señal acústica y los rasgos lingüísticos se extraen una vez; las ventanas se construyen conjuntamente. Se mantiene `bs=1` para la inferencia. | Pruebas con extractores simulados comprueban paridad de tensores y predicciones respecto al camino anterior. Falta medir latencia y paridad con un checkpoint real. |
-| Contrato de entrada | Se rechazan arreglos no monofónicos, valores no finitos, WAV distintos de PCM16 y modos que requieren video en la API que solo recibe audio. | Pruebas de errores y formatos. No se afirma soporte audiovisual en `analyze`. |
-| Eventos | `Event.text` deja de depender de `keep_windows`. | Prueba de equivalencia de eventos con y sin ventanas de depuración. |
-| Referencia humana | `label_source="human"` exige cobertura completa declarada y procedencia no vacía. Un tier ausente, etiqueta desconocida o intervalo inválido se rechaza. | Pruebas de cobertura y lectura EAF. La declaración de procedencia debe comprobarse contra los documentos del corpus. |
+## Tres formas de instalarlo
 
-Para registros con anotación humana completa, el manifiesto debe incluir `human_annotation: {"coverage": "complete", "provenance": "fuente o registro verificable"}`. Un tier vacío puede significar un negativo solo cuando esa cobertura está documentada. Las anotaciones parciales o desconocidas no se convierten en ventanas `fluent`.
+> La imagen en `ghcr.io` se publica **solo cuando se crea una etiqueta `v*`** en el repositorio (el primer paquete nace privado: quien publica debe hacerlo público una vez desde los ajustes del paquete en GitHub). Mientras no exista, construya la imagen localmente (`docker build -t mrcd .`) y use `mrcd` en lugar de `ghcr.io/oratoria-proyectotesis/mrcd:latest`.
 
-## Camino para medir una mejora de F1
+### 1. `docker run`
 
-1. **Definir unidad y referencia:** conservar las etiquetas originales de corpus publicados, su licencia, cobertura, tiempos y procedencia. Mapear únicamente categorías equivalentes. La restricción del proyecto es reutilizar anotaciones existentes, sin crear una nueva campaña manual.
-2. **Congelar comparadores:** guardar código, dependencias, rasgos, particiones por hablante, umbrales y predicciones de reglas, audio, texto, audio/texto y video. Seleccionar hiperparámetros solo en desarrollo. Los segmentos ya inspeccionados no constituyen una nueva prueba independiente.
-3. **Resolver paridad de v4:** ejecutar la extracción del mismo medio en procesos separados, con hashes, versión del encoder, parámetros de hilos y configuración registrados. No promover el bundle mientras persista la diferencia de rasgos.
-4. **Conseguir evaluación externa compatible:** buscar unidades publicadas con positivos de varios hablantes, negativos con cobertura acreditada y clases realmente anotadas. Informar soporte por clase, matriz de errores y F1 por hablante además del agregado. Si una fuente solo marca FPAUSE por segmento, limitar la conclusión a esa tarea binaria.
-5. **Medir video de forma emparejada:** admitirlo solo cuando correspondencia de hablante, cobertura y sincronía estén verificadas. Comparar las mismas unidades con audio/texto; reportar respaldo y ausencias por motivo. Los umbrales visuales del complemento son parámetros de ingeniería aún no calibrados.
+```bash
+docker run --rm -p 127.0.0.1:8765:8765 \
+  -v "$PWD/models:/models:ro" \
+  ghcr.io/oratoria-proyectotesis/mrcd:latest
+```
 
-Los intervalos emitidos por el clasificador de ventanas son franjas de decisión de 0,5 s; no deben llamarse fronteras humanas de disfluencia. Las probabilidades softmax tampoco están calibradas. Cualquier mejora de F1 se declarará solo después de una comparación sobre la **misma tarea, referencia y partición**.
+`./models` debe contener `ckpt_audio_text.pt`. En PowerShell use `${PWD}` en lugar de `$PWD` (`-v "${PWD}/models:/models:ro"`). Whisper (`small`) ya viene dentro de la imagen y el servicio no descarga nada al ejecutarse (`HF_HUB_OFFLINE=1`). Eso no aísla la red del contenedor; si lo necesita, use reglas de firewall o una red Docker interna.
+
+### 2. Docker Compose
+
+```bash
+git clone https://github.com/oratorIA-ProyectoTesis/MRCD.git && cd MRCD
+# Coloque el checkpoint en ./models (docker-compose.yml ya monta esa carpeta como solo lectura)
+docker compose up --build            # CPU
+docker compose --profile gpu up --build mrcd-gpu    # GPU (ver más abajo)
+```
+
+### 3. `pip` (sin Docker)
+
+```bash
+pip install "mrcd[service] @ git+https://github.com/oratorIA-ProyectoTesis/MRCD@<etiqueta>"
+# Whisper debe estar en la caché local antes de arrancar:
+python -c "from faster_whisper import WhisperModel; WhisperModel('small', device='cpu', compute_type='int8')"
+OMP_NUM_THREADS=4 python -m mrcd.service serve --ckpt ./models/ckpt_audio_text.pt \
+  --device cpu --preload p0 --warmup --incremental
+```
+
+Python 3.11 o superior. En este modo el servicio queda en `http://127.0.0.1:8765` y `/docs` (Swagger) está activo, porque el servidor escucha solo en loopback.
+
+## Cómo se maneja el checkpoint
+
+Los pesos entrenados no se incluyen en la imagen. El script de arranque del contenedor busca el archivo en `/models/ckpt_audio_text.pt` (variable `MRCD_CKPT` para cambiar la ruta):
+
+- **Con checkpoint montado:** el servicio precarga el perfil `p0`, hace un calentamiento y habilita `/v1/sessions` (modo incremental).
+- **Sin checkpoint:** el contenedor arranca igualmente y `GET /v1/health` responde 200, así como `GET /v1/schema`. Cualquier análisis falla con el código `checkpoint_unavailable` (HTTP 503; en un trabajo asíncrono, `status: "failed"` con `error.code: "checkpoint_unavailable"`). Ningún perfil de análisis funciona sin el checkpoint.
+
+Monte solo un checkpoint de origen confiable: el motor lo carga con `torch.load(..., weights_only=False)`, que ejecuta código arbitrario si el archivo está manipulado. Por eso el volumen se monta de solo lectura (`:ro`).
+
+Los pesos entrenados con corpus de terceros siguen las condiciones de esas fuentes (ver [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)).
+
+## Endpoints
+
+| Método y ruta                                            | Uso                                                                                                                    |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `GET /v1/health`                                         | Estado (`status`, `engine_loaded`, `warmed_up`, `incremental`).                                                        |
+| `GET /v1/schema`                                         | JSON Schema del contrato `mrcd.analysis/v1`.                                                                           |
+| `POST /v1/jobs`                                          | Cuerpo: WAV (`Content-Type: audio/wav`). Responde `202` con un `job_id`.                                               |
+| `GET /v1/jobs/{job_id}`                                  | Estado del trabajo: `queued`, `running`, `completed` o `failed`; el campo `result` contiene el documento del análisis. |
+| `POST /v1/sessions` y rutas bajo `/v1/sessions/{id}/...` | Análisis incremental por lotes de audio (solo con checkpoint y CPU). Ver `docs/contracts/DESIGN_B_INCREMENTAL.md`.     |
+
+Parámetros de consulta de `POST /v1/jobs`: `include_text` (`false` por defecto; el texto transcrito no se devuelve salvo que lo pida), `include_out_of_scope`, `asr_profile` (`p0` por defecto), `decision_profile` (`o2026_11` por defecto o `v0`). Los demás son experimentales; consulte `/v1/schema`.
+
+Los trabajos se guardan solo en memoria y el audio se descarta al terminar. Un resultado `completed` trae `events[]` (cada uno con `class`, `start_s`, `end_s`, `score`) y `summary` (por ejemplo `events_per_minute`, con `available` y `unavailable_reason`: un indicador no medido se informa como no disponible, nunca como `0`). Un resultado `failed` trae `error.code` y `error.message`. Todo documento se puede validar con `python -m mrcd.service validate archivo.json`.
+
+## Ejemplos
+
+Necesita un WAV de prueba. Si no tiene uno propio, genere uno sintético (sin voz humana; solo sirve para comprobar que el servicio responde):
+
+```bash
+python scripts/docker_smoke.py --write-wav synthetic.wav
+```
+
+### curl
+
+```bash
+curl -sf http://127.0.0.1:8765/v1/health
+curl -sf -X POST --data-binary @grabacion.wav -H "Content-Type: audio/wav" \
+  "http://127.0.0.1:8765/v1/jobs"             # devuelve {"job_id": "...", "status": "queued", ...}
+curl -sf http://127.0.0.1:8765/v1/jobs/<job_id>
+```
+
+Script completo con espera: [`examples/curl.sh`](examples/curl.sh).
+
+### Python (solo biblioteca estándar)
+
+```python
+import json, time, urllib.request
+
+BASE = "http://127.0.0.1:8765"
+
+def call(method, path, data=None):
+    req = urllib.request.Request(BASE + path, data=data, method=method,
+                                 headers={"Content-Type": "audio/wav"} if data else {})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        return json.loads(r.read())
+
+job = call("POST", "/v1/jobs", open("grabacion.wav", "rb").read())
+while job["status"] not in ("completed", "failed"):
+    time.sleep(1)
+    job = call("GET", f"/v1/jobs/{job['job_id']}")
+for ev in job["result"].get("events", []):
+    print(ev["class"], ev["start_s"], ev["end_s"], ev["score"]["value"])
+```
+
+Versión ejecutable: [`examples/python_client.py`](examples/python_client.py).
+
+### TypeScript (Node 18+ o navegador)
+
+```ts
+const base = "http://127.0.0.1:8765";
+
+export async function analyze(wav: Blob) {
+  let job = await (
+    await fetch(`${base}/v1/jobs`, {
+      method: "POST",
+      headers: { "Content-Type": "audio/wav" },
+      body: wav,
+    })
+  ).json();
+  while (job.status !== "completed" && job.status !== "failed") {
+    await new Promise((r) => setTimeout(r, 1000));
+    job = await (await fetch(`${base}/v1/jobs/${job.job_id}`)).json();
+  }
+  return job.result; // documento mrcd.analysis/v1
+}
+```
+
+Desde una página web en otro origen, inicie el servicio con `--cors-origin https://su-sitio.example` (en Docker: `docker run ... mrcd --cors-origin https://su-sitio.example`). Versión para Node: [`examples/analyze.mjs`](examples/analyze.mjs).
+
+## Uso de GPU
+
+La imagen `-cuda` (`ghcr.io/oratoria-proyectotesis/mrcd:latest-cuda`, solo `linux/amd64`) requiere el NVIDIA Container Toolkit:
+
+```bash
+docker run --rm --gpus all -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" \
+  ghcr.io/oratoria-proyectotesis/mrcd:latest-cuda
+```
+
+Qué cambia respecto de la imagen de CPU:
+
+- Solo el reconocimiento de voz (Whisper) usa la GPU. Los modelos que clasifican corren en CPU.
+- `serve --device` solo admite `cpu`, así que esta imagen arranca sin ese parámetro y precarga el perfil `p0_cuda`. Con `--device` automático, el perfil por defecto `p0` también se ejecuta en CUDA si hay una GPU visible.
+- El texto de Whisper en GPU (float16) puede diferir del texto en CPU (int8) con el que se entrenaron los modelos. Los perfiles `p0_cuda` y `p1_cuda` son **experimentales** y el servicio lo advierte en `warnings`. Si necesita el comportamiento validado, use la imagen de CPU.
+- El modo incremental (`/v1/sessions`) no está disponible, porque exige `--device cpu`.
+
+## Solución de problemas
+
+| Síntoma                                                          | Causa probable y solución                                                                                                                                                                                |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Los trabajos terminan en `failed` con `checkpoint_unavailable`   | No hay checkpoint en `/models`. Monte `./models` con `ckpt_audio_text.pt` y verifique el nombre exacto.                                                                                                  |
+| El primer arranque tarda varios minutos                          | Con checkpoint, el contenedor carga el modelo y hace un calentamiento antes de aceptar tráfico. El `HEALTHCHECK` espera hasta 180 s (240 s en CUDA). Siga el progreso con `docker logs -f <contenedor>`. |
+| `address already in use`                                         | El puerto 8765 está ocupado. Use `-p 127.0.0.1:9000:8765` y apunte su cliente a ese puerto.                                                                                                              |
+| Contenedor terminado por memoria (`OOMKilled`)                   | Whisper `small` y el modelo necesitan alrededor de 3 a 4 GB libres; ajuste el límite de memoria de Docker Desktop.                                                                                       |
+| `audio_too_short` / `unsupported_sample_rate` / `audio_not_mono` | El WAV debe durar al menos 13 s, ser mono, 16 kHz y PCM16. Convierta con `ffmpeg -i entrada.mp3 -ac 1 -ar 16000 -c:a pcm_s16le salida.wav`.                                                              |
+| `asr_unavailable` con un perfil `*_cuda`                         | El contenedor no ve la GPU: ejecute con `--gpus all` y compruebe `nvidia-smi` en el host. Los perfiles de GPU nunca recurren a CPU.                                                                      |
+| `queue_full` (HTTP 429)                                          | Hay demasiados trabajos pendientes; reintente más tarde. El motor procesa un trabajo a la vez.                                                                                                           |
+| `/docs` devuelve 404 en Docker                                   | Es intencional: el servicio desactiva Swagger cuando escucha fuera del loopback. Use `GET /v1/schema`.                                                                                                   |
+| El navegador bloquea la llamada (CORS)                           | Agregue `--cors-origin <origen>` al final del comando de `docker run`.                                                                                                                                   |
+
+## Verificación automática
+
+El flujo [`.github/workflows/docker.yml`](.github/workflows/docker.yml) construye la imagen, la ejecuta y comprueba `/v1/health` y un análisis con `scripts/docker_smoke.py`, validando la respuesta contra `mrcd/service/schemas/mrcd.analysis.v1.schema.json`. En etiquetas `v*` publica las imágenes en `ghcr.io`.

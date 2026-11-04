@@ -27,7 +27,7 @@ Check each corpus owner's page for the authoritative terms; this file is a recor
 
 - Aggregate metrics, counts and reports computed from these corpora (no per-unit text or labels).
 - `docs/corpora/*`: manifests and SHA-256 hashes of the archives, so that users can verify their own downloads.
-- `results/mejoras_20261030/checkpoints/*.pt` (small classification heads) and `models/ckpt_audio_text.pt`: model weights trained or tuned with labels from the corpora and internal clips listed above (DIHANA, CC BY 4.0, requires attribution). Their redistribution under the terms of the original training data has not been separately cleared; treat them as research artifacts.
+- `results/mejoras_20261030/checkpoints/*.pt` (small classification heads) and `models/ckpt_audio_text.pt` (the latter is no longer distributed; available on request for non-commercial research, see `models/README.md`): model weights trained or tuned with labels from the corpora and internal clips listed above (DIHANA, CC BY 4.0, requires attribution). Their redistribution under the terms of the original training data has not been separately cleared; treat them as research artifacts.
 - `results/mejoras_20261030/dev_units_frozen.json`: list of DIHANA unit identifiers (no text, no labels).
 - `case_study_interview.md` (inherited from the original repository history): derived report on a public YouTube interview; the video license is "not declared".
 

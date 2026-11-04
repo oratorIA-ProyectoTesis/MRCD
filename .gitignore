@@ -50,3 +50,6 @@ __pycache__/
 
 # Local fixtures cut from third-party audio
 /tests/data/*.npy
+
+# Trained checkpoint: not redistributed (see models/README.md)
+models/*.pt
