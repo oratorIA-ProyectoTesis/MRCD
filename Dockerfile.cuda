@@ -1,0 +1,73 @@
+# MRCD service image with CUDA runtime for the opt-in GPU ASR profiles (p0_cuda / p1_cuda). linux/amd64 only.
+#
+#   docker build -f Dockerfile.cuda -t mrcd:cuda .
+#   docker run --rm --gpus all -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" mrcd:cuda
+#
+# Needs the NVIDIA Container Toolkit on the host. Same contract as the CPU image (see Dockerfile).
+# Differences:
+#  - `serve --device` only accepts "cpu", so this image starts WITHOUT --device (ASR device auto) and preloads p0_cuda.
+#  - /v1/sessions (--incremental) is not enabled: it requires --device cpu.
+#  - Only the ASR (faster-whisper / CTranslate2) uses the GPU. The models that classify run on CPU torch.
+#  - GPU float16 text can differ from the CPU int8 text the models were trained on: p0_cuda is EXPERIMENTAL and the
+#    service says so in `warnings`. With device auto, the default profile p0 also resolves to CUDA when one is visible.
+FROM nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04
+
+ARG MRCD_VERSION=0.3.0
+ARG TORCH_VERSION=2.9.1
+ARG WHISPER_SIZE=small
+
+LABEL org.opencontainers.image.title="mrcd (cuda)" \
+      org.opencontainers.image.description="MRCD HTTP service with CUDA runtime for GPU ASR profiles (contract mrcd.analysis/v1)" \
+      org.opencontainers.image.source="https://github.com/oratorIA-ProyectoTesis/MRCD" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.version="${MRCD_VERSION}"
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    HF_HOME=/opt/hf \
+    OMP_NUM_THREADS=4 \
+    VIRTUAL_ENV=/opt/venv \
+    PATH=/opt/venv/bin:$PATH \
+    MRCD_CKPT=/models/ckpt_audio_text.pt \
+    MRCD_DEVICE= \
+    MRCD_PRELOAD=p0_cuda
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3 python3-venv ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && python3 -m venv /opt/venv \
+ && useradd --create-home --uid 10001 --shell /usr/sbin/nologin mrcd
+
+# CPU torch: the classifiers run on CPU; the GPU is used by CTranslate2 (cuBLAS/cuDNN come from the base image).
+RUN pip install --index-url https://download.pytorch.org/whl/cpu "torch==${TORCH_VERSION}"
+
+WORKDIR /src
+COPY pyproject.toml README.md LICENSE THIRD_PARTY_NOTICES.md ./
+COPY docker/constraints.txt ./constraints.txt
+COPY mrcd ./mrcd
+RUN pip install -c constraints.txt ".[service]" \
+ && mkdir -p /usr/share/doc/mrcd \
+ && cp LICENSE THIRD_PARTY_NOTICES.md /usr/share/doc/mrcd/ \
+ && cd / \
+ && rm -r /src
+
+COPY docker/entrypoint.sh /usr/local/bin/mrcd-entrypoint
+RUN chmod 0755 /usr/local/bin/mrcd-entrypoint
+
+# Whisper baked in (downloaded on CPU; the same files serve CPU and CUDA). No network access at run time.
+RUN python -c "from faster_whisper import WhisperModel; WhisperModel('${WHISPER_SIZE}', device='cpu', compute_type='int8')" \
+ && chown -R mrcd:mrcd /opt/hf
+ENV HF_HUB_OFFLINE=1
+
+USER mrcd
+WORKDIR /home/mrcd
+EXPOSE 8765
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=240s --retries=3 \
+  CMD python -c "import sys, urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8765/v1/health', timeout=4).status == 200 else 1)"
+
+ENTRYPOINT ["/usr/local/bin/mrcd-entrypoint"]
+CMD []

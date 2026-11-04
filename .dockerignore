@@ -1,0 +1,12 @@
+# Allow-list: the image needs the package sources and the files pyproject.toml references, nothing else
+# (no data, results, models, corpora, notebooks, local venvs or caches).
+*
+!pyproject.toml
+!README.md
+!LICENSE
+!THIRD_PARTY_NOTICES.md
+!mrcd/
+!docker/constraints.txt
+!docker/entrypoint.sh
+**/__pycache__
+**/*.pyc
