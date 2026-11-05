@@ -51,7 +51,7 @@ the root you pass as `--dihana-root`. Verify licence and DOI on the record page 
 ## Run
 
 ```bash
-pip install -e ".[train]" faster-whisper soundfile     # from the repository root, Python >= 3.11
+pip install -e .     # from the repository root, Python >= 3.11
 cd benchmarks/asr_survival/scripts
 
 # 1) Decode (any ASR works; this is the reference decoder). Audio: 16 kHz mono WAV named <turn_id>.wav, supplied by you.
@@ -75,7 +75,7 @@ Prompts (exact strings, `P0`, `P1`, `C1`; `p_none` = no prompt): [prompts/](prom
 Whisper small (CPU int8) and large-v3 (GPU float16) under P0/P1/C1/no-prompt, plus a verbatim-tag model. For
 example `small_P0` gives survival_rep 105/214 = 0.491 (CI 0.426-0.550), survival_rev 53/161 = 0.329,
 survival_filler 158/308 = 0.513. `survival_bench.py` reproduces these three values from the cached small-P0
-transcripts (verified before release). Decoding on other hardware is not bit-identical to the reported runs.
+transcripts (verified before release). Decoding on other hardware is not bit-identical to the reported runs. The `code_sha256` entries in `metrics.json` were computed on the authors' Windows (CRLF) working tree and refer to `scripts/asr_survival_models/*`, which is not published; checkouts with LF line endings will not match them byte for byte.
 
 `results/PROTOCOL.md` is the frozen protocol; its sha256 (`b83fb8fc...357c`) is recorded in
 `results/PROTOCOL.sha256.json` and inside `metrics.json`, and checked by the tests. It is published byte for byte,

@@ -53,7 +53,7 @@ cualquier cosa.
 ## Ejecutar
 
 ```bash
-pip install -e ".[train]" faster-whisper soundfile     # desde la raíz del repositorio, Python >= 3.11
+pip install -e .     # desde la raíz del repositorio, Python >= 3.11
 cd benchmarks/asr_survival/scripts
 
 # 1) Decodificar (sirve cualquier ASR; este es el decodificador de referencia). Audio: WAV mono 16 kHz llamado <turn_id>.wav, lo aportas tú.
@@ -77,7 +77,7 @@ Prompts (cadenas exactas `P0`, `P1`, `C1`; `p_none` = sin prompt): [prompts/](pr
 congelado: Whisper small (CPU int8) y large-v3 (GPU float16) con P0/P1/C1/sin prompt, más un modelo con etiquetas
 verbatim. Por ejemplo, `small_P0` da survival_rep 105/214 = 0,491 (IC 0,426-0,550), survival_rev 53/161 = 0,329,
 survival_filler 158/308 = 0,513. `survival_bench.py` reproduce esos tres valores a partir de las transcripciones
-guardadas de small-P0 (verificado antes de publicar). Decodificar en otro hardware no es idéntico bit a bit.
+guardadas de small-P0 (verificado antes de publicar). Decodificar en otro hardware no es idéntico bit a bit. Los hashes `code_sha256` de `metrics.json` se calcularon sobre la copia de trabajo de los autores en Windows (CRLF) y se refieren a `scripts/asr_survival_models/*`, que no se publica; una copia con finales de línea LF no coincidirá byte a byte.
 
 `results/PROTOCOL.md` es el protocolo congelado; su sha256 (`b83fb8fc...357c`) está en
 `results/PROTOCOL.sha256.json` y dentro de `metrics.json`, y las pruebas lo verifican. Se publica byte a byte, por lo
