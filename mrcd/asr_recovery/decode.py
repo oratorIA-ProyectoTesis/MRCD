@@ -1,4 +1,4 @@
-"""O1: the three fixed decoding variants (P0 control, P1 disfluent prompt, P2 prompt + temperature fallback)."""
+"""O1: the fixed decoding variants (P0 control, P1 disfluent prompt, P2 prompt + temperature fallback, C1 fluent control, p_none no prompt)."""
 
 from __future__ import annotations
 
@@ -26,6 +26,9 @@ VARIANTS: dict[str, dict] = {
     "P0": dict(initial_prompt=WHISPER_INITIAL_PROMPT, temperature=0.0),
     "P1": dict(initial_prompt=P1_PROMPT, temperature=0.0),
     "C1": dict(initial_prompt=C1_PROMPT, temperature=0.0),
+    # No-prompt control of results/control_noprompt_20261103/PROTOCOL.md (EXPLORATORY): identical to P0 except that
+    # no initial_prompt is passed. Experiment-only variant; it is NOT an ASR profile of the service (mrcd.asr_profiles).
+    "p_none": dict(initial_prompt=None, temperature=0.0),
     "P2": dict(
         initial_prompt=P1_PROMPT,
         condition_on_previous_text=False,
