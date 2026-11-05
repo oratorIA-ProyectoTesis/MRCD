@@ -43,7 +43,7 @@ There is no transcript text and no audio. The reference marks are rebuilt from y
 
 ## Get DIHANA
 
-DIHANA (Spanish task-oriented dialogues), Zenodo record 5572470, <https://zenodo.org/records/5572470>,
+DIHANA (Spanish task-oriented dialogues), Zenodo record 5572470, DOI [10.5281/zenodo.5572470](https://doi.org/10.5281/zenodo.5572470) (Benedí, Lleida, Varona et al.; verified 2026-11-04 via the Zenodo API),
 licence **CC BY 4.0** (attribution required; cite the corpus authors as named on the record). The record is
 listed in [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md). Extract it so that `data/*/*/*.xml` exists under
 the root you pass as `--dihana-root`. Verify licence and DOI on the record page before redistributing anything.

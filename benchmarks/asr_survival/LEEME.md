@@ -44,7 +44,7 @@ No hay texto de transcripciones ni audio. Las marcas de referencia se reconstruy
 
 ## Obtener DIHANA
 
-DIHANA (diálogos orientados a tareas en español), registro de Zenodo 5572470, <https://zenodo.org/records/5572470>,
+DIHANA (diálogos orientados a tareas en español), registro de Zenodo 5572470, DOI [10.5281/zenodo.5572470](https://doi.org/10.5281/zenodo.5572470) (Benedí, Lleida, Varona et al.; verificado el 04/11/2026 con la API de Zenodo),
 licencia **CC BY 4.0** (se exige atribución; cita a los autores del corpus como figuran en el registro). Está listado
 en [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md). Extrae el corpus de modo que exista `data/*/*/*.xml` bajo
 la raíz que pases en `--dihana-root`. Verifica la licencia y el DOI en la página del registro antes de redistribuir
