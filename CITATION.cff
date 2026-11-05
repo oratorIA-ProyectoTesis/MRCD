@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software or the ASR-survival benchmark, please cite it as below. The DIHANA corpus must be cited separately (CC BY 4.0)."
+title: "MRCD: multimodal contextual recognition engine for speech disfluencies in Spanish (with the ASR-survival benchmark)"
+type: software
+version: 0.3.0
+license: MIT
+repository-code: "https://github.com/oratorIA-ProyectoTesis/MRCD"
+abstract: "Open-source engine for detecting filler words, prolongations and repetitions in Spanish speech, plus a reusable benchmark (benchmarks/asr_survival) that measures how much human-annotated disfluency evidence survives in ASR transcripts of a 1,025-turn DIHANA frame."
+keywords:
+  - disfluency
+  - speech
+  - Spanish
+  - ASR
+  - benchmark
+authors:
+  - family-names: Cortez Flores
+    given-names: Ely Rivaldo
+  - family-names: Ventura Chancafe
+    given-names: Eduardo Renato
+  - family-names: Castro Veramendi
+    given-names: Rafael
