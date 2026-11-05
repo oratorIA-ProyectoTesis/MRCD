@@ -1,0 +1,18 @@
+{
+  "title": "MRCD: multimodal contextual recognition engine for speech disfluencies in Spanish (with the ASR-survival benchmark)",
+  "upload_type": "software",
+  "description": "Open-source engine for detecting filler words, prolongations and repetitions in Spanish speech, plus a reusable benchmark (benchmarks/asr_survival) that measures how much human-annotated disfluency evidence survives in ASR transcripts of a 1,025-turn DIHANA frame. The benchmark ships identifiers, labels, prompts, code and aggregate results only; no corpus text and no audio. DIHANA (CC BY 4.0) must be obtained and cited separately.",
+  "creators": [
+    {"name": "Cortez Flores, Ely Rivaldo"},
+    {"name": "Ventura Chancafe, Eduardo Renato"},
+    {"name": "Castro Veramendi, Rafael"}
+  ],
+  "license": "MIT",
+  "version": "0.3.0",
+  "keywords": ["disfluency", "speech", "Spanish", "ASR", "benchmark"],
+  "language": "eng",
+  "related_identifiers": [
+    {"relation": "isSupplementTo", "identifier": "https://github.com/oratorIA-ProyectoTesis/MRCD", "scheme": "url"},
+    {"relation": "references", "identifier": "https://zenodo.org/records/5572470", "scheme": "url"}
+  ]
+}
