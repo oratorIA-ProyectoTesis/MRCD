@@ -3,3 +3,7 @@ mrcd/service/profiles/** -text
 tests/data/v0_frozen_document.json -text
 *.sh text eol=lf
 Dockerfile* text eol=lf
+# ASR-survival benchmark: byte-exact (sha256-pinned protocol, exact prompt strings, frame ids)
+benchmarks/asr_survival/results/** -text
+benchmarks/asr_survival/prompts/*.txt -text
+benchmarks/asr_survival/frame/*.csv -text
