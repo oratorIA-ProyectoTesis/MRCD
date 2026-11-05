@@ -49,7 +49,7 @@ COMMON = dict(
 
 def decode_kwargs(variant: str, language: str = "es") -> dict:
     if variant not in VARIANTS:
-        raise KeyError(f"unknown variant {variant!r}; the protocol fixes P0/P1/P2")
+        raise KeyError(f"unknown variant {variant!r}; known variants: {sorted(VARIANTS)}")
     kw = dict(COMMON)
     kw.update(VARIANTS[variant])
     kw["language"] = language

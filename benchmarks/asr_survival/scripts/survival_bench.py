@@ -54,6 +54,7 @@ SEED, NBOOT = 20261101, 5000
 THRESH_PERSISTS, THRESH_MAJORITY = 0.75, 0.50
 
 # --- non-lexical filled pauses (same rule as the frozen protocol; "este" is NOT a filler) -------------------------
+# NB: `e+h*` also matches a bare "e"/"ee"; that is the frozen protocol rule, kept as is.
 NONLEXICAL_FILLER_RE = re.compile(r"^(e+h*|eh+|ehm+|em+|mm+|hm+|ah+|aa+h*)$")
 
 
