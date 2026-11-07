@@ -2,7 +2,7 @@
 # Uso:  powershell -ExecutionPolicy Bypass -File .\setup_and_run.ps1
 #       (argumentos extra se pasan a run_all.py, p. ej. --skip-mining)
 $ErrorActionPreference = "Stop"
-Set-Location $PSScriptRoot
+Set-Location (Split-Path $PSScriptRoot -Parent)  # legacy/ -> repository root
 $env:PYTHONIOENCODING = "utf-8"; $env:PYTHONUTF8 = "1"
 
 if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {

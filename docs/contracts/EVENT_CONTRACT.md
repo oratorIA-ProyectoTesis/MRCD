@@ -78,7 +78,7 @@ Not serialised by `to_dict()`: `windows` (kept only with `keep_windows=True`, av
 
 - `window_plan`: `window_s` 3.0, `stride_s` 0.5, `terminal_window`, `span`, `asr_chunk_s`.
 - `head`: name of the loaded head or null.
-- `environment`: OMP threads, versions (python, numpy, faster-whisper, ctranslate2), CPU count, `environment_is_pinned`, `effective` (may be `null` = not verified), ASR model size/device/compute type. Contains a `warning` when OMP was not set before numpy was imported. Absolute model paths are present in `asr_profile.model.model_dir` (the fixtures replace the home directory by `<HOME>`).
+- `environment`: OMP threads, versions (python, numpy, faster-whisper, ctranslate2), CPU count, `environment_is_pinned`, `effective` (may be `null` = not verified), ASR model size/device/compute type. `device` there reflects the configuration that was requested/resolved at load time, not an observation of the device the engine actually ran on (for example, a silent CPU fallback is not detected by this field). Contains a `warning` when OMP was not set before numpy was imported. Absolute model paths are present in `asr_profile.model.model_dir` (the fixtures replace the home directory by `<HOME>`).
 - `asr_profile`: see `ASR_PROFILES_CONTRACT.md`. An ASR object that exposes no profile is reported as `name: "unknown"`, `experimental: null`, never as p0.
 
 ## 7. Validations performed by the engine (and where)

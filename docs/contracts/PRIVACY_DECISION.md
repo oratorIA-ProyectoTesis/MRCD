@@ -16,7 +16,7 @@
 |---|---|
 | El servicio MRCD decodifica en memoria, no escribe en disco y guarda solo resultados JSON acotados en memoria | `APP_INTEGRATION_CONTRACT.md` B.8 |
 | `include_text=false` por defecto: el texto de la transcripción no sale salvo petición explícita | idem |
-| El servidor de desarrollo no tiene autenticación ni TLS: solo `loopback`; rechaza otras direcciones sin `--allow-non-loopback` | idem |
+| El servidor en `loopback` no exige token y no tiene TLS; fuera de `loopback` rechaza el arranque sin `--allow-non-loopback` y sin `MRCD_SERVICE_TOKEN` (token portador, límite de tasa por cliente). El TLS no está en el servicio: lo termina un proxy inverso (`deploy/caddy/Caddyfile`, escrito pero no ejecutado en el entorno de trabajo) | idem |
 | Los registros (`logs`) no deben contener audio ni texto | idem |
 | El vínculo app-resultado usa el hash SHA-256 del audio (`request.audio_sha256`); el hash no es el único dato que se guarda: ver la sección 6 (qué se persiste exactamente) | idem, B.10 |
 | El video nunca entra al motor; el video no sale del navegador | `docs/architecture/README.md`, límites de confianza |
@@ -34,14 +34,14 @@
 | Efecto en el reporte | La sección de disfluencias queda "no disponible: integración no habilitada" | Normal | Normal | Normal |
 | Efecto en el kit de micrófono | Ninguno (ya no guarda nada) | Ninguno; el kit sigue siendo una prueba local independiente | Ninguno | Si se ofrece conservar, debe usar el mismo texto de consentimiento y el opt-in `--keep-audio` |
 | Efecto en el kit SUS | La aplicación no podría mostrar disfluencias; el SUS evaluaría un producto sin la función | Compatible: los participantes consienten un análisis efímero | Compatible | Compatible; el consentimiento del SUS puede ser el mismo documento |
-| Qué NO resuelve | -- | Un servidor MRCD sin autenticación ni TLS no debe exponerse; la red entre app y MRCD debe ser local o protegida | Idem | Idem; no sustituye la aprobación ética |
+| Qué NO resuelve | -- | Un servidor MRCD sin el proxy con TLS no debe exponerse fuera de la máquina; hay un único secreto compartido (sin identidad por usuario, sin vencimiento ni mTLS) y el tramo proxy-servicio es HTTP en `loopback` | Idem | Idem; no sustituye la aprobación ética |
 
 ## 4. Riesgos transversales (cualquier opción distinta de A)
 
 1. **Datos de terceros en el audio** (otras voces, contenido personal del discurso).
 2. **Fuga por registros** (logs con texto o rutas de audio): prohibida por contrato, pero no verificada en la app.
 3. **Transcripción como dato personal:** `include_text=false` reduce la exposición; si se activa, el reporte pasa a contener texto del usuario.
-4. **Servidor sin autenticación:** el servicio de desarrollo es solo para `loopback`; una integración real requiere decisión sobre autenticación y TLS.
+4. **Autenticación y TLS limitadas:** existe un token portador compartido (obligatorio fuera de `loopback`) y un límite de tasa; el TLS depende del proxy inverso documentado. Sigue abierta la decisión sobre identidad por usuario, rotación/vencimiento de credenciales y la validación real del Caddyfile.
 5. **Fallos parciales:** si el trabajo falla, el audio debe descartarse igual; hay que probar el descarte en el camino de error.
 6. **Cumplimiento y ética:** la aprobación ética, la base legal y los textos de consentimiento no existen hoy; ninguna opción los sustituye.
 7. **El video no se envía a MRCD** y nunca se infiere un estado psicológico a partir de él; esta decisión es solo sobre audio.
@@ -95,7 +95,7 @@ Tope global de búferes simultáneos, tope por cuenta, tope de bytes en memoria 
 
 ### 7.5 Sigue abierto
 
-Ratificación del asesor de la opción B y del texto de consentimiento; aprobación ética y base legal (Ley 29733); texto de Términos de servicio; autenticación y TLS entre la app y MRCD; prueba con micrófono real; las rutas Postgres no tienen prueba automatizada propia (se ejercitaron en la prueba de extremo a extremo).
+Ratificación del asesor de la opción B y del texto de consentimiento; aprobación ética y base legal (Ley 29733); texto de Términos de servicio; despliegue real del token y del proxy con TLS entre la app y MRCD (la app aún no los usa); prueba con micrófono real; las rutas Postgres no tienen prueba automatizada propia (se ejercitaron en la prueba de extremo a extremo).
 
 ## 8. Addendum 2026-11-01 (variante "B incremental" frente a B original)
 

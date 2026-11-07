@@ -32,7 +32,7 @@ its own license or access agreement. Only the following are published here:
 | Spanish in Texas | CC BY-NC-ND 4.0 + confidentiality | transcripts only |
 | SOPHIAS | DUA required | pending (DUA unsigned) |
 | Bangor Miami | TalkBank/Bangor conditions | not recovered |
-| CHM150 (LDC2016S04) | LDC agreement; redistribution prohibited | not obtained (license discrepancy open) |
+| CHM150 (LDC2016S04) | LDC "CHM150 Agreement" (signed, order R824739218); redistribution prohibited | obtained 2026-11-02, aggregates only |
 | SEP-28k / FluencyBank | CC BY-NC 4.0 labels (English) | taxonomy comparison only |
 | Internal YouTube clips (87) | license "no declarada" | local only, not redistributable |
 

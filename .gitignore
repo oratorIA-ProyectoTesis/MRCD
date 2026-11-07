@@ -53,3 +53,13 @@ __pycache__/
 
 # Trained checkpoint: not redistributed (see models/README.md)
 models/*.pt
+# Distributed on purpose: the synthetic sample WAV (the trained checkpoint is NOT distributed, see models/README.md)
+/mrcd/weights/*.pt
+!mrcd/service/web/sample_es.wav
+!site/sample_es.wav
+# Build outputs
+/build/
+/dist/
+
+# skill registry cache
+.atl/

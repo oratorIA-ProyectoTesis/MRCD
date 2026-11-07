@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Orquestador end-to-end (reanudable). Genera RUN_REPORT.md y el resumen final en consola.
+"""Orquestador end-to-end (reanudable). Genera legacy/RUN_REPORT.md y el resumen final en consola.
 
   python scripts/run_all.py                 # todo
   python scripts/run_all.py --skip-mining   # si ya minaste
@@ -37,7 +37,7 @@ def stage(name: str, cmd: list[str], critical: bool = True) -> bool:
     LOG.append(dict(stage=name, cmd=" ".join(cmd), seconds=round(time.time() - t0, 1), rc=rc, tail=tail if rc else []))
     write_report()
     if rc != 0 and critical:
-        print(f"\n✗ Etapa '{name}' falló (rc={rc}). Revisa RUN_REPORT.md. Puedes relanzar: el pipeline es reanudable.")
+        print(f"\n✗ Etapa '{name}' falló (rc={rc}). Revisa legacy/RUN_REPORT.md. Puedes relanzar: el pipeline es reanudable.")
         sys.exit(rc)
     return rc == 0
 
@@ -76,7 +76,7 @@ def write_report() -> None:
               f"- descargados sin extraer: {sum(v.get('status') == 'downloaded' for v in st.values())}",
               f"- descartados: {len(rej)}", "", "| video_id | etapa | motivo |", "|---|---|---|"]
         L += [f"| {k} | {v.get('stage','')} | {v.get('reason','')} |" for k, v in rej.items()]
-    (ROOT / "RUN_REPORT.md").write_text("\n".join(L) + "\n", encoding="utf-8")
+    (ROOT / "legacy" / "RUN_REPORT.md").write_text("\n".join(L) + "\n", encoding="utf-8")
 
 
 def final_summary() -> None:

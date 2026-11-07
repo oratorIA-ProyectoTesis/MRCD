@@ -318,16 +318,21 @@ class IncrementalSession:
         raw[:] = bytes(len(raw))  # transient copy: overwrite before releasing
         del raw
         try:
-            real = self._owner.analyzer.asr_for(self.options)
-            ns = session_namespace(self.options, real)
-            key = segment_key(ns, start, seg)
-            if key not in self.cache:
-                words, events = decode_with(real, seg, start)
-                self.decode_calls += 1
-                with self.lock:
-                    if not self.alive:
-                        return
-                    self.cache.put(key, words, events)
+            # every ASR the close will run: the requested one and, for o2026_11b, the P1 pass of repetition
+            reals = [self._owner.analyzer.asr_for(self.options)]
+            second = self._owner.analyzer.secondary_asr_for(self.options)
+            if second is not None:
+                reals.append(second)
+            for real in reals:
+                ns = session_namespace(self.options, real)
+                key = segment_key(ns, start, seg)
+                if key not in self.cache:
+                    words, events = decode_with(real, seg, start)
+                    self.decode_calls += 1
+                    with self.lock:
+                        if not self.alive:
+                            return
+                        self.cache.put(key, words, events)
             with self.lock:
                 if self.alive:
                     self.chunks_decoded += 1
@@ -410,13 +415,16 @@ class IncrementalSession:
             if self.status != "closing" or wav is None:
                 return
         try:
-            real = self._owner.analyzer.asr_for(self.options)
-            ns = session_namespace(self.options, real)
+            # the namespace is computed from each wrapped ASR (requested profile, and P1 for o2026_11b), exactly as the
+            # early decodes computed it
             result = self._owner.analyzer.analyze_bytes(
                 wav,
                 self.options,
                 asr_wrapper=lambda asr: CachedASR(
-                    asr, self.cache, ns, should_stop=self._abandoned
+                    asr,
+                    self.cache,
+                    session_namespace(self.options, asr),
+                    should_stop=self._abandoned,
                 ),
             )
         except Exception as exc:  # noqa: BLE001
@@ -521,7 +529,7 @@ class SessionRegistry:
             return self._bytes_in_use
 
     def open(self, options: AnalysisOptions) -> IncrementalSession:
-        if not self.analyzer.is_loaded(options) or "cuda" in options.asr_profile:
+        if not self.analyzer.is_ready(options) or "cuda" in options.asr_profile:
             raise ServiceError(
                 "profile_not_supported_incremental",
                 "Incremental sessions only accept CPU profiles that were preloaded at start.",

@@ -32,7 +32,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$ROOT = $PSScriptRoot
+$ROOT = Split-Path $PSScriptRoot -Parent  # legacy/ -> repository root
 $PY = Join-Path $ROOT ".venv\Scripts\python.exe"
 Set-Location $ROOT
 

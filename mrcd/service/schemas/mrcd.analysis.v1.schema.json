@@ -176,11 +176,13 @@
             "payload_too_large",
             "profile_not_supported_incremental",
             "queue_full",
+            "rate_limited",
             "sequence_conflict",
             "session_closed",
             "session_expired",
             "session_limit",
             "session_not_found",
+            "unauthorized",
             "unsupported_audio_format",
             "unsupported_sample_rate"
           ]
@@ -228,7 +230,8 @@
         "decision_profile": {
           "enum": [
             "v0",
-            "o2026_11"
+            "o2026_11",
+            "o2026_11b"
           ]
         },
         "audio_sha256": {
@@ -443,7 +446,8 @@
                 "max_window_softmax_score",
                 "max_window_class_probability",
                 "text_route_logistic_score",
-                "unit_pipeline_model_score"
+                "unit_pipeline_model_score",
+                "lexical_rule_indicator"
               ]
             },
             "calibrated": {
@@ -810,7 +814,8 @@
         "name": {
           "enum": [
             "v0",
-            "o2026_11"
+            "o2026_11",
+            "o2026_11b"
           ]
         },
         "status": {
@@ -836,6 +841,12 @@
         },
         "note": {
           "type": "string"
+        },
+        "secondary_asr": {
+          "type": [
+            "object",
+            "null"
+          ]
         }
       }
     },

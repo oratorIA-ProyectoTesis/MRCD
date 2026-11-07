@@ -692,7 +692,7 @@ def main() -> None:
         "",
     ]
 
-    out = Path(a.out) if a.out else ROOT / "case_study_interview.md"
+    out = Path(a.out) if a.out else ROOT / "legacy" / "case_study_interview.md"
     out.write_text("\n".join(L) + "\n", encoding="utf-8")
     print(f"[qa] informe -> {out}")
     print(f"[qa] cola de adjudicación -> {qpath}  ({len(queue)} ventanas)")

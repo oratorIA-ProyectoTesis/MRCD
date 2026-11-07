@@ -76,10 +76,17 @@ class VerbatimASR:
         language: str = "es",
         profile: "str | ASRProfile | None" = None,
     ):
-        from faster_whisper import WhisperModel  # type: ignore
-
         # ``None`` -> "p0": the historical decoding parameters, unchanged (see mrcd/asr_profiles.py).
         self.profile = get_profile(profile)
+        if self.profile.backend == "crisperwhisper":  # opt-in verbatim profile (cw2); never reached by p0/p1
+            from mrcd import verbatim
+
+            self.model, self.device, self.compute_type = verbatim.load_crisper(self.profile, device, compute_type)
+            self.model_size, self.language = self.profile.model_id, language
+            self._model_bin_sha256 = self._model_dir = None
+            self._model_info_done, self.dropped_tags = True, []
+            return
+        from faster_whisper import WhisperModel  # type: ignore
 
         strict_device = self.profile.device
         if strict_device is not None:  # opt-in GPU profile: demand it, never fall back silently
@@ -198,11 +205,34 @@ class VerbatimASR:
     def transcribe(self, audio: np.ndarray) -> list[Word]:
         # objects built without __init__ (test doubles) fall back to the default profile
         profile = get_profile(getattr(self, "profile", None))
+        if profile.backend == "crisperwhisper":
+            return self._transcribe_crisper(audio)
         kwargs = profile.decode_kwargs(self.language)
         words = _decode_words(self.model, audio, kwargs)
         if profile.loop_redecode:
             words = VerbatimASR._redecode_if_looped(self, audio, kwargs, words)
         return words
+
+    def _transcribe_crisper(self, audio: np.ndarray) -> list[Word]:
+        """Opt-in ``cw2``: verbatim decode; filled-pause tags -> lexicon words (``mrcd.verbatim.FP_TAG_NORM``), other tags dropped.
+
+        CrisperWhisper gives no per-word probability: ``prob`` is 1.0 (neutral, NOT a confidence). Long audio is handled by the
+        package's own long-form strategy, not by MRCD's 8 s chunking.
+        """
+        from mrcd import verbatim
+
+        r = self.model.transcribe(
+            audio.astype(np.float32), language=self.language, mode="verbatim", word_timestamps=True, sr=SAMPLE_RATE
+        )
+        words: list[Word] = []
+        for w in r.words or []:
+            tok, dropped = verbatim.map_token(w.word)
+            if dropped is not None:
+                self.dropped_tags.append(dropped)
+            if tok is None:
+                continue
+            words.append(Word(tok.strip(), normalize(tok), float(w.start), float(w.end), 1.0, _punct(tok)))
+        return [w for w in words if w.norm]
 
     def _redecode_if_looped(self, audio: np.ndarray, kwargs: dict, words: list[Word]) -> list[Word]:
         """Opt-in (profiles ``*_noloop``): re-decode a chunk whose text looks like a repetition loop.
@@ -269,6 +299,8 @@ class VerbatimASR:
         """
         self.redecode_events = []
         self._chunk_offset_s = 0.0
+        if getattr(getattr(self, "profile", None), "backend", "faster_whisper") == "crisperwhisper":
+            return self.transcribe(audio)  # the package does its own long-form chunking
         if chunk_s <= 0 or len(audio) <= chunk_s * SAMPLE_RATE:
             return self.transcribe(audio)
 

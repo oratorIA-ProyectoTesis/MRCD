@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self' http://127.0.0.1:* http://localhost:* http://[::1]:*; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="MRCD: motor local que detecta muletillas, prolongaciones y repeticiones en habla española y las entrega por una API HTTP versionada.">
+<title>MRCD · Detección de disfluencias del habla en español</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface-2: #efede7;
+  --ink: #1c1f23;
+  --muted: #4c535d;
+  --line: #d6d2c9;
+  --accent: #0c6a62;
+  --accent-ink: #ffffff;
+  --accent-soft: #e2f1ee;
+  --warn-bg: #fff4e0;
+  --warn-line: #c98a1b;
+  --err-bg: #fdeceb;
+  --err-line: #b4372f;
+  --code-bg: #f0eee8;
+  --c-filler_word: #a3470b;
+  --c-prolongation: #5a3fae;
+  --c-repetition: #0c6a62;
+  --focus: #1f5fd6;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgb(0 0 0 / .06), 0 4px 16px rgb(0 0 0 / .04);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #131619;
+    --surface: #1b1f23;
+    --surface-2: #23292e;
+    --ink: #ebe8e2;
+    --muted: #aab1ba;
+    --line: #343b42;
+    --accent: #5fc6b9;
+    --accent-ink: #0a1513;
+    --accent-soft: #173330;
+    --warn-bg: #33270f;
+    --warn-line: #d9a441;
+    --err-bg: #3a1a18;
+    --err-line: #ef7d72;
+    --code-bg: #20252a;
+    --c-filler_word: #f2a560;
+    --c-prolongation: #b8a5f6;
+    --c-repetition: #5fc6b9;
+    --focus: #8ab4ff;
+    --shadow: none;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; animation: none !important; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 var(--font); -webkit-text-size-adjust: 100%; }
+a { color: var(--accent); text-underline-offset: .18em; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+.skip { position: absolute; left: -999px; top: 0; background: var(--surface); padding: .6rem 1rem; z-index: 20; }
+.skip:focus { left: 1rem; top: 1rem; }
+.wrap { max-width: 72rem; margin: 0 auto; padding-inline: max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-right)); }
+header.top { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top, 0px); }
+.top .wrap { display: flex; align-items: center; gap: 1rem; min-height: 3.5rem; flex-wrap: wrap; }
+.brand { font-weight: 700; letter-spacing: .02em; color: var(--ink); text-decoration: none; font-size: 1.05rem; }
+.brand span { color: var(--muted); font-weight: 500; margin-left: .35rem; font-size: .85rem; }
+nav.sections { margin-left: auto; overflow-x: auto; }
+nav.sections ul { display: flex; gap: .2rem; list-style: none; margin: 0; padding: 0; white-space: nowrap; }
+nav.sections a { display: block; padding: .35rem .55rem; color: var(--muted); text-decoration: none; border-radius: 6px; font-size: .92rem; }
+nav.sections a:hover { color: var(--ink); background: var(--surface-2); }
+@media (max-width: 720px) { header.top { position: static; } nav.sections { margin-left: 0; width: 100%; padding-bottom: .4rem; } .top .wrap { gap: .2rem; } main section { scroll-margin-top: 0; } }
+main section { padding-block: 3rem; border-bottom: 1px solid var(--line); scroll-margin-top: 4rem; }
+main section:last-of-type { border-bottom: 0; }
+h1, h2, h3 { line-height: 1.2; letter-spacing: -.01em; }
+h1 { font-size: clamp(1.9rem, 4.2vw, 2.9rem); margin: 0 0 1rem; max-width: 22ch; }
+h2 { font-size: clamp(1.45rem, 2.6vw, 1.9rem); margin: 0 0 1rem; }
+h3 { font-size: 1.1rem; margin: 1.6rem 0 .5rem; }
+p, li { max-width: 72ch; }
+.lead { font-size: 1.15rem; color: var(--muted); max-width: 62ch; }
+.hero { padding-block: 3.5rem 3rem; }
+.eyebrow { font-size: .85rem; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); font-weight: 700; margin: 0 0 .6rem; }
+.chips { display: flex; flex-wrap: wrap; gap: .45rem; margin: 1.2rem 0 1.6rem; padding: 0; list-style: none; }
+.chips li { font-size: .82rem; border: 1px solid var(--line); background: var(--surface); padding: .2rem .6rem; border-radius: 999px; color: var(--muted); }
+.cta { display: flex; flex-wrap: wrap; gap: .7rem; }
+.btn { display: inline-flex; align-items: center; gap: .45rem; font: inherit; font-weight: 600; font-size: .95rem; padding: .62rem 1.05rem; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); cursor: pointer; text-decoration: none; min-height: 44px; }
+.btn.secondary { background: transparent; color: var(--accent); }
+.btn:hover { filter: brightness(1.06); }
+.btn[disabled] { opacity: .5; cursor: not-allowed; filter: none; }
+.btn.rec { border-color: var(--err-line); background: var(--err-line); color: #fff; }
+.note { border-left: 4px solid var(--warn-line); background: var(--warn-bg); padding: .8rem 1rem; border-radius: 0 var(--radius) var(--radius) 0; margin: 1rem 0; }
+.note.info { border-color: var(--accent); background: var(--accent-soft); }
+.note.err { border-color: var(--err-line); background: var(--err-bg); }
+.note p { margin: .2rem 0; }
+.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.2rem; box-shadow: var(--shadow); }
+.card h3 { margin-top: 0; }
+.card p { margin: .4rem 0; }
+.card .src { font-size: .82rem; color: var(--muted); }
+.tag { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .04em; padding: .1rem .45rem; border-radius: 4px; background: var(--surface-2); color: var(--muted); margin-right: .35rem; vertical-align: .1em; }
+code, pre, kbd { font-family: var(--mono); font-size: .88em; }
+:not(pre) > code { background: var(--code-bg); padding: .08rem .32rem; border-radius: 4px; overflow-wrap: break-word; }
+.code { position: relative; margin: .7rem 0 1rem; }
+.code pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: .85rem 1rem; overflow-x: auto; line-height: 1.5; }
+.copy { position: absolute; top: .4rem; right: .4rem; font: 600 .75rem var(--font); padding: .25rem .55rem; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; min-height: 28px; }
+.copy:hover { color: var(--ink); }
+.steps { counter-reset: s; list-style: none; padding: 0; }
+.steps > li { counter-increment: s; position: relative; padding-left: 2.2rem; margin-bottom: .6rem; }
+.steps > li::before { content: counter(s); position: absolute; left: 0; top: .1rem; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: .8rem; display: grid; place-items: center; }
+/* try block */
+.try { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: clamp(1rem, 2.5vw, 1.6rem); box-shadow: var(--shadow); }
+.mode { display: flex; gap: .6rem; align-items: flex-start; }
+.dot { width: .7rem; height: .7rem; border-radius: 50%; margin-top: .45rem; flex: none; background: var(--muted); }
+.dot.on { background: #1e9e5a; }
+.actions { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0 .6rem; }
+.opts { display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; margin: .4rem 0 .8rem; padding: 0; border: 0; }
+.opts legend { font-weight: 600; font-size: .9rem; margin-bottom: .2rem; padding: 0; }
+.opts label { display: inline-flex; align-items: center; gap: .45rem; font-size: .95rem; min-height: 32px; }
+.opts input { width: 1.1rem; height: 1.1rem; accent-color: var(--accent); flex: none; }
+.opts code { white-space: nowrap; font-size: .8em; color: var(--muted); }
+.connect { display: flex; flex-wrap: wrap; gap: .5rem; align-items: end; margin: .8rem 0; }
+.connect label { display: grid; gap: .25rem; font-size: .9rem; font-weight: 600; flex: 1 1 16rem; }
+.connect input { font: inherit; padding: .55rem .7rem; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); min-height: 44px; }
+.status { min-height: 1.6rem; font-weight: 600; margin: .6rem 0; }
+.sample { display: grid; gap: .5rem; margin: .8rem 0; padding: .8rem 1rem; background: var(--surface-2); border-radius: var(--radius); }
+.sample audio { width: 100%; max-width: 32rem; }
+.sample q { font-style: italic; }
+.result { margin-top: 1.2rem; }
+.kpis { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); margin: .8rem 0 1.2rem; }
+.kpi { background: var(--surface-2); border-radius: 8px; padding: .6rem .8rem; }
+.kpi b { display: block; font-size: 1.35rem; }
+.kpi span { font-size: .82rem; color: var(--muted); }
+.timeline { margin: .6rem 0 1rem; }
+.tl-row { display: grid; grid-template-columns: 8.5rem 1fr; gap: .6rem; align-items: center; margin-bottom: .45rem; }
+.tl-label { font-size: .9rem; font-weight: 600; display: flex; align-items: center; gap: .4rem; }
+.swatch { width: .8rem; height: .8rem; border-radius: 3px; flex: none; }
+.tl-track { position: relative; height: 2.1rem; background: var(--surface-2); border-radius: 6px; border: 1px solid var(--line); }
+.tl-ev { position: absolute; top: 3px; bottom: 3px; min-width: 6px; border-radius: 4px; border: 0; padding: 0; cursor: pointer; }
+.tl-ev:hover { filter: brightness(1.12); }
+.tl-ev[data-state="uncertain"] { background-image: repeating-linear-gradient(45deg, transparent 0 4px, rgb(255 255 255 / .35) 4px 7px); }
+.tl-axis { position: relative; height: 1.3rem; margin-left: 9.1rem; font-size: .75rem; color: var(--muted); }
+.tl-axis span { position: absolute; transform: translateX(-50%); }
+.tl-playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); opacity: .7; pointer-events: none; }
+@media (max-width: 560px) { .tl-row { grid-template-columns: 1fr; gap: .2rem; } .tl-axis { margin-left: 0; } }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th { background: var(--surface-2); font-weight: 650; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.na { color: var(--muted); font-style: italic; }
+details { margin: .8rem 0; }
+details > summary { cursor: pointer; font-weight: 600; padding: .3rem 0; }
+details pre { max-height: 28rem; overflow: auto; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: .8rem 1rem; font-size: .8rem; }
+.diagram { display: grid; gap: .5rem; margin: 1rem 0; }
+.diagram .node { background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--accent); border-radius: 8px; padding: .7rem 1rem; }
+.diagram .node b { display: block; }
+.diagram .node small { color: var(--muted); }
+.diagram .edge { font-size: .82rem; color: var(--muted); padding-left: 1.4rem; position: relative; }
+.diagram .edge::before { content: "↓"; position: absolute; left: .35rem; color: var(--accent); font-weight: 700; }
+.c4 { overflow-x: auto; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .5rem; }
+.c4 svg { display: block; width: 100%; min-width: 760px; height: auto; }
+.endpoints td:first-child { white-space: nowrap; font-family: var(--mono); font-size: .85rem; }
+footer { padding-block: 2rem calc(2rem + env(safe-area-inset-bottom, 0px)); color: var(--muted); font-size: .9rem; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.pill { font-size: .78rem; padding: .1rem .5rem; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.meter { height: .5rem; background: var(--surface-2); border-radius: 999px; overflow: hidden; max-width: 18rem; }
+.meter i { display: block; height: 100%; width: 0; background: var(--accent); }
+</style>
+</head>
+<body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio">MRCD <span>v0.4.0</span></a>
+    <nav class="sections" aria-label="Secciones">
+      <ul>
+        <li><a href="#pruebalo">Pruébalo</a></li>
+        <li><a href="#ventajas">Ventajas</a></li>
+        <li><a href="#instalacion">Instalación</a></li>
+        <li><a href="#arquitectura">Arquitectura</a></li>
+        <li><a href="#api">API</a></li>
+        <li><a href="#integracion">Integración</a></li>
+        <li><a href="#limites">Límites</a></li>
+        <li><a href="https://github.com/oratorIA-ProyectoTesis/MRCD">Código</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="contenido">
+<section class="hero" id="inicio">
+  <div class="wrap">
+    <p class="eyebrow">Motor de reconocimiento contextual · español</p>
+    <h1>Detecta muletillas, prolongaciones y repeticiones en el habla, en tu propia máquina.</h1>
+    <p class="lead">MRCD analiza una grabación en español y devuelve cada disfluencia con su marca temporal, en un documento JSON versionado que cualquier aplicación puede consumir por HTTP. El audio no sale de tu equipo.</p>
+    <ul class="chips" aria-label="Datos del producto">
+      <li>Versión 0.4.0</li>
+      <li>Licencia MIT (código)</li>
+      <li>Python 3.11 y 3.12</li>
+      <li>Contrato <code>mrcd.analysis/v1</code>, revisión 1.4</li>
+      <li>Prototipo de investigación</li>
+    </ul>
+    <div class="cta">
+      <a class="btn" href="#pruebalo">Pruébalo con un audio de muestra</a>
+      <a class="btn secondary" href="#instalacion">Instalar en 5 minutos</a>
+    </div>
+  </div>
+</section>
+
+<section id="que-es" aria-labelledby="que-es-t">
+  <div class="wrap">
+    <h2 id="que-es-t">Qué es y qué problema resuelve</h2>
+    <p>Las herramientas de retroalimentación oral necesitan saber <em>dónde</em> y <em>cuántas veces</em> alguien dice “eh”, alarga un sonido o repite una palabra. El reconocimiento de voz estándar tiende a limpiar justo esa evidencia: en el corpus DIHANA, la configuración por defecto del ASR borró 109 de 214 repeticiones (51 %). Una aplicación que solo mira la transcripción pierde lo que quiere medir.</p>
+    <p>MRCD es un motor local que combina evidencia acústica (energía, tono, actividad de voz) con el texto de un ASR Whisper que también se ejecuta en tu máquina, y marca tres clases:</p>
+    <div class="grid" role="list">
+      <div class="card" role="listitem"><h3><span class="swatch" style="background:var(--c-filler_word);display:inline-block"></span> Muletilla</h3><p>Pausa llena o relleno, por ejemplo “eh”. Clase <code>filler_word</code>.</p></div>
+      <div class="card" role="listitem"><h3><span class="swatch" style="background:var(--c-prolongation);display:inline-block"></span> Prolongación</h3><p>Alargamiento observable de un sonido. Se reporta como observación acústica, sin afirmar su función disfluente. Clase <code>prolongation</code>.</p></div>
+      <div class="card" role="listitem"><h3><span class="swatch" style="background:var(--c-repetition);display:inline-block"></span> Repetición</h3><p>Repetición literal de una palabra o parte de ella, por ejemplo “el motor, el motor”. Clase <code>repetition</code>.</p></div>
+    </div>
+    <p>El resultado se entrega por un servicio HTTP local (<code>mrcd serve</code>), una biblioteca de Python o la línea de comandos. Los puntajes <strong>no están calibrados</strong>: ordenan la evidencia, no son probabilidades de acierto.</p>
+  </div>
+</section>
+
+<section id="pruebalo" aria-labelledby="pruebalo-t">
+  <div class="wrap">
+    <h2 id="pruebalo-t">Pruébalo</h2>
+    <div class="try">
+      <div class="mode" id="mode" role="status">
+        <span class="dot" id="mode-dot" aria-hidden="true"></span>
+        <div id="mode-text"><p>Comprobando si hay un servicio MRCD disponible…</p></div>
+      </div>
+
+      <div id="connect-panel" hidden>
+        <div class="connect">
+          <label for="svc-url">Dirección de tu servicio local
+            <input id="svc-url" type="url" value="http://127.0.0.1:8765" inputmode="url" autocomplete="off" spellcheck="false">
+          </label>
+          <button class="btn secondary" id="btn-connect" type="button">Conectar</button>
+        </div>
+        <div id="connect-help"></div>
+      </div>
+
+      <div class="sample">
+        <div><strong>Audio de muestra</strong> <span class="pill">voz sintética · 14,9 s · 16 kHz mono</span></div>
+        <audio id="player" controls preload="none" src="sample_es.wav"></audio>
+        <p style="margin:0">Texto leído: <q>Buenos días. Eh, hoy les presento el proyecto. El motor, el motor escucha el audio y busca muletillas. Luego, eh, marca cada repetición con su tiempo. Así se arma el reporte final.</q></p>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="btn-sample" type="button" disabled>Analizar la muestra</button>
+        <button class="btn secondary" id="btn-upload" type="button" disabled>Subir un audio</button>
+        <input id="file" type="file" accept="audio/*,.wav" hidden>
+        <button class="btn secondary" id="btn-rec" type="button" disabled aria-pressed="false">Grabar con el micrófono</button>
+      </div>
+      <fieldset class="opts" id="opts">
+        <legend>Opciones de la petición</legend>
+        <label><input type="checkbox" id="opt-text" checked> Incluir el texto <code>include_text</code></label>
+        <label><input type="checkbox" id="opt-decision"> Decisión de tres estados, experimental <code>decision</code></label>
+        <label id="opt-inc-wrap"><input type="checkbox" id="opt-inc" disabled> Sesión incremental <code>/v1/sessions</code></label>
+      </fieldset>
+      <div id="rec-panel" hidden>
+        <p style="margin:.2rem 0">Grabando: <strong id="rec-time">0,0 s</strong> <span class="na">(mínimo 13 s, máximo 120 s)</span></p>
+        <div class="meter" aria-hidden="true"><i id="rec-level"></i></div>
+      </div>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+      <div class="result" id="result" aria-live="off"></div>
+    </div>
+  </div>
+</section>
+
+<section id="ventajas" aria-labelledby="ventajas-t">
+  <div class="wrap">
+    <h2 id="ventajas-t">Ventajas, con su evidencia</h2>
+    <p>Comparación cualitativa por criterios definidos y congelados por hash antes de llenar la matriz (02/11/2026), sobre la documentación pública de nueve soluciones. En las fuentes consultadas no se identificó otra de las soluciones comparadas que reúna estos seis puntos a la vez. Es una evaluación de documentación, hecha por el propio equipo; ninguna solución se ejecutó.</p>
+    <ol class="grid" style="list-style:none;padding:0">
+      <li class="card"><h3><span class="tag">K4</span>Conserva, medido, la evidencia que el ASR omite</h3><p>En habla española y con control: el ASR por defecto borra 109 de 214 repeticiones (51 %); con el perfil P1 sobreviven 144 de 214, frente a 42 de 214 del control fluido. Diferencia P1 − control: +0,387 de F1 [0,298; 0,478]. Ninguna fuente consultada de las otras soluciones mide esto en español frente a un control.</p><p class="src">Un corpus (DIHANA), exploratorio; P1 es experimental.</p></li>
+      <li class="card"><h3><span class="tag">K5</span>Reporte por clase con procedencia y límites</h3><p>Cada evento trae su intervalo en segundos y un puntaje rotulado “no calibrado”; cada documento lleva la procedencia (perfil de decisión, sha256 de los artefactos, modelo ASR) y advertencias de alcance.</p></li>
+      <li class="card"><h3><span class="tag">K6</span>Estados honestos verificados por pruebas</h3><p>La ausencia nunca se codifica como 0 (“no disponible: motivo”), existe el estado incierto y los puntajes se marcan como no calibrados. En las demás soluciones este criterio no está documentado.</p></li>
+      <li class="card"><h3><span class="tag">K8</span>Reproducibilidad</h3><p>Protocolos congelados por hash (<code>PROTOCOL.sha256.json</code>) y revisiones que reproducen las cifras del ASR; código MIT en un repositorio público.</p></li>
+      <li class="card"><h3><span class="tag">K9 + K7</span>Contrato versionado con análisis local</h3><p>Esquema <code>mrcd.analysis/v1</code> con revisiones aditivas 1.0 a 1.4, <code>POST /v1/jobs</code> y CLI, ejecutado en tu máquina. AssemblyAI y Deepgram tienen API versionada, pero en la nube; CrisperWhisper y OpenOPAF son locales, pero sin contrato de eventos versionado.</p></li>
+      <li class="card"><h3><span class="tag">K2 + K1</span>Tres clases en español en un mismo motor</h3><p>Muletilla, prolongación y repetición literal, evaluadas con habla española. El RAP de ESPOL trata pausas llenas (con prolongaciones dentro de esa definición) y muletillas, sin repeticiones.</p></li>
+    </ol>
+    <p class="src" style="color:var(--muted);font-size:.88rem">Fuente: benchmarking cualitativo del proyecto (02/11/2026), criterios K1 a K12 congelados por sha256 antes de llenar la matriz; los seis puntos son los de su sección de ventajas. Todo es exploratorio. La desventaja principal es la madurez: no hay estudios con usuarios (criterio K12).</p>
+  </div>
+</section>
+
+<section id="instalacion" aria-labelledby="instalacion-t">
+  <div class="wrap">
+    <h2 id="instalacion-t">Instalación: tres rutas</h2>
+    <p>La primera ejecución descarga Whisper small (~486 MB) desde Hugging Face con un aviso de progreso; las siguientes usan la caché. Con <code>HF_HUB_OFFLINE=1</code> se prohíbe cualquier descarga. Python 3.11 o 3.12; probado con 3.12 en Windows y en Linux (Docker).</p>
+    <div class="grid">
+      <article class="card">
+        <h3>1. Docker, un comando</h3>
+        <p>Imagen con PyTorch para CPU y Whisper small ya incluidos; corre como usuario sin privilegios y tiene verificación de salud.</p>
+        <div class="code"><pre><code>docker run --rm -e MRCD_SERVICE_TOKEN="$TOKEN" -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" ghcr.io/oratoria-proyectotesis/mrcd:0.4.0</code></pre></div>
+        <p>Luego abre <a href="http://127.0.0.1:8765/">http://127.0.0.1:8765/</a>. El puerto se publica solo en <code>127.0.0.1</code>; dentro del contenedor el servicio exige un token portador (<code>TOKEN</code> de 32 caracteres o más). <code>./models</code> debe contener el checkpoint, que no se distribuye (ver <code>models/README.md</code>). Para construirla tú: <code>docker build -t ghcr.io/oratoria-proyectotesis/mrcd:0.4.0 https://github.com/oratorIA-ProyectoTesis/MRCD.git#v0.4.0</code>, o <code>docker compose up --build</code> con el repositorio clonado.</p>
+      </article>
+      <article class="card">
+        <h3>2. pip</h3>
+        <div class="code"><pre><code>python -m venv .venv
+# Windows: .venv\Scripts\activate
+. .venv/bin/activate
+pip install "mrcd[service] @ git+https://github.com/oratorIA-ProyectoTesis/MRCD@v0.4.0"
+mrcd serve</code></pre></div>
+        <p>El comando <code>mrcd</code> fija <code>OMP_NUM_THREADS=4</code> si no está definido: el texto del ASR en CPU depende de ese valor y solo tiene efecto antes de importar numpy.</p>
+      </article>
+      <article class="card">
+        <h3>3. Desde el código</h3>
+        <div class="code"><pre><code>git clone https://github.com/oratorIA-ProyectoTesis/MRCD
+cd MRCD
+python -m venv .venv
+. .venv/bin/activate
+pip install -e ".[service,dev]"
+mrcd serve
+pytest -q</code></pre></div>
+      </article>
+    </div>
+    <h3>Primer análisis desde la terminal</h3>
+    <div class="code"><pre><code>mrcd sample sample_es.wav        # escribe el audio de muestra incluido
+mrcd analyze sample_es.wav --include-text</code></pre></div>
+  </div>
+</section>
+
+<section id="arquitectura" aria-labelledby="arquitectura-t">
+  <div class="wrap">
+    <h2 id="arquitectura-t">Componentes y arquitectura</h2>
+    <p>Un solo proceso local. El servicio serializa el trabajo en un hilo de motor, porque el motor no es seguro entre hilos; el audio se decodifica en memoria.</p>
+    <div class="diagram" role="list" aria-label="Flujo de una petición">
+      <div class="node" role="listitem"><b>Tu aplicación</b><small>cualquier lenguaje: HTTP en bucle local, o la biblioteca de Python</small></div>
+      <div class="edge" aria-hidden="true">WAV 16 kHz mono PCM16, o lotes PCM en una sesión incremental</div>
+      <div class="node" role="listitem"><b>Servicio <code>mrcd.service</code></b><small>FastAPI + uvicorn · <code>/v1/jobs</code>, <code>/v1/sessions</code>, <code>/v1/health</code>, <code>/v1/schema</code> · página y Swagger solo en bucle local</small></div>
+      <div class="edge" aria-hidden="true">opciones validadas, cola con prioridades, un hilo de motor</div>
+      <div class="node" role="listitem"><b>Analizador</b><small>valida el audio, arma el documento del contrato v1, procedencia y advertencias; nunca codifica una ausencia como 0</small></div>
+      <div class="edge" aria-hidden="true">audio en memoria</div>
+      <div class="node" role="listitem"><b>Motor <code>DisfluencyEngine</code></b><small>Silero VAD · rasgos acústicos (pYIN, energía) · ASR faster-whisper small en fragmentos de 8 s · clasificador de fusión audio + texto (checkpoint de 75 144 parámetros, sha256 fijado)</small></div>
+      <div class="edge" aria-hidden="true">ventanas de 3 s con paso de 0,5 s</div>
+      <div class="node" role="listitem"><b>Perfil de decisión <code>o2026_11</code></b><small>muletilla y prolongación por segmento con los pipelines de la campaña O (artefactos JSON con sha256); repetición por ventanas</small></div>
+      <div class="edge" aria-hidden="true">documento JSON</div>
+      <div class="node" role="listitem"><b>Resultado <code>mrcd.analysis/v1</code></b><small>eventos por clase, resumen, modalidades, procedencia, advertencias</small></div>
+    </div>
+    <details>
+      <summary>Diagrama C4 de contexto (nivel 1, en inglés)</summary>
+      <p>Incluye la aplicación web que integra el motor en la tesis y los proveedores que esa aplicación puede usar; el análisis MRCD queda dentro del equipo local.</p>
+      <div class="c4" role="img" aria-label="Diagrama C4 de contexto: el orador y la aplicación web en el equipo local llaman al motor MRCD por HTTP de bucle local; el motor lee corpus y archivos de modelo locales; la aplicación puede usar proveedores en la nube.">
+<!-- C4:BEGIN -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 850" width="1200" height="850" font-family="Segoe UI, Arial, sans-serif">
+<title>C4 level 1 - System context (current: MRCD service integrated in the app on feat/mrcd-integration)</title>
+<defs>
+<marker id="ar_sync" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#333333"/></marker>
+<marker id="ar_live" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1565c0"/></marker>
+<marker id="ar_offline" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6a1b9a"/></marker>
+<marker id="ar_data" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#616161"/></marker>
+<marker id="ar_proposed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e65100"/></marker>
+</defs>
+<rect width="1200" height="850" fill="#ffffff"/>
+<text x="20" y="26" font-size="16" font-weight="700" fill="#111">C4 level 1 - System context (current: MRCD service integrated in the app on feat/mrcd-integration)</text>
+<rect x="20" y="40" width="860" height="640" rx="8" fill="none" stroke="#b71c1c" stroke-width="1.6" stroke-dasharray="10 5"/>
+<text x="30" y="58" font-size="11.5" font-weight="600" fill="#b71c1c">Local workstation (nothing MRCD processes leaves it) [trust boundary]</text>
+<rect x="910" y="40" width="270" height="230" rx="8" fill="none" stroke="#b71c1c" stroke-width="1.6" stroke-dasharray="10 5"/>
+<text x="920" y="58" font-size="11.5" font-weight="600" fill="#b71c1c">Third-party cloud [trust boundary]</text>
+<polyline points="250.0,158.0 380.0,158.0" fill="none" stroke="#333333" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_sync)"/>
+<polyline points="630.0,158.0 940.0,158.0" fill="none" stroke="#333333" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_sync)"/>
+<polyline points="250.0,473.4 380.0,475.7" fill="none" stroke="#6a1b9a" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_offline)"/>
+<polyline points="630.0,463.3 720.0,452.7" fill="none" stroke="#616161" stroke-width="1.7" stroke-dasharray="2 3" marker-end="url(#ar_data)"/>
+<polyline points="630.0,533.7 720.0,573.8" fill="none" stroke="#616161" stroke-width="1.7" stroke-dasharray="2 3" marker-end="url(#ar_data)"/>
+<polyline points="505.0,216.0 505.0,420.0" fill="none" stroke="#1565c0" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_live)"/>
+<rect x="40" y="100" width="210" height="116" rx="6" fill="#fff8e1" stroke="#b28704" stroke-width="1.8" stroke-dasharray=""/>
+<text x="48" y="122" font-size="12.5" font-weight="700" fill="#111">Speaker</text>
+<text x="48" y="135" font-size="9.5" font-style="italic" fill="#37474f">Person</text>
+<text x="48" y="151" font-size="10.5" fill="#222">Records a speech with microphone</text>
+<text x="48" y="164" font-size="10.5" fill="#222">and camera in the browser. Sees</text>
+<text x="48" y="177" font-size="10.5" fill="#222">the MRCD disfluency section in</text>
+<text x="48" y="190" font-size="10.5" fill="#222">the report only after an</text>
+<text x="48" y="203" font-size="10.5" fill="#222">explicit, versioned opt-in.</text>
+<rect x="40" y="420" width="210" height="103" rx="6" fill="#fff8e1" stroke="#b28704" stroke-width="1.8" stroke-dasharray=""/>
+<text x="48" y="442" font-size="12.5" font-weight="700" fill="#111">Researcher / advisor</text>
+<text x="48" y="455" font-size="9.5" font-style="italic" fill="#37474f">Person</text>
+<text x="48" y="471" font-size="10.5" fill="#222">Runs MRCD scripts, the service</text>
+<text x="48" y="484" font-size="10.5" fill="#222">and the live demo and reads</text>
+<text x="48" y="497" font-size="10.5" fill="#222">results. Advisor approvals are</text>
+<text x="48" y="510" font-size="10.5" fill="#222">PENDING (no signature).</text>
+<rect x="380" y="100" width="250" height="116" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.8" stroke-dasharray=""/>
+<text x="388" y="122" font-size="12.5" font-weight="700" fill="#111">ORATORIA-PROYECTO web app</text>
+<text x="388" y="135" font-size="9.5" font-style="italic" fill="#37474f">Software system (separate repo)</text>
+<text x="388" y="151" font-size="10.5" fill="#222">Practice sessions and report. Embeds</text>
+<text x="388" y="164" font-size="10.5" fill="#222">ORATORIA-ENGINE v0 and, on branch</text>
+<text x="388" y="177" font-size="10.5" fill="#222">feat/mrcd-integration (published, not</text>
+<text x="388" y="190" font-size="10.5" fill="#222">merged), calls the MRCD service for</text>
+<text x="388" y="203" font-size="10.5" fill="#222">consenting accounts.</text>
+<rect x="380" y="420" width="250" height="116" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.8" stroke-dasharray=""/>
+<text x="388" y="442" font-size="12.5" font-weight="700" fill="#111">MRCD engine (this repo)</text>
+<text x="388" y="455" font-size="9.5" font-style="italic" fill="#37474f">Software system, Python package mrcd</text>
+<text x="388" y="471" font-size="10.5" fill="#222">Experimental 7-class window classifier</text>
+<text x="388" y="484" font-size="10.5" fill="#222">over audio and ASR text. Local HTTP</text>
+<text x="388" y="497" font-size="10.5" fill="#222">service (offline jobs + incremental</text>
+<text x="388" y="510" font-size="10.5" fill="#222">sessions), library, live replay. Scores</text>
+<text x="388" y="523" font-size="10.5" fill="#222">are not calibrated.</text>
+<rect x="720" y="380" width="140" height="129" rx="6" fill="#eeeeee" stroke="#616161" stroke-width="1.8" stroke-dasharray=""/>
+<text x="728" y="402" font-size="12.5" font-weight="700" fill="#111">Annotated corpora</text>
+<text x="728" y="415" font-size="9.5" font-style="italic" fill="#37474f">Files (git-ignored)</text>
+<text x="728" y="431" font-size="10.5" fill="#222">DIHANA, DIME,</text>
+<text x="728" y="444" font-size="10.5" fill="#222">ESLORA, own clips.</text>
+<text x="728" y="457" font-size="10.5" fill="#222">Offline evaluation</text>
+<text x="728" y="470" font-size="10.5" fill="#222">only; licences</text>
+<text x="728" y="483" font-size="10.5" fill="#222">restrict</text>
+<text x="728" y="496" font-size="10.5" fill="#222">redistribution.</text>
+<rect x="720" y="560" width="140" height="90" rx="6" fill="#eeeeee" stroke="#616161" stroke-width="1.8" stroke-dasharray=""/>
+<text x="728" y="582" font-size="12.5" font-weight="700" fill="#111">Model files</text>
+<text x="728" y="595" font-size="9.5" font-style="italic" fill="#37474f">Files</text>
+<text x="728" y="611" font-size="10.5" fill="#222">ckpt_audio_text.pt,</text>
+<text x="728" y="624" font-size="10.5" fill="#222">Vc head, faster-</text>
+<text x="728" y="637" font-size="10.5" fill="#222">whisper small cache.</text>
+<rect x="940" y="100" width="220" height="116" rx="6" fill="#eeeeee" stroke="#616161" stroke-width="1.8" stroke-dasharray=""/>
+<text x="948" y="122" font-size="12.5" font-weight="700" fill="#111">Cloud ASR and LLM providers</text>
+<text x="948" y="135" font-size="9.5" font-style="italic" fill="#37474f">External (as configured)</text>
+<text x="948" y="151" font-size="10.5" fill="#222">Configuration used: Speechmatics</text>
+<text x="948" y="164" font-size="10.5" fill="#222">ASR (session audio) and OpenAI LLM</text>
+<text x="948" y="177" font-size="10.5" fill="#222">(transcript text). Local</text>
+<text x="948" y="190" font-size="10.5" fill="#222">alternative: Whisper + Ollama, the</text>
+<text x="948" y="203" font-size="10.5" fill="#222">local compose default.</text>
+<rect x="248.9" y="144.0" width="132.2" height="28" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#333333" stroke-width="0.6"/>
+<text x="315.0" y="156.0" font-size="9.5" text-anchor="middle" fill="#333333">Speaks; audio and video</text>
+<text x="315.0" y="168.0" font-size="9.5" text-anchor="middle" fill="#333333">captured in the browser</text>
+<rect x="718.9" y="138.0" width="132.2" height="40" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#333333" stroke-width="0.6"/>
+<text x="785.0" y="150.0" font-size="9.5" text-anchor="middle" fill="#333333">Session audio (ASR) and</text>
+<text x="785.0" y="162.0" font-size="9.5" text-anchor="middle" fill="#333333">transcript text (LLM)</text>
+<text x="785.0" y="174.0" font-size="9.5" text-anchor="middle" fill="#333333">leave the machine</text>
+<rect x="243.5" y="466.6" width="143.0" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#6a1b9a" stroke-width="0.6"/>
+<text x="315.0" y="478.6" font-size="9.5" text-anchor="middle" fill="#6a1b9a">Runs scripts, demo, tests</text>
+<rect x="630.5" y="450.0" width="89.0" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#616161" stroke-width="0.6"/>
+<text x="675.0" y="462.0" font-size="9.5" text-anchor="middle" fill="#616161">Reads (offline)</text>
+<rect x="657.5" y="545.8" width="35.0" height="16" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#616161" stroke-width="0.6"/>
+<text x="675.0" y="557.8" font-size="9.5" text-anchor="middle" fill="#616161">Loads</text>
+<rect x="430.8" y="292.0" width="148.4" height="52" rx="3" fill="#ffffff" fill-opacity="0.95" stroke="#1565c0" stroke-width="0.6"/>
+<text x="505.0" y="304.0" font-size="9.5" text-anchor="middle" fill="#1565c0">WAV in memory over</text>
+<text x="505.0" y="316.0" font-size="9.5" text-anchor="middle" fill="#1565c0">loopback HTTP (offline job</text>
+<text x="505.0" y="328.0" font-size="9.5" text-anchor="middle" fill="#1565c0">or incremental batches);</text>
+<text x="505.0" y="340.0" font-size="9.5" text-anchor="middle" fill="#1565c0">counts-only SSE back</text>
+<text x="20" y="720" font-size="12" font-weight="700" fill="#111">Legend</text>
+<rect x="20" y="730" width="22" height="14" rx="3" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.6" stroke-dasharray=""/>
+<text x="48" y="742" font-size="10.5" fill="#222">exists in MRCD tree</text>
+<rect x="166.39999999999998" y="730" width="22" height="14" rx="3" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.6" stroke-dasharray=""/>
+<text x="194.39999999999998" y="742" font-size="10.5" fill="#222">exists in ORATORIA-PROYECTO (read-only inspection)</text>
+<rect x="486.4" y="730" width="22" height="14" rx="3" fill="#eeeeee" stroke="#616161" stroke-width="1.6" stroke-dasharray=""/>
+<text x="514.4" y="742" font-size="10.5" fill="#222">external / data</text>
+<rect x="610.4" y="730" width="22" height="14" rx="3" fill="#fff8e1" stroke="#b28704" stroke-width="1.6" stroke-dasharray=""/>
+<text x="638.4" y="742" font-size="10.5" fill="#222">person</text>
+<rect x="684.0" y="730" width="22" height="14" rx="3" fill="#ffffff" stroke="#e65100" stroke-width="1.6" stroke-dasharray="7 4"/>
+<text x="712.0" y="742" font-size="10.5" fill="#222">PROPOSED, does not exist</text>
+<line x1="20" y1="768" x2="54" y2="768" stroke="#333333" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_sync)"/>
+<text x="62" y="772" font-size="10.5" fill="#222">request / response</text>
+<line x1="180.8" y1="768" x2="214.8" y2="768" stroke="#1565c0" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_live)"/>
+<text x="222.8" y="772" font-size="10.5" fill="#222">live / streaming path</text>
+<line x1="358.4" y1="768" x2="392.4" y2="768" stroke="#6a1b9a" stroke-width="1.7" stroke-dasharray="" marker-end="url(#ar_offline)"/>
+<text x="400.4" y="772" font-size="10.5" fill="#222">offline / batch path</text>
+<line x1="530.4" y1="768" x2="564.4" y2="768" stroke="#616161" stroke-width="1.7" stroke-dasharray="2 3" marker-end="url(#ar_data)"/>
+<text x="572.4" y="772" font-size="10.5" fill="#222">file or model read/write</text>
+<line x1="724.8" y1="768" x2="758.8" y2="768" stroke="#e65100" stroke-width="1.7" stroke-dasharray="7 4" marker-end="url(#ar_proposed)"/>
+<text x="766.8" y="772" font-size="10.5" fill="#222">PROPOSED, not implemented</text>
+<line x1="20" y1="794" x2="54" y2="794" stroke="#b71c1c" stroke-width="1.6" stroke-dasharray="10 5"/>
+<text x="62" y="798" font-size="10.5" fill="#222">trust boundary (red dashed); grey dotted frame = grouping only</text>
+<text x="20" y="820" font-size="10" fill="#555">Architecture of the inspected tree (commit in README.md). Generated by docs/architecture/c4_model.py; do not edit by hand.</text>
+</svg>
+<!-- C4:END -->
+      </div>
+    </details>
+    <p>Diagramas C4 completos, generados y verificados contra el código: <a href="https://github.com/oratorIA-ProyectoTesis/MRCD/tree/HEAD/docs/architecture">docs/architecture</a> (contexto, contenedores, componentes, código y secuencias de las sesiones).</p>
+  </div>
+</section>
+
+<section id="api" aria-labelledby="api-t">
+  <div class="wrap">
+    <h2 id="api-t">API y contrato</h2>
+    <p>Documentación interactiva: <a id="swagger-link" href="http://127.0.0.1:8765/docs">Swagger en /docs</a> (disponible cuando el servicio corre en bucle local). Esquema: <code>GET /v1/schema</code>.</p>
+    <div class="table-wrap">
+      <table class="endpoints">
+        <caption class="visually-hidden">Rutas del servicio</caption>
+        <thead><tr><th scope="col">Ruta</th><th scope="col">Uso</th></tr></thead>
+        <tbody>
+          <tr><td>POST /v1/jobs</td><td>Cuerpo: WAV 16 kHz mono PCM16 (mínimo 13 s, máximo 600 s). Responde 202 con el trabajo. Parámetros: <code>include_text</code>, <code>decision</code>, <code>include_out_of_scope</code>, <code>decision_profile</code>.</td></tr>
+          <tr><td>GET /v1/jobs/{id}</td><td>Estado del trabajo (<code>queued</code>, <code>running</code>, <code>completed</code>, <code>failed</code>) y el resultado al terminar.</td></tr>
+          <tr><td>POST /v1/sessions</td><td>Abre una sesión incremental (servicio con <code>--incremental</code>). Devuelve el identificador y un token.</td></tr>
+          <tr><td>PUT /v1/sessions/{id}/audio/{seq}</td><td>Envía un lote PCM16 con <code>X-Offset-Samples</code>; el ASR decodifica fragmentos mientras grabas.</td></tr>
+          <tr><td>POST /v1/sessions/{id}/close</td><td>Cierra con <code>total_samples</code>, <code>wav_sha256</code> y <code>last_seq</code>; luego <code>GET /v1/sessions/{id}</code> trae el resultado.</td></tr>
+          <tr><td>GET /v1/health</td><td>Estado del servicio, motores cargados y si las sesiones están activas.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Petición</h3>
+    <div class="code"><pre><code>curl -s -X POST --data-binary @sample_es.wav -H "Content-Type: audio/wav" \
+  "http://127.0.0.1:8765/v1/jobs?include_text=true"
+# → 202 {"schema_version": "mrcd.job/v1", "job_id": "…", "status": "queued", …}
+curl -s http://127.0.0.1:8765/v1/jobs/&lt;job_id&gt;</code></pre></div>
+    <h3>Respuesta (extracto real del audio de muestra)</h3>
+    <div class="code"><pre><code id="api-example">Se muestra al cargar la página.</code></pre></div>
+    <p>Los errores usan el mismo documento con <code>status: "failed"</code> y un <code>error</code> estructurado (<code>code</code>, <code>message</code>, <code>retryable</code>, <code>details</code>), por ejemplo <code>audio_too_short</code> (422) o <code>unsupported_sample_rate</code> (415).</p>
+  </div>
+</section>
+
+<section id="integracion" aria-labelledby="integracion-t">
+  <div class="wrap">
+    <h2 id="integracion-t">Integración en tu proyecto</h2>
+    <div class="grid">
+      <article class="card">
+        <h3>Python</h3>
+        <p>Cliente incluido, solo biblioteca estándar.</p>
+        <div class="code"><pre><code>from mrcd.client import MrcdClient
+
+client = MrcdClient("http://127.0.0.1:8765")
+doc = client.analyze("sample_es.wav", include_text=True)
+for ev in doc["events"]:
+    print(ev["class"], ev["start_s"], ev["end_s"],
+          ev["score"]["value"], "(no calibrado)")</code></pre></div>
+      </article>
+      <article class="card">
+        <h3>JavaScript o TypeScript</h3>
+        <p>Un archivo, sin dependencias: <code>clients/typescript/mrcd.ts</code>, con tipos escritos desde el esquema.</p>
+        <div class="code"><pre><code>import { MrcdClient } from "./mrcd";
+
+const client = new MrcdClient("http://127.0.0.1:8765");
+const wav = await (await fetch("sample_es.wav")).arrayBuffer();
+const doc = await client.analyze(wav, { include_text: true });
+console.log(doc.summary?.counts_by_class);</code></pre></div>
+      </article>
+      <article class="card">
+        <h3>Cualquier lenguaje</h3>
+        <p>HTTP y JSON: envía el WAV con <code>POST /v1/jobs</code>, consulta <code>GET /v1/jobs/{id}</code> hasta <code>completed</code> o <code>failed</code>, y valida contra <code>GET /v1/schema</code>. Desde un navegador en otro origen, levanta el servicio con <code>--cors-origin https://tu-app.example</code>.</p>
+      </article>
+      <article class="card">
+        <h3>Sesiones incrementales</h3>
+        <p>Para grabaciones en vivo: envía lotes mientras grabas y el resultado llega pocos segundos después de cerrar (5,9 s tras una sesión de 2 min, medido en CPU).</p>
+        <div class="code"><pre><code>mrcd serve --incremental --device cpu --preload p0 --warmup
+
+with client.open_session() as s:
+    for pcm in lotes:      # PCM16 LE, 16 kHz, mono
+        s.send(pcm)
+    doc = s.close()</code></pre></div>
+      </article>
+    </div>
+    <p>Ejemplos completos con curl, Python y JavaScript en <a href="https://github.com/oratorIA-ProyectoTesis/MRCD/tree/HEAD/examples">examples/</a>.</p>
+  </div>
+</section>
+
+<section id="privacidad" aria-labelledby="privacidad-t">
+  <div class="wrap">
+    <h2 id="privacidad-t">Privacidad</h2>
+    <ul>
+      <li>El análisis completo, incluido el ASR, corre en tu equipo. Tras la descarga inicial del modelo no hay llamadas de red.</li>
+      <li>El audio se decodifica en memoria y se descarta al terminar el trabajo; nunca se escribe en disco. Los buffers de las sesiones se sobrescriben con ceros al cerrar.</li>
+      <li>El texto transcrito solo vuelve si lo pides con <code>include_text=true</code>. Los resultados se guardan en memoria, con un límite, y desaparecen al detener el proceso.</li>
+      <li>El servicio se niega a escuchar fuera del bucle local salvo con <code>--allow-non-loopback</code>, y no tiene autenticación: no lo expongas a una red.</li>
+      <li>Esta página no carga recursos de terceros ni usa rastreadores.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="reproducibilidad" aria-labelledby="reproducibilidad-t">
+  <div class="wrap">
+    <h2 id="reproducibilidad-t">Reproducibilidad</h2>
+    <ul>
+      <li>Cada respuesta registra el sha256 del checkpoint y del modelo Whisper, el perfil ASR, el perfil de decisión con el hash de sus artefactos y el entorno (incluido <code>OMP_NUM_THREADS</code>).</li>
+      <li>El checkpoint no se distribuye (a pedido, solo para investigación; ver <code>models/README.md</code>); se busca en <code>models/ckpt_audio_text.pt</code> y se verifica por sha256 antes de cargarlo.</li>
+      <li>Los protocolos de evaluación están congelados por hash (<code>PROTOCOL.sha256.json</code>) y las cifras del ASR se reprodujeron en revisiones independientes.</li>
+      <li>Más de mil pruebas automáticas (<code>pytest -q</code>) y un verificador que comprueba que los diagramas de arquitectura no contradicen el código.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="resultados" aria-labelledby="resultados-t">
+  <div class="wrap">
+    <h2 id="resultados-t">Resultados</h2>
+    <p>F1 por clase entre 0,51 y 0,70, con intervalos por hablante, según clase, corpus y condición. Frente a comparadores fijos en las mismas unidades, la ganancia es modesta en muletillas (+0,036 [0,008; 0,064] frente a la regla léxica) y nula en repeticiones (−0,002 frente a la regla de una línea). Costo local: factor de tiempo real de 0,45 a 0,51 en CPU.</p>
+    <div class="note"><p><strong>Salvedad.</strong> Son resultados exploratorios. El F1 se midió sobre turnos del corpus DIHANA (telefónico, español peninsular); el perfil por defecto se entrenó con esos turnos y se aplica a segmentos separados por pausas, un cambio de dominio no medido. La ganancia externa no está demostrada (EPIC: +0,006 [−0,050; 0,068]). Estas cifras no son comparables con las de otros sistemas, que miden otra tarea, unidad o corpus.</p></div>
+  </div>
+</section>
+
+<section id="limites" aria-labelledby="limites-t">
+  <div class="wrap">
+    <h2 id="limites-t">Límites conocidos</h2>
+    <ul>
+      <li>Puntajes sin calibrar y sin concordancia interanotador: no los presentes como probabilidades ni como diagnóstico.</li>
+      <li>Validado en un solo corpus de audio con ASR; ningún corpus peruano ni estudio con usuarios.</li>
+      <li>La desambiguación contextual de formas como “este” o “bueno” no está demostrada.</li>
+      <li>Bloqueos, revisiones y pausas quedan fuera del alcance evaluado y se ocultan por defecto. El servicio analiza solo audio; el canal de video no forma parte de él.</li>
+      <li>Servicio de desarrollo: sin autenticación ni TLS, pensado para el bucle local.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="licencia" aria-labelledby="licencia-t">
+  <div class="wrap">
+    <h2 id="licencia-t">Licencia y cita</h2>
+    <p>El código está bajo licencia MIT. Los pesos del modelo (<code>ckpt_audio_text.pt</code>) se entrenaron con etiquetas derivadas de corpus con sus propias condiciones y se distribuyen como artefacto de investigación: revisa <code>THIRD_PARTY_NOTICES.md</code> antes de un uso comercial. El audio de muestra es voz sintética generada con espeak-ng.</p>
+    <div class="code"><pre><code>MRCD authors (2026). MRCD: motor de reconocimiento contextual mediante la fusión
+multimodal para la detección de disfluencias del habla en español (versión 0.4.0)
+[software]. https://github.com/oratorIA-ProyectoTesis/MRCD</code></pre></div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="wrap">
+    <p>MRCD 0.4.0 · <a href="https://github.com/oratorIA-ProyectoTesis/MRCD">Repositorio</a> · Esta misma página la sirve el servicio en <code>http://127.0.0.1:8765/</code>.</p>
+  </div>
+</footer>
+
+<script type="application/json" id="sample-result">{"schema_version":"mrcd.analysis/v1","status":"completed","generated_at":"2026-11-02T16:02:41+00:00","error":null,"request":{"audio_sha256":"357cf2696b539210a856b1f2b046efe3220e1bf6a792b4ddb7fc689b6e2d1cb3","audio_duration_s":{"available":true,"value":14.904,"unavailable_reason":null},"sample_rate_hz":{"available":true,"value":16000,"unavailable_reason":null},"channels":{"available":true,"value":1,"unavailable_reason":null},"asr_profile":"p0","head":null,"include_text":true,"output_scope":"evaluated","decision":false,"text_route":null,"decision_profile":"o2026_11"},"events":[{"id":"ev-0001","class":"filler_word","start_s":0.0,"end_s":13.02,"interval_semantics":"decision_stride_not_human_boundary","score":{"value":0.946402,"kind":"unit_pipeline_model_score","calibrated":false,"label":"uncalibrated"},"n_windows":22,"modalities_used":["acoustic","linguistic"],"text":"Buenos días. Eh, hoy les presento el proyecto. El motor, el motor escucha el audio y busca muletillas. Luego, eh, marca acá la repetición con su tiempo. Así se arma","validation":"exploratory unit-level decision (O-campaign pipeline) on an ASR segment split at pauses; interval = segment span; trained on DIHANA turns, not validated outside DIHANA","experimental":false,"in_scope":true},{"id":"ev-0002","class":"repetition","start_s":5.5,"end_s":6.0,"interval_semantics":"decision_stride_not_human_boundary","score":{"value":0.82606,"kind":"max_window_softmax_score","calibrated":false,"label":"uncalibrated"},"n_windows":1,"modalities_used":["acoustic","linguistic"],"text":"el audio y busca muletillas. Luego,","validation":null,"experimental":false,"in_scope":true},{"id":"ev-0003","class":"repetition","start_s":11.0,"end_s":11.5,"interval_semantics":"decision_stride_not_human_boundary","score":{"value":0.540322,"kind":"max_window_softmax_score","calibrated":false,"label":"uncalibrated"},"n_windows":1,"modalities_used":["acoustic","linguistic"],"text":"su tiempo. Así se arma el reporte fin.","validation":null,"experimental":false,"in_scope":true}],"summary":{"n_events":3,"events_per_minute":{"available":true,"value":12.0774,"unavailable_reason":null},"counts_by_class":{"filler_word":1,"repetition":2},"out_of_scope":{"included":false,"n_events":0,"counts_by_class":{}}},"modalities":{"acoustic":{"available":true,"reason":null},"linguistic":{"available":true,"reason":null},"kinesic_video":{"available":false,"reason":"service v1 receives audio only; no video was provided or processed"}},"provenance":{"service":{"name":"mrcd.service","contract":"mrcd.analysis/v1","contract_revision":"1.4","mrcd_version":"0.4.0"},"checkpoint":{"file":"ckpt_audio_text.pt","sha256":"87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669","mode":"audio_text","labels":["fluent","filler_word","prolongation","repetition","block","revision","rhetorical_pause","neutral_pause"],"checkpoint_notice":"PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"},"asr":{"profile":"p0","experimental":false,"validation":null,"initial_prompt_sha256":"bd0bddb4329c6c75e2dd7c0b21366a418cc23314f8155357401a1577853b19fa","model":{"model_size":"small","model_bin_sha256":"3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671","compute_type":"int8","device":"cpu"},"language":"es","decode":{"temperature":0.0,"beam_size":5,"condition_on_previous_text":false,"vad_filter":false,"word_timestamps":true,"chunk_s_requested":8.0},"profile_fingerprint":"f8308984aacab31949cddca3069a6a1830001869048916bac83f7d013657e658","anomalies":[]},"head":null,"config":{"window_s":3.0,"stride_s":0.5,"terminal_window":false,"span":null,"asr_chunk_s":8.0},"environment":{"omp_num_threads":"4","omp_pin_opted_out":false,"cpu_count_logical":20,"python":"3.12.13","platform":"Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.41","processor":"","faster_whisper":"1.2.1","ctranslate2":"4.8.4","numpy":"2.5.4","environment_is_pinned":true,"omp_num_threads_at_mrcd_import":"4","numpy_imported_before_mrcd":false,"set_before_numpy":true,"assigned_after_import":false,"effective":true,"cpu_threads":{"torch":1,"asr_cpu_threads_arg":0},"asr":{"model_size":"small","device":"cpu","compute_type":"int8"}},"decision_profile":{"name":"o2026_11","status":"exploratory","classes":{"filler_word":{"route":"o_campaign_unit_pipeline","unit":"ASR segment split at pauses >= 0.6 s (max 30 words)","artifact":"filler_word.json","artifact_sha256":"2a07b50c156bd8e064f6703b38c78dd85b1b853a6ad4a5e0e3be354a80858c1e","source_pickle_sha256":"787828317c87b188469f09bec03d6fd3c633e8b1af2a7d2dff84725936064c91","pipeline_version":"o-campaign/1","asr_profile_trained_on":"p0"},"prolongation":{"route":"o_campaign_unit_pipeline","unit":"ASR segment split at pauses >= 0.6 s (max 30 words)","artifact":"prolongation.json","artifact_sha256":"d6230ed2e8b930e1cd930c89b1d74769310f7068c65c3070f75faee83ab7a96a","source_pickle_sha256":"ba2f253648717a0671cf7f15d833bd466327b8f07db34ad43f471975b38f3f21","pipeline_version":"o-campaign/1","asr_profile_trained_on":"p0"},"repetition":{"route":"engine_v0_window_events"}},"calibration_claim":"none","pipelines_verified":true,"note":"product default of the service; the library default stays v0. Repetition keeps the engine decision."}},"experimental":{"active":false,"components":[]},"head_decision":null,"transcript":"Buenos días. Eh, hoy les presento el proyecto. El motor, el motor escucha el audio y busca muletillas. Luego, eh, marca acá la repetición con su tiempo. Así se arma el reporte fin. final.","warnings":[{"code":"scores_uncalibrated","message":"Scores are the maximum window softmax score of an uncalibrated model (softmax, not calibrated); they are not probabilities of correctness."},{"code":"no_human_validation","message":"Classes are window-level decisions of a model trained with weak (heuristic) supervision; agreement with human annotation has not been established."},{"code":"engine_provenance","message":"PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"},{"code":"decision_profile_exploratory","message":"Decision profile o2026_11 (service default): filler_word and prolongation come from exploratory pipelines selected by nested cross-validation on DIHANA folds 1-4 (configuration unstable across folds, weak V0 baseline, no external gain demonstrated). Scores are model outputs, not calibrated probabilities. Units are ASR segments split at pauses, whereas training used DIHANA turns. Repetition keeps the engine decision. Use decision_profile=v0 to reproduce the historical output."}]}</script>
+<script>
+(() => {
+  "use strict";
+  const $ = (s, r = document) => r.querySelector(s);
+  const CLASSES = [
+    { id: "filler_word", name: "Muletilla" },
+    { id: "prolongation", name: "Prolongación" },
+    { id: "repetition", name: "Repetición" },
+  ];
+  const CLASS_NAME = Object.fromEntries(CLASSES.map((c) => [c.id, c.name]));
+  const MIN_S = 13, MAX_REC_S = 120, RATE = 16000;
+  const PAGES_ORIGIN = location.origin;
+  const st = { base: null, local: false, health: null, busy: false, rec: null, audioUrl: null };
+  const nf = (n, d = 2) => Number(n).toLocaleString("es-419", { minimumFractionDigits: d, maximumFractionDigits: d });
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const status = (msg) => { $("#status").textContent = msg; };
+
+  /* ------------------------------------------------------------ copy buttons */
+  document.querySelectorAll(".code").forEach((box) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "copy"; b.textContent = "Copiar";
+    b.setAttribute("aria-label", "Copiar el código");
+    b.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(box.querySelector("pre").innerText); b.textContent = "Copiado"; }
+      catch (_) { b.textContent = "Selecciona y copia"; }
+      setTimeout(() => (b.textContent = "Copiar"), 1800);
+    });
+    box.appendChild(b);
+  });
+
+  /* ------------------------------------------------------------ audio helpers */
+  function wavFromPcm(pcm) {
+    const n = pcm.length * 2, buf = new ArrayBuffer(44 + n), v = new DataView(buf);
+    const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    w(0, "RIFF"); v.setUint32(4, 36 + n, true); w(8, "WAVEfmt "); v.setUint32(16, 16, true);
+    v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, RATE, true); v.setUint32(28, RATE * 2, true);
+    v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, n, true);
+    new Int16Array(buf, 44).set(pcm);
+    return buf;
+  }
+  function toPcm16(f32) {
+    const out = new Int16Array(f32.length);
+    for (let i = 0; i < f32.length; i++) { const s = Math.max(-1, Math.min(1, f32[i])); out[i] = s < 0 ? s * 32768 : s * 32767; }
+    return out;
+  }
+  function concat(parts) {
+    const out = new Int16Array(parts.reduce((a, p) => a + p.length, 0));
+    let o = 0; for (const p of parts) { out.set(p, o); o += p.length; }
+    return out;
+  }
+  /** 16 kHz mono PCM16 WAV? Returns its PCM, or null. Walks the RIFF chunks. */
+  function pcmOfCanonicalWav(buf) {
+    const v = new DataView(buf); const tag = (o) => String.fromCharCode(v.getUint8(o), v.getUint8(o + 1), v.getUint8(o + 2), v.getUint8(o + 3));
+    if (buf.byteLength < 44 || tag(0) !== "RIFF" || tag(8) !== "WAVE") return null;
+    let o = 12, fmt = null;
+    while (o + 8 <= buf.byteLength) {
+      const id = tag(o), size = v.getUint32(o + 4, true);
+      if (id === "fmt ") fmt = { format: v.getUint16(o + 8, true), ch: v.getUint16(o + 10, true), rate: v.getUint32(o + 12, true), bits: v.getUint16(o + 22, true) };
+      if (id === "data") {
+        if (!fmt || fmt.format !== 1 || fmt.ch !== 1 || fmt.rate !== RATE || fmt.bits !== 16) return null;
+        const len = Math.min(size, buf.byteLength - o - 8) & ~1;
+        return new Int16Array(buf.slice(o + 8, o + 8 + len));
+      }
+      o += 8 + size + (size & 1);
+    }
+    return null;
+  }
+  async function fileToPcm(buf) {
+    const pcm = pcmOfCanonicalWav(buf);
+    if (pcm) return { pcm, wav: buf, converted: false };
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AC();
+    let decoded;
+    try { decoded = await ctx.decodeAudioData(buf.slice(0)); } finally { ctx.close(); }
+    const off = new OfflineAudioContext(1, Math.max(1, Math.ceil(decoded.duration * RATE)), RATE);
+    const src = off.createBufferSource(); src.buffer = decoded; src.connect(off.destination); src.start();
+    const rendered = await off.startRendering();
+    const out = toPcm16(rendered.getChannelData(0));
+    return { pcm: out, wav: wavFromPcm(out), converted: true };
+  }
+  /** Streaming downsampler (box filter), any input rate -> 16 kHz. */
+  function Downsampler(inRate) {
+    const r = inRate / RATE; let carry = new Float32Array(0), pos = 0;
+    this.push = (x) => {
+      const buf = new Float32Array(carry.length + x.length); buf.set(carry); buf.set(x, carry.length);
+      const out = [];
+      while (pos + r <= buf.length) {
+        const a = Math.floor(pos), b = Math.max(a + 1, Math.floor(pos + r));
+        let s = 0; for (let i = a; i < b; i++) s += buf[i];
+        out.push(s / (b - a)); pos += r;
+      }
+      const keep = Math.floor(pos); carry = buf.slice(keep); pos -= keep;
+      return Float32Array.from(out);
+    };
+  }
+  async function sha256hex(buf) {
+    const d = await crypto.subtle.digest("SHA-256", buf);
+    return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  /* ------------------------------------------------------------ service calls */
+  const url = (path) => new URL(path, st.base).href;
+  function query() {
+    const q = new URLSearchParams({ include_text: String($("#opt-text").checked), decision: String($("#opt-decision").checked) });
+    return q.toString();
+  }
+  async function asJson(r) { try { return await r.json(); } catch (_) { return null; } }
+  class ServiceFail extends Error { constructor(doc, status) { super((doc && doc.error && doc.error.message) || "HTTP " + status); this.doc = doc; this.status = status; } }
+  async function runJob(wav) {
+    const r = await fetch(url("v1/jobs?" + query()), { method: "POST", body: wav, headers: { "Content-Type": "audio/wav" } });
+    let job = await asJson(r);
+    if (!r.ok) throw new ServiceFail(job, r.status);
+    const t0 = performance.now();
+    while (job.status === "queued" || job.status === "running") {
+      status((job.status === "queued" ? "En cola" : "Analizando") + "… " + nf((performance.now() - t0) / 1000, 0) + " s");
+      await new Promise((ok) => setTimeout(ok, 500));
+      const g = await fetch(url("v1/jobs/" + job.job_id), { cache: "no-store" });
+      job = await asJson(g);
+      if (!g.ok) throw new ServiceFail(job, g.status);
+    }
+    return job.result;
+  }
+  function Session() {
+    let id = null, token = null, seq = 0, offset = 0, chain = Promise.resolve(), failed = null;
+    const headers = (extra) => Object.assign({ "X-Session-Token": token }, extra || {});
+    this.open = async () => {
+      const r = await fetch(url("v1/sessions?" + query()), { method: "POST" });
+      const body = await asJson(r);
+      if (!r.ok) throw new ServiceFail(body, r.status);
+      id = body.session_id; token = body.subscription_token;
+    };
+    this.send = (pcm) => {
+      if (!pcm.length) return chain;
+      const mySeq = seq++, myOffset = offset; offset += pcm.length;
+      chain = chain.then(async () => {
+        if (failed) return;
+        const r = await fetch(url("v1/sessions/" + id + "/audio/" + mySeq), {
+          method: "PUT", body: pcm.buffer.slice(pcm.byteOffset, pcm.byteOffset + pcm.byteLength),
+          headers: headers({ "Content-Type": "application/octet-stream", "X-Offset-Samples": String(myOffset) }),
+        });
+        const body = await asJson(r);
+        if (!r.ok) { failed = new ServiceFail(body, r.status); return; }
+        status("Sesión incremental: " + nf(body.contiguous_samples / RATE, 1) + " s recibidos, " + body.chunks_decoded + " fragmentos ya transcritos");
+      });
+      return chain;
+    };
+    this.close = async (wav) => {
+      await chain; if (failed) throw failed;
+      const r = await fetch(url("v1/sessions/" + id + "/close"), {
+        method: "POST", headers: headers({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ total_samples: offset, wav_sha256: await sha256hex(wav), last_seq: seq - 1 }),
+      });
+      if (!r.ok) throw new ServiceFail(await asJson(r), r.status);
+      const t0 = performance.now();
+      for (;;) {
+        const g = await fetch(url("v1/sessions/" + id), { headers: headers(), cache: "no-store" });
+        const s = await asJson(g);
+        if (!g.ok) throw new ServiceFail(s, g.status);
+        if (s.status === "completed" || s.status === "failed") { status("Resultado " + nf((performance.now() - t0) / 1000, 1) + " s después de cerrar la sesión."); return s.result; }
+        status("Cerrando la sesión: análisis del audio completo… " + nf((performance.now() - t0) / 1000, 0) + " s");
+        await new Promise((ok) => setTimeout(ok, 300));
+      }
+    };
+  }
+  async function analyzePcm(pcm, wav, label) {
+    const secs = pcm.length / RATE;
+    if (secs < MIN_S) { showError("El audio dura " + nf(secs, 1) + " s; el motor necesita al menos " + MIN_S + " s."); return; }
+    setBusy(true);
+    const t0 = performance.now();
+    try {
+      let doc;
+      if ($("#opt-inc").checked) {
+        const s = new Session(); await s.open();
+        for (let i = 0; i < pcm.length; i += RATE) s.send(pcm.subarray(i, i + RATE));
+        doc = await s.close(wav);
+      } else {
+        status("Enviando " + label + "…");
+        doc = await runJob(wav);
+      }
+      render(doc, { source: label, elapsed: (performance.now() - t0) / 1000 });
+      status(doc.status === "completed" ? "Listo en " + nf((performance.now() - t0) / 1000, 1) + " s." : "El análisis terminó con error.");
+    } catch (e) { showError(e); }
+    finally { setBusy(false); }
+  }
+
+  /* ------------------------------------------------------------ rendering */
+  const measure = (m, unit, d = 2) => m && m.available ? nf(m.value, d) + (unit ? " " + unit : "") : '<span class="na">no disponible: ' + esc((m && m.unavailable_reason) || "sin motivo") + "</span>";
+  const modality = (m) => m && m.available ? "disponible" : '<span class="na">no disponible: ' + esc((m && m.reason) || "sin motivo") + "</span>";
+  const STATE = { present: "presente", absent: "ausente", uncertain: "incierto" };
+  function showError(e) {
+    const doc = e && e.doc;
+    const box = $("#result");
+    if (doc && doc.error) { render(doc, {}); }
+    else box.innerHTML = '<div class="note err"><p><strong>No se pudo completar.</strong> ' + esc(e && e.message ? e.message : e) + "</p></div>";
+    status("Error: " + (doc && doc.error ? doc.error.code : (e && e.message) || e));
+  }
+  function render(doc, meta) {
+    const box = $("#result");
+    if (!doc) { box.innerHTML = ""; return; }
+    const dur = Math.max(1e-3, Number(doc.request && doc.request.audio_duration_s && doc.request.audio_duration_s.available
+      ? doc.request.audio_duration_s.value
+      : Math.max(1, ...(doc.events || []).map((e) => Number(e.end_s) || 0))) || 1);
+    let h = "";
+    if (meta.precomputed) h += '<div class="note info"><p><strong>Resultado real precalculado</strong> del audio de muestra. ' + esc(meta.precomputed) + "</p></div>";
+    if (doc.status === "failed") {
+      const er = doc.error || {};
+      h += '<div class="note err"><p><strong>' + esc(er.code || "failed") + "</strong>: " + esc(er.message || "") + "</p>" +
+        (er.details && Object.keys(er.details).length ? "<p><code>" + esc(JSON.stringify(er.details)) + "</code></p>" : "") + "</div>";
+    } else {
+      const s = doc.summary || {};
+      h += '<div class="kpis">' +
+        '<div class="kpi"><b>' + measure(doc.request.audio_duration_s, "s", 1) + "</b><span>duración</span></div>" +
+        '<div class="kpi"><b>' + esc(s.n_events ?? "–") + "</b><span>eventos en el alcance evaluado</span></div>" +
+        '<div class="kpi"><b>' + measure(s.events_per_minute, "", 1) + "</b><span>eventos por minuto</span></div>" +
+        CLASSES.map((c) => '<div class="kpi"><b>' + esc(Number((s.counts_by_class || {})[c.id]) || 0) + "</b><span>" + c.name.toLowerCase() + "</span></div>").join("") +
+        "</div>";
+      h += '<h3 id="tl-title">Línea de tiempo por clase</h3><p style="margin:.2rem 0 .6rem;color:var(--muted);font-size:.9rem">Cada barra es un evento; su ancho es el intervalo de decisión del motor, no un límite marcado por una persona. Al pulsarla, el audio salta a ese momento. Rayado: decisión incierta.</p>';
+      h += '<div class="timeline" role="group" aria-labelledby="tl-title">';
+      for (const c of CLASSES) {
+        const evs = (doc.events || []).filter((e) => e.class === c.id);
+        h += '<div class="tl-row"><div class="tl-label"><span class="swatch" style="background:var(--c-' + c.id + ')"></span>' + c.name + ' <span class="na">(' + evs.length + ")</span></div>" +
+          '<div class="tl-track" data-track>' + evs.map((e) => {
+            const t0 = Number(e.start_s) || 0, t1 = Number(e.end_s) || 0;
+            const left = Math.max(0, Math.min(100, (100 * t0) / dur)), width = Math.max(0.8, (100 * (t1 - t0)) / dur);
+            const label = c.name + ", de " + nf(e.start_s) + " a " + nf(e.end_s) + " s, puntaje " + nf(e.score.value) + " no calibrado" + (e.decision ? ", decisión " + STATE[e.decision.state] : "");
+            return '<button type="button" class="tl-ev" data-start="' + t0 + '" data-state="' + esc(e.decision ? e.decision.state : "") + '" style="left:' + left + "%;width:" + Math.min(width, 100 - left) + "%;background:var(--c-" + c.id + ')" title="' + esc(label) + '" aria-label="' + esc(label) + '"></button>';
+          }).join("") + '<span class="tl-playhead" hidden></span></div></div>';
+      }
+      const step = dur > 60 ? 10 : dur > 20 ? 5 : 2;
+      h += '<div class="tl-axis" aria-hidden="true">';
+      for (let t = 0; t <= dur + 1e-6; t += step) h += '<span style="left:' + (100 * t) / dur + '%">' + t + " s</span>";
+      h += "</div></div>";
+      h += '<div class="table-wrap"><table><caption class="visually-hidden">Eventos detectados</caption><thead><tr><th scope="col">Clase</th><th scope="col">Inicio</th><th scope="col">Fin</th><th scope="col">Puntaje (no calibrado)</th>' +
+        (doc.request.decision ? '<th scope="col">Decisión (experimental)</th>' : "") + (doc.request.include_text ? '<th scope="col">Texto</th>' : "") + "</tr></thead><tbody>";
+      if (!(doc.events || []).length) h += '<tr><td colspan="6" class="na">Sin eventos en el alcance evaluado.</td></tr>';
+      for (const e of doc.events || []) {
+        h += "<tr><td>" + esc(CLASS_NAME[e.class] || e.class) + (e.experimental ? ' <span class="pill">experimental</span>' : "") + '</td><td class="num">' + nf(e.start_s) + ' s</td><td class="num">' + nf(e.end_s) + ' s</td><td class="num">' + nf(e.score.value) + "</td>" +
+          (doc.request.decision ? "<td>" + (e.decision ? STATE[e.decision.state] + ' <span class="na">[' + nf(e.decision.lo) + "; " + nf(e.decision.hi) + "]</span>" : '<span class="na">no disponible</span>') + "</td>" : "") +
+          (doc.request.include_text ? "<td>" + (e.text ? esc(e.text) : '<span class="na">sin texto</span>') + "</td>" : "") + "</tr>";
+      }
+      h += "</tbody></table></div>";
+      if (doc.transcript) h += "<h3>Transcripción</h3><p>" + esc(doc.transcript) + "</p>";
+      const m = doc.modalities || {};
+      h += "<h3>Modalidades</h3><ul><li>Acústica: " + modality(m.acoustic) + "</li><li>Texto del ASR: " + modality(m.linguistic) + "</li><li>Video: " + modality(m.kinesic_video) + "</li></ul>";
+      const oos = s.out_of_scope;
+      if (oos && oos.n_events) h += "<p>Clases fuera del alcance evaluado detectadas y ocultas: " + esc(Object.entries(oos.counts_by_class).map(([k, v]) => k + " = " + v).join(", ")) + ". No se cuentan en los totales.</p>";
+    }
+    if ((doc.warnings || []).length) h += '<details><summary>Advertencias del servicio (' + doc.warnings.length + ', en inglés)</summary><ul>' + doc.warnings.map((w) => "<li><code>" + esc(w.code) + "</code>: " + esc(w.message) + "</li>").join("") + "</ul></details>";
+    h += '<details><summary>JSON crudo (' + esc(doc.schema_version) + ")</summary><pre>" + esc(JSON.stringify(doc, null, 2)) + "</pre></details>";
+    box.innerHTML = h;
+    box.querySelectorAll(".tl-ev").forEach((b) => b.addEventListener("click", () => {
+      const p = $("#player"); p.currentTime = Number(b.dataset.start); p.play().catch(() => {});
+    }));
+  }
+  $("#player").addEventListener("timeupdate", () => {
+    const p = $("#player"); if (!p.duration) return;
+    document.querySelectorAll(".tl-playhead").forEach((ph) => { ph.hidden = false; ph.style.left = (100 * p.currentTime) / p.duration + "%"; });
+  });
+
+  /* ------------------------------------------------------------ actions */
+  function setBusy(b) {
+    st.busy = b;
+    const ready = !!st.health && !b;
+    $("#btn-sample").disabled = !ready; $("#btn-upload").disabled = !ready;
+    $("#btn-rec").disabled = !st.health || (b && !st.rec);
+  }
+  $("#btn-sample").addEventListener("click", async () => {
+    try {
+      status("Leyendo la muestra…");
+      const buf = await (await fetch("sample_es.wav")).arrayBuffer();
+      $("#player").src = "sample_es.wav";
+      const { pcm, wav } = await fileToPcm(buf);
+      await analyzePcm(pcm, wav, "la muestra");
+    } catch (e) { showError(e); }
+  });
+  $("#btn-upload").addEventListener("click", () => $("#file").click());
+  $("#file").addEventListener("change", async () => {
+    const f = $("#file").files[0]; if (!f) return;
+    try {
+      status("Leyendo " + f.name + "…");
+      const { pcm, wav, converted } = await fileToPcm(await f.arrayBuffer());
+      if (st.audioUrl) URL.revokeObjectURL(st.audioUrl);
+      st.audioUrl = URL.createObjectURL(new Blob([wav], { type: "audio/wav" })); $("#player").src = st.audioUrl;
+      await analyzePcm(pcm, wav, f.name + (converted ? " (convertido a 16 kHz mono en tu navegador)" : ""));
+    } catch (e) { showError(e.name === "EncodingError" ? "El navegador no pudo decodificar ese archivo." : e); }
+    $("#file").value = "";
+  });
+  $("#btn-rec").addEventListener("click", () => (st.rec ? stopRec() : startRec()));
+  async function startRec() {
+    if (!navigator.mediaDevices || !window.isSecureContext) { showError("El micrófono requiere un contexto seguro: abre la página desde http://127.0.0.1 o https."); return; }
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false } }); }
+    catch (e) { showError("No se obtuvo permiso para el micrófono (" + e.name + ")."); return; }
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = ctx.createMediaStreamSource(stream), proc = ctx.createScriptProcessor(4096, 1, 1), down = new Downsampler(ctx.sampleRate);
+    const rec = { stream, ctx, src, proc, parts: [], n: 0, session: null, pending: [], pendingN: 0 };
+    if ($("#opt-inc").checked) {
+      try { rec.session = new Session(); await rec.session.open(); } catch (e) { stream.getTracks().forEach((t) => t.stop()); ctx.close(); showError(e); return; }
+    }
+    proc.onaudioprocess = (ev) => {
+      const x = ev.inputBuffer.getChannelData(0);
+      let peak = 0; for (let i = 0; i < x.length; i++) peak = Math.max(peak, Math.abs(x[i]));
+      $("#rec-level").style.width = Math.min(100, peak * 140) + "%";
+      const pcm = toPcm16(down.push(x)); rec.parts.push(pcm); rec.n += pcm.length;
+      if (rec.session) { rec.pending.push(pcm); rec.pendingN += pcm.length; if (rec.pendingN >= RATE) { rec.session.send(concat(rec.pending)); rec.pending = []; rec.pendingN = 0; } }
+      $("#rec-time").textContent = nf(rec.n / RATE, 1) + " s";
+      if (rec.n / RATE >= MAX_REC_S) stopRec();
+    };
+    src.connect(proc); proc.connect(ctx.destination);
+    st.rec = rec; setBusy(true);
+    const b = $("#btn-rec"); b.textContent = "Detener y analizar"; b.classList.add("rec"); b.setAttribute("aria-pressed", "true");
+    $("#rec-panel").hidden = false; status(rec.session ? "Grabando; el audio se envía al servicio mientras hablas." : "Grabando… habla al menos 13 s.");
+  }
+  async function stopRec() {
+    const rec = st.rec; if (!rec) return; st.rec = null;
+    rec.proc.disconnect(); rec.src.disconnect(); rec.stream.getTracks().forEach((t) => t.stop()); rec.ctx.close();
+    const b = $("#btn-rec"); b.textContent = "Grabar con el micrófono"; b.classList.remove("rec"); b.setAttribute("aria-pressed", "false");
+    $("#rec-panel").hidden = true;
+    const pcm = concat(rec.parts), wav = wavFromPcm(pcm);
+    if (st.audioUrl) URL.revokeObjectURL(st.audioUrl);
+    st.audioUrl = URL.createObjectURL(new Blob([wav], { type: "audio/wav" })); $("#player").src = st.audioUrl;
+    if (pcm.length / RATE < MIN_S) { setBusy(false); if (rec.session) rec.session.send(new Int16Array(0)); showError("Grabaste " + nf(pcm.length / RATE, 1) + " s; el motor necesita al menos " + MIN_S + " s."); return; }
+    if (!rec.session) { setBusy(false); return analyzePcm(pcm, wav, "la grabación"); }
+    try {
+      if (rec.pendingN) rec.session.send(concat(rec.pending));
+      const t0 = performance.now();
+      const doc = await rec.session.close(wav);
+      render(doc, { source: "la grabación", elapsed: (performance.now() - t0) / 1000 });
+    } catch (e) { showError(e); }
+    finally { setBusy(false); }
+  }
+
+  /* ------------------------------------------------------------ where am I? */
+  async function probe(base) {
+    const target = new URL("v1/health", base).href;
+    try {
+      const r = await fetch(target, { cache: "no-store" });
+      const h = await asJson(r);
+      if (!r.ok || !h || !h.contract) return { ok: false, kind: "not-mrcd", status: r.status };
+      return { ok: true, health: h };
+    } catch (_) {
+      let reachable = false;
+      try { await fetch(target, { mode: "no-cors", cache: "no-store" }); reachable = true; } catch (_) { /* unreachable or blocked */ }
+      return { ok: false, kind: reachable ? "cors" : "network" };
+    }
+  }
+  function connected(base, h, local) {
+    st.base = base; st.health = h; st.local = local;
+    $("#mode-dot").classList.add("on");
+    const inc = $("#opt-inc");
+    inc.disabled = !h.incremental;
+    $("#opt-inc-wrap").title = h.incremental ? "" : "El servicio no se levantó con --incremental.";
+    $("#mode-text").innerHTML = local
+      ? "<p><strong>Conectado al servicio que sirve esta página.</strong> Contrato <code>" + esc(h.contract) + "</code>; sesiones incrementales: " + (h.incremental ? "activas" : "desactivadas") + ". El audio se analiza en este equipo.</p>"
+      : "<p><strong>Conectado a " + esc(base) + ".</strong> Sesiones incrementales: " + (h.incremental ? "activas" : "desactivadas") + ". El audio va de tu navegador a tu servicio local; no pasa por este sitio.</p>";
+    if (local) { $("#swagger-link").href = "docs"; $("#swagger-link").textContent = "Swagger en /docs"; }
+    $("#connect-panel").hidden = local;
+    setBusy(false);
+  }
+  function corsCommands() {
+    return '<div class="code"><pre><code>mrcd serve --cors-origin ' + esc(PAGES_ORIGIN) + "\n# o con Docker:\ndocker run --rm -e MRCD_SERVICE_TOKEN=... -p 127.0.0.1:8765:8765 -v models:/models:ro ghcr.io/oratoria-proyectotesis/mrcd:0.4.0 --cors-origin " + esc(PAGES_ORIGIN) + "</code></pre></div>";
+  }
+  async function connectExternal() {
+    let base = $("#svc-url").value.trim();
+    if (!/^https?:\/\//.test(base)) base = "http://" + base;
+    if (!base.endsWith("/")) base += "/";
+    $("#connect-help").innerHTML = "<p>Conectando…</p>";
+    const p = await probe(base);
+    if (p.ok) { connected(base, p.health, false); $("#connect-help").innerHTML = ""; return; }
+    let msg;
+    if (p.kind === "cors") msg = '<div class="note err"><p><strong>El servicio responde, pero no autoriza este origen (CORS).</strong> Reinícialo permitiendo <code>' + esc(PAGES_ORIGIN) + "</code>:</p>" + corsCommands() + "</div>";
+    else if (p.kind === "not-mrcd") msg = '<div class="note err"><p>En esa dirección responde algo que no es un servicio MRCD (HTTP ' + esc(p.status) + ").</p></div>";
+    else msg = '<div class="note err"><p><strong>No hubo respuesta.</strong> Hay dos causas posibles:</p><ol>' +
+      "<li>El servicio no está levantado en esa dirección. Compruébalo con <code>curl " + esc(base) + "v1/health</code>.</li>" +
+      "<li>El navegador bloqueó el acceso de una página pública a tu red local (Chrome y Edge aplican la restricción de red privada y pueden pedir permiso de “acceso a la red local”; Safari puede bloquear contenido http desde https). Si aparece un aviso de permiso, acéptalo. El servicio ya responde a esa verificación cuando se levanta con <code>--cors-origin</code>:</li></ol>" +
+      corsCommands() + "<p>Alternativa que siempre funciona: abre <a href=\"" + esc(base) + "\">" + esc(base) + "</a>, la misma página servida por tu servicio.</p></div>";
+    $("#connect-help").innerHTML = msg;
+  }
+  $("#btn-connect").addEventListener("click", connectExternal);
+
+  function showPrecomputed() {
+    let doc = null;
+    try { doc = JSON.parse($("#sample-result").textContent); } catch (_) { doc = null; }
+    if (!doc) return null;
+    const env = doc.provenance && doc.provenance.environment;
+    render(doc, { precomputed: "Calculado con mrcd " + esc(doc.provenance.service.mrcd_version) + " (" + esc(doc.generated_at.slice(0, 10)) + "), perfil de decisión " + esc(doc.request.decision_profile) + ", OMP_NUM_THREADS=" + esc((env && (env.omp_num_threads || (env.asr && env.asr.omp_num_threads))) || "4") + ", con include_text=true." });
+    return doc;
+  }
+  function apiExample(doc) {
+    if (!doc) return;
+    const ex = {
+      schema_version: doc.schema_version, status: doc.status,
+      request: { audio_duration_s: doc.request.audio_duration_s, include_text: doc.request.include_text, decision_profile: doc.request.decision_profile },
+      events: (doc.events || []).slice(0, 1),
+      summary: doc.summary,
+      modalities: { kinesic_video: doc.modalities.kinesic_video },
+      warnings: (doc.warnings || []).slice(0, 1),
+    };
+    $("#api-example").textContent = JSON.stringify(ex, null, 2).replace(/\n}$/, ',\n  "…": "provenance, transcript, experimental y demás campos del contrato"\n}');
+  }
+
+  (async () => {
+    const pre = (() => { try { return JSON.parse($("#sample-result").textContent); } catch (_) { return null; } })();
+    apiExample(pre);
+    const here = location.protocol.startsWith("http") ? await probe(new URL(".", location.href).href) : { ok: false };
+    if (here.ok) { connected(new URL(".", location.href).href, here.health, true); return; }
+    $("#mode-text").innerHTML = "<p><strong>Estás viendo la página publicada.</strong> Abajo tienes un resultado real precalculado del audio de muestra. Para analizar tu propio audio, levanta el servicio en tu equipo (ver <a href=\"#instalacion\">Instalación</a>) con <code>--cors-origin " + esc(PAGES_ORIGIN) + "</code> y conéctalo, o abre directamente <code>http://127.0.0.1:8765/</code>.</p>";
+    $("#connect-panel").hidden = false;
+    $("#opt-inc").disabled = true;
+    showPrecomputed();
+  })();
+})();
+</script>
+</body>
+</html>

@@ -16,7 +16,7 @@ import json
 import numpy as np
 
 from mrcd.optimize import space as SP
-from mrcd.optimize.product_pipeline import ClassPipeline
+from mrcd.optimize.class_pipeline import ClassPipeline
 
 FORMAT = "mrcd.o_pipeline.json/1"
 

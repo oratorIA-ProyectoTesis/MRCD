@@ -9,16 +9,12 @@ from __future__ import annotations
 import hashlib
 import json
 import pickle
-from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 
-from mrcd import calibration as CAL
-from mrcd.asr_recovery.signals import SignalStats
-from mrcd.fusion_text import apply_or
-from mrcd.optimize import blocks as B
 from mrcd.optimize import space as SP
+from mrcd.optimize.class_pipeline import ClassPipeline  # noqa: F401  (re-exported: existing pickles resolve it here)
 
 PIPELINE_VERSION = "o-campaign/1"
 DEFAULT_PIPELINE = False  # opt-in until the promotion rule of PROTOCOL.md section 7 is met and the service adopts it
@@ -26,47 +22,6 @@ DEFAULT_PIPELINE = False  # opt-in until the promotion rule of PROTOCOL.md secti
 
 def _sha_bytes(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
-
-
-@dataclass
-class ClassPipeline:
-    cfg: SP.Config
-    stats: dict  # {"med": float, "scale": float} duration normaliser fitted on the training rows
-    model: object
-    thr: float
-    t_or: float | None
-    calibrator: dict | None
-    band: dict
-    train_note: str
-
-    def matrix(self, recs: list[dict]) -> np.ndarray:
-        st = SignalStats(self.stats["med"], self.stats["scale"])
-        parts = []
-        for b in self.cfg.blocks:
-            if b in B.STATELESS:
-                parts.append(
-                    B._san(B.STATELESS[b](recs, self.cfg.profile, self.cfg.cls))
-                )
-            else:
-                parts.append(B._san(B.stateful_block(b, recs, self.cfg.profile, st)))
-        return np.hstack(parts)
-
-    def predict(self, recs: list[dict]) -> dict:
-        s = np.asarray(self.model.score(self.matrix(recs)), float)
-        if self.cfg.fusion == "or_rule":
-            r = B._san(B.b_rule(recs, self.cfg.profile, self.cfg.cls))[:, 0].astype(int)
-            dec = apply_or(r, s, self.t_or)
-        else:
-            dec = (s >= self.thr).astype(int)
-        cal = (
-            CAL.Calibrator.from_dict(self.calibrator).apply(s) if self.calibrator else s
-        )
-        return {
-            "score": s,
-            "decision": dec,
-            "calibrated": cal,
-            "state": CAL.states(cal, self.band["lo"], self.band["hi"]),
-        }
 
 
 def fit_class_pipeline(d, tr: np.ndarray, sel_best: dict, note: str) -> ClassPipeline:

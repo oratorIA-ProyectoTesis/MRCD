@@ -3,3 +3,10 @@ mrcd/service/profiles/** -text
 tests/data/v0_frozen_document.json -text
 *.sh text eol=lf
 Dockerfile* text eol=lf
+# packaged binaries: exact bytes (sha256-pinned)
+*.pt binary
+*.wav binary
+# product page and sample: byte-identical in the package, the service and site/ (GitHub Pages)
+mrcd/service/web/** -text
+site/** -text
+*.sh text eol=lf

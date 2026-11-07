@@ -51,7 +51,7 @@ Source: `results/auditoria_corpus_20261030/MATRIZ_CORPUS.md` (counts recomputed 
 | disfluentES | repetition (T), filler (T) | 4,506 sentences; 633 repetition, 86 filler positives | 329-450 child speakers, text only | CC BY 4.0 | Children reading aloud; no audio; the filler rule that works needs the bare token `e`, found by inspecting this same corpus (optimistic) |
 | ES-Port | repetition + false start jointly (T) | 99,298 utterances | 1,170 dialogues (speakers not linkable) | CC BY-SA 3.0 Spain | Joint label, not repetition alone |
 | DIME, ESLORA | engineering checks only (importers, throughput, ASR smoke) | 20 dialogues + utt1/utt74; public text | - | per catalogue | DIME has no class labels (XLS are dialogue acts); repair-label directory returned HTTP 403; ESLORA text has no audio or times |
-| CHM150, SEP-28k, FluencyBank | not used. SEP-28k/FluencyBank label CSVs were downloaded as external taxonomy contrast (English, stuttering context) | - | - | CHM150: licence conflict unresolved; SEP-28k/FluencyBank labels CC BY-NC 4.0 | Not mixed with Spanish metrics |
+| CHM150, SEP-28k, FluencyBank | not used. SEP-28k/FluencyBank label CSVs were downloaded as external taxonomy contrast (English, stuttering context) | - | - | CHM150: governed by the signed LDC "CHM150 Agreement" (no redistribution); SEP-28k/FluencyBank labels CC BY-NC 4.0 | Not mixed with Spanish metrics |
 | PerLA, PUCP, SOPHIAS | nothing retrieved (auth wall, challenge, DUA pending) | - | - | - | - |
 
 The exclusion of an entire family of corpora is not a finding about the engine; it is a data-access limit (section 11).

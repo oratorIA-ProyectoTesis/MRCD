@@ -17,7 +17,8 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-PS1 = sorted(ROOT.glob("*.ps1"))
+# historical scripts moved to legacy/ in 0.4.0; any new root script is checked too
+PS1 = sorted(ROOT.glob("*.ps1")) + sorted((ROOT / "legacy").glob("*.ps1"))
 
 
 def test_there_are_scripts_to_check():

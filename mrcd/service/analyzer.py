@@ -22,6 +22,7 @@ from typing import Any, Callable
 import numpy as np
 
 from mrcd.constants import SAMPLE_RATE
+from mrcd.weights import CHECKPOINT_SHA256, DEFAULT_CHECKPOINT, PACKAGED_CHECKPOINT, REPO_CHECKPOINT
 from mrcd.service.audio_io import (
     DecodedAudio,
     ServiceError,
@@ -46,8 +47,12 @@ from mrcd.service.contract import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_CHECKPOINT = ROOT / "models" / "ckpt_audio_text.pt"
+# DEFAULT_CHECKPOINT (imported from ``mrcd.weights``): the packaged copy if this build ships one, else
+# ``models/ckpt_audio_text.pt`` in a clone; sha256-verified before torch unpickles it. Not distributed publicly.
 DEFAULT_MAX_DURATION_S = 600.0
+#: below this the engine's linguistic context (CONTEXT_S + WINDOW_S) is incomplete; shorter audio is only accepted
+#: when the analyzer's ``min_duration_s`` is lowered, and then carries the ``short_audio_reduced_confidence`` warning
+SHORT_AUDIO_S = 13.0
 ALLOWED_HEADS = (None, "vc")
 
 _MODALITIES_BY_MODE = {
@@ -308,11 +313,13 @@ def build_analysis(
     audio: DecodedAudio | None,
     engine_info: dict,
     profile_events: list[dict] | None = None,
+    secondary_asr: dict | None = None,
 ) -> dict:
     """Map an ``AnalysisResult`` to the v1 document. Pure function: no engine, no I/O.
 
-    ``profile_events`` (decision profile ``o2026_11``): events of the pipelined classes computed by the caller; the V0
-    events of those classes are dropped and these take their place."""
+    ``profile_events`` (decision profiles ``o2026_11`` / ``o2026_11b``): events of the classes the profile replaces,
+    computed by the caller; the V0 events of those classes are dropped and these take their place.
+    ``secondary_asr`` (``o2026_11b``): provenance of the second (P1) ASR pass."""
     meta = result.metadata or {}
     asr_meta = meta.get("asr_profile") or None
     experimental = _experimental(options, asr_meta)
@@ -343,7 +350,8 @@ def build_analysis(
             }
         )
     if profile_events is not None:
-        raw = [r for r in raw if r["class"] not in DP.O_CLASSES]
+        dropped = DP.replaced_classes(options.decision_profile) or DP.O_CLASSES
+        raw = [r for r in raw if r["class"] not in dropped]
         for t in profile_events:
             raw.append(
                 {
@@ -352,16 +360,16 @@ def build_analysis(
                     "end_s": t["end_s"],
                     "score": {
                         "value": round(t["score"], 6),
-                        "kind": DP.SCORE_KIND_UNIT_PIPELINE,
+                        "kind": t.get("score_kind", DP.SCORE_KIND_UNIT_PIPELINE),
                         "calibrated": False,
                         "label": NOT_CALIBRATED_LABEL,
                     },
                     "n_windows": t["n_windows"],
-                    "modalities_used": list(DP.MODALITIES),
+                    "modalities_used": list(t.get("modalities_used", DP.MODALITIES)),
                     "text": t["text"] if options.include_text else None,
-                    "validation": DP.VALIDATION_TEXT,
+                    "validation": t.get("validation", DP.VALIDATION_TEXT),
                     "experimental": False,
-                    "_basis": t["class"],
+                    "_basis": t.get("basis", t["class"]),
                     "_decision": t["decision"],
                 }
             )
@@ -515,7 +523,8 @@ def build_analysis(
             warnings.append(
                 {
                     "code": "decision_profile_asr_mismatch",
-                    "message": "The o2026_11 pipelines were trained on P0 ASR text; this run used another ASR profile. "
+                    "message": f"The {options.decision_profile} filler/prolongation pipelines were trained on P0 ASR "
+                    "text; this run used another ASR profile. "
                     "The pipelines read the words of the REQUESTED profile (not rejected, not re-decoded as p0).",
                 }
             )
@@ -523,11 +532,30 @@ def build_analysis(
             warnings.append(
                 {
                     "code": "decision_profile_no_words",
-                    "message": "Not available: the ASR returned no words, so the o2026_11 pipelines could not evaluate "
+                    "message": f"Not available: the ASR returned no words, so the {options.decision_profile} pipelines "
+                    "could not evaluate "
                     "filler_word or prolongation (absence of events here does not mean absence of the phenomena; "
                     "decision_profile=v0 uses the acoustic windows).",
                 }
             )
+    if secondary_asr and secondary_asr.get("anomalies"):
+        warnings.append(
+            {
+                "code": "secondary_asr_anomaly",
+                "message": "The second (P1) ASR pass used for repetition shows anomalies (prompt echo or loops); its "
+                "text was not altered. Detail: "
+                + json.dumps(_jsonable(secondary_asr["anomalies"]), ensure_ascii=False)[:500],
+            }
+        )
+    if audio is not None and audio.duration_s < SHORT_AUDIO_S:
+        warnings.append(
+            {
+                "code": "short_audio_reduced_confidence",
+                "message": f"Short audio ({audio.duration_s:.1f} s < {SHORT_AUDIO_S:.0f} s): reduced confidence. The "
+                "linguistic context window (10 s) is incomplete and audio shorter than one 3 s analysis window is "
+                "zero-padded for the acoustic features.",
+            }
+        )
     warnings.extend(_asr_profile_warnings(options, asr_meta))
     anomalies = (asr_meta or {}).get("anomalies") or []
     if anomalies:
@@ -594,13 +622,21 @@ def build_analysis(
             _jsonable(meta.get("window_plan")),
             env,
             route_meta,
-            DP.profile_meta(options.decision_profile),
+            _profile_provenance(options, secondary_asr),
         ),
         "experimental": experimental,
         "head_decision": head_decision,
         "transcript": (result.transcript if options.include_text else None),
         "warnings": warnings,
     }
+
+
+def _profile_provenance(options: AnalysisOptions, secondary_asr: dict | None) -> dict:
+    if options.decision_profile == DP.PROFILE_OB:
+        meta = DP.profile_meta(options.decision_profile, asr_profile=options.asr_profile)
+        meta["secondary_asr"] = secondary_asr
+        return meta
+    return DP.profile_meta(options.decision_profile)
 
 
 # ----------------------------------------------------------------------------- engine plumbing
@@ -645,8 +681,8 @@ def _classify_load_failure(
     ):
         return ServiceError(
             "asr_unavailable",
-            "The ASR (Whisper) model could not be loaded. The model must already be in the local cache; "
-            "the service never downloads models.",
+            "The ASR (Whisper) model could not be loaded. Fetch it once with `mrcd download` "
+            "(the service itself never downloads models during a request).",
             {"exception_type": kind},
         )
     return ServiceError(
@@ -667,6 +703,7 @@ class MrcdAnalyzer:
         device: str | None = None,
         engine_factory: Callable[[AnalysisOptions], Any] | None = None,
         max_duration_s: float = DEFAULT_MAX_DURATION_S,
+        min_duration_s: float | None = None,
     ):
         self.checkpoint = Path(checkpoint)
         self._factory = engine_factory or _default_factory(
@@ -674,8 +711,13 @@ class MrcdAnalyzer:
         )
         self._custom_factory = engine_factory is not None
         self.max_duration_s = max_duration_s
+        #: ``None`` = the engine minimum (``DisfluencyEngine.MIN_AUDIO_S``, 13 s)
+        self.min_duration_s = min_duration_s
         self._engines: dict[tuple, tuple[Any, dict]] = {}
         self._lock = threading.Lock()
+        #: set by the server: returns ``environment_pin.evaluate(...)`` for the live process. Without it the document
+        #: keeps the library's OMP-value-only flag (a bare library user has no start-up order to check).
+        self.environment_probe: Callable[[], dict] | None = None
 
     @property
     def loaded(self) -> bool:
@@ -690,10 +732,36 @@ class MrcdAnalyzer:
     def preload(self, options: AnalysisOptions) -> None:
         """Loads the engine of ``options`` now, with the SAME arguments the lazy first request would use."""
         self.validate_options(options)
-        if options.decision_profile == DP.PROFILE_O:
+        if options.decision_profile in DP.UNIT_PIPELINE_PROFILES:
             DP.o_pipelines()  # fail at start, not at the first request, if an artifact was altered
         with self._lock:
             self._engine(options)
+            if self._needs_secondary(options):
+                self._engine(self._secondary_options(options))
+
+    @staticmethod
+    def _needs_secondary(options: AnalysisOptions) -> bool:
+        """``o2026_11b`` decodes the audio a second time with P1 unless the requested profile already is P1."""
+        return DP.uses_p1_repetition(options.decision_profile) and options.asr_profile != DP.P1_ASR_PROFILE
+
+    @staticmethod
+    def _secondary_options(options: AnalysisOptions) -> AnalysisOptions:
+        from dataclasses import replace
+
+        return replace(options, asr_profile=DP.P1_ASR_PROFILE, head=None)
+
+    def is_ready(self, options: AnalysisOptions) -> bool:
+        """Every engine the options need is loaded (the requested one and, for o2026_11b, the P1 one)."""
+        return self.is_loaded(options) and (
+            not self._needs_secondary(options) or self.is_loaded(self._secondary_options(options))
+        )
+
+    def secondary_asr_for(self, options: AnalysisOptions) -> Any | None:
+        """The P1 ASR of the second pass (``o2026_11b``), or None. Only the engine worker thread may call it."""
+        if not self._needs_secondary(options):
+            return None
+        with self._lock:
+            return self._engine(self._secondary_options(options))[0]._asr
 
     def asr_for(self, options: AnalysisOptions) -> Any:
         """The (shared) ASR of an already loaded engine. Only the engine worker thread may call it."""
@@ -754,6 +822,13 @@ class MrcdAnalyzer:
                 "sha256": file_sha256(self.checkpoint),
                 "file": self.checkpoint.name,
             }
+            if self.checkpoint.resolve() in (PACKAGED_CHECKPOINT, REPO_CHECKPOINT.resolve()) and info["sha256"] != CHECKPOINT_SHA256:
+                # the packaged default is a pickle: never unpickle a modified copy
+                raise ServiceError(
+                    "engine_load_failed",
+                    "The default engine checkpoint does not match its pinned sha256; obtain it again from the authors.",
+                    {"checkpoint_file": self.checkpoint.name},
+                )
         try:
             engine = self._factory(options)
         except ServiceError:
@@ -847,12 +922,25 @@ class MrcdAnalyzer:
             "sample_rate_hz": audio.sample_rate,
             "channels": audio.channels,
         }
-        min_s = float(DisfluencyEngine.MIN_AUDIO_S)
+        min_s = float(
+            DisfluencyEngine.MIN_AUDIO_S if self.min_duration_s is None else self.min_duration_s
+        )
         if audio.duration_s < min_s:
             raise ServiceError(
                 "audio_too_short",
-                f"Audio of {audio.duration_s:.1f} s; the engine needs at least {min_s:.0f} s.",
-                {"min_duration_s": min_s, "duration_s": round(audio.duration_s, 3)},
+                f"Audio of {audio.duration_s:.1f} s is shorter than the minimum of {min_s:g} s"
+                + (
+                    " (the engine's linguistic context window of 10 s plus one 3 s analysis window)."
+                    if min_s >= SHORT_AUDIO_S
+                    else " (below it the measured accuracy was not sustained)."
+                ),
+                {
+                    "min_duration_s": min_s,
+                    "duration_s": round(audio.duration_s, 3),
+                    "reason": "engine_context_window"
+                    if min_s >= SHORT_AUDIO_S
+                    else "short_audio_accuracy_not_sustained",
+                },
             )
         if audio.duration_s > self.max_duration_s:
             raise ServiceError(
@@ -868,15 +956,21 @@ class MrcdAnalyzer:
             if asr_wrapper is not None:
                 engine = copy.copy(engine)  # shallow: the shared engine and its ASR are never modified
                 engine._asr = asr_wrapper(engine._asr)
-            use_profile = options.decision_profile == DP.PROFILE_O
+            use_profile = options.decision_profile in DP.UNIT_PIPELINE_PROFILES
             profile_events = None
+            secondary = None
             try:
                 kw = {"return_words": True} if (options.text_route or use_profile) else {}
+                if audio.duration_s < float(DisfluencyEngine.MIN_AUDIO_S):
+                    kw["min_audio_s"] = min_s  # opt-in short-audio path (only reachable with a lowered minimum)
                 result = engine.analyze(audio.samples, sample_rate=audio.sample_rate, **kw)
                 if use_profile:
                     profile_events = DP.apply_profile(
                         engine, audio.samples, audio.sample_rate, getattr(result, "words", None)
                     )
+                if DP.uses_p1_repetition(options.decision_profile):
+                    words_p1, secondary = self._p1_words(options, audio, result, asr_wrapper)
+                    profile_events = (profile_events or []) + DP.repetition_events(words_p1)
             except DP.ProfileArtifactError as exc:
                 return error_document(
                     "analysis_failed",
@@ -903,6 +997,54 @@ class MrcdAnalyzer:
                         info.get("checkpoint"), None, None, None, None, None
                     ),
                 )
-        return build_analysis(
-            result, options=options, audio=audio, engine_info=info, profile_events=profile_events
+        doc = build_analysis(
+            result,
+            options=options,
+            audio=audio,
+            engine_info=info,
+            profile_events=profile_events,
+            secondary_asr=secondary,
         )
+        self._apply_environment_pin(doc)
+        return doc
+
+    def _apply_environment_pin(self, doc: dict) -> None:
+        """Replace the OMP-value-only ``environment_is_pinned`` with the real environment_pin verdict. Without a probe the
+        document says not pinned, with ``["not_probed"]`` as the reason (never the legacy OMP-only True)."""
+        env = (doc.get("provenance") or {}).get("environment")
+        if not isinstance(env, dict):
+            return
+        if self.environment_probe is None:
+            # The legacy flag only compares the OMP value; it must never be published as a pin verdict.
+            env["environment_is_pinned"] = False
+            env["environment_pin_failed_checks"] = ["not_probed"]
+            return
+        verdict = self.environment_probe()
+        env["environment_is_pinned"] = bool(verdict["environment_is_pinned"])
+        env["environment_pin_failed_checks"] = [
+            name for name, c in verdict["checks"].items() if not c["ok"]
+        ]
+
+    def _p1_words(self, options, audio, result, asr_wrapper) -> tuple[list[dict], dict | None]:
+        """Words of the P1 pass of ``o2026_11b`` (caller holds the lock). If the requested profile already is P1 the
+        main words are reused; otherwise the audio is decoded again with the P1 engine's ASR, with the SAME chunking
+        as ``DisfluencyEngine.analyze`` (8 s chunks, 2 s overlap) and, in incremental sessions, the same chunk cache."""
+        if not self._needs_secondary(options):
+            return list(getattr(result, "words", None) or []), None
+        from mrcd.asr_profiles import detect_asr_anomalies
+
+        asr = self._engine(self._secondary_options(options))[0]._asr
+        if asr_wrapper is not None:
+            asr = asr_wrapper(asr)
+        words = [w.to_dict() for w in asr.transcribe_chunked(audio.samples, chunk_s=8.0)]
+        profile = getattr(asr, "profile", None)
+        meta = {
+            "profile": DP.P1_ASR_PROFILE,
+            "used_for": ["repetition"],
+            "initial_prompt_sha256": getattr(profile, "prompt_sha256", None),
+            "chunk_s_requested": 8.0,
+            "anomalies": detect_asr_anomalies(
+                " ".join(w["text"] for w in words), getattr(profile, "initial_prompt", "") or ""
+            ),
+        }
+        return words, _jsonable(meta)

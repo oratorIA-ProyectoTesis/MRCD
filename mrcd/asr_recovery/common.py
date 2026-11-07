@@ -1,10 +1,10 @@
 """Paths, pool loading (folds 1-4 only), outer partition and task units shared by every script."""
 
 from __future__ import annotations
-import os
 
 import hashlib
 import json
+import os
 import pickle
 from pathlib import Path
 
@@ -13,12 +13,12 @@ import numpy as np
 from mrcd.context_eval.partition import assert_no_crossing, group_folds
 from mrcd.context_eval.pool import assert_no_historical, build_pool
 
-REPO = Path(r"C:\zArnes-tesis\mrcd")
+# Local experiment inputs, never shipped: the repository root (default: this checkout) and the corpora root
+# (MRCD_CORPORA_ROOT, default <repo>/data/corpora), same convention as scripts/s6_video/s6_common.py.
+REPO = Path(os.environ.get("MRCD_REPO_ROOT") or Path(__file__).resolve().parents[2])
 OUT = REPO / "results" / "asr_recovery_20261031"
 SEED = 13
-CORPUS = Path(
-    (os.environ.get("MRCD_CORPORA_ROOT", r"<CORPORA_ROOT>") + r"\01_DIHANA\extraido\dihana")
-)
+CORPUS = Path(os.environ.get("MRCD_CORPORA_ROOT") or REPO / "data" / "corpora") / "01_DIHANA" / "extraido" / "dihana"
 TURNS = REPO / "results/baselines_20261030/dihana/turns.csv"
 ASR = REPO / "results/mejoras_20261030/asr_cache/dihana"
 WAV = REPO / "results/baselines_20261030/dihana/wav16k"

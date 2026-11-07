@@ -4,7 +4,7 @@ Integración mínima
 ------------------
     from mrcd import DisfluencyEngine
 
-    engine = DisfluencyEngine.load("models/ckpt_audio_text.pt")   # una vez, al arrancar
+    engine = DisfluencyEngine.load()   # una vez, al arrancar (checkpoint incluido en el paquete)
     result = engine.analyze_file("audio.wav")
 
     for ev in result:
@@ -49,7 +49,7 @@ _IMPORT_STATE = {
 from mrcd.constants import BACKGROUND, LABELS, SAMPLE_RATE, TAXONOMY
 from mrcd.engine import AnalysisResult, DisfluencyEngine, Event, Window
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "DisfluencyEngine",

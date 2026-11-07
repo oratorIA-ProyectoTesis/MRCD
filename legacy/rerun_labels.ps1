@@ -1,6 +1,6 @@
 # Re-etiquetado rapido tras cambiar reglas (NO vuelve a descargar ni a correr ASR/MediaPipe)
 $ErrorActionPreference = "Stop"
-Set-Location $PSScriptRoot
+Set-Location (Split-Path $PSScriptRoot -Parent)  # legacy/ -> repository root
 $env:PYTHONIOENCODING = "utf-8"; $env:PYTHONUTF8 = "1"
 $py = ".\.venv\Scripts\python.exe"
 & $py -m pytest -q tests

@@ -1,14 +1,15 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "mrcd"
-version = "0.3.0"
+version = "0.4.0"
 description = "Motor de reconocimiento contextual por fusión multimodal para detección de disfluencias del habla en español"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 keywords = ["disfluency", "speech", "spanish", "multimodal", "asr"]
 classifiers = [
     "Programming Language :: Python :: 3.11",
@@ -43,7 +44,8 @@ train = ["scikit-learn>=1.4", "pyyaml>=6.0"]
 # Construcción del corpus desde fuentes públicas.
 mining = ["yt-dlp>=2024.8.6", "pyyaml>=6.0"]
 
-# Servicio HTTP (`python -m mrcd.service serve`, contrato mrcd.analysis/v1) y su imagen Docker.
+# Servicio HTTP local (contrato mrcd.analysis/v1), página del producto en `/` y Swagger en `/docs`.
+# `pip install "mrcd[service]"` y luego `mrcd serve`.
 # scikit-learn: lo importan los perfiles de decisión del servicio (mrcd.calibration).
 service = ["fastapi>=0.115", "uvicorn>=0.30", "scikit-learn>=1.4"]
 
@@ -57,18 +59,32 @@ dev = ["pytest>=8.0", "pytest-timeout>=2.3"]
 
 # Todo menos `dev`, para reproducir los experimentos de la tesis.
 all = [
-    "mrcd[video]", "mrcd[train]", "mrcd[mining]", "mrcd[demo]", "mrcd[roberta]",
+    "mrcd[video]", "mrcd[train]", "mrcd[mining]", "mrcd[demo]", "mrcd[roberta]", "mrcd[service]",
 ]
+
+[project.scripts]
+# `mrcd serve | analyze | download | sample | validate | schema` (= `python -m mrcd.service`).
+# Points to `mrcd_launcher`, outside the `mrcd` package, so that OMP_NUM_THREADS is set before numpy is imported.
+mrcd = "mrcd_launcher:main"
+
+[project.urls]
+Homepage = "https://oratoria-proyectotesis.github.io/MRCD/"
+Source = "https://github.com/oratorIA-ProyectoTesis/MRCD"
 
 [tool.setuptools.packages.find]
 # Solo la librería. `scripts/` y `tests/` son del repositorio, no del paquete:
 # quien instala `mrcd` no debe recibir herramientas de línea de comandos que
-# asumen rutas del repo ni dependencias que no declaró.
+# asumen rutas del repo ni dependencias que no declaró. `mrcd*` también incluye `mrcd_launcher`.
 include = ["mrcd*"]
 
 [tool.setuptools.package-data]
 # Service artifacts: plain JSON, sha256-pinned in mrcd/service/decision_profile.py
 "mrcd.service" = ["schemas/*.json", "experimental/*.json", "profiles/*/*.json"]
+# Product page and synthetic sample (served at / and /sample_es.wav)
+"mrcd.service.web" = ["index.html", "sample_es.wav"]
+# The engine checkpoint is NOT distributed in the public repository (see models/README.md); a private build may
+# drop it at mrcd/weights/ckpt_audio_text.pt (sha256-pinned in mrcd/weights/__init__.py) and it is then packaged.
+"mrcd.weights" = ["ckpt_audio_text.pt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

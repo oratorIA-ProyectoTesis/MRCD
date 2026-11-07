@@ -189,7 +189,7 @@ class DisfluencyEngine:
     @classmethod
     def load(
         cls,
-        checkpoint: str | Path,
+        checkpoint: str | Path | None = None,
         *,
         whisper_size: str = "small",
         device: str | None = None,
@@ -199,6 +199,9 @@ class DisfluencyEngine:
         asr_profile: str = "p0",
     ) -> DisfluencyEngine:
         """Carga el motor. Operacion CARA: hazla una vez al arrancar el servicio.
+
+        `checkpoint=None` usa el checkpoint incluido en el paquete (o `$MRCD_CHECKPOINT`), verificado por
+        sha256 antes de deserializarlo (ver `mrcd.weights`).
 
         `device=None` elige CUDA si esta disponible. Si las librerias de CUDA
         fallan, el ASR cae a CPU por su cuenta y lo avisa por stdout.
@@ -227,7 +230,10 @@ class DisfluencyEngine:
 
         from mrcd.asr_profiles import get_profile
 
+        from mrcd.weights import resolve_checkpoint
+
         profile = get_profile(asr_profile)  # reject unknown profiles before any expensive load
+        checkpoint = resolve_checkpoint(checkpoint)
         message = omp_warning(omp_status())
         if message:
             warnings.warn(message, RuntimeWarning, stacklevel=2)
@@ -280,6 +286,7 @@ class DisfluencyEngine:
         terminal_window: bool = False,
         span: tuple[float, float] | None = None,
         return_words: bool = False,
+        min_audio_s: float | None = None,
     ) -> AnalysisResult:
         """Analiza audio mono float32 en [-1, 1] y devuelve los eventos.
 
@@ -323,9 +330,10 @@ class DisfluencyEngine:
                 "el remuestreo silencioso aqui ocultaria un desajuste de tu pipeline."
             )
         duration = len(audio) / SAMPLE_RATE
-        if duration < self.MIN_AUDIO_S:
+        min_s = self.MIN_AUDIO_S if min_audio_s is None else float(min_audio_s)
+        if duration < min_s:
             raise ValueError(
-                f"Audio de {duration:.1f} s; se necesitan al menos {self.MIN_AUDIO_S:.0f} s. "
+                f"Audio de {duration:.1f} s; se necesitan al menos {min_s:g} s. "
                 "El ramal linguistico mira una ventana de contexto mas ancha que la de "
                 "analisis y sin ella no hay decision que tomar."
             )
@@ -337,10 +345,23 @@ class DisfluencyEngine:
             if asr_chunk_s
             else self._asr.transcribe(audio)
         )
+        eval_audio = audio
+        if duration < WINDOW_S:
+            # opt-in short audio (``min_audio_s`` < WINDOW_S): the ASR saw the real audio; only the window features are
+            # computed over the audio zero-padded at the end to one window (pad mode of ``windowing.plan_unit``)
+            from mrcd.windowing import pad_audio
+
+            eval_audio = pad_audio(audio, int(round(WINDOW_S * SAMPLE_RATE)) - len(audio), "zero")
         windows, head_report = self._evaluate(
-            audio, words, keep_windows, terminal_window=terminal_window, span=span
+            eval_audio, words, keep_windows, terminal_window=terminal_window, span=span
         )
         events = self._merge(windows)
+        if eval_audio is not audio:  # padded short audio: no interval reaches past the real end
+            from dataclasses import replace as _clip
+
+            events = [
+                _clip(e, start=min(e.start, duration), end=min(e.end, duration)) for e in events
+            ]
         if head_report is not None:
             events = [self._mark(e, head_report) for e in events]
         transcript = " ".join(w.text for w in words)

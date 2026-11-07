@@ -67,6 +67,12 @@ class ASRProfile:
     #: ``LOOP_REDECODE_LADDER`` (see ``VerbatimASR.transcribe``). Every re-decode is recorded; an unresolved chunk keeps its
     #: original text. ``False`` = historical behaviour (p0/p1 are untouched).
     loop_redecode: bool = False
+    #: ``"faster_whisper"`` = historical backend. ``"crisperwhisper"`` (profile ``cw2``) decodes with CrisperWhisper 2.0
+    #: (verbatim); its model id, pinned revision and licence note are recorded in ``describe()`` and the cache key.
+    backend: str = "faster_whisper"
+    model_id: str | None = None
+    model_revision: str | None = None
+    license_note: str = ""
 
     @property
     def prompt_sha256(self) -> str:
@@ -96,6 +102,11 @@ class ASRProfile:
             out["compute_type"] = self.compute_type
         if self.loop_redecode:
             out["loop_redecode"] = {"enabled": True, "ladder": [dict(a) for a in LOOP_REDECODE_LADDER], "seed": LOOP_REDECODE_SEED}
+        if self.backend != "faster_whisper":  # only the opt-in verbatim profile; every other description is untouched
+            out["backend"] = self.backend
+            out["model_id"] = self.model_id
+            out["model_revision"] = self.model_revision
+            out["license_note"] = self.license_note
         return out
 
     def _describe_base(self) -> dict:
@@ -181,6 +192,34 @@ PROFILES["p1_noloop"] = replace(
 )
 
 
+# Opt-in verbatim profile (2026-11-07, branch feat/verbatim-asr-profile). CrisperWhisper 2.0 large transcribes
+# disfluencies (repetitions, fragments, ``[UH]``-style filled-pause tags) that Whisper erases; see
+# ``results/asr_survival_models_20261104`` (survival) and ``results/benchmark_empirico_20261107`` (benchmark: the ASR is
+# the bottleneck). No prompt exists for this model. The tag -> filled-pause mapping is declared in ``mrcd/verbatim.py``.
+CW2_MODEL_ID = "nyralabs/CrisperWhisper2.0_large"
+#: Hugging Face commit of the snapshot the survival and benchmark campaigns decoded with (refs/main on 2026-11-07).
+CW2_MODEL_REVISION = "f4334f6e8193f2691212d49b20fa12d370e13896"
+CW2_LICENSE_NOTE = (
+    "CrisperWhisper 2.0 code is MIT, but the WEIGHTS AND THE OUTPUTS are under the Nyra Health Non-Commercial Research "
+    "License: non-commercial research use only. Not usable in a commercial product; transcripts must not be published."
+)
+PROFILES["cw2"] = ASRProfile(
+    name="cw2",
+    initial_prompt="",
+    word_timestamps=True,
+    experimental=True,
+    validation=(
+        "experimental; verbatim ASR, non-commercial research licence; survival and benchmark are exploratory, "
+        "DIHANA folds 1-4 and CHM150 only"
+    ),
+    description="CrisperWhisper 2.0 large, verbatim, Spanish, no prompt, CUDA float16 (CPU fallback documented). Opt-in; never selected by default.",
+    backend="crisperwhisper",
+    model_id=CW2_MODEL_ID,
+    model_revision=CW2_MODEL_REVISION,
+    license_note=CW2_LICENSE_NOTE,
+)
+
+
 def get_profile(profile: str | ASRProfile | None) -> ASRProfile:
     """Resolve a profile name; ``None`` -> default. Unknown names are rejected (never silently defaulted)."""
     if profile is None:
@@ -248,6 +287,8 @@ def asr_cache_key(
         "omp_num_threads": omp_num_threads,
         "audio_sha256": audio_sha256,
     }
+    if p.backend != "faster_whisper":  # only cw2: the key must carry the model identity
+        payload["backend"] = {"name": p.backend, "model_id": p.model_id, "model_revision": p.model_revision}
     if p.loop_redecode:  # only for the opt-in profiles: p0/p1 keys stay bit-identical
         payload["loop_redecode"] = {"ladder": [dict(a) for a in LOOP_REDECODE_LADDER], "seed": LOOP_REDECODE_SEED}
     return sha256_text(json.dumps(payload, sort_keys=True, ensure_ascii=True))

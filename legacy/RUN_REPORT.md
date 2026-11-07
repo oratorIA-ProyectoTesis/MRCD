@@ -20,15 +20,15 @@ Generado: 2026-09-20 04:20:32 · semilla aleatoria: 13
 
 | Etapa | Duración | rc | Comando |
 |---|---|---|---|
-| tests previos | 0.4 min | 0 | `C:\zArnes-tesis\mrcd\.venv\Scripts\python.exe -m pytest -q tests` |
-| modelos | 0.1 min | 0 | `C:\zArnes-tesis\mrcd\.venv\Scripts\python.exe scripts/download_models.py --whisper small` |
-| minería (seeds + discover-auto + extract) | 84.1 min | 0 | `C:\zArnes-tesis\mrcd\.venv\Scripts\python.exe scripts/data_mining.py all --whisper small` |
-| extracción 3 señales + pre-anotación | 29.3 min | 0 | `C:\zArnes-tesis\mrcd\.venv\Scripts\python.exe scripts/extract_and_label.py --whisper small --recall-mode` |
-| ventanas | 0.3 min | 0 | `C:\zArnes-tesis\mrcd\.venv\Scripts\python.exe scripts/build_windows.py --labels auto` |
-| ablación (prueba de humo) | 22.7 min | 0 | `C:\zArnes-tesis\mrcd\.venv\Scripts\python.exe scripts/run_ablation.py --data data/windows_auto.npz --allow-auto-labels --bootstrap 300` |
-| soporte por clase | 0.0 min | 0 | `C:\zArnes-tesis\mrcd\.venv\Scripts\python.exe scripts/report_support.py` |
-| paquete de anotación | 0.0 min | 0 | `C:\zArnes-tesis\mrcd\.venv\Scripts\python.exe scripts/sample_for_annotation.py` |
-| tests finales | 0.1 min | 0 | `C:\zArnes-tesis\mrcd\.venv\Scripts\python.exe -m pytest -q tests` |
+| tests previos | 0.4 min | 0 | `.venv\Scripts\python.exe -m pytest -q tests` |
+| modelos | 0.1 min | 0 | `.venv\Scripts\python.exe scripts/download_models.py --whisper small` |
+| minería (seeds + discover-auto + extract) | 84.1 min | 0 | `.venv\Scripts\python.exe scripts/data_mining.py all --whisper small` |
+| extracción 3 señales + pre-anotación | 29.3 min | 0 | `.venv\Scripts\python.exe scripts/extract_and_label.py --whisper small --recall-mode` |
+| ventanas | 0.3 min | 0 | `.venv\Scripts\python.exe scripts/build_windows.py --labels auto` |
+| ablación (prueba de humo) | 22.7 min | 0 | `.venv\Scripts\python.exe scripts/run_ablation.py --data data/windows_auto.npz --allow-auto-labels --bootstrap 300` |
+| soporte por clase | 0.0 min | 0 | `.venv\Scripts\python.exe scripts/report_support.py` |
+| paquete de anotación | 0.0 min | 0 | `.venv\Scripts\python.exe scripts/sample_for_annotation.py` |
+| tests finales | 0.1 min | 0 | `.venv\Scripts\python.exe -m pytest -q tests` |
 
 ## Videos
 

@@ -30,7 +30,7 @@ It checks that audio reaches the pipeline with a sane level. It does **not** mea
    access your microphone" ON. Settings > System > Sound > Input: select the microphone and watch the bar move.
 3. **Open PowerShell** (a normal terminal, not a hidden/scheduled task) and go to the repository:
    ```powershell
-   cd "C:\zArnes-tesis\mrcd"
+   cd "<path to your MRCD clone>"
    $env:OMP_NUM_THREADS = "4"
    ```
 4. **List the devices** (does not record) and note the index of your microphone:

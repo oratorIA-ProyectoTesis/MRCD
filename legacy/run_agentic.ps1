@@ -4,7 +4,7 @@
 # Uso:  powershell -ExecutionPolicy Bypass -File .\run_agentic.ps1 [-Model claude-sonnet-4-5]
 param([string]$Model = "claude-sonnet-4-5", [int]$PerClass = 60, [int]$Negatives = 120, [int]$Bootstrap = 300)
 $ErrorActionPreference = "Stop"
-Set-Location $PSScriptRoot
+Set-Location (Split-Path $PSScriptRoot -Parent)  # legacy/ -> repository root
 $env:PYTHONIOENCODING = "utf-8"; $env:PYTHONUTF8 = "1"
 $py = ".\.venv\Scripts\python.exe"
 

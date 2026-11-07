@@ -83,3 +83,11 @@ Accepted, marked, never silent: besides `experimental_components`, the service a
 ## 7. What is NOT measured
 
 WER of any profile against a legitimate human reference outside DIHANA folds 1-4 (fold 5 is historical and must not be used for tuning); behaviour on app audio (16 kHz PCM16 160 ms chunks with echo cancellation, noise suppression and AGC on); streaming-vs-offline accuracy on the same human-referenced units. These are open items for OE3, not statements of this contract.
+
+## 8. Opt-in verbatim profile `cw2` and route `verbatim_or` (2026-11-07, EXPERIMENTAL)
+
+`cw2` is registered in `PROFILES` (so the service accepts it) but selected only explicitly. Backend: CrisperWhisper 2.0 large, `nyralabs/CrisperWhisper2.0_large`, revision `f4334f6e8193f2691212d49b20fa12d370e13896`, transformers backend, verbatim mode, `language="es"`, no prompt, word timestamps. Device: CUDA float16 when torch sees a GPU; otherwise CPU float32 (documented fallback, much slower; `device="cuda"` without a GPU raises `ASRDeviceUnavailable`). The `crisperwhisper` package is NOT a dependency of MRCD: install it in a separate environment. **Licence: weights and outputs are non-commercial research only** (`describe()["license_note"]`, `THIRD_PARTY_NOTICES.md`).
+
+- Tag mapping (`mrcd/verbatim.py`, declared before measuring): `[UH] [UM] [EH] [EM] [ER] [AH] [AHH] [HM] [HMM] [MM] [MMM]` become the lexicon words `eh em eh em eh ah ah mm mm mm mm`; any other tag is dropped and listed in `VerbatimASR.dropped_tags`. `Word.prob` is 1.0 (the model gives none; not a confidence). Long audio uses the package's own long-form strategy, not the 8 s MRCD chunking.
+- Route `verbatim_or` (`mrcd.verbatim.route_decisions`): per class, MRCD classifier decision OR a lexical rule on the tag-stripped verbatim text. Library function only; the service default and `DisfluencyEngine.load` default (`p0`) are unchanged. Whether it is worth adopting: `results/verbatim_profile_20261107/README_RESULTADOS.md`.
+- Not measured: the classifier fed with `cw2` words (distribution shift: it was trained on P0 text); `cw2` on pause-segmented service audio.

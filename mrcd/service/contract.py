@@ -37,6 +37,9 @@ ERROR_CODES: dict[str, tuple[int, bool]] = {
     "analysis_failed": (500, True),
     "job_not_found": (404, False),
     "queue_full": (429, True),
+    # service hardening (2026-11-07): emitted by the security middleware (mrcd/service/security.py)
+    "unauthorized": (401, False),
+    "rate_limited": (429, True),
     # rev 1.3 (incremental sessions)
     "incremental_disabled": (404, False),
     "session_not_found": (404, False),
@@ -74,7 +77,9 @@ SCORE_KIND_DEPRECATED = "max_window_class_probability"
 SCORE_KIND_TEXT_ROUTE = "text_route_logistic_score"
 #: Score of the O-campaign per-class unit pipelines (decision profile o2026_11). NOT a probability.
 SCORE_KIND_UNIT_PIPELINE = "unit_pipeline_model_score"
-DECISION_PROFILE_NAMES = ("v0", "o2026_11")
+#: Repetition rule of decision profile o2026_11b (rev 1.5): 1.0 = the lexical rule fired. An indicator, NOT a probability.
+SCORE_KIND_RULE = "lexical_rule_indicator"
+DECISION_PROFILE_NAMES = ("v0", "o2026_11", "o2026_11b")
 INTERVAL_SEMANTICS = "decision_stride_not_human_boundary"
 #: Classes with a compatible human reference (reduced OE4 scope). Everything else is out of scope.
 EVALUATED_CLASSES = ("filler_word", "prolongation", "repetition")
@@ -269,6 +274,7 @@ SCHEMA: dict = {
                                 SCORE_KIND_DEPRECATED,
                                 SCORE_KIND_TEXT_ROUTE,
                                 SCORE_KIND_UNIT_PIPELINE,
+                                SCORE_KIND_RULE,
                             ]
                         },
                         "calibrated": {"const": False},
@@ -363,6 +369,7 @@ SCHEMA: dict = {
                 "calibration_claim": {"const": "none"},
                 "pipelines_verified": {"type": ["boolean", "null"]},
                 "note": _STR,
+                "secondary_asr": {"type": ["object", "null"]},
             },
         },
         "experimental": {

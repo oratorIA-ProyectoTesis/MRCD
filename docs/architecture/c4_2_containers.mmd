@@ -16,12 +16,12 @@ flowchart LR
     cloudasr["<b>ASR provider</b><br/><i>External API</i><br/>Receives audio when a cloud adapter is configured."]:::ext
   end
   subgraph mrcdp["MRCD local Python process / working tree [trust boundary]"]
-    svc["<b>[PRODUCT] MRCD service (offline jobs + CLI)</b><br/><i>mrcd/service, FastAPI loopback :8765 / CLI</i><br/>GET /v1/health, /v1/schema; POST /v1/jobs + GET /v1/jobs/{id} (offline reference and the app's fallback); contract mrcd.analysis/v1. One engine worker thread, priority queue. No auth, loopback only. Preloads enabled ASR profiles and optionally warms up at start."]:::cur
+    svc["<b>[PRODUCT] MRCD service (offline jobs + CLI)</b><br/><i>mrcd/service, FastAPI loopback :8765 / CLI</i><br/>GET /v1/health, /v1/schema; POST /v1/jobs + GET /v1/jobs/{id} (offline reference and the app's fallback); contract mrcd.analysis/v1. One engine worker thread, priority queue. No auth, loopback only. Preloads enabled ASR profiles and optionally warms up at start. Console command mrcd; product page at / with docs on."]:::cur
     incr["<b>[OPT-IN] Incremental sessions</b><br/><i>mrcd/service/incremental, /v1/sessions</i><br/>POST /v1/sessions (returns subscription_token once); PUT /audio/{seq} (idempotent PCM16 batches); POST /close; GET /events (SSE, counts only); GET state; DELETE. Per-session ChunkCache of 8 s ASR fragments. Profiles p0/p1 on CPU only; noloop and cuda are refused (offline job instead)."]:::cur
-    lib["<b>mrcd library</b><br/><i>Python package mrcd 0.3.0</i><br/>DisfluencyEngine.load/analyze/analyze_file -> AnalysisResult(Event, Window). Only supported entry; everything else is internal. Also holds the opt-in and research packages (av, optimize, context_ambiguity, recording_check, calibration, fusion_text), see level 3."]:::cur
+    lib["<b>mrcd library</b><br/><i>Python package mrcd 0.4.0</i><br/>DisfluencyEngine.load/analyze/analyze_file -> AnalysisResult(Event, Window). Only supported entry; everything else is internal. Also holds the opt-in and research packages (av, optimize, context_ambiguity, recording_check, calibration, fusion_text), see level 3."]:::cur
     demo["<b>Live demo</b><br/><i>scripts/live_demo.py, FastAPI :8001</i><br/>Microphone -> LiveScorer rows -> WebSocket /ws and dashboard. Not an API for other systems."]:::cur
     scripts["<b>Research and batch scripts</b><br/><i>scripts/*.py, argparse</i><br/>Dataset, training, parity, ASR recovery, audits. No console_scripts and no CLI around analyze_file."]:::cur
-    artifacts["<b>Model artifacts</b><br/><i>Files</i><br/>models/ckpt_audio_text.pt, Vc head (sha256 pinned), faster-whisper small cache."]:::ext
+    artifacts["<b>Model artifacts</b><br/><i>Files</i><br/>mrcd/weights/ckpt_audio_text.pt (packaged, sha256 pinned; same bytes as models/), Vc head (sha256 pinned), faster-whisper small cache."]:::ext
     results["<b>Results store</b><br/><i>results/ (git-ignored)</i><br/>Reports, logs, JSON. Only force-added files are versioned."]:::ext
   end
   spa ==>|"WS: PCM16 frames + summaries; REST: report"| api

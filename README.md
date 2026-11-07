@@ -1,10 +1,106 @@
-# MRCD — Dataset, extracción y benchmark de ablación
+# MRCD — detección de disfluencias del habla en español
 
-Motor de Reconocimiento Contextual mediante Fusión Multimodal para la Detección de
-Disfluencias del Habla en Español. El motor es un paquete de Python (`mrcd/`) que toma audio
-(y, opcionalmente, video), extrae señales acústicas, léxicas y visuales, las fusiona por ventanas
-y emite eventos de disfluencia con intervalos y puntajes. Incluye además las herramientas de
-datos, evaluación y reproducibilidad usadas para estudiarlo. Incluye un servicio HTTP local (sin autenticación) y una imagen Docker para integrarlo; ver _Quickstart_.
+Motor local que analiza una grabación en español y marca **muletillas** (`filler_word`), **prolongaciones**
+(`prolongation`) y **repeticiones literales** (`repetition`) con su marca temporal. Combina evidencia acústica con el
+texto de un ASR Whisper que también corre en tu máquina, y entrega un documento JSON versionado
+(contrato `mrcd.analysis/v1`, revisión 1.4) por HTTP, por la biblioteca de Python o por la línea de comandos.
+Prototipo de investigación: los puntajes **no están calibrados**.
+
+Página del producto (instalación, componentes, API y prueba en vivo): <https://oratoria-proyectotesis.github.io/MRCD/>,
+y la misma página en `http://127.0.0.1:8765/` cuando el servicio corre.
+
+## Inicio rápido (5 minutos)
+
+> **El checkpoint entrenado (`ckpt_audio_text.pt`) no se distribuye** ni en este repositorio ni en la imagen Docker (se
+> entrenó con audio de videos públicos cuyos hablantes no consintieron este uso; ver [`models/README.md`](models/README.md)).
+> Está disponible **a pedido, solo para investigación no comercial**. Colóquelo en `models/ckpt_audio_text.pt` o indique otra
+> ruta con `--ckpt` / `MRCD_CHECKPOINT`. Sin él, el servicio arranca y `/v1/health` responde, pero los análisis fallan con
+> `checkpoint_unavailable`. El checkpoint se carga con `torch.load(weights_only=False)`: monte solo un archivo obtenido de
+> los autores.
+
+**Python soportado: 3.11 y 3.12** (probado con 3.12.10 en Windows 11 y con 3.12 en Linux dentro de Docker).
+3.13 no está verificado. La primera ejecución descarga Whisper small (~486 MB) con un aviso de progreso; después usa la
+caché. `HF_HUB_OFFLINE=1` prohíbe cualquier descarga.
+
+### Opción A: Docker (un comando)
+
+```bash
+docker run --rm -e MRCD_SERVICE_TOKEN="$TOKEN" -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro"   ghcr.io/oratoria-proyectotesis/mrcd:0.4.0
+```
+
+`./models` debe contener el checkpoint (ver el aviso de arriba). Imagen CPU con Whisper small incluido, usuario sin privilegios y `HEALTHCHECK` sobre `/v1/health`. Publica el puerto
+solo en `127.0.0.1`. Dentro del contenedor el servicio escucha en `0.0.0.0`, por lo que exige un token portador (`TOKEN` de 32 caracteres o más, p. ej. `python -c "import secrets; print(secrets.token_urlsafe(32))"`) y no arranca sin él; las llamadas llevan `Authorization: Bearer $TOKEN` (la página de demostración `/` no envía el token, así que con token solo es consultiva). El TLS no está en el servicio: ver `deploy/caddy/Caddyfile`. Alternativa sin el registro:
+`docker build -t ghcr.io/oratoria-proyectotesis/mrcd:0.4.0 https://github.com/oratorIA-ProyectoTesis/MRCD.git#v0.4.0`,
+o `docker compose up --build` con el repositorio clonado.
+
+### Opción B: pip
+
+```bash
+python -m venv .venv
+. .venv/bin/activate              # Windows: .venv\Scripts\activate
+pip install "mrcd[service] @ git+https://github.com/oratorIA-ProyectoTesis/MRCD@v0.4.0"
+mrcd serve                        # http://127.0.0.1:8765/ (página) y /docs (Swagger)
+```
+
+En Linux, `pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu` antes del paso anterior evita
+descargar la pila CUDA si no la usarás.
+
+### Opción C: desde el código
+
+```bash
+git clone https://github.com/oratorIA-ProyectoTesis/MRCD && cd MRCD
+python -m venv .venv && . .venv/bin/activate
+pip install -e ".[service,dev]"
+mrcd serve
+OMP_NUM_THREADS=4 pytest -q
+```
+
+### Primer análisis
+
+Requiere el checkpoint (ver el aviso de arriba); `mrcd sample` y `mrcd validate` no lo necesitan.
+
+```bash
+mrcd sample sample_es.wav                       # audio de muestra incluido (voz sintética, 14,9 s)
+mrcd analyze sample_es.wav --include-text       # JSON del contrato v1 por stdout
+curl -s -X POST --data-binary @sample_es.wav -H "Content-Type: audio/wav" \
+  "http://127.0.0.1:8765/v1/jobs?include_text=true"      # con el servicio levantado; luego GET /v1/jobs/{id}
+```
+
+```python
+from mrcd.client import MrcdClient                  # cliente HTTP, solo biblioteca estándar
+doc = MrcdClient("http://127.0.0.1:8765").analyze("sample_es.wav", include_text=True)
+
+from mrcd import DisfluencyEngine                   # o la biblioteca, sin servicio
+result = DisfluencyEngine.load().analyze_file("sample_es.wav")
+```
+
+Más ejemplos (curl, Python, JavaScript, TypeScript y sesiones incrementales) en [`examples/`](examples/); el cliente
+TypeScript de un archivo está en [`clients/typescript/mrcd.ts`](clients/typescript/mrcd.ts).
+
+### Detalles que conviene saber
+
+- **`OMP_NUM_THREADS`.** El texto que produce Whisper (CTranslate2 int8) en CPU depende del número de hilos OpenMP, y
+  solo `OMP_NUM_THREADS=4` reproduce la configuración fijada (`mrcd/reproducibility.py`). La variable solo tiene efecto
+  si está en el entorno **antes** de importar numpy, y `import mrcd` importa numpy. Por eso el comando `mrcd` la fija en
+  4 cuando no está definida, antes de cargar el paquete (`mrcd_launcher`); un valor ya definido se respeta y
+  `MRCD_NO_OMP_PIN=1` desactiva el ajuste. Con `python -m mrcd.service` defínela tú.
+- **Checkpoint.** No se distribuye (ver [`models/README.md`](models/README.md)). Por defecto se busca
+  `models/ckpt_audio_text.pt` (se verifica por sha256 antes de deserializarlo); `--ckpt` o `MRCD_CHECKPOINT` eligen otro.
+- **Audio.** WAV 16 kHz, mono, PCM de 16 bits, entre 13 s y 600 s. El servicio no convierte formatos; la página sí lo
+  hace en el navegador.
+- **Navegador en otro origen.** `mrcd serve --cors-origin https://tu-app.example` (también responde la verificación de
+  red privada de Chrome). Con Docker: `docker run ... ghcr.io/oratoria-proyectotesis/mrcd:0.4.0 --cors-origin https://tu-app.example`.
+- **Sesiones incrementales.** `mrcd serve --incremental --device cpu --preload p0 --warmup` (la imagen Docker ya las
+  activa); ver `docs/contracts/DESIGN_B_INCREMENTAL.md`.
+
+## Using an AI assistant
+
+Cloning this repo? Ask your coding agent (Claude Code, Codex, Cursor, Copilot) to install, run, integrate or troubleshoot MRCD. It reads [`AGENTS.md`](AGENTS.md) and the skills in [`.claude/skills/`](.claude/skills/) (index in `llms.txt`).
+
+## Investigación: dataset, extracción y benchmark de ablación
+
+Lo que sigue documenta el trabajo de investigación que produjo el motor. Los scripts de orquestación antiguos de la raíz
+están en [`legacy/`](legacy/) y son **históricos** (no forman parte del producto ni se mantienen).
 
 > **Estado: resultados exploratorios.** Ninguna clase de disfluencia está confirmada como detectable
 > con evidencia suficiente, los puntajes del modelo **no están calibrados** (no son probabilidades) y
@@ -42,51 +138,20 @@ results/                     informes y métricas agregadas (sin texto, etiqueta
 Documentación: [contratos](docs/contracts/README.md) · [arquitectura](docs/architecture/README.md) ·
 [corpus](docs/corpora/README.md) · [informe OE4](docs/oe4/INFORME_OE4_REDUCIDO.md).
 
-Los ejemplos y _fixtures_ de contratos tienen los campos de texto reemplazados por `[text withheld]`
+Los ejemplos y *fixtures* de contratos tienen los campos de texto reemplazados por `[text withheld]`
 (el texto original procedía de un video de terceros). Las pruebas que necesitan datos locales (corpus,
 clips, cachés de ASR) se omiten con un mensaje explícito si esos datos no existen.
 
-## Quickstart (service for integrating developers)
-
-The engine runs as a local HTTP service (contract `mrcd.analysis/v1`). Full guide in Spanish: [`INTEGRACION.md`](INTEGRACION.md).
-The trained checkpoint `ckpt_audio_text.pt` is **not** inside the image or the repository (available on request, see [`models/README.md`](models/README.md)): mount it at `/models`. Without it the container
-starts and `/v1/health` answers, but analysis jobs fail with `checkpoint_unavailable`.
-The image is published to `ghcr.io` only after a `v*` tag; until then build it locally with `docker build -t mrcd .`.
-
-```bash
-# 1. Docker
-docker run --rm -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" ghcr.io/oratoria-proyectotesis/mrcd:latest
-
-# 2. Docker Compose (CPU; mounts ./models read-only)
-docker compose up --build
-#    GPU: docker compose --profile gpu up --build mrcd-gpu
-
-# 3. pip, no Docker (Python >= 3.11)
-pip install "mrcd[service] @ git+https://github.com/oratorIA-ProyectoTesis/MRCD@<tag>"
-python -m mrcd.service serve --ckpt ./models/ckpt_audio_text.pt --device cpu --preload p0 --warmup --incremental
-
-# Analyse a mono 16 kHz PCM16 WAV (>= 13 s)
-curl -X POST --data-binary @recording.wav -H "Content-Type: audio/wav" http://127.0.0.1:8765/v1/jobs
-curl http://127.0.0.1:8765/v1/jobs/<job_id>
-```
-
-The service has no authentication: publish the port on `127.0.0.1` only.
-
-## Using an AI assistant
-
-Cloning this repo? Ask your coding agent (Claude Code, Codex, Cursor, Copilot) to install, run, integrate or troubleshoot MRCD. It reads [`AGENTS.md`](AGENTS.md) and the skills in [`.claude/skills/`](.claude/skills/) (index in `llms.txt`).
-
-## Ejecución completa (Windows, un comando)
+## Ejecución completa histórica (Windows)
 
 ```powershell
-cd <repo>
-powershell -ExecutionPolicy Bypass -File .\setup_and_run.ps1
+powershell -ExecutionPolicy Bypass -File .\legacy\setup_and_run.ps1
 ```
 
 Instala ffmpeg (si falta), crea `.venv`, instala dependencias y corre `scripts/run_all.py`:
 tests → modelos → minería (12 semillas + 15–20 por búsqueda) → extracción de 3 señales + pre-anotación
 (`--recall-mode`) → ventanas → ablación (prueba de humo) → `results/class_support.md` →
-`data/annotation_batch_01/` → tests finales. Todo queda en `RUN_REPORT.md` y `run_log.txt`.
+`data/annotation_batch_01/` → tests finales. Todo queda en `legacy/RUN_REPORT.md` y `run_log.txt`.
 Es reanudable: si se corta, vuelve a lanzar el mismo comando.
 
 Etapas sueltas: `python scripts/data_mining.py {seeds|discover-auto|extract|all|status}`,
@@ -102,7 +167,7 @@ transcripción de contexto y mediciones objetivas. Así el benchmark deja de ser
 
 ```powershell
 $env:ANTHROPIC_API_KEY="sk-ant-..."      # o  $env:OPENAI_API_KEY="sk-..."
-powershell -ExecutionPolicy Bypass -File .\run_agentic.ps1
+powershell -ExecutionPolicy Bypass -File .\legacy\run_agentic.ps1
 ```
 
 Etapas: `build_windows --labels auto` (train) → `llm_judge.py` (juicios ciegos, caché reanudable en

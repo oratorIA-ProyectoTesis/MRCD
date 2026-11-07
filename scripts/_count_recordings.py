@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cuenta las grabaciones de un manifest. Auxiliar de run_v4.ps1.
+"""Cuenta las grabaciones de un manifest. Auxiliar de legacy/run_v4.ps1.
 
 Existe como archivo y no como one-liner porque PowerShell parsea las comillas
 del argumento antes de entregarlo a Python y rompe la expresion.

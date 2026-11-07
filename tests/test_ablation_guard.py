@@ -99,7 +99,7 @@ def test_guard_runs_before_any_training(tmp_path):
 def test_run_v2_passes_the_training_set_explicitly():
     """Sin --data, el valor por defecto es windows_gold.npz y el benchmark
     entrena sobre el propio test."""
-    t = (ROOT / "run_v2.ps1").read_text(encoding="ascii")
+    t = (ROOT / "legacy" / "run_v2.ps1").read_text(encoding="ascii")
     for line in t.split("\r\n"):
         if "run_ablation.py" in line and "--test-data" in line:
             assert "--data" in line, f"falta --data en: {line.strip()}"
@@ -108,7 +108,7 @@ def test_run_v2_passes_the_training_set_explicitly():
 
 @pytest.mark.parametrize("script", ["run_v2.ps1", "run_agentic.ps1"])
 def test_no_script_calls_the_ablation_without_a_training_set(script):
-    t = (ROOT / script).read_text(encoding="ascii")
+    t = (ROOT / "legacy" / script).read_text(encoding="ascii")
     for line in t.split("\r\n"):
         if "run_ablation.py" not in line or "--test-data" not in line:
             continue

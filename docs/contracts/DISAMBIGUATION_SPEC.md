@@ -49,6 +49,10 @@ The checkpoint was trained on labels produced by `mrcd/annotation/auto_labeler.p
 
 Window label = the candidate with the largest `overlap x confidence` among candidates with confidence >= 0.5 and overlap >= min(0.30 s, half its duration) (`window_labels`, `auto_labeler.py:335-356`). The thresholds are `H` in `constants.py:63-75`, described as "preliminary design thresholds proposed by the author, subject to experimental calibration". **None has been calibrated.** The network can reproduce these rules, including their artefacts.
 
+### Single pause value (2026-11-07)
+
+There is ONE candidate-silence / neutral-pause value in this repository: `H["silence_min_s"] = 0.60 s` (`constants.py:64`), also used by the service to split ASR segments (`s3_features.GAP_S`). It is an **uncalibrated placeholder**: no human pause labels exist, so it has no measured justification. Older project notes that quote a 0.4 s pause figure refer to a different, never-implemented figure and must be read as 0.60 s. `tests/test_pause_constant.py` pins the constant.
+
 ## 4. Decision procedure at inference [IMPL]
 
 ```

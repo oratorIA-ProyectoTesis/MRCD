@@ -1,0 +1,57 @@
+# TLS termination for the MRCD service (TODO_PLAN action 7.2). TLS is NOT implemented in the Python service.
+# Not executed in the authoring environment (no Caddy binary): validate with `caddy validate --config Caddyfile`.
+#
+#   MRCD_SERVICE_TOKEN=<>=32 chars> mrcd serve --host 127.0.0.1 --port 8765 --device cpu --trusted-proxy 127.0.0.1 ...
+#   MRCD_PUBLIC_HOST=mrcd.example.org caddy run --config deploy/caddy/Caddyfile
+#
+# MRCD listens on loopback only; Caddy is the only thing exposed. For a public DNS name Caddy obtains and renews
+# certificates automatically (ACME). For `localhost` it uses its own local CA (development only).
+# Global options. Timeouts bound slow-header / slow-body clients (Caddy's `servers > timeouts` option). `write` is left
+# unset on purpose: a write deadline would cut the long-lived SSE stream. `read_body` must stay generous enough for a
+# 64 MiB upload on a slow link.
+{
+	servers {
+		timeouts {
+			read_header 10s
+			read_body 5m
+			idle 2m
+		}
+	}
+}
+
+{$MRCD_PUBLIC_HOST:localhost} {
+	# Same cap as the service (DEFAULT_MAX_BODY_BYTES, 64 MiB = 67108864 bytes). Caddy parses sizes with go-humanize:
+	# `MB` is SI (1000^2 = 64,000,000 would reject valid uploads), `MiB` is 1024^2. Keep the MiB spelling.
+	# Same cap as the service: reject oversize uploads before they reach Python.
+	request_body {
+		max_size 64MiB
+	}
+
+	reverse_proxy 127.0.0.1:8765 {
+		# Long-lived SSE (/v1/sessions/{id}/events) must not be buffered.
+		flush_interval -1
+		# Caddy sets X-Forwarded-For to the real client address (it does not trust client-supplied values by default);
+		# the service uses it as rate-limit key only for a peer given in --trusted-proxy.
+	}
+
+	header {
+		# No includeSubDomains: nothing in the deployment docs says every sibling subdomain of MRCD_PUBLIC_HOST is
+		# HTTPS-only, and HSTS cannot be rolled back once cached.
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Content-Security-Policy "frame-ancestors 'none'"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+
+	# Access log WITHOUT credentials: the bearer token and the session token never reach the log.
+	log {
+		output stderr
+		format filter {
+			wrap json
+			request>headers>Authorization delete
+			request>headers>X-Session-Token delete
+		}
+	}
+}
