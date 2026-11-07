@@ -19,10 +19,13 @@ services:
     image: ghcr.io/oratoria-proyectotesis/mrcd:latest
     build: .
     ports:
-      # host loopback only: the service has no authentication
+      # host loopback only; the service also requires the bearer token set below
       - "127.0.0.1:8765:8765"
     volumes:
       - ./models:/models:ro
+    environment:
+      # required: off loopback (inside the container) the service refuses to start without a bearer token (>= 32 chars)
+      MRCD_SERVICE_TOKEN: ${MRCD_SERVICE_TOKEN:?set MRCD_SERVICE_TOKEN to a random string of at least 32 characters}
     # Allow a browser page on another origin:
     # command: ["--cors-origin", "http://localhost:5173"]
     restart: unless-stopped
@@ -38,6 +41,8 @@ services:
       - "127.0.0.1:8765:8765"
     volumes:
       - ./models:/models:ro
+    environment:
+      MRCD_SERVICE_TOKEN: ${MRCD_SERVICE_TOKEN:?set MRCD_SERVICE_TOKEN to a random string of at least 32 characters}
     deploy:
       resources:
         reservations:

@@ -15,7 +15,7 @@ DEVICE="${MRCD_DEVICE-cpu}"
 PRELOAD="${MRCD_PRELOAD:-p0}"
 
 # 0.0.0.0 is required inside the container for port publishing; publish it on the HOST loopback only
-# (-p 127.0.0.1:8765:8765): the service has no authentication. The CLI forces Swagger (/docs) off when
+# (-p 127.0.0.1:8765:8765). The service refuses to start off loopback without MRCD_SERVICE_TOKEN (>= 32 chars). The CLI forces Swagger (/docs) off when
 # --allow-non-loopback is used.
 set -- --host 0.0.0.0 --allow-non-loopback --ckpt "$CKPT" "$@"
 if [ -n "$DEVICE" ]; then

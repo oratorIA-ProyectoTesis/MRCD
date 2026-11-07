@@ -27,7 +27,9 @@ El servicio **no tiene autenticación**. Publique el puerto solo en el loopback 
 ### 1. `docker run`
 
 ```bash
-docker run --rm -p 127.0.0.1:8765:8765 \
+# el contenedor escucha en 0.0.0.0: el servicio exige un token portador (>= 32 caracteres)
+export TOKEN="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+docker run --rm -e MRCD_SERVICE_TOKEN="$TOKEN" -p 127.0.0.1:8765:8765 \
   -v "$PWD/models:/models:ro" \
   ghcr.io/oratoria-proyectotesis/mrcd:latest
 ```
@@ -39,8 +41,8 @@ docker run --rm -p 127.0.0.1:8765:8765 \
 ```bash
 git clone https://github.com/oratorIA-ProyectoTesis/MRCD.git && cd MRCD
 # Coloque el checkpoint en ./models (docker-compose.yml ya monta esa carpeta como solo lectura)
-docker compose up --build            # CPU
-docker compose --profile gpu up --build mrcd-gpu    # GPU (ver más abajo)
+MRCD_SERVICE_TOKEN="$TOKEN" docker compose up --build   # CPU (exige el token)
+MRCD_SERVICE_TOKEN="$TOKEN" docker compose --profile gpu up --build mrcd-gpu    # GPU (ver más abajo)
 ```
 
 ### 3. `pip` (sin Docker)
@@ -89,6 +91,8 @@ python scripts/docker_smoke.py --write-wav synthetic.wav
 ```
 
 ### curl
+
+Con Docker (token activo) agregue `-H "Authorization: Bearer $TOKEN"` a cada llamada excepto `/v1/health`; con `mrcd serve` en loopback no hace falta.
 
 ```bash
 curl -sf http://127.0.0.1:8765/v1/health
@@ -150,7 +154,7 @@ Desde una página web en otro origen, inicie el servicio con `--cors-origin http
 La imagen `-cuda` (`ghcr.io/oratoria-proyectotesis/mrcd:latest-cuda`, solo `linux/amd64`) requiere el NVIDIA Container Toolkit:
 
 ```bash
-docker run --rm --gpus all -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" \
+docker run --rm --gpus all -e MRCD_SERVICE_TOKEN="$TOKEN" -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" \
   ghcr.io/oratoria-proyectotesis/mrcd:latest-cuda
 ```
 

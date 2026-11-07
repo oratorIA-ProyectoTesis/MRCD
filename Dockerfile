@@ -39,6 +39,7 @@ RUN pip install --index-url https://download.pytorch.org/whl/cpu "torch==${TORCH
 WORKDIR /src
 COPY pyproject.toml README.md LICENSE THIRD_PARTY_NOTICES.md ./
 COPY docker/constraints.txt ./constraints.txt
+COPY mrcd_launcher ./mrcd_launcher
 COPY mrcd ./mrcd
 RUN pip install -c constraints.txt ".[service]" \
  && mkdir -p /usr/share/doc/mrcd \

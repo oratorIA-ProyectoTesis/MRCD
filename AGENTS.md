@@ -18,20 +18,22 @@ The trained checkpoint `ckpt_audio_text.pt` is not distributed (on request, see 
 ## Golden commands
 
 ```bash
+# The container listens on 0.0.0.0, so the service REQUIRES a bearer token (>= 32 chars) and calls send `Authorization: Bearer $TOKEN`
+export TOKEN="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 # Docker CPU (service on 127.0.0.1:8765; PowerShell: use ${PWD})
-docker run --rm -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" ghcr.io/oratoria-proyectotesis/mrcd:latest
+docker run --rm -e MRCD_SERVICE_TOKEN="$TOKEN" -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" ghcr.io/oratoria-proyectotesis/mrcd:latest
 # Docker GPU (linux/amd64, NVIDIA Container Toolkit)
-docker run --rm --gpus all -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" ghcr.io/oratoria-proyectotesis/mrcd:latest-cuda
+docker run --rm --gpus all -e MRCD_SERVICE_TOKEN="$TOKEN" -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" ghcr.io/oratoria-proyectotesis/mrcd:latest-cuda
 # Compose
-docker compose up --build                          # CPU
-docker compose --profile gpu up --build mrcd-gpu   # GPU
+MRCD_SERVICE_TOKEN="$TOKEN" docker compose up --build   # CPU
+MRCD_SERVICE_TOKEN="$TOKEN" docker compose --profile gpu up --build mrcd-gpu   # GPU
 # pip from a git tag (Python >= 3.11); from a clone: pip install ".[service]"
 pip install "mrcd[service] @ git+https://github.com/oratorIA-ProyectoTesis/MRCD@v0.3.0"
 python -m mrcd.service serve --ckpt ./models/ckpt_audio_text.pt --device cpu --preload p0 --warmup --incremental
 # Dev + tests
 pip install -e ".[service,dev]" && python -m pytest tests/test_service_server.py tests/test_service_contract.py -q
 # Smoke test a running service (needs `pip install jsonschema`)
-python scripts/docker_smoke.py --url http://127.0.0.1:8765 --expect completed   # or checkpoint_unavailable
+MRCD_SERVICE_TOKEN="$TOKEN" python scripts/docker_smoke.py --url http://127.0.0.1:8765 --expect completed   # or checkpoint_unavailable
 ```
 
 Images: `ghcr.io/oratoria-proyectotesis/mrcd:{<version>,latest,<version>-cuda,latest-cuda}`, published only on `v*` tags. Until then: `docker build -t mrcd .`.

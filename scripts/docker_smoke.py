@@ -4,6 +4,7 @@
     python scripts/docker_smoke.py --url http://127.0.0.1:8765 --expect completed
     python scripts/docker_smoke.py --expect checkpoint_unavailable      # container started without the checkpoint
 
+Set MRCD_SERVICE_TOKEN in the environment when the service requires the bearer token (always, in the container).
 Steps: wait for GET /v1/health == 200, POST a synthetic 16 kHz mono PCM16 WAV to /v1/jobs, poll the job, validate the
 job and its result against mrcd/service/schemas/mrcd.analysis.v1.schema.json (needs `pip install jsonschema`).
 The WAV is generated here (harmonic tone + seeded noise, 13 s): no recorded voice is involved. Standard library only,
@@ -16,6 +17,7 @@ import argparse
 import io
 import json
 import math
+import os
 import random
 import struct
 import sys
@@ -58,12 +60,11 @@ def synthetic_wav(seconds: float = 13.0) -> bytes:
 def http(
     method: str, url: str, data: bytes | None = None, timeout: float = 30.0
 ) -> tuple[int, dict]:
-    req = urllib.request.Request(
-        url,
-        data=data,
-        method=method,
-        headers={"Content-Type": "audio/wav"} if data else {},
-    )
+    headers = {"Content-Type": "audio/wav"} if data else {}
+    token = os.environ.get("MRCD_SERVICE_TOKEN")  # the container refuses to start off loopback without one
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    req = urllib.request.Request(url, data=data, method=method, headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             return r.status, json.loads(r.read())

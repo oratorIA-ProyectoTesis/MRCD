@@ -59,7 +59,9 @@ jobs:
 
       - name: Smoke test without checkpoint (contract error path)
         run: |
-          docker run -d --name mrcd-nockpt -p 127.0.0.1:8765:8765 mrcd:ci
+          # off loopback (inside the container) the service refuses to start without a bearer token (>= 32 chars)
+          export MRCD_SERVICE_TOKEN="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+          docker run -d --name mrcd-nockpt -e MRCD_SERVICE_TOKEN -p 127.0.0.1:8765:8765 mrcd:ci
           python scripts/docker_smoke.py --url http://127.0.0.1:8765 --expect checkpoint_unavailable --job-timeout-s 120 \
             || { docker logs mrcd-nockpt; exit 1; }
           # The image HEALTHCHECK must reach "healthy" (checked every 30 s).
@@ -78,7 +80,8 @@ jobs:
             echo "No checkpoint in this checkout (it is not distributed); skipping the full analysis test."
             exit 0
           fi
-          docker run -d --name mrcd-ckpt -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" mrcd:ci
+          export MRCD_SERVICE_TOKEN="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+          docker run -d --name mrcd-ckpt -e MRCD_SERVICE_TOKEN -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" mrcd:ci
           python scripts/docker_smoke.py --url http://127.0.0.1:8765 --expect completed \
             || { docker logs mrcd-ckpt; exit 1; }
           docker rm -f mrcd-ckpt
