@@ -79,7 +79,12 @@ SCORE_KIND_TEXT_ROUTE = "text_route_logistic_score"
 SCORE_KIND_UNIT_PIPELINE = "unit_pipeline_model_score"
 #: Repetition rule of decision profile o2026_11b (rev 1.5): 1.0 = the lexical rule fired. An indicator, NOT a probability.
 SCORE_KIND_RULE = "lexical_rule_indicator"
-DECISION_PROFILE_NAMES = ("v0", "o2026_11", "o2026_11b")
+DECISION_PROFILE_NAMES = ("v0", "o2026_11", "o2026_11b", "o2026_12")
+#: additive within rev 1.4, no bump (plan A, decision profile o2026_12 only): optional event ``context`` = contextual state of the
+#: candidate layer and the filler subclass. Only ``disfluent`` candidates become events (demoted ones are counted in
+#: ``provenance.decision_profile``), so the event schema admits only that state. Older documents still validate.
+EMITTED_CONTEXT_STATES = ("disfluent",)
+FILLER_SUBCLASSES = ("filled_pause", "lexical_filler")
 INTERVAL_SEMANTICS = "decision_stride_not_human_boundary"
 #: Classes with a compatible human reference (reduced OE4 scope). Everything else is out of scope.
 EVALUATED_CLASSES = ("filler_word", "prolongation", "repetition")
@@ -288,6 +293,16 @@ SCHEMA: dict = {
                 "experimental": _BOOL,
                 "in_scope": _BOOL,
                 "decision": {"$ref": "#/$defs/decision"},
+                "context": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": ["state", "subclass"],
+                    "properties": {
+                        "state": {"enum": list(EMITTED_CONTEXT_STATES)},
+                        "subclass": {"enum": [*FILLER_SUBCLASSES, None]},
+                        "basis": _STR,
+                    },
+                },
             },
         },
         "decision": {

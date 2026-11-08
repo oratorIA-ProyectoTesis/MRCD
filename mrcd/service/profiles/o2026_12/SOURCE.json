@@ -1,0 +1,58 @@
+{
+ "asr_profile_trained_on": "p1_disfluent_prompt",
+ "calibration_claim": "none",
+ "features": "DisfluencyEngine.unit_features recomputed with P1 words (service path)",
+ "files": {
+  "filler_word.json": {
+   "config": {
+    "blocks": [
+     "rule",
+     "v0",
+     "ctxfill",
+     "sig",
+     "pause"
+    ],
+    "cls": "filler_word",
+    "fusion": "or_rule",
+    "hp": {
+     "C": 3.0
+    },
+    "key": "8617d6a333ae",
+    "model": "lr",
+    "profile": "p1"
+   },
+   "inner_f1": 0.6845809341010877,
+   "n_evaluated": 3,
+   "sha256": "b974eb906673cdd8a545801468248709f36dd525a41327c4d946c2c2eb05875d"
+  },
+  "prolongation.json": {
+   "config": {
+    "blocks": [
+     "v0",
+     "sig",
+     "lenx",
+     "pause",
+     "emb"
+    ],
+    "cls": "prolongation",
+    "fusion": "none",
+    "hp": {
+     "C": 0.3
+    },
+    "key": "4a3fbc403e0d",
+    "model": "lr",
+    "profile": "p1"
+   },
+   "inner_f1": 0.6315338474721508,
+   "n_evaluated": 3,
+   "sha256": "59c8295cb539b02f33b2e713fff48bf44ec5020fba12fedc80051a754143a802"
+  }
+ },
+ "git_head_at_fit": "d6f5fa25531e3402a065b8313825da891c39dffc",
+ "profile": "o2026_12",
+ "protocol": "results/plan_a_20261108/PROTOCOL_EXPLORATORY_A.md",
+ "protocol_sha256": "e58b912faaefde491a2a36e99194157d229015c446bcdacedcabd1d6d830b17e",
+ "selection": "restricted: o2026_11 final blocks and fusion per class, LR C in the frozen grid, inner K=3 by speaker",
+ "status": "exploratory",
+ "training_data": "DIHANA folds 1-4, 5056 turns, 180 speakers (fold 5 never indexed)"
+}

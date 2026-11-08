@@ -2,6 +2,12 @@
 
 * ``v0``       - the engine's historical decision for every class (window argmax events). Reproduces every document the
                  service produced before rev 1.4 (events, scores, summary). Always available, explicit opt-in.
+* ``o2026_12`` - EXPLORATORY, opt-in (plan A, 2026-11-08). ONE ASR pass with ``p1_disfluent_prompt`` feeds every class:
+                 ``filler_word`` (subclass ``filled_pause``) and ``prolongation`` come from unit pipelines re-fitted on P1 text
+                 and P1 engine features (same blocks / fusion as o2026_11, LR only); ``repetition`` is the confirmatory
+                 lexical rule as candidate generator followed by a demotion-only contextual layer; lexical fillers are a
+                 second ``filler_word`` subclass (``lexical_filler``). See ``mrcd/service/contextual.py`` and
+                 ``results/plan_a_20261108/PROTOCOL_EXPLORATORY_A.md``.
 * ``o2026_11`` - PRODUCT DEFAULT of the service. ``filler_word`` and ``prolongation`` come from the per-class pipelines
                  of the O-campaign (2026-11-01) applied to pause-delimited ASR segments; ``repetition`` and every other class
                  keep the engine decision (the campaign did not beat the one-line rule / S3 route for repetition).
@@ -39,14 +45,16 @@ PROFILE_V0 = "v0"
 PROFILE_O = "o2026_11"
 #: o2026_11 + repetition from a second ASR pass with the P1 prompt (contract rev 1.5, see ``repetition_events``)
 PROFILE_OB = "o2026_11b"
-DECISION_PROFILES = (PROFILE_V0, PROFILE_O, PROFILE_OB)
+#: single P1 pass for every class + candidate/demotion repetition + filler subclasses (plan A, opt-in)
+PROFILE_12 = "o2026_12"
+DECISION_PROFILES = (PROFILE_V0, PROFILE_O, PROFILE_OB, PROFILE_12)
 DEFAULT_DECISION_PROFILE = (
     PROFILE_O  # service / app default; the library default stays V0
 )
 O_CLASSES = ("filler_word", "prolongation")
 #: profiles whose filler_word / prolongation come from the O-campaign unit pipelines
-UNIT_PIPELINE_PROFILES = (PROFILE_O, PROFILE_OB)
-#: ASR profile of the second pass used by ``o2026_11b`` for repetition only
+UNIT_PIPELINE_PROFILES = (PROFILE_O, PROFILE_OB, PROFILE_12)
+#: ASR profile of the second pass used by ``o2026_11b`` for repetition only (and the single pass of ``o2026_12``)
 P1_ASR_PROFILE = "p1_disfluent_prompt"
 #: repetition routes on P1 segment text: the one-line lexical rule, or the S3 text route (ctx_LR)
 REPETITION_ROUTES = ("rule_p1", "rep_ctx_p1")
@@ -58,9 +66,19 @@ def replaced_classes(profile: str) -> tuple[str, ...]:
     """Classes whose engine (V0) events the profile drops and replaces with its own."""
     if profile == PROFILE_O:
         return O_CLASSES
-    if profile == PROFILE_OB:
+    if profile in (PROFILE_OB, PROFILE_12):
         return (*O_CLASSES, "repetition")
     return ()
+
+
+def required_asr_profile(profile: str) -> str | None:
+    """The ASR profile a decision profile owns (``o2026_12`` -> P1), or None when any requested profile is used."""
+    return P1_ASR_PROFILE if profile == PROFILE_12 else None
+
+
+def trained_asr_profile(profile: str) -> str:
+    """ASR profile whose text the profile's unit pipelines were fitted on."""
+    return P1_ASR_PROFILE if profile == PROFILE_12 else "p0"
 
 
 def uses_p1_repetition(profile: str) -> bool:
@@ -68,6 +86,7 @@ def uses_p1_repetition(profile: str) -> bool:
 
 
 PROFILE_DIR = Path(__file__).resolve().parent / "profiles" / PROFILE_O
+PROFILE_12_DIR = Path(__file__).resolve().parent / "profiles" / PROFILE_12
 #: sha256 of the exported pipelines, pinned here (a second manifest next to the files would not protect against an
 #: attacker who can edit both). Regenerate with ``scripts/o_integration/export_json_pipelines.py`` and update on purpose.
 PINNED_SHA256 = {
@@ -79,6 +98,12 @@ SOURCE_PICKLE_SHA256 = {
     "filler_word": "787828317c87b188469f09bec03d6fd3c633e8b1af2a7d2dff84725936064c91",
     "prolongation": "ba2f253648717a0671cf7f15d833bd466327b8f07db34ad43f471975b38f3f21",
 }
+#: sha256 of the o2026_12 pipelines (exported by ``scripts/plan_a/evaluate.py final``), pinned here on purpose
+PINNED_SHA256_12 = {
+    "filler_word.json": "b974eb906673cdd8a545801468248709f36dd525a41327c4d946c2c2eb05875d",
+    "prolongation.json": "59c8295cb539b02f33b2e713fff48bf44ec5020fba12fedc80051a754143a802",
+}
+_PINS = {PROFILE_O: PINNED_SHA256, PROFILE_12: PINNED_SHA256_12}
 MARGIN_S = (
     0.15  # context kept on each side of a segment clip (ASR word times are approximate)
 )
@@ -97,9 +122,14 @@ def sha256_hex(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
 
 
-def load_o_pipelines(directory: Path | None = None) -> dict:
-    """Verified pipelines of ``o2026_11``: ``{cls: ClassPipeline}``. Not cached (see ``o_pipelines``)."""
-    d = Path(directory) if directory is not None else PROFILE_DIR
+def load_o_pipelines(directory: Path | None = None, profile: str = PROFILE_O) -> dict:
+    """Verified pipelines of ``o2026_11`` (or ``o2026_12``): ``{cls: ClassPipeline}``. Not cached (see ``o_pipelines``)."""
+    pins = _PINS[profile]
+    d = (  # module attributes read at call time (tests relocate them)
+        Path(directory)
+        if directory is not None
+        else (PROFILE_12_DIR if profile == PROFILE_12 else PROFILE_DIR)
+    )
     out = {}
     for cls in O_CLASSES:
         name = f"{cls}.json"
@@ -109,7 +139,7 @@ def load_o_pipelines(directory: Path | None = None) -> dict:
             raise ProfileArtifactError(
                 f"{name}: artifact missing ({type(exc).__name__})"
             ) from exc
-        if sha256_hex(blob) != PINNED_SHA256[name]:
+        if sha256_hex(blob) != pins[name]:
             raise ProfileArtifactError(f"{name}: sha256 mismatch (artifact altered)")
         try:
             out[cls] = SAFE.load_pipeline(json.loads(blob.decode("utf8")))
@@ -125,8 +155,22 @@ def o_pipelines() -> dict:
     return load_o_pipelines()
 
 
+@lru_cache(maxsize=1)
+def o12_pipelines() -> dict:
+    return load_o_pipelines(profile=PROFILE_12)
+
+
+def pipelines_for(profile: str) -> dict:
+    """Verified unit pipelines used by a decision profile (o2026_11 / o2026_11b share the o2026_11 files)."""
+    return o12_pipelines() if profile == PROFILE_12 else o_pipelines()
+
+
 def profile_meta(
-    profile: str, *, applied: bool | None = True, asr_profile: str = "p0"
+    profile: str,
+    *,
+    applied: bool | None = True,
+    asr_profile: str = "p0",
+    stats: dict | None = None,
 ) -> dict:
     """The ``provenance.decision_profile`` object of a document. ``asr_profile`` (the requested ASR profile) is only
     written into the per-class ``asr_profile_used`` of ``o2026_11b`` (rev 1.5); other profiles are unchanged."""
@@ -142,6 +186,8 @@ def profile_meta(
             "pipelines_verified": None,
             "note": "engine decision of every class (window argmax events); identical to contract revisions <= 1.3",
         }
+    if profile == PROFILE_12:
+        return _profile_12_meta(applied, stats)
     classes = {
         c: {
             "route": "o_campaign_unit_pipeline",
@@ -185,7 +231,65 @@ def profile_meta(
     }
 
 
+def _profile_12_meta(applied: bool | None, stats: dict | None) -> dict:
+    from mrcd.service import contextual as CX
+
+    stats = stats or {}
+    classes = {
+        c: {
+            "route": "unit_pipeline_refit_p1",
+            "unit": f"ASR segment split at pauses >= {S3F.GAP_S} s (max {S3F.MAX_WORDS} words)",
+            "artifact": f"{c}.json",
+            "artifact_sha256": PINNED_SHA256_12[f"{c}.json"],
+            "pipeline_version": "o-campaign/1",
+            "asr_profile_trained_on": P1_ASR_PROFILE,
+            "asr_profile_used": P1_ASR_PROFILE,
+        }
+        for c in O_CLASSES
+    }
+    classes["filler_word"]["subclasses"] = {
+        CX.FILLED_PAUSE: "unit pipeline (trained on DIHANA non-lexical f marks)",
+        CX.LEXICAL_FILLER: "lexical items of the existing Spanish filler lexicon with the auto-labeler evidence rule "
+        "(adjacent gap >= 0.15 s, duration >= 0.35 s or comma/ellipsis); otherwise uncertain, not emitted",
+    }
+    classes["filler_word"]["lexical_candidates"] = stats.get("lexical_filler")
+    classes["repetition"] = {
+        "route": "rule_candidates_contextual_demotion",
+        "asr_profile_used": P1_ASR_PROFILE,
+        "generator": "confirmatory lexical rule: immediate exact repetition of 1-4 norm_tokens, non-lexical "
+        "fillers removed, interval = second copy",
+        "demotion_rules": {
+            "loop": "inside an ASR hallucination loop (asr_profiles._scan_loops) -> uncertain",
+            "gap": "silence between copies > 1.5 s (H.repetition_max_gap_s) -> uncertain",
+            "seam": "copies decoded by different 8 s / 2 s ASR chunks -> uncertain",
+            "polarity": "one-token repeat of a polarity item (textfeat.POLARITY) -> functional",
+        },
+        "emitted_states": [CX.DISFLUENT],
+        "candidates": stats.get("repetition"),
+    }
+    return {
+        "name": PROFILE_12,
+        "status": "exploratory",
+        "classes": classes,
+        "calibration_claim": "none",
+        "pipelines_verified": None if applied is None else bool(applied),
+        "note": "single ASR pass with p1_disfluent_prompt for every class; exploratory (DIHANA folds 1-4, plan A "
+        "protocol results/plan_a_20261108). Only the disfluent state is emitted as an event; demoted candidates are "
+        "counted here. The functional state has no human reference. The library default stays v0.",
+    }
+
+
 def warning_for(profile: str) -> dict | None:
+    if profile == PROFILE_12:
+        return {
+            "code": "decision_profile_exploratory",
+            "message": "Decision profile o2026_12 (opt-in, exploratory, DIHANA folds 1-4 only): one ASR pass with the P1 "
+            "prompt (p1_disfluent_prompt) feeds every class. filler_word (subclasses filled_pause and lexical_filler) "
+            "and prolongation pipelines were re-fitted on P1 text; repetition is a lexical rule whose candidates may "
+            "only be demoted (to uncertain or functional) by fixed contextual rules. Scores are not calibrated "
+            "probabilities; the functional state has no human reference. Use decision_profile=o2026_11 or v0 to "
+            "reproduce earlier outputs.",
+        }
     if profile == PROFILE_OB:
         return {
             "code": "decision_profile_exploratory",
@@ -220,7 +324,7 @@ def _clip_range(seg: list[dict], n: int, sr: int) -> tuple[int, int]:
 
 
 def unit_records(
-    engine, audio: np.ndarray, sample_rate: int, words: list[dict]
+    engine, audio: np.ndarray, sample_rate: int, words: list[dict], key: str = "p0"
 ) -> tuple[list[dict], list[dict]]:
     """One record (``optimize.data`` layout) per pause-delimited ASR segment, plus its ``{start, end}`` span.
 
@@ -243,8 +347,8 @@ def unit_records(
                 "pooled": f["pooled"],
                 "pause": f["pause"],
                 "n_samples": f["n_samples"],
-                "words": {"p0": rel},
-                "text": {"p0": " ".join(w["text"] for w in seg)},
+                "words": {key: rel},
+                "text": {key: " ".join(w["text"] for w in seg)},
                 "acoustic": None,
             }
         )
@@ -252,8 +356,15 @@ def unit_records(
     return recs, spans
 
 
-def profile_events(pipelines: dict, recs: list[dict], spans: list[dict]) -> list[dict]:
-    """Positive units of each pipelined class as raw event dicts (analyzer layout, plus ``_decision``)."""
+def profile_events(
+    pipelines: dict,
+    recs: list[dict],
+    spans: list[dict],
+    key: str = "p0",
+    subclass: dict | None = None,
+) -> list[dict]:
+    """Positive units of each pipelined class as raw event dicts (analyzer layout, plus ``_decision``).
+    ``subclass`` (o2026_12): ``{cls: subclass}`` adds a ``context`` (state disfluent + subclass) to those events."""
     out = []
     for cls in O_CLASSES:
         if not recs:
@@ -271,7 +382,18 @@ def profile_events(pipelines: dict, recs: list[dict], spans: list[dict]) -> list
                     "end_s": round(sp["end"], 3),
                     "score": score,
                     "n_windows": int(len(r["probs"])),
-                    "text": r["text"]["p0"],
+                    "text": r["text"][key],
+                    **(
+                        {
+                            "context": {
+                                "state": "disfluent",
+                                "subclass": subclass[cls],
+                                "basis": "unit_pipeline",
+                            }
+                        }
+                        if subclass and cls in subclass
+                        else {}
+                    ),
                     "decision": {
                         "state": str(pred["state"][i]),
                         "estimate": round(
@@ -294,6 +416,74 @@ def apply_profile(
     pipes = o_pipelines()
     recs, spans = unit_records(engine, audio, sample_rate, words or [])
     return profile_events(pipes, recs, spans)
+
+
+def apply_profile_12(
+    engine, audio: np.ndarray, sample_rate: int, words: list[dict] | None
+) -> tuple[list[dict], dict]:
+    """Events and candidate statistics of ``o2026_12`` for one recording (the words ARE the single P1 pass)."""
+    from mrcd.service import contextual as CX
+
+    words = list(words or [])
+    pipes = o12_pipelines()
+    recs, spans = unit_records(engine, audio, sample_rate, words, key="p1")
+    events = profile_events(
+        pipes, recs, spans, key="p1", subclass={"filler_word": CX.FILLED_PAUSE}
+    )
+    duration = len(audio) / float(sample_rate)
+    cands = CX.classify_repetitions(words, duration)
+    for ev in CX.merge_disfluent(cands):
+        events.append(
+            {
+                "class": "repetition",
+                "start_s": round(float(ev["start_s"]), 3),
+                "end_s": round(float(ev["end_s"]), 3),
+                "score": 1.0,
+                "score_kind": SCORE_KIND_RULE,
+                "n_windows": 1,
+                "modalities_used": ["linguistic"],
+                "validation": "lexical rule candidate (immediate exact repetition of 1-4 tokens) kept as disfluent by "
+                "the contextual demotion rules; P1 ASR text; evaluated on DIHANA folds 1-4 only",
+                "text": None,
+                "basis": "rule_candidate_contextual",
+                "decision": None,
+                "context": {
+                    "state": CX.DISFLUENT,
+                    "subclass": None,
+                    "basis": "rule_candidate_contextual",
+                },
+            }
+        )
+    lex = CX.classify_lexical_fillers(words)
+    for c in lex:
+        if c["state"] != CX.DISFLUENT:
+            continue
+        events.append(
+            {
+                "class": "filler_word",
+                "start_s": round(c["start_s"], 3),
+                "end_s": round(c["end_s"], 3),
+                "score": 1.0,
+                "score_kind": SCORE_KIND_RULE,
+                "n_windows": 1,
+                "modalities_used": ["linguistic"],
+                "validation": "lexical filler item with hesitation evidence (adjacent pause, lengthening or comma); "
+                "exploratory, compared only with DIHANA d:rellenar marks (folds 1-4)",
+                "text": c["token"],
+                "basis": "lexical_filler_rule",
+                "decision": None,
+                "context": {
+                    "state": CX.DISFLUENT,
+                    "subclass": CX.LEXICAL_FILLER,
+                    "basis": "lexical_filler_rule",
+                },
+            }
+        )
+    stats = {
+        "repetition": CX.demotion_stats(cands),
+        "lexical_filler": CX.lexical_stats(lex),
+    }
+    return events, stats
 
 
 # ----------------------------------------------------------------------------------------------- o2026_11b repetition

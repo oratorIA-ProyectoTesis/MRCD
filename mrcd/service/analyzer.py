@@ -79,6 +79,13 @@ class AnalysisOptions:
     #: decision profile (contract rev 1.4): "o2026_11" (service default) or "v0" (historical engine decision)
     decision_profile: str = DP.DEFAULT_DECISION_PROFILE
 
+    def __post_init__(self) -> None:
+        # o2026_12 owns its ASR profile (one P1 pass for every class). The default "p0" cannot be told apart from an
+        # explicit request, so it is mapped to P1; any other profile is rejected by ``validate_options``.
+        req = DP.required_asr_profile(self.decision_profile)
+        if req is not None and self.asr_profile == "p0":
+            object.__setattr__(self, "asr_profile", req)
+
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -314,6 +321,7 @@ def build_analysis(
     engine_info: dict,
     profile_events: list[dict] | None = None,
     secondary_asr: dict | None = None,
+    profile_stats: dict | None = None,
 ) -> dict:
     """Map an ``AnalysisResult`` to the v1 document. Pure function: no engine, no I/O.
 
@@ -371,6 +379,7 @@ def build_analysis(
                     "experimental": False,
                     "_basis": t.get("basis", t["class"]),
                     "_decision": t["decision"],
+                    **({"_context": t["context"]} if t.get("context") else {}),
                 }
             )
         raw.sort(key=lambda r: (r["start_s"], r["end_s"]))
@@ -419,6 +428,7 @@ def build_analysis(
     for i, r in enumerate(kept, start=1):
         basis = r.pop("_basis")
         own_decision = r.pop("_decision", None)
+        context = r.pop("_context", None)
         ev = {
             "id": f"ev-{i:04d}",
             "class": r.pop("class"),
@@ -433,6 +443,8 @@ def build_analysis(
             d = own_decision or S3F.decision_for(basis, ev["score"]["value"])
             if d is not None:
                 ev["decision"] = d
+        if context is not None:
+            ev["context"] = context
         events.append(ev)
 
     in_events = [ev for ev in events if ev["in_scope"]]
@@ -519,7 +531,7 @@ def build_analysis(
     dp_warning = DP.warning_for(options.decision_profile)
     if dp_warning is not None:
         warnings.append(dp_warning)
-        if options.asr_profile != "p0":
+        if options.asr_profile != DP.trained_asr_profile(options.decision_profile):
             warnings.append(
                 {
                     "code": "decision_profile_asr_mismatch",
@@ -622,7 +634,7 @@ def build_analysis(
             _jsonable(meta.get("window_plan")),
             env,
             route_meta,
-            _profile_provenance(options, secondary_asr),
+            _profile_provenance(options, secondary_asr, profile_stats),
         ),
         "experimental": experimental,
         "head_decision": head_decision,
@@ -631,7 +643,11 @@ def build_analysis(
     }
 
 
-def _profile_provenance(options: AnalysisOptions, secondary_asr: dict | None) -> dict:
+def _profile_provenance(
+    options: AnalysisOptions, secondary_asr: dict | None, stats: dict | None = None
+) -> dict:
+    if options.decision_profile == DP.PROFILE_12:
+        return DP.profile_meta(options.decision_profile, stats=_jsonable(stats) if stats else None)
     if options.decision_profile == DP.PROFILE_OB:
         meta = DP.profile_meta(options.decision_profile, asr_profile=options.asr_profile)
         meta["secondary_asr"] = secondary_asr
@@ -733,7 +749,7 @@ class MrcdAnalyzer:
         """Loads the engine of ``options`` now, with the SAME arguments the lazy first request would use."""
         self.validate_options(options)
         if options.decision_profile in DP.UNIT_PIPELINE_PROFILES:
-            DP.o_pipelines()  # fail at start, not at the first request, if an artifact was altered
+            DP.pipelines_for(options.decision_profile)  # fail at start, not at the first request, if an artifact was altered
         with self._lock:
             self._engine(options)
             if self._needs_secondary(options):
@@ -796,6 +812,14 @@ class MrcdAnalyzer:
                 "invalid_request",
                 f"Unknown decision_profile {options.decision_profile!r}.",
                 {"allowed": list(DP.DECISION_PROFILES)},
+            )
+        req = DP.required_asr_profile(options.decision_profile)
+        if req is not None and options.asr_profile != req:
+            raise ServiceError(
+                "invalid_request",
+                f"decision_profile {options.decision_profile!r} uses a single ASR pass with {req!r}; "
+                f"asr_profile {options.asr_profile!r} is not compatible.",
+                {"required_asr_profile": req},
             )
         if options.text_route is not None and options.text_route not in TEXT_ROUTES:
             raise ServiceError(
@@ -959,12 +983,17 @@ class MrcdAnalyzer:
             use_profile = options.decision_profile in DP.UNIT_PIPELINE_PROFILES
             profile_events = None
             secondary = None
+            profile_stats = None
             try:
                 kw = {"return_words": True} if (options.text_route or use_profile) else {}
                 if audio.duration_s < float(DisfluencyEngine.MIN_AUDIO_S):
                     kw["min_audio_s"] = min_s  # opt-in short-audio path (only reachable with a lowered minimum)
                 result = engine.analyze(audio.samples, sample_rate=audio.sample_rate, **kw)
-                if use_profile:
+                if options.decision_profile == DP.PROFILE_12:
+                    profile_events, profile_stats = DP.apply_profile_12(
+                        engine, audio.samples, audio.sample_rate, getattr(result, "words", None)
+                    )
+                elif use_profile:
                     profile_events = DP.apply_profile(
                         engine, audio.samples, audio.sample_rate, getattr(result, "words", None)
                     )
@@ -1004,6 +1033,7 @@ class MrcdAnalyzer:
             engine_info=info,
             profile_events=profile_events,
             secondary_asr=secondary,
+            profile_stats=profile_stats,
         )
         self._apply_environment_pin(doc)
         return doc

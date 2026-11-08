@@ -231,7 +231,8 @@
           "enum": [
             "v0",
             "o2026_11",
-            "o2026_11b"
+            "o2026_11b",
+            "o2026_12"
           ]
         },
         "audio_sha256": {
@@ -488,6 +489,31 @@
         },
         "decision": {
           "$ref": "#/$defs/decision"
+        },
+        "context": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "subclass"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "disfluent"
+              ]
+            },
+            "subclass": {
+              "enum": [
+                "filled_pause",
+                "lexical_filler",
+                null
+              ]
+            },
+            "basis": {
+              "type": "string"
+            }
+          }
         }
       }
     },
@@ -815,7 +841,8 @@
           "enum": [
             "v0",
             "o2026_11",
-            "o2026_11b"
+            "o2026_11b",
+            "o2026_12"
           ]
         },
         "status": {

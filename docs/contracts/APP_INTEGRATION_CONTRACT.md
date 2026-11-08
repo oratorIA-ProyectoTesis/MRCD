@@ -97,6 +97,28 @@ The app stores a **binding** (`oratoria.mrcd-binding/v1`, schema `$defs.binding`
 - **Library vs product.** `DisfluencyEngine.analyze` always returns V0 events (reproducible history, experiments). Only the service (and therefore the app) selects a profile; the default is `o2026_11`.
 - Fixtures: `examples/service_analysis_v1_4_default_profile.json` (o2026_11, `decision=true`, `include_text`), `examples/service_analysis_v1_4_v0.json`.
 
+### B.3d Decision profile `o2026_12` (additive, opt-in, 2026-11-08, plan A; exploratory)
+
+Not the default: the service default stays `o2026_11`. Selected only with `decision_profile=o2026_12`.
+
+- **One ASR pass.** The profile owns its ASR profile: `request.asr_profile` becomes `p1_disfluent_prompt` (the default `p0`
+  is mapped to it; any other value is `invalid_request`). Every class, including the V0 out-of-scope classes, reads the
+  same P1 words; there is no second pass (the cause of the `o2026_11b` G4 failure).
+- **filler_word.** Two subclasses in the additive event field `context` = `{state: "disfluent", subclass, basis}`:
+  `filled_pause` (unit pipeline re-fitted on P1 text and P1 engine features, same blocks and fusion as `o2026_11`, LR only)
+  and `lexical_filler` (items of the existing Spanish filler lexicon with hesitation evidence: adjacent pause >= 0.15 s,
+  duration >= 0.35 s or comma/ellipsis; score kind `lexical_rule_indicator`).
+- **prolongation.** Unit pipeline re-fitted on P1 (same blocks as `o2026_11`).
+- **repetition.** The confirmatory lexical rule generates candidates; fixed contextual rules may only demote a candidate
+  (`loop`, `gap`, `seam` -> uncertain; `polarity` -> functional). Only `disfluent` candidates are events (score kind
+  `lexical_rule_indicator`, `context.subclass: null`); the counts per state and per rule are in
+  `provenance.decision_profile.classes.repetition.candidates`. The event schema admits only `context.state: "disfluent"`.
+  The `functional` state has no human reference and is not validated.
+- **Integrity.** Artifacts `mrcd/service/profiles/o2026_12/*.json`, sha256 pinned in `decision_profile.py`
+  (`PINNED_SHA256_12`), same refusal rules as `o2026_11`.
+- **Evidence.** `results/plan_a_20261108/RESULTS_A.md` (exploratory, DIHANA folds 1-4, turn-level; protocol
+  `PROTOCOL_EXPLORATORY_A.md`). Not validated on any other corpus.
+
 ### B.6 What the report may show (`oratoria.mrcd-report/v1`)
 
 Schema `$defs.report_section`; reference mapping `build_report_section.py`; real examples `examples/app_report_section_example.json` (from the real success document) and `examples/app_report_section_failed_example.json`. Rules:
