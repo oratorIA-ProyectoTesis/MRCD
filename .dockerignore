@@ -6,6 +6,7 @@
 !LICENSE
 !THIRD_PARTY_NOTICES.md
 !mrcd/
+!mrcd_launcher/
 !docker/constraints.txt
 !docker/entrypoint.sh
 **/__pycache__
