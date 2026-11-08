@@ -14,12 +14,16 @@ nombres de botones pueden cambiar en la interfaz.
 
 ## A. Etapa 1: antes de entrar a OSF (en el repositorio)
 
-- [ ] **OD-1 cerrada por escrito** (la única decisión abierta; por defecto: conservar a `maria` con análisis de
-      sensibilidad). Si decide excluirla, el manifiesto se vuelve a sortear con `sample_items.py --exclude-speaker maria`
-      y se hace commit del manifiesto nuevo **antes** del pase 1.
+- [x] **OD-1 cerrada por escrito el 2026-11-08 (decisión final del autor): CONSERVAR** los 5 ítems de `maria` en el
+      análisis principal, con los análisis de sensibilidad declarados de antemano S-MARIA (sin `maria`) y
+      S-MARIA-ENRIQUE (sin `maria` ni `enrique2`). El manifiesto **no** se vuelve a sortear. Ya no queda ninguna decisión
+      abierta.
+- [ ] Las reglas de implementación de la sección 17 del protocolo (formato de las transcripciones, confianza del
+      alineador, compuertas, intervalos, pisos, simulación de potencia, ubicación de archivos) están en el texto que se
+      congela; el arnés (`scripts/protocol_g/`) las implementa y sus pruebas pasan sobre datos sintéticos.
 - [ ] Calibración terminada y guía congelada por commit, con su hash anotado. Tenga presentes los conteos de calibración
       que ya vio (son ventanas de las mismas 19 grabaciones): los declarará en el paso B6.
-- [ ] `PROTOCOL_G.md` (versión final, sin "DRAFT", con OD-1 cerrada) y `PROTOCOL_G.stage1.sha256.json` están en commit.
+- [ ] `PROTOCOL_G.md` (versión final, sin "DRAFT"; OD-1 ya figura cerrada) y `PROTOCOL_G.stage1.sha256.json` están en commit.
       Si algún valor cambió respecto del borrador después de la calibración, figura en `PROTOCOL_G.md` como "cambiado
       después de la calibración". Anote el hash del commit y el sha256 de `PROTOCOL_G.md`.
 - [ ] **El pase 1 no ha empezado.** Ningún sistema (MRCD, Whisper, CrisperWhisper, el modelo afinado) ni el alineador CTC
@@ -49,7 +53,8 @@ nombres de botones pueden cambiar en la interfaz.
        azar (límite inferior del IC 95 % de κ mayor que 0); es solo una verificación "mejor que el azar".
        Indique que las familias secundarias (PGS1-PGS6, PGC1-PGC3, PGF1-PGF3) son exploratorias, sin control global del
        error por familia, y remita al archivo adjunto para todo lo demás. Si prefiere un formulario guiado, la plantilla de
-       datos secundarios ("Secondary Data Preregistration") también encaja, porque el corpus ya existe.
+       datos secundarios ("Secondary Data Preregistration") también encaja, porque el corpus ya existe. Mencione que
+       OD-1 se cerró el 2026-11-08 conservando a `maria`, con los análisis de sensibilidad S-MARIA y S-MARIA-ENRIQUE.
 6. [ ] Declare en el texto, sin suavizar: anotación por el propio autor (un solo evaluador principal, ciego al sistema),
        subconjunto del evaluador 2 con su tamaño previsto, contacto previo con el corpus (la celda gastada de 14
        grabaciones del protocolo F, los conteos publicados de `hm`/`eh`, la hablante `maria` compartida), conocimiento de
@@ -62,8 +67,9 @@ nombres de botones pueden cambiar en la interfaz.
 
 ## C. Etapa 1: de vuelta en el repositorio
 
-- [ ] Cree `results/protocol_g/OSF_REGISTRATION_STAGE1.json` con la URL, el DOI si existe, la fecha y hora UTC, el commit
-      de la etapa 1 y el sha256 de `PROTOCOL_G.md` registrado; haga commit.
+- [ ] Cree `results/protocol_g/OSF_REGISTRATION_STAGE1.json` con las claves `url`, `doi` (si existe), `utc`,
+      `stage1_commit` y `protocol_sha256` (el sha256 de `PROTOCOL_G.md` registrado); haga commit con `git add -f`
+      (la carpeta `results/` está ignorada por git).
 - [ ] Recién entonces empiece el pase 1 de anotación.
 
 ## D. Etapa 2: después de las anotaciones y antes de cualquier ejecución
@@ -78,8 +84,9 @@ nombres de botones pueden cambiar en la interfaz.
 - [ ] `PROTOCOL_G.stage2.sha256.json` está en commit y repite sin cambios los hashes de la etapa 1.
 - [ ] Suba `PROTOCOL_G.stage2.sha256.json` (y los anexos, si los hay) al proyecto de OSF como documento fechado. El
       registro de la etapa 1 no se edita.
-- [ ] Cree `results/protocol_g/OSF_REGISTRATION.json` con los datos de la etapa 1 y la fecha y hora UTC de la carga de la
-      etapa 2; haga commit. El arnés no ejecuta `run` sin este archivo ni sin el de la etapa 1.
+- [ ] Cree `results/protocol_g/OSF_REGISTRATION.json` con las claves `url`, `utc_upload` (fecha y hora UTC de la carga
+      de la etapa 2) y `stage2_sha256` (sha256 de `PROTOCOL_G.stage2.sha256.json`); haga commit con `git add -f`. El arnés
+      no ejecuta `run` sin este archivo ni sin el de la etapa 1.
 - [ ] Recién entonces: `freeze-system` ya hecho, `verify` y **una sola** ejecución de `run`.
 
 ## E. Si algo cambia después del registro

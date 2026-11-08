@@ -1,16 +1,18 @@
 # Protocol G - confirmatory evaluation against a HUMAN reference (NOCANDO, 19 unlabelled recordings) - DRAFT
 
-**Status: DRAFT, NOT FROZEN, NOT REGISTERED (revision 2 of 2026-11-08, see the revision log at the end).** Written by a
-software agent and revised after one independent fresh-context review; no advisor ratification. No human annotation of
-the cell exists yet (pass 1 has not started), no system and no aligner has touched its audio, and no transcript of these
-recordings was opened to write this draft (only file names were listed, section 3.3).
+**Status: DRAFT, NOT FROZEN, NOT REGISTERED (revision 4 of 2026-11-08, see the revision log at the end).** Written by a
+software agent and revised after one independent fresh-context review and after the harness was built (section 17); no
+advisor ratification. No human annotation of the cell exists yet (pass 1 has not started), no system and no aligner has
+touched its audio, and no transcript of these recordings was opened to write this draft (only file names were listed,
+section 3.3). The transcript parse rule (section 4.3) was derived from the file structure of ONE transcript of the
+**spent** cell (protocol F), never from a file of this cell.
 
 **Two-stage freeze (binding, section 14).**
 
 - **Stage 1 - before annotation pass 1.** Everything that defines the test is frozen: hypotheses, predicted directions,
   thresholds, evaluability floors, reference quality gates, statistics, matching and mapping rules, the timing method of
   the transcript-derived reference (closed decision OD-2), every default and every closed decision. The frozen text is a
-  NEW file `PROTOCOL_G.md` (this draft with OD-1 closed and "DRAFT" removed), committed and hashed
+  NEW file `PROTOCOL_G.md` (this draft with "DRAFT" removed; every decision, OD-1 included, is already closed), committed and hashed
   (`PROTOCOL_G.stage1.sha256.json`), then registered by the author on OSF as a **pre-annotation registration** with its
   timestamp (`OSF_PREREGISTRATION_CHECKLIST.md`). Pass 1 does not start before the registration exists.
 - **Stage 2 - after the annotations are committed, before any system or aligner run.** Only three things may be added:
@@ -30,24 +32,19 @@ criteria `PGA*`) so they never collide with the G4 latency gate of the engine do
 
 ## Decisions
 
-### The one open decision (must be closed by the author before stage 1, i.e. before pass 1)
+### Open decisions
 
-| id   | Decision                                                                                             | Default (frozen if the author does not change it)                                                                                                                                                                        | Why it must be closed before pass 1                                                                                                                                                                      |
-| ---- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| OD-1 | Speaker `maria` (5 items, recording `maria_es_1`) also spoke in the spent cell (`maria_es_2`, `_3`). | **Keep + sensitivity:** the 5 items stay in the primary analysis; pre-declared sensitivities S-MARIA (exclude them) and S-MARIA-ENRIQUE (also exclude `enrique2`, 25 items, identity with spent-cell `enrique` unknown). | Exclusion means redrawing the manifest (`sample_items.py --exclude-speaker maria`, new committed manifest), which is only possible before pass 1. After pass 1 the only remaining option is the default. |
-
-If the author chooses exclusion, the redrawn manifest replaces the one cited in section 3.1 in the stage-1 commit, the
-item and speaker counts of section 3.1 are updated there, S-MARIA and S-MARIA-ENRIQUE become S-ENRIQUE only, and the
-leave-one-speaker-out criterion of section 10 reads "at least 5 of 6".
+None. OD-1, the last one, was closed by the author on 2026-11-08 (table below).
 
 ### Closed decisions (rules, frozen at stage 1)
 
-| id   | Closed as                                                                                                                                                                                                                                                                                                                                                                                                                     | Basis                                                                                                                        |
-| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| OD-2 | `R_T` timing by a **pinned CTC forced aligner independent of every tested system** (section 4.3). Anchoring to the `p0` decode is a pre-declared sensitivity (S-P0ANCHOR).                                                                                                                                                                                                                                                    | Anchoring to `p0` made the reference's timing depend on the output of the system family under test (circular for `p0_rule`). |
-| OD-3 | Rater-2 gate: "not assessable" (no rater 2, `subset_below_minimum`, too few events in the subset) gives a **conditional** verdict, annotated; an assessable gate that **fails** makes the class descriptive (section 7).                                                                                                                                                                                                      | Separates lack of a check from a failed check.                                                                               |
-| OD-4 | `o2026_13` / `ft_small_v1` (family PGF) is included iff, at the stage-2 freeze, its branch is merged into the system commit and the `ft_small_v1` CT2 `model.bin` sha256 is pinned in `SYSTEM_FREEZE_G.json`. Decided by merge status alone; deadline = the stage-2 freeze. Otherwise PGF is removed and recorded as `not_available` (reason: not merged at the stage-2 freeze).                                              | No annotation count, gate value or other consideration may enter this decision.                                              |
-| OD-5 | Until the author confirms at the NOCANDO source page that non-commercial research annotation is covered by its licence (CC BY-NC-SA 3.0 recorded, not verified for this use; `docs/corpora/README.md` records "audit only"), only aggregates and **hashes** are published, in the repository and on OSF; this includes the manifests (uploaded as sha256 only). This is a pending author action, not an open design decision. | Annotations are an adaptation; ShareAlike terms apply.                                                                       |
+| id   | Closed as                                                                                                                                                                                                                                                                                                                                                                                                                     | Basis                                                                                                                              |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| OD-1 | **Closed 2026-11-08 by the author: KEEP.** Speaker `maria` (5 items, recording `maria_es_1`) also spoke in the spent cell (`maria_es_2`, `_3`). Her 5 items stay in the primary analysis; the manifest is not redrawn. Pre-declared sensitivities (section 11): S-MARIA (exclude `maria`) and S-MARIA-ENRIQUE (also exclude `enrique2`, 25 items, identity with spent-cell `enrique` unknown).                                | Author decision (final). Exclusion would have required redrawing the manifest before pass 1; the overlap is declared (section 12). |
+| OD-2 | `R_T` timing by a **pinned CTC forced aligner independent of every tested system** (section 4.3). Anchoring to the `p0` decode is a pre-declared sensitivity (S-P0ANCHOR).                                                                                                                                                                                                                                                    | Anchoring to `p0` made the reference's timing depend on the output of the system family under test (circular for `p0_rule`).       |
+| OD-3 | Rater-2 gate: "not assessable" (no rater 2, `subset_below_minimum`, fewer than 10 events of the class in the pass on the subset items, section 7) gives a **conditional** verdict, annotated; an assessable gate that **fails** makes the class descriptive (section 7).                                                                                                                                                                                                      | Separates lack of a check from a failed check.                                                                                     |
+| OD-4 | `o2026_13` / `ft_small_v1` (family PGF) is included iff, at the stage-2 freeze, its branch is merged into the system commit and the `ft_small_v1` CT2 `model.bin` sha256 is pinned in `SYSTEM_FREEZE_G.json`. Decided by merge status alone; deadline = the stage-2 freeze. Otherwise PGF is removed and recorded as `not_available` (reason: not merged at the stage-2 freeze).                                              | No annotation count, gate value or other consideration may enter this decision.                                                    |
+| OD-5 | Until the author confirms at the NOCANDO source page that non-commercial research annotation is covered by its licence (CC BY-NC-SA 3.0 recorded, not verified for this use; `docs/corpora/README.md` records "audit only"), only aggregates and **hashes** are published, in the repository and on OSF; this includes the manifests (uploaded as sha256 only). This is a pending author action, not an open design decision. | Annotations are an adaptation; ShareAlike terms apply.                                                                             |
 
 ## 1. What this test can and cannot claim
 
@@ -68,7 +65,7 @@ available"**, which is neither a success nor a failure.
 
 ## 2. Order of operations (binding)
 
-1. **OD-1 closed** by the author (redraw of the manifest only if exclusion is chosen).
+1. **OD-1 closed** by the author: done on 2026-11-08 (keep `maria`; the manifest is not redrawn).
 2. **Calibration** per `docs/annotation_20261108/README.md` (20 calibration clips, solo re-pass after >= 48 h, stop rule,
    at most one more round); guide frozen by commit. The calibration clips are disjoint windows **of the same 19
    recordings**; their labels and counts are seen by the author before stage 1 and are declared in the registration
@@ -99,8 +96,8 @@ cannot change it.
 - **Items:** the 150 rows of `docs/annotation_20261108/manifest_nocando_unlabeled.csv` (columns `item_id, file, sha256,
 start_s, end_s, speaker_if_in_name`), drawn by `scripts/annotation/sample_items.py` with seed 20261108 from file names
   and durations only. 19 recordings, 7 speaker labels: `cristina-mem` 44 items (3 recordings), `enrique2` 25 (3),
-  `maribel` 25 (3), `iris` 24 (3), `gemma` 22 (3), `jessica3-mem` 5 (3), `maria` 5 (1). (Counts change only if OD-1 is
-  closed as exclusion.)
+  `maribel` 25 (3), `iris` 24 (3), `gemma` 22 (3), `jessica3-mem` 5 (3), `maria` 5 (1). These counts are final (OD-1
+  closed as keep).
 - **Unit of C1 = the item** (one 6-10 s window). An item is positive for a class under a reference if that reference has
   at least one event of the class in it (section 4). The 20 calibration items (`manifest_nocando_calibration.csv`) are
   excluded from everything.
@@ -123,6 +120,12 @@ from bytes by a script at stage 1 (digests only, no content displayed) and froze
 counts of `hm|eh|em|mm` over all 40 transcripts, including these 19 (`CONTAMINATION_AUDIT.md` row 19): the order of
 magnitude of transcribed filled pauses is known, the positives are not.
 
+**Locations.** Corpus root = the environment variable `MRCD_CORPORA_ROOT` (or `--corpora-root`; no default path), as in
+protocol F. Audio: `<root>/02_NOCANDO_ES/audio/<file>`, `<file>` being the manifest column; transcript:
+`<root>/02_NOCANDO_ES/transcripciones/<stem>_ts.txt`, `<stem>` being that file name without `.mp3`. A missing file, or
+bytes whose sha256 differs from the stage-1 value, makes `check --check-data` and `run` refuse. The file layout and its
+parse rule are in section 4.3.
+
 ## 4. References
 
 ### 4.1 Human reference `H` (adjudicated CSV, kit v1.1 schema)
@@ -136,8 +139,11 @@ item with `inaudible` overlapping >= 50 % of its duration is excluded from every
   `functional` or `uncertain`). It is the human construct closest to `R_T`, whose literal rule counts every immediate
   repeat regardless of function (the DIHANA / transcript convention, in which "sí, sí" is a repetition).
 - **`H_disf` (secondary for C1; primary for C2 and the PGA criteria):** item positive for class c iff it has >= 1 event of
-  c with state `disfluent`. An item whose only events of c are `uncertain` is **not scorable** for c under `H_disf` (count
-  reported).
+  c with state `disfluent`. An item with **no** `disfluent` event of c and **at least one** `uncertain` event of c is
+  **not scorable** for c under `H_disf` (count reported), whether its other events of c are `functional` or absent: the
+  uncertain event may be disfluent, so the item's `H_disf` label is undetermined and scoring it 0 would turn a doubt into
+  a verified negative. An item whose events of c are all `functional` is a scorable negative. S-UNC-POS / S-UNC-NEG
+  (section 11) score exactly these not-scorable items 1 / 0.
 - **Availability of the "sí, sí" distinction.** The guide yields a **state** distinction for repetitions (`functional`
   covers emphatic and polarity repeats), so the convention contrast `H_lit` vs `H_disf` is available. The guide records
   **no word content** for `REP`, so the polarity subset is **`not_available`** from the human reference; plan A's R4
@@ -154,11 +160,29 @@ role AND is deletable AND at least one adjacency cue is present (`silent_or_fill
 
 ### 4.3 Transcript-derived reference `R_T`
 
-**Tokens.** Built **exactly as in protocol F** from the transcript text: the vendored CHM150 rule
-(`mrcd.context_eval.transcript_reference`; lower case, accents removed, non-`[a-z0-9n]` to space; non-lexical filled pauses
-`^(e+h*|eh+|ehm+|em+|mm+|hm+|ah+|aa+h*)$` separated, bare `e` excluded before `i`/`hi`; `_`, `#` and bracket marks not
-interpreted). `rep_literal` events = every immediate exact repetition of 1-4 contiguous lexical tokens (event = the second
-copy); `fill_ref` events = every filled-pause token. `este` is not a filler.
+**Transcript file and parse rule (frozen).** The rule below was written from the structure of ONE transcript of the
+spent cell (protocol F, a recording with a TextGrid), never from a file of this cell; it is generic and no content of
+any file is reproduced here. Bytes are decoded as protocol F decoded TextGrid bytes (BOM -> UTF-16; else strict UTF-8,
+an optional UTF-8 BOM removed; else Latin-1). The file is a markup document: a `<recording ...>` element whose attributes
+are descriptive (recording id, story, speaker name, dates, transcriber), containing a `<transcript>` element made of
+`<segment id="...">TEXT</segment>` elements, without times.
+
+- The transcript text is the character content of every `segment` element, in document order, one string per segment.
+  Tag names, attribute values and anything outside a segment are never text. Character references are decoded.
+- A file with no `segment` element, with markup (`<` or `>`) inside a segment, or with non-blank character data outside
+  every element does not have the declared layout: `R_T` for that recording is `not_available` (reason
+  `TranscriptFormatError`), exactly like an aligner failure (it counts towards the "more than 1 of 19" rule). Nothing
+  is guessed and nothing is shown.
+
+**Tokens.** Built **exactly as in protocol F** from each segment's text: the vendored CHM150 rule
+(`mrcd.context_eval.transcript_reference`; lower case, accents removed by NFD decomposition and removal of combining
+marks (which also turns `ñ` into `n`, so the tokens are `[a-z0-9]` only), every other character to space; non-lexical
+filled pauses `^(e+h*|eh+|ehm+|em+|mm+|hm+|ah+|aa+h*)$` separated, bare `e` excluded before `i`/`hi`; `_`, `#` and bracket
+marks not interpreted, the bracket content stays). **The segment plays the role of protocol F's transcript unit:** the
+filler test looks at the next token of the same segment (a segment-final bare `e` is a filled pause), and
+`rep_literal` events = every immediate exact repetition of 1-4 contiguous lexical tokens **within one segment** (event =
+the second copy); a repeat across a segment boundary is not an event. `fill_ref` events = every filled-pause token.
+`este` is not a filler.
 
 **Timing (primary, frozen choice): CTC forced alignment with a model that no tested system uses.**
 
@@ -173,14 +197,24 @@ copy); `fill_ref` events = every filled-pause token. `este` is not a filler.
   recorded).
 - Alignment: the standard CTC Viterbi trellis (blank interleaved, repeats allowed only through a blank) of the normalised
   transcript tokens joined by the word delimiter `|`, implemented in the harness in numpy (no new alignment dependency).
-  Characters absent from the checkpoint vocabulary are dropped from the target (count reported); a token left with no
-  character takes times linearly interpolated between its nearest aligned neighbours (count reported).
+  **Target:** all tokens of the recording, segments concatenated in document order (a segment boundary is an ordinary
+  word boundary), fillers included. Each character is looked up verbatim in the checkpoint's 41-symbol vocabulary
+  (lower-case `a`-`z`, accented vowels, `ñ`, `ü`, apostrophe, hyphen, the delimiter `|` and four special tokens; it has
+  **no digits**); no re-accenting, no spelling of digits, no case change (tokens are already lower case). Blank = the
+  tokenizer's pad token; special tokens never enter the target. Characters absent from the vocabulary (in practice the
+  digits) are dropped from the target (count reported); a token left with no character (e.g. an all-digit token) is
+  **untimed**: it takes times linearly interpolated between its nearest aligned neighbours (count reported) and has no
+  confidence.
 - Token time = first to last frame of its characters times the frame stride of the checkpoint (20 ms). An `R_T` event
   belongs to the item that contains its midpoint.
-- **Aligner-confidence gate (per recording, the only exclusion on `R_T` timing):** token confidence = mean posterior
-  probability of its characters along the Viterbi path. If fewer than 70 % of the recording's lexical tokens have
-  confidence >= 0.50, the recording's items are excluded from every contrast that uses `R_T` (all systems and all human
-  references equally; count reported). Both values are judgement values frozen here. No system output enters this gate.
+- **Aligner-confidence gate (per recording, the only exclusion on `R_T` timing):** frame posterior = exp of the
+  log-softmax of the character's label at a frame whose Viterbi state is that character (blank and delimiter frames
+  never count); character confidence = mean frame posterior over the frames of that character; **token confidence =
+  unweighted mean of its characters' confidences** (dropped characters do not count). The gate is computed over the
+  recording's **lexical** tokens (filled-pause tokens excluded); an untimed token stays in the denominator and counts as
+  not confident. If fewer than 70 % of the lexical tokens have confidence >= 0.50, the recording's items are excluded
+  from every contrast that uses `R_T` (all systems and all human references equally; count reported); a recording with
+  no lexical token fails the gate. Both values are judgement values frozen here. No system output enters this gate.
   Sensitivity S-NOGATE drops it.
 - If the aligner fails on a recording, `R_T` for that recording is `not_available` and its items leave every `R_T`
   contrast; if more than 1 of 19 recordings fail, `R_T` is not interpretable and every `R_T` contrast is "not evaluable".
@@ -217,6 +251,10 @@ same ASR differ only in their decision.
   `EVIDENCE_GAP_S = 0.15`, `EVIDENCE_DUR_S = 0.35`, `EVIDENCE_PUNCT = {",", "...", "…"}`, `LEXICAL_FILLERS` as at the
   system commit (its sorted list is written to `SYSTEM_FREEZE_G.json`). A different value of the three constants makes
   `run` refuse.
+- **Identity of `ft_small_v1` (OD-4).** The ASR profile of `o2026_13` is the key `ft_small_v1` of
+  `mrcd.asr_profiles.PROFILES`, which must equal `mrcd.service.decision_profile.required_asr_profile("o2026_13")` at the
+  system commit (as on the plan-F branch). If the branch is merged and the name resolves otherwise, `freeze-system`
+  refuses (a different name is a different tested system, not a pin); `run` re-checks it when PGF is included.
 - `ft_small_v1` is evaluated here only because NOCANDO is out of domain: the model was trained on DIHANA folds 1-4
   speakers and **must never be run on DIHANA training speakers**; this cell has none.
 - Engine settings as protocol F: packaged checkpoint, Whisper `small` CTranslate2 int8 on CPU for `p0`/`p1` (the two
@@ -234,7 +272,9 @@ same ASR differ only in their decision.
 - **Failed recordings (C1):** a recording on which a system fails (service error) is **excluded** from every contrast in
   which that system takes part, for every member of the contrast (pairing is kept); it is listed and never scored as
   all-zero. If more than 1 of 19 recordings fails for a system, that system is `interpretable: false` and its contrasts
-  are "not evaluable" (Holm members still counted).
+  are "not evaluable" (Holm members still counted). The exploratory `cw2` arm follows the same rule: one failed
+  recording is excluded from its contrasts (both arms of a paired survival contrast), more than one makes the arm
+  `not_available`.
 - **Survival (C2):** for a human event [s, e] (recording time), the ASR words considered are those overlapping
   [s - 0.25, e + 0.25] (**±250 ms**, the annotation protocol's primary tolerance; ±100 ms and ±500 ms as sensitivity
   S-TOL). A `REP` event survives iff those words, after non-lexical fillers are removed, contain an immediate exact
@@ -267,7 +307,7 @@ protocol's stop rule; 0.40 for harder judgements), not literature values. Point 
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- | ----------------------------------------------------------------------------- |
 | QG-1 presence (intra)                    | per-class item-level Cohen κ for "item contains >= 1 event of class c" (pass 1 vs pass 2) **and** per-class Dice (`per_class[c].dice`, verbatim) | FP, REP, LF, PRO                                    | κ >= 0.60 and Dice >= 0.50; assessable only if c has >= 5 events in each pass |
 | QG-2 state (intra)                       | κ on `state` of matched `REP` events; κ on `marker_function` of matched marker spans (`compute_markers`, `kappa` verbatim)                       | REP (convention contrast PGS4/PGS5), markers (PG3)  | κ >= 0.40                                                                     |
-| QG-3 rater 2 (subset)                    | item-level presence κ of rater 2 vs pass 1 **and** vs pass 2 (both must pass); for markers, `compute_markers` in subset mode vs each pass        | each class with >= 10 events in the subset; markers | κ >= 0.40                                                                     |
+| QG-3 rater 2 (subset)                    | item-level presence κ of rater 2 vs pass 1 **and** vs pass 2 (both must pass); for markers, `compute_markers` in subset mode vs each pass        | each class with >= 10 events in the pass on the subset items; markers | κ >= 0.40                                                                     |
 | QG-4 boundaries (intra, descriptive)     | `boundary_agreement` (±250 ms) and `mean_iou_matched`                                                                                            | all classes                                         | reported, no gate                                                             |
 | QG-5 marker detection (PG3 precondition) | `function_kappa_descriptive_only` of `compute_markers`, verbatim (true iff `detection_f1` < `MIN_DETECTION_F1` = 0.5)                            | markers                                             | must be false                                                                 |
 
@@ -286,13 +326,36 @@ Consequences (never a silent drop):
 - **QG-5:** `function_kappa_descriptive_only = true` on the intra comparison -> PG3 "not evaluable" (descriptive).
 - **QG-3 reads `subset_below_minimum` from `agreement.py` verbatim** (true iff fewer than `MIN_SUBSET_ITEMS` = 40 common
   items). Two outcomes are kept apart:
-  - **Not assessable** - no rater-2 file, `subset_below_minimum = true`, fewer than 10 events of c in the subset, or (for
-    markers) `kappa = None`: the verdict of every hypothesis on c is still computed and reported as **conditional**, with
+  - **Not assessable** - no rater-2 file, `subset_below_minimum = true`, fewer than 10 events of c in the pass on the subset
+    items, or (for markers) `kappa = None` with fewer than 30 matched spans: the verdict of every hypothesis on c is still computed and reported as **conditional**, with
     the annotation "inter-rater gate not assessable: <reason>".
-  - **Failed** - assessable and κ < 0.40 against either pass, or (markers, assessable) `function_kappa_descriptive_only =
+  - **Failed** - assessable and κ < 0.40 or κ undefined against either pass, or (markers, assessable) `function_kappa_descriptive_only =
 true` in subset mode: class c (or PG3) is **descriptive**, its Holm members "not evaluable".
-- An undefined statistic on the intra comparison (zero variance) is `not_available` and counts as a failed gate.
+- An undefined statistic on the intra comparison (zero variance), or on an assessable subset comparison, is
+  `not_available` and counts as a failed gate.
 - Krippendorff α (nominal) is reported next to every κ; the gates use κ.
+
+**Definitions of the gate statistics (frozen).**
+
+- Every κ is the kit's `cohen_kappa` (nominal): `None` (undefined) only when there is no unit or `pe = 1`, i.e. both
+  sources constant on the same value; a source constant alone gives κ = 0, a defined (failing) value.
+- **QG-1 κ (per class c):** units = the items present in both pass files (every annotated cell item; calibration items
+  are never in these files; no inaudible exclusion, the gate is about the files); label = the item has >= 1 event of c
+  in **any** state. Event counts for the >= 5 rule = `per_class[c].n_a` / `n_b` of `compute --mode intra`. Dice is
+  `per_class[c].dice` verbatim (same-class matches, any state).
+- **QG-2 REP state κ:** units = REP-REP pairs matched within each item by `match_events` (greedy, IoU >= 0.10); label =
+  the three-way `state` (`disfluent` / `functional` / `uncertain`). No matched pair -> κ undefined -> failed.
+  **QG-2 markers:** `kappa` of `compute_markers --mode intra`, verbatim.
+- **QG-3 per class (each of rater 2 vs pass 1 and vs pass 2):** units = the items common to the two files; label as in
+  QG-1. **Not assessable** iff no rater-2 file, `subset_below_minimum = true`, or the **pass** has fewer than 10 events
+  of c on the common items (`per_class[c].n_a` of `compute --mode subset`). Rater 2's own count is reported but never
+  makes the gate not assessable: a rater 2 who hears fewer events is a disagreement (it can fail the gate), not a missing
+  check. Assessable and κ undefined counts as **failed** (same rule as the intra comparison).
+- **QG-3 markers (each comparison):** not assessable iff `subset_below_minimum = true` or `kappa = None` with a
+  `not_available_reason` (fewer than 30 matched spans); failed iff `function_kappa_descriptive_only = true`, or
+  `kappa = None` with >= 30 matched spans (constant functions), or κ < 0.40.
+- **Combination of the two comparisons:** failed if either assessable comparison fails; otherwise not assessable if
+  either is not assessable; otherwise passed.
 
 ## 8. Evaluability floors (from the reference only, before any scoring)
 
@@ -303,6 +366,9 @@ true` in subset mode: class c (or PG3) is **descriptive**, its Holm members "not
 | C2, type c (REP, FP)        | >= 20 `H_disf` events of c, in >= 4 recordings and >= 3 speakers                                                                                                                                                  |
 | C3, PG3                     | reference floor: >= 30 non-uncertain adjudicated marker spans, in >= 4 recordings and >= 3 speakers; in-run floor: >= 20 of them transcribed by the `o2026_12` ASR (else "not evaluable", with the erasure count) |
 | PRO                         | descriptive in any case (no text survival, no transcript reference); counts only if < 20 events                                                                                                                   |
+| PGA1, PGA3 (REP), PGF3      | the `H_disf` REP item floor (>= 20 positive and >= 20 negative scorable items, positives in >= 4 recordings and >= 3 speakers) on the set the criterion uses (items scorable under `H_disf` whose recording did not fail for the system(s) involved); no `R_T` floor and no aligner gate (these criteria do not use `R_T`) |
+| PGA2 (FP)                   | the same item floor for FP under `H_disf`, on the items scorable under `H_disf` whose recording did not fail for `default`                                                                                         |
+| Descriptives (10.6)         | always reported with their counts; a rate, F1 or interval only when the reference side has >= 20 units (positive items, events or non-uncertain marker spans; >= 20 transcribed spans for a C3 table's rates); below that, **counts only** (`not_available` with the count), never a rate |
 
 **Two different 30-span minima.** `MIN_MARKER_SPANS` = 30 (kit v1.1) is the minimum of **matched spans between two human
 sources** for a reliability κ (QG-2, QG-3). The PG3 reference floor of 30 is the number of **adjudicated non-uncertain
@@ -324,12 +390,24 @@ outcome.
   section 10.
 - p two-sided = `min(1, 2*min(P(d<=0), P(d>=0)))`, p one-sided = `P(d<=0)` (or `P(d>=t)` against a threshold t), +1
   correction. A resample in which a statistic is undefined counts against the hypothesis and the number of such resamples
-  is reported (PG3 adds the 10 % rule of section 10.1).
+  is reported (PG3 adds the 10 % rule of section 10.1): in a one-sided test it is added to the tail against the
+  hypothesis; in a **two-sided test it is added to both tails** (`P(d<=0)` and `P(d>=0)` both include it), so it can only
+  raise p.
+- **Which interval decides.** For every hypothesis test (families of section 10) the deciding 95 % interval is the
+  2.5 / 97.5 percentile of the **defined** values among the **same 5 000 test resamples** that give p (protocol F's
+  `paired_delta`); the 2 000-resample interval is reported next to it and decides nothing. The CI-based absolute
+  criteria PGA1-PGA3 use the 2 000-resample draws (protocol F's `boot_ci`, as F's A1/A2), with undefined resamples placed
+  **below** the floor (they count against the criterion); the interval over defined resamples is reported.
+- **Resampling universe.** C1: the recordings that keep at least one item in the contrast's item set. C2: **every
+  recording of the cell** (after a sensitivity's speaker exclusion), including recordings with zero `H_disf` events of the
+  type, which enter as rows (0 survived, 0 events); the universe is fixed by the cell, not by where events fall. C3: every
+  recording of the cell, a recording without transcribed non-uncertain spans contributing an empty 2x2 table.
 - **Scorable item sets, identical for both references of a contrast.** `S_lit` = items scorable under `R_T` (aligner gate
   passed, recording not failed) and under `H_lit` (not inaudible-excluded). `S_dec` = `S_lit` minus items not scorable under
   `H_disf` (uncertain-only `REP` items). PG1, PGS6 and PGC1 use `S_lit`; PGS4 and PGS5 use `S_dec`. For every contrast the
   prevalence (positive items / items) under **each** reference on its set is reported.
-- **Decomposition (exact on `S_dec`, descriptive):** F1(`R_T`) - F1(`H_disf`) = [F1(`R_T`) - F1(`H_lit`)] (transcript-origin
+- **Decomposition (exact on `S_dec`, descriptive; written to `descriptive.decomposition` of the result with a paired
+  recording-bootstrap interval per term, counts only below the descriptive floor):** F1(`R_T`) - F1(`H_disf`) = [F1(`R_T`) - F1(`H_lit`)] (transcript-origin
   effect) + [F1(`H_lit`) - F1(`H_disf`)] (convention effect), all F1 of `p0_rule` on `S_dec`. The origin term on `S_dec`
   is reported next to PG1 (on `S_lit`); they differ only by the uncertain-only items.
 - All contrasts are paired: the same items (C1), the same human events (C2) or the same marker spans (C3) in every
@@ -337,15 +415,22 @@ outcome.
 - F1 with no predicted and no reference positive in a resample: undefined (rule above). F1 of a system with zero
   predictions on the full cell: reported as 0 with `tp=fp=0` (a measured outcome, not an absence).
 - Leave-one-speaker-out (LOSO): for each speaker label, the point estimate of the hypothesis statistic recomputed without
-  that speaker's recordings; an undefined LOSO estimate counts as not keeping the predicted direction.
+  that speaker's recordings; an undefined LOSO estimate counts as not keeping the predicted direction. **n** = the number
+  of speaker labels present among the contrast's resampling units (7 in the primary analysis; 6 in S-MARIA, 5 in
+  S-MARIA-ENRIQUE; fewer only if all of a speaker's recordings left the contrast, which is reported); the requirement is
+  that at least **n - 1** keep the predicted direction.
 
 ## 10. Hypotheses, multiplicity, success and failure
 
 A hypothesis is **supported on these recordings** iff (i) `p_Holm < 0.05` within its family, (ii) the 95 % interval
 excludes the null value (0, or the threshold) on the predicted side, (iii) the sign is the predicted one, and (iv) the LOSO
-point estimate keeps the predicted direction for at least 6 of the 7 speakers (at least 5 of 6 if OD-1 excludes
-`maria`). A significant result in the opposite sign is **contradicted**. Otherwise **not demonstrated** (a result, not an
-inconclusive run). A member that cannot be computed (gate, floor) is "not evaluable" and still counts in its family. A
+point estimate keeps the predicted direction for at least n - 1 of the n speakers of the contrast (section 9; 6 of 7 in
+the primary analysis). A significant result in the opposite sign is **contradicted**: for a two-sided test, `p_Holm <
+0.05` with the interval wholly on the opposite side of the null and the opposite sign; for a **one-sided** test (PG2,
+PG3, PGS1), whose Holm p only covers the predicted side, the one-sided p of the opposite claim (same 5 000 resamples,
+undefined resamples counted against it) times the fixed family size (Bonferroni, never smaller than Holm) < 0.05, with
+the interval wholly on the opposite side and the opposite sign. LOSO is not required for "contradicted". Otherwise
+**not demonstrated** (a result, not an inconclusive run). A member that cannot be computed (gate, floor) is "not evaluable" and still counts in its family. A
 verdict under a not-assessable QG-3 is reported as conditional (section 7). Wording is always "supported on these
 recordings", never "demonstrated".
 
@@ -376,18 +461,32 @@ DEFF for recording clustering, the smallest true survival detectable against 0.8
 
 So only substantial erasure (true survival around 0.6 or lower) is detectable at the expected event counts. At stage 2 a
 **simulation** is added (descriptive, changes no rule, threshold, floor or family): using only the committed per-recording
-`H_disf` `REP` event counts and synthetic survival outcomes (beta-binomial per recording, intra-recording correlation
-ρ in {0, 0.1, 0.3}, true survival on a grid 0.40-0.80), seed 20261108, 1 000 simulated cells, each passed through the same
-recording bootstrap and Holm rule; the output is the simulated power curve. No ASR output is used or simulated from data.
+`H_disf` `REP` event counts of **every** recording of the manifest (zero-event recordings included, as in the run) and
+synthetic survival outcomes (beta-binomial per recording: mean = true survival p, intra-recording correlation ρ, i.e.
+Beta(p·k, (1-p)·k) with k = (1-ρ)/ρ, binomial at ρ = 0; ρ in {0, 0.1, 0.3}; p in {0.40, 0.50, 0.60, 0.70, 0.80}), seed
+20261108, 1 000 simulated cells, each passed through the **full PG2 verdict rule**: the same recording bootstrap (seed
+13, 5 000 resamples), Holm over the fixed family of 3 with the **two other primary members taken at p = 1** (so the PG2
+Holm p is 3p, the least favourable case: the curve is a lower bound with respect to the other members), upper 95 %
+bound < 0.80, estimate < 0.80 and the LOSO rule with the manifest speakers. A simulated cell whose test is not
+computable counts as a non-rejection. Output `results/protocol_g/POWER_SIM_G.json`. No ASR output is used or simulated
+from data.
 
 **PG3 rules.**
 
 - Human spans: adjudicated marker rows with `marker_token` in the closed list; `uncertain` excluded (the uncertain rate is
   reported). Spans **`not_transcribed`** by the `o2026_12` ASR are excluded from κ and reported separately as an **erasure
   count** (and share).
-- κ undefined on the full-cell point estimate (a constant margin) -> PG3 **not evaluable**, κ `not_available` with the
-  reason. If more than 10 % of the bootstrap resamples are degenerate (κ undefined), PG3 is **not evaluable**; otherwise
-  degenerate resamples count against the hypothesis (section 9).
+- **Transcribed span without a rule candidate.** A span whose token is transcribed but for which
+  `classify_lexical_fillers` returns no overlapping candidate of that token gets system state **0** (not `disfluent`;
+  the rule did not call it disfluent) and stays in κ; their number is reported (`n_transcribed_without_candidate`).
+- **What "undefined" means.** κ is undefined only when there is no span or when the human labels and the system states
+  are **both constant on the same value** (`pe = 1`, the kit's semantics). A **constant system alone** (or a constant
+  human alone) gives **κ = 0, a defined value**: PG3 is then computed and cannot be supported (its lower bound cannot
+  exceed 0); it is not "not evaluable".
+- κ undefined on the full-cell point estimate -> PG3 **not evaluable**, κ `not_available` with the reason. **Degenerate
+  share:** computed on the **5 000 test resamples** (seed 13, the draws that give p and the deciding interval) as the
+  share with κ undefined; if it exceeds 10 %, PG3 is **not evaluable**; otherwise degenerate resamples count against the
+  hypothesis (section 9).
 - Companions, always reported: the full 2x2 table, precision and recall of the system's `disfluent` against human
   `disfluent`, PABAK (= 2·p_o - 1), and the erasure count.
 - Construct overlap (section 12) is declared: a supported PG3 says the system's state agrees with the human label better
@@ -430,7 +529,7 @@ recording bootstrap and Holm rule; the output is the simulated power curve. No A
 
 ### 10.6 Descriptive (no p-value, no verdict)
 
-Per system and reference: TP/FP/FN, precision, recall, F1 with intervals, for REP and FP, under `R_T`, `H_lit`, `H_disf`,
+Per system and reference (counts only below the descriptive floor of section 8): TP/FP/FN, precision, recall, F1 with intervals, for REP and FP, under `R_T`, `H_lit`, `H_disf`,
 with prevalence per reference. The decomposition of section 9. **Ranking change:** systems ranked by F1 under `R_T` and
 under `H_lit` (and `H_disf`); Kendall τ_b between rankings with a bootstrap interval; every pairwise order flip listed with
 its paired interval. Survival per ASR and type with intervals (including `PRO` word presence). C3: human uncertain rate
@@ -524,6 +623,27 @@ transcript, no per-unit ASR text**), `RUN_G.lock.json`, local-only per-item pred
 aggregates and, once OD-5 is resolved, annotation ids/labels are shared. NOCANDO: Brunetti, Bott, Costa, Vallduví (2011),
 CC BY-NC-SA 3.0. CrisperWhisper 2.0: Nyra Health Non-Commercial Research License.
 
+### 13.1 File locations (frozen)
+
+Every protocol file lives in `results/protocol_g/` (the draft stays in `results/protocol_g_draft/`). `results/` is
+git-ignored in this repository, so each tracked file below is added with `git add -f`.
+
+| File (in `results/protocol_g/`)   | Written by / when                                 | Content                                                                                                  |
+| --------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `PROTOCOL_G.md`                   | author, stage 1                                   | this draft with "DRAFT" removed                                                                          |
+| `PROTOCOL_G.stage1.sha256.json`   | `freeze-stage1`, stage 1                          | section 14 digests                                                                                       |
+| `OSF_REGISTRATION_STAGE1.json`    | author, after the OSF registration                | `url`, `doi` (if any), `utc`, `stage1_commit`, `protocol_sha256`                                         |
+| `REFERENCE_GATES_G.json`          | `gates`, stage 2                                  | QG-1..QG-5 from the committed annotation files; no timestamp, regenerated and compared byte for byte by `run` |
+| `SYSTEM_FREEZE_G.json`            | `freeze-system`, stage 2                          | section 14 pins, including the OD-4 record (`od4`)                                                       |
+| `PROTOCOL_G.stage2.sha256.json`   | `freeze-stage2`, stage 2                          | section 14 digests, repeats stage 1                                                                      |
+| `OSF_REGISTRATION.json`           | author, after uploading the stage-2 file to OSF   | `url`, `utc_upload`, `stage2_sha256`                                                                     |
+| `POWER_SIM_G.json`                | `power-sim`, stage 2 (descriptive)                | section 10.1 simulated power                                                                             |
+| `RUN_G.lock.json`                 | `run` (O_EXCL, after the environment is built, before any audio) | start record with sanitized argv; `completed` with the result sha256; committed immediately |
+| `RESULT_G.json`                   | `run`                                             | aggregates only (section 13)                                                                             |
+| `local/item_predictions.csv`      | `run`                                             | per-item 0/1 labels, **never committed** (`local/` stays local)                                          |
+
+The annotation files stay in `docs/annotation_20261108/` (section 2, step 4).
+
 ## 14. Locks, hashes, two-stage freeze, single shot, annexes
 
 - **Stage 1 - `PROTOCOL_G.stage1.sha256.json`** (before pass 1): sha256 of `PROTOCOL_G.md` (CRLF normalised to LF), of the
@@ -546,16 +666,47 @@ CC BY-NC-SA 3.0. CrisperWhisper 2.0: Nyra Health Non-Commercial Research License
   `transformers`, `numpy`, `scipy`, `soundfile`, `librosa`); `environment_is_pinned: false`. A difference in the profile
   name, the lexical-filler constants or a weights hash makes `run` refuse; a different library version is recorded as a
   declared provenance difference. `run` also refuses if the tree differs or the freeze commit is not an ancestor of HEAD.
-- **Leakage check** at the system commit (expected: no hit). Search terms: the 19 file stems of the manifest (whole-token
-  match) and the 19 transcript sha256 digests. **Allow-list:** `docs/annotation_20261108/`, `results/protocol_g*/`,
-  `scripts/protocol_g/`, `tests/test_protocol_g*`. Any hit in a tracked file outside the allow-list, or in any file
-  (tracked or ignored, caches included) under `results/` outside the allow-list, fails the check and `run` refuses. The
-  corpus name is not a search term (it legitimately appears in audit, plan and protocol-F code).
-- **Single shot:** `run` creates `RUN_G.lock.json` with O_EXCL before loading anything and refuses to start again. A
-  finished run (`RESULT_G.json` exists) can never be repeated. A crash (lock `started`, no result) can be continued only
-  with `--continue-after-crash ANNEX_<date>.md`, an annex that states the crash and changes nothing else; the continuation
-  repeats the run from the start with identical inputs. The `cw2` arm runs in the same process after the primary systems;
-  its failure follows annex F section 7 and does not affect the primary result.
+- **Leakage check** at the system commit (expected: no hit). Search terms: the 19 file stems of the manifest (token
+  match: a neighbouring letter or digit prevents a match, an underscore does not, so `<stem>_ts.txt` is a hit) and the 19
+  transcript sha256 digests; the relative path of every file (its name included) is scanned with the same terms.
+  **Allow-list:** `docs/annotation_20261108/`, `results/protocol_g*/`, `scripts/protocol_g/`, `tests/test_protocol_g*`, and
+  the single exact path `results/confirmatoria_20261107/PROTOCOL.sha256.json` (the frozen protocol-F hash manifest: it
+  lists the audio file names and the sha256 of the audio BYTES of the earlier cell, which include these 19 recordings, and
+  no text; no other protocol-F file contains a term, and none else is allowed). Any hit in a tracked file outside the
+  allow-list, or in any file (tracked or ignored, caches included) under `results/` outside the allow-list, fails the
+  check and `run` refuses. The corpus name is not a search term (it legitimately appears in audit, plan and protocol-F
+  code). On the working tree of this draft the check passes (19 stems; the transcript digests exist only after stage 1).
+- **Run environment and weight check (before the lock).** `check` and `run` import `transformers` and `torch`
+  (a failed import refuses), hash the weight files that will actually be loaded and compare them with the frozen record
+  and the pinned values: Whisper small CT2 `model.bin` (shared by `p0`/`p1`), every file of the aligner snapshot
+  (`pytorch_model.bin`, `config.json`, `vocab.json`, `preprocessor_config.json`, `special_tokens_map.json`,
+  `alphabet.json`; a hub-cache snapshot must also sit under the pinned revision), the `ft_small_v1` `model.bin` (given with
+  `--ft-model-bin`) when OD-4 includes it, and the `cw2` snapshot (an absent local `cw2` snapshot is recorded and the
+  exploratory arm then ends `not_available`; a present one must match its manifest hash). Any mismatch refuses. Nothing
+  is downloaded. **Required environment:** one interpreter that holds the whole stack, namely the project's cw2 virtual
+  environment (`faster-whisper` 1.2.1, `ctranslate2` 4.8.2, `transformers` 5.22.1, `torch` 2.9.1+cu130, CUDA 13.0, with
+  `numpy`, `scipy`, `soundfile`, `librosa`, `silero-vad`, `onnxruntime`, `huggingface_hub`). The default MRCD environment
+  has no `transformers` and no CUDA build of `torch`, and the CTC-only environment used for the earlier survival campaign
+  (`torch` 2.14.0+cu130) has no `faster-whisper`: neither can run `run`. The `torch` build therefore differs from the
+  survival campaign's, so emissions are not claimed bit-identical to it (section 12, determinism); versions are recorded in
+  the result, not pinned. `check` additionally constructs the aligner emitter, the analyzer and the classifier, parses the
+  manifest and the annotation files and runs a one-second synthetic-zeros forward pass of the aligner when the snapshot
+  is available locally (otherwise it prints that the dry construction was skipped); it uses no corpus audio.
+- **Single shot:** `run` first completes every precondition and constructs every object that can fail for an
+  environment reason (aligner emitter, analyzer and backends, classifier, manifest and annotation parsing), and only
+  then creates `RUN_G.lock.json` with O_EXCL, before any audio, transcript or ASR call; it refuses to start again. The
+  lock stores the sanitized command line (no absolute path: paths inside the repository are repo-relative, others are
+  redacted). A data or runtime error of ONE recording after the lock (audio load, decode, aligner, S-P0ANCHOR) is that
+  recording's "recording failed" outcome of section 6 for every system and ASR arm, never a crash of the run. The lock
+  and the result are committed immediately after they are created (`git add -f`, section 13.1). A finished run
+  (`RESULT_G.json` exists) can never be repeated. A crash (lock `started`, no result) can be continued only
+  with `--continue-after-crash ANNEX_<date>.md`, an annex that states the crash and changes nothing else, is committed
+  inside the repository before the continuation, and whose sha256 is recorded in the lock and in the result; the
+  continuation repeats the run from the start with identical inputs. The `cw2` arm runs in the same process after the
+  primary systems; its failure follows annex F section 7 and does not affect the primary result.
+- **Harness file set.** `run` recomputes the list of harness files (`scripts/protocol_g/*.py`, `tests/test_protocol_g*.py`,
+  `tests/protocol_g_synth.py`, the three protocol-F / kit files) and compares the SET with the stage-2 list: a file added
+  or removed after the stage-2 freeze refuses.
 - **Annex rules.** Between stage 1 and stage 2, only the three stage-2 additions are allowed without an annex. Any other
   change after pass 1 has started is a dated annex with its own hash, **declared post-annotation**, listing exactly which
   annotation counts, agreement figures or gate values the author had seen when writing it; it may add, never alter, a
@@ -563,11 +714,13 @@ CC BY-NC-SA 3.0. CrisperWhisper 2.0: Nyra Health Non-Commercial Research License
   of the affected arm exists, except to declare a crash or a deviation that already happened (stated as such, with no
   change of analysis).
 
-## 15. To build (declared; nothing here has been built or run)
+## 15. Harness (built before pass 1; tested on synthetic data only; never run on the cell)
 
-Preferably before pass 1 (it reduces post-annotation discretion); at the latest at stage 2:
+Built on branch `feat/protocol-g-harness` (`scripts/protocol_g/`, tests `tests/test_protocol_g_*.py`), before pass 1 as
+recommended; it is hashed at stage 2. Scope:
 
-- `scripts/protocol_g/run_protocol_g.py` (`freeze-system`, `verify`, `run`, `gates`) importing the protocol F harness and kit
+- `scripts/protocol_g/env_check.py` (import probe, weight hashing, argv sanitising); `scripts/protocol_g/run_protocol_g.py`
+  (`freeze-system`, `verify`, `run`, `gates`) importing the protocol F harness and kit
   v1.1 `scripts/annotation/agreement.py` unchanged; CTC emissions and numpy Viterbi aligner (section 4.3); `S_lit`/`S_dec`
   construction; C2 survival; C3 matching with `not_transcribed`; PG3 degenerate-resample rule; LOSO; families and
   sensitivities; leakage check with the allow-list.
@@ -584,7 +737,85 @@ Outputs and comments in English; the annotator guide is in Spanish. No personal 
 variable. Never "no system exists"; never inference of psychological states; absence is `not_available`, never 0; no
 uncalibrated figure is presented as a result (every threshold here is a declared judgement value).
 
+## 17. Implementation rules closed before stage 1 (harness review, 2026-11-08)
+
+Building the harness (section 15) exposed points the text left open. Each is closed below by the conservative option
+consistent with protocol F and with the intent of this protocol; the normative wording is in the cited section, and the
+harness implements exactly that wording (no harness constant is marked as an assumption any more). None of these rules
+was chosen after seeing any annotation, calibration label, transcript of this cell or system output.
+
+| #     | Point                                                       | Rule (section)                                                                                                                                                                        |
+| ----- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1-2   | `_ts.txt` layout, parse rule, file locations                | Markup document; text = content of the `segment` elements in order; other layouts -> `R_T` `not_available` for that recording; paths under `MRCD_CORPORA_ROOT` (3.3, 4.3). Derived from a spent-cell file. |
+| 3-4   | Aligner token confidence; untimed tokens                    | Unweighted mean over characters of the mean frame posterior on the Viterbi path; untimed tokens stay in the gate's denominator as not confident (4.3)                                 |
+| 5     | Aligner vocabulary / normalisation                          | Protocol F tokens verbatim (NFD accent removal, `ñ` -> `n`), exact character lookup, digits dropped and counted, no re-accenting or digit spelling (4.3)                              |
+| 6     | Item with `uncertain` + `functional` events only            | **Not scorable** under `H_disf` (4.1)                                                                                                                                                  |
+| 7     | QG-3 event-count rule; undefined κ in the subset            | >= 10 events of the class **in the pass** on the subset items; assessable + undefined κ = failed; markers: < 30 matched spans = not assessable (7)                                     |
+| 8     | Per-class κ of QG-1 / QG-2                                  | QG-1: item presence in any state over items common to both passes; QG-2: three-way state of matched REP-REP pairs (7)                                                                 |
+| 9     | Undefined resamples in two-sided tests                      | Added to both tails (9)                                                                                                                                                                |
+| 10    | Interval that decides                                       | Tests: 95 % of the same 5 000 test resamples; PGA: 2 000 draws, undefined below the floor (9)                                                                                          |
+| 11    | "Contradicted" for one-sided tests                          | Opposite one-sided p × family size (Bonferroni) < 0.05, interval wholly opposite, opposite sign (10)                                                                                   |
+| 12    | LOSO n - 1                                                  | n = speakers present in the contrast's resampling units (9, 10)                                                                                                                        |
+| 13    | PG3 degenerate share                                        | On the 5 000 test resamples (10.1)                                                                                                                                                     |
+| 14    | C2 resampling universe                                      | Every recording of the cell, zero-event recordings included (9)                                                                                                                        |
+| 15    | PG3 span transcribed but without a rule candidate           | System state 0, kept in κ, count reported (10.1)                                                                                                                                       |
+| 16    | Name of the FT ASR profile                                  | `ft_small_v1`, checked against `required_asr_profile("o2026_13")`; mismatch -> `freeze-system` refuses (5)                                                                            |
+| 17    | Floors for PGA1-PGA3, PGF3 and descriptives                 | `H_disf` item floor of the class on the criterion's set; descriptives below 20 units are counts only (8)                                                                              |
+| 18    | Power simulation                                            | Full PG2 verdict rule, other two primary members at p = 1, all recordings, grid step 0.10 (10.1)                                                                                       |
+| 19    | File locations                                              | `results/protocol_g/` table (13.1)                                                                                                                                                     |
+| κ     | PG3 "κ undefined (constant margin)"                         | Undefined only when both sides are constant on the same value; a constant system alone gives κ = 0, a defined failing value (10.1)                                                    |
+
+Two further harness corrections follow from the text and change no rule: PGF3 and PGA1-PGA3 are no longer blocked when
+`R_T` is not interpretable (they do not use `R_T`), and the 2x2 κ is computed in closed form so that a constant margin
+gives exactly 0 (a floating-point residue below 0 could otherwise have been read as a significant negative κ).
+
 ## Revision log
+
+Revision 4 addendum (2026-11-08), a harness-only change; no rule of sections 1-13 changes:
+
+- **cw2 snapshot refuses by default (section 14).** An absent local `cw2` snapshot used to be recorded silently and the
+  exploratory arm ended `not_available`. `check`, `verify` and `run` now REFUSE (`cw2_weights`) when the snapshot is not
+  available locally. The explicit flag `--allow-cw2-unavailable` accepts the absence: the weights report, the lock
+  (`cw2_unavailable`) and the result (`weights_checked_before_the_lock`) record `not_available_locally` with the reason,
+  and the arm ends `not_available`. A present snapshot is always hashed and must match; the flag never bypasses a mismatch.
+
+Revision 4 (2026-11-08) vs revision 3, after a fresh-context review of the harness ("merge after fixes"); no
+annotation, calibration label, transcript of this cell or system output was consulted:
+
+- **Leakage allow-list (H1).** The exact tracked path `results/confirmatoria_20261107/PROTOCOL.sha256.json` (protocol-F
+  audio byte hashes and file names, no text) is allowed, with the justification in section 14; no other protocol-F file
+  needed an exception. The token rule also matches a stem followed by `_` and file names are scanned (L2). The real check
+  passes on the working tree and a test runs it against the repository tree.
+- **System probe (H2).** Decision-profile names are read from `mrcd.service.contract.DECISION_PROFILE_NAMES` and
+  `decision_profile.DECISION_PROFILES`; `o2026_13` appears only once `feat/plan-f-ft-profile` is merged (OD-4 unchanged).
+- **Lock ordering and environment (H3, M1).** Section 14: the run environment is imported, constructed and checked before
+  the lock, weight files (including the aligner config / vocabulary and the revision) are hashed in preflight, `transformers`
+  and `torch` are expected libraries, and the required interpreter is named by purpose and versions.
+- **Per-recording failures (M2, L3).** A failure of one recording after the lock is that recording's "recording failed"
+  outcome; the `cw2` arm tolerates one failed recording like any system (section 6).
+- **Decomposition and flips (M3).** Written to the result with paired intervals, as sections 9 and 10.6 already said.
+- **Continuation and lock (M4, M5).** Crash annex committed with its sha256 recorded; sanitized argv in the lock; lock and
+  result committed immediately; harness file set recomputed (section 14).
+- **Low items.** Self-closing `<segment .../>` is an empty segment (L1); verdict label `not_evaluable` for every member
+  that cannot be computed (L5); a lower bound that falls in the undefined tail is `not_available`, never a number (L6);
+  dead code removed (L7).
+
+Revision 3 (2026-11-08) vs revision 2 (commit `1804dc2`), after the harness was built (`feat/protocol-g-harness`):
+
+- **OD-1 closed (author decision, final, 2026-11-08): KEEP.** The 5 `maria` items stay in the primary analysis; the
+  pre-declared sensitivities S-MARIA and S-MARIA-ENRIQUE remain; the manifest is not redrawn. OD-1 moved to the closed
+  decisions; no open decision remains. Section 2 step 1, section 3.1 counts (final) and the LOSO wording of section 10
+  updated accordingly; the "if OD-1 excludes `maria`" branches removed.
+- **Implementation rules closed (section 17, items 1-19 and the κ note):** transcript layout and parse rule (from one
+  spent-cell file), file locations (3.3, 13.1), aligner confidence, untimed tokens and vocabulary (4.3), the
+  uncertain-plus-functional item (4.1), gate statistics and QG-3 assessability (7), floors for PGA, PGF3 and
+  descriptives (8), undefined resamples, deciding intervals, resampling universe and LOSO n (9), one-sided
+  "contradicted" (10), PG3 degenerate share, uncandidated spans and the meaning of an undefined κ (10.1), FT profile
+  identity (5), power simulation (10.1). The token class of section 4.3 is corrected to what the vendored rule does
+  (`ñ` becomes `n`; tokens are `[a-z0-9]`).
+- Section 15 now describes the built harness (synthetic tests only, never run on the cell). Expected outcomes of 10.8
+  unchanged and still uncalibrated guesses. No annotation, calibration label, transcript of this cell or system output
+  was consulted for any change.
 
 Revision 2 (2026-11-08) vs commit `25ce1f1` (revision 1), after a fresh-context review ("merge after fixes"):
 
