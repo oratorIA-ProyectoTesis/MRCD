@@ -73,6 +73,10 @@ class ASRProfile:
     model_id: str | None = None
     model_revision: str | None = None
     license_note: str = ""
+    #: Backend-specific caveat reported by ``describe()`` for non-default backends: decode settings of that backend that
+    #: the generic fields above cannot express (e.g. a decoder prompt made of special tokens, a suppress list read from
+    #: the model's ``generation_config.json``). Empty for p0/p1/cw2 so their descriptions stay unchanged.
+    decode_note: str = ""
 
     @property
     def prompt_sha256(self) -> str:
@@ -107,6 +111,8 @@ class ASRProfile:
             out["model_id"] = self.model_id
             out["model_revision"] = self.model_revision
             out["license_note"] = self.license_note
+            if self.decode_note:
+                out["decode_note"] = self.decode_note
         return out
 
     def _describe_base(self) -> dict:
@@ -217,6 +223,43 @@ PROFILES["cw2"] = ASRProfile(
     model_id=CW2_MODEL_ID,
     model_revision=CW2_MODEL_REVISION,
     license_note=CW2_LICENSE_NOTE,
+)
+
+# Opt-in CTranslate2 variant of cw2 (2026-11-08, Plan C, ``results/plan_c_20261108``). Same weights and revision,
+# converted to CTranslate2 float16 (a Derivative Work under the same non-commercial licence; the conversion lives
+# outside the repository, see ``mrcd/verbatim_ct2.py``). Exploratory evidence: on 48 DIHANA folds 1-4 turns (<= 30 s) the
+# text equals the cw2 Hugging Face pipeline on every unit at about half its GPU time. The ``cw2`` definition above is
+# unchanged; this profile is never a default.
+PROFILES["cw2_ct2"] = ASRProfile(
+    name="cw2_ct2",
+    initial_prompt="",
+    word_timestamps=True,
+    beam_size=1,  # greedy (the measured decode); the ASRProfile default of 5 does not apply
+    chunk_s=30.0,
+    overlap_s=4.0,
+    experimental=True,
+    validation=(
+        "experimental; exploratory Plan C equivalence with cw2 on 48 DIHANA folds 1-4 turns <= 30 s; long-form "
+        "windowing and word times not validated; non-commercial research licence"
+    ),
+    description=(
+        "CrisperWhisper 2.0 large converted to CTranslate2 float16, verbatim prompt, greedy, CUDA (upstream ctranslate2). "
+        "Needs MRCD_CW2_CT2_DIR. Opt-in; never selected by default."
+    ),
+    decode_note=(
+        "initial_prompt and suppress_tokens above are NOT what is decoded: the decoder prompt is the five tokens "
+        "[verbatim_1]..[verbatim_5] followed by <|startoftranscript|><|es|><|transcribe|><|notimestamps|>, "
+        "suppress_tokens is read from the model's generation_config.json (negative ids dropped), greedy "
+        "(beam_size=1, temperature 0), max_length=448 including the prompt; audio is cut into 30 s windows with "
+        "4 s overlap (the engine's asr_chunk_s does not apply to this backend)."
+    ),
+    device="cuda",
+    compute_type="float16",
+    backend="crisperwhisper_ct2",
+    model_id=CW2_MODEL_ID,
+    model_revision=CW2_MODEL_REVISION,
+    license_note=CW2_LICENSE_NOTE
+    + " The CTranslate2 conversion is a Derivative Work under the same licence.",
 )
 
 

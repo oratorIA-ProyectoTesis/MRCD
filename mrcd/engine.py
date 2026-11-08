@@ -484,7 +484,8 @@ class DisfluencyEngine:
             device=info["device"],
             omp_num_threads=omp,
             language=getattr(asr, "language", "es"),
-            chunk_s=asr_chunk_s,
+            # cw2_ct2 ignores asr_chunk_s (own 30 s windows): keep the profile's windows in the key, not an unused value
+            chunk_s=None if profile.backend == "crisperwhisper_ct2" else asr_chunk_s,
         )
         out = profile.describe()
         if profile.loop_redecode:  # every chunk whose text was replaced (or could not be) is listed here

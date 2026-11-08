@@ -86,6 +86,15 @@ class VerbatimASR:
             self._model_bin_sha256 = self._model_dir = None
             self._model_info_done, self.dropped_tags = True, []
             return
+        if self.profile.backend == "crisperwhisper_ct2":  # opt-in cw2_ct2 (Plan C); never reached by other profiles
+            from mrcd import verbatim_ct2
+
+            self.model, self.device, self.compute_type = verbatim_ct2.load_crisper_ct2(self.profile, device, compute_type)
+            self.model_size, self.language = self.profile.model_id, language
+            self._model_dir = str(self.model.model_dir)
+            self._model_bin_sha256 = None  # hashed lazily by ``model_info()`` (model.bin is ~3 GB)
+            self._model_info_done, self.dropped_tags = False, []
+            return
         from faster_whisper import WhisperModel  # type: ignore
 
         strict_device = self.profile.device
@@ -166,7 +175,7 @@ class VerbatimASR:
             from mrcd.reproducibility import file_sha256
 
             try:
-                d = Path(self.model_size)
+                d = Path(self._model_dir) if getattr(getattr(self, "profile", None), "backend", "") == "crisperwhisper_ct2" else Path(self.model_size)
                 if not d.is_dir():
                     from faster_whisper.utils import download_model  # type: ignore
 
@@ -207,6 +216,8 @@ class VerbatimASR:
         profile = get_profile(getattr(self, "profile", None))
         if profile.backend == "crisperwhisper":
             return self._transcribe_crisper(audio)
+        if profile.backend == "crisperwhisper_ct2":
+            return self._transcribe_crisper_ct2(audio)
         kwargs = profile.decode_kwargs(self.language)
         words = _decode_words(self.model, audio, kwargs)
         if profile.loop_redecode:
@@ -232,6 +243,22 @@ class VerbatimASR:
             if tok is None:
                 continue
             words.append(Word(tok.strip(), normalize(tok), float(w.start), float(w.end), 1.0, _punct(tok)))
+        return [w for w in words if w.norm]
+
+    def _transcribe_crisper_ct2(self, audio: np.ndarray) -> list[Word]:
+        """Opt-in ``cw2_ct2``: same tag mapping as ``cw2`` (``mrcd.verbatim.map_token``) on the CTranslate2 decode of
+        ``mrcd.verbatim_ct2``; 30 s windows with 4 s overlap for long audio (its own rule, not MRCD's 8 s chunking)."""
+        from mrcd import verbatim
+
+        words: list[Word] = []
+        for text, start, end, prob in self.model.transcribe(audio.astype(np.float32)):
+            tok, dropped = verbatim.map_token(text)
+            if dropped is not None:
+                self.dropped_tags.append(dropped)
+            if tok is None:
+                continue
+            p = prob if verbatim.TAG_RE.fullmatch(text.strip()) is None else 1.0
+            words.append(Word(tok.strip(), normalize(tok), float(start), float(end), float(p), _punct(tok)))
         return [w for w in words if w.norm]
 
     def _redecode_if_looped(self, audio: np.ndarray, kwargs: dict, words: list[Word]) -> list[Word]:
@@ -299,8 +326,8 @@ class VerbatimASR:
         """
         self.redecode_events = []
         self._chunk_offset_s = 0.0
-        if getattr(getattr(self, "profile", None), "backend", "faster_whisper") == "crisperwhisper":
-            return self.transcribe(audio)  # the package does its own long-form chunking
+        if getattr(getattr(self, "profile", None), "backend", "faster_whisper") in ("crisperwhisper", "crisperwhisper_ct2"):
+            return self.transcribe(audio)  # cw2: the package's long-form chunking; cw2_ct2: its own 30 s windows
         if chunk_s <= 0 or len(audio) <= chunk_s * SAMPLE_RATE:
             return self.transcribe(audio)
 

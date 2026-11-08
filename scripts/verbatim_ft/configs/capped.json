@@ -1,0 +1,19 @@
+{
+  "base_model": "openai/whisper-small",
+  "base_revision": "973afd24965f72e36ca33b3055d56a652f456b4d",
+  "out_dir": "../_models_ft/capped",
+  "seed": 20261108,
+  "lr": 1e-05,
+  "weight_decay": 0.0,
+  "warmup_steps": 50,
+  "max_steps": null,
+  "max_epochs": 6,
+  "max_gpu_hours": 2.0,
+  "micro_batch": 8,
+  "grad_accum": 2,
+  "ckpt_every": 200,
+  "fp16": true,
+  "grad_checkpointing": true,
+  "freeze_encoder": false,
+  "max_label_len": 448
+}
