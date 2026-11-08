@@ -1,0 +1,17 @@
+{
+ "frozen_utc": "2026-11-07T18:17:29+00:00",
+ "annex_file": "PROTOCOL_ANNEX_20261107_SECONDARY_CW2.md",
+ "annex_sha256": "c5bafeb5baba95989dab97c922cac470a755f9e0683bb4acfd151f6406b2d817",
+ "files": {
+  "scripts/confirmatoria/run_secondary_cw2.py": "8b5ae2b22c364eb1e073625baf9acd61ea1d9d7fb68e16c199691d489457e176",
+  "tests/test_confirmatoria_secondary_cw2.py": "e942335dcfa71a700e9fe28e4193421ec57f788a3c25671ba64e0a37225d4b9e"
+ },
+ "primary_harness_file": "scripts/confirmatoria/run_confirmatoria.py (unchanged; frozen in PROTOCOL.sha256.json)",
+ "primary_harness_sha256": "f5cd329b4ddd40827e0c562b6abc2adda723508a20cbd888edf96d745d55a981",
+ "cw2": {
+  "model_id": "nyralabs/CrisperWhisper2.0_large",
+  "model_revision": "f4334f6e8193f2691212d49b20fa12d370e13896",
+  "weights_manifest_sha256": "b22cf7a5208e73405514f32b9e7686019364771d51a8a8683f105596d88e7ac9"
+ },
+ "note": "sha256 of text files computed after CRLF -> LF normalisation"
+}

@@ -1,0 +1,25 @@
+{
+ "frozen_utc": "2026-11-07T19:11:09+00:00",
+ "system_commit": "a0510677ae2d2f906206a276e49cc88221edbe89",
+ "system_paths": [
+  "mrcd",
+  "models",
+  "pyproject.toml"
+ ],
+ "system_tree_sha256": "fca42f09db7c0a60d1986cafbcbf6b463d6dcc97e8ecbfa46a753e060621af5a",
+ "system_tree_n_files": 132,
+ "protocol_sha256": "ba0c92902471728d02acd4eaee47f61f549a8492d7227e7bd010eaaeb65594c2",
+ "harness_sha256": "f5cd329b4ddd40827e0c562b6abc2adda723508a20cbd888edf96d745d55a981",
+ "default_decision_profile": "o2026_11",
+ "environment": {
+  "python": "3.12.10",
+  "OMP_NUM_THREADS": "4",
+  "numpy": "2.5.3",
+  "torch": "2.9.1",
+  "faster-whisper": "1.2.1",
+  "ctranslate2": "4.8.2",
+  "librosa": "1.0.0",
+  "soundfile": "0.14.0",
+  "scipy": "1.18.1"
+ }
+}

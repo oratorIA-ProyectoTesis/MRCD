@@ -1,0 +1,190 @@
+{
+ "label": "SECONDARY ARM cw2 (annex 2026-11-07); reported separately; never replaces or alters the primary result",
+ "system_commit": "a0510677ae2d2f906206a276e49cc88221edbe89",
+ "git_head_at_run": "f8268fee4d28b933568275a2b589a4351f6faaa2",
+ "annex_sha256": "c5bafeb5baba95989dab97c922cac470a755f9e0683bb4acfd151f6406b2d817",
+ "primary_conclusions_sha256": "7d7552d1dd6b1bf0491b790cbbb63f8204959ad7f70a946702a9c92d3234f722",
+ "protocol_sha256": "ba0c92902471728d02acd4eaee47f61f549a8492d7227e7bd010eaaeb65594c2",
+ "primary_harness_sha256": "f5cd329b4ddd40827e0c562b6abc2adda723508a20cbd888edf96d745d55a981",
+ "secondary_harness_sha256": "8b5ae2b22c364eb1e073625baf9acd61ea1d9d7fb68e16c199691d489457e176",
+ "system": {
+  "asr_profile": "cw2",
+  "model_id": "nyralabs/CrisperWhisper2.0_large",
+  "model_revision": "f4334f6e8193f2691212d49b20fa12d370e13896",
+  "weights_manifest_sha256_pinned": "b22cf7a5208e73405514f32b9e7686019364771d51a8a8683f105596d88e7ac9",
+  "rule": "same as primary 'rule'",
+  "licence": "CrisperWhisper weights and outputs: non-commercial research only; no transcript is stored"
+ },
+ "environment": {
+  "versions": {
+   "python": "3.12.12",
+   "OMP_NUM_THREADS": "4",
+   "numpy": "2.5.4",
+   "torch": "2.9.1+cu130",
+   "faster-whisper": "1.2.1",
+   "ctranslate2": "4.8.2",
+   "librosa": "1.0.0",
+   "soundfile": "0.14.0",
+   "scipy": "1.18.1"
+  },
+  "device_requested": "cuda",
+  "compute_type_expected": "float16",
+  "cuda_available": true,
+  "gpu_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+  "torch": "2.9.1+cu130",
+  "cuda_runtime": "13.0",
+  "snapshot_dir_name": "f4334f6e8193f2691212d49b20fa12d370e13896",
+  "weights_manifest_sha256_at_run": "b22cf7a5208e73405514f32b9e7686019364771d51a8a8683f105596d88e7ac9"
+ },
+ "finished_utc": "2026-11-08T02:45:00+00:00",
+ "status": "ok",
+ "classes": {
+  "repetition": {
+   "gate": {
+    "positives": 95,
+    "recordings_with_positives": 14,
+    "speakers_with_positives": 5,
+    "evaluable": true
+   },
+   "metrics": {
+    "cw2_rule": {
+     "tp": 91,
+     "fp": 47,
+     "fn": 4,
+     "precision": 0.6594202898550725,
+     "recall": 0.9578947368421052,
+     "f1": 0.7811158798283262,
+     "f1_ci95": [
+      0.6809997712194006,
+      0.8518518518518519
+     ]
+    },
+    "default": {
+     "tp": 32,
+     "fp": 97,
+     "fn": 63,
+     "precision": 0.24806201550387597,
+     "recall": 0.3368421052631579,
+     "f1": 0.2857142857142857,
+     "f1_ci95": [
+      0.19386932192231732,
+      0.37975729678836695
+     ]
+    },
+    "p0_rule": {
+     "tp": 52,
+     "fp": 51,
+     "fn": 43,
+     "precision": 0.5048543689320388,
+     "recall": 0.5473684210526316,
+     "f1": 0.5252525252525253,
+     "f1_ci95": [
+      0.42999766355140184,
+      0.632267939433838
+     ]
+    }
+   },
+   "descriptive_cw2_rule_vs_p0_rule": {
+    "delta": 0.2558633545758009,
+    "ci": [
+     0.1658835566416673,
+     0.3511601650763387
+    ],
+    "n_boot": 5000
+   }
+  },
+  "filler_word": {
+   "gate": {
+    "positives": 37,
+    "recordings_with_positives": 12,
+    "speakers_with_positives": 5,
+    "evaluable": true
+   },
+   "metrics": {
+    "cw2_rule": {
+     "tp": 29,
+     "fn": 8,
+     "recall": 0.7837837837837838,
+     "recall_ci95": [
+      0.6578947368421053,
+      0.9047991071428569
+     ]
+    },
+    "default": {
+     "tp": 20,
+     "fn": 17,
+     "recall": 0.5405405405405406,
+     "recall_ci95": [
+      0.37920258620689656,
+      0.6829268292682927
+     ]
+    },
+    "p0_rule": {
+     "tp": 19,
+     "fn": 18,
+     "recall": 0.5135135135135135,
+     "recall_ci95": [
+      0.38095238095238093,
+      0.6511627906976745
+     ]
+    }
+   },
+   "note": "recall on transcript-marked non-lexical filled pauses; no precision, no F1",
+   "descriptive_cw2_rule_vs_p0_rule": {
+    "delta": 0.2702702702702703,
+    "ci": [
+     0.11904761904761907,
+     0.4137931034482758
+    ],
+    "n_boot": 5000
+   }
+  }
+ },
+ "secondary_tests": {
+  "S1_cw2_rule_vs_default_repetition_f1": {
+   "delta": 0.4954015941140405,
+   "ci": [
+    0.3757384479745619,
+    0.624715149415984
+   ],
+   "p_two": 0.0003999200159968006,
+   "n_boot": 5000,
+   "sides": "two-sided",
+   "p_raw": 0.0003999200159968006,
+   "p_holm": 0.0007998400319936012,
+   "direction": "cw2_better",
+   "verdict": "supported"
+  },
+  "S2_cw2_rule_vs_default_filler_recall": {
+   "delta": 0.2432432432432432,
+   "ci": [
+    0.049969512195122,
+    0.4411764705882353
+   ],
+   "p_two": 0.023195360927814438,
+   "n_boot": 5000,
+   "sides": "two-sided",
+   "p_raw": 0.023195360927814438,
+   "p_holm": 0.023195360927814438,
+   "direction": "cw2_better",
+   "verdict": "supported"
+  }
+ },
+ "holm_family": {
+  "size": 2,
+  "members": [
+   "S1_cw2_rule_vs_default_repetition_f1",
+   "S2_cw2_rule_vs_default_filler_recall"
+  ],
+  "p_raw": [
+   0.0003999200159968006,
+   0.023195360927814438
+  ],
+  "p_holm": [
+   0.0007998400319936012,
+   0.023195360927814438
+  ],
+  "alpha": 0.05
+ },
+ "dropped_events_no_unit": 3
+}

@@ -1,0 +1,218 @@
+{
+ "frozen_utc": "2026-11-07T06:24:24+00:00",
+ "protocol_file": "PROTOCOL_CONFIRMATORIO.md",
+ "protocol_sha256": "ba0c92902471728d02acd4eaee47f61f549a8492d7227e7bd010eaaeb65594c2",
+ "harness_file": "scripts/confirmatoria/run_confirmatoria.py",
+ "harness_sha256": "f5cd329b4ddd40827e0c562b6abc2adda723508a20cbd888edf96d745d55a981",
+ "note": "sha256 of text files computed after CRLF -> LF normalisation; data files hashed as raw bytes",
+ "data": {
+  "02_NOCANDO_ES/audio/berta_es_1.mp3": {
+   "sha256": "a89dbf65ad152a48579e56db93f1a753b7ae2d97f864dc68658c7b1d173e9e9f",
+   "bytes": 2190399
+  },
+  "02_NOCANDO_ES/audio/berta_es_2.mp3": {
+   "sha256": "92394adb780b71ca17b7af419250e7050d24b0235c9536e850d739bfca0884ae",
+   "bytes": 3350075
+  },
+  "02_NOCANDO_ES/audio/berta_es_3.mp3": {
+   "sha256": "e0a7a07c887acd2f5d3942669e65436792dbcc1d0d774ec0a731e2f3d1806dc8",
+   "bytes": 2978220
+  },
+  "02_NOCANDO_ES/audio/carmen_es_1.mp3": {
+   "sha256": "b6cf502d672d085969a6df0798b878385b01d6103c7a5fa0dbcb557df8abb91a",
+   "bytes": 5512431
+  },
+  "02_NOCANDO_ES/audio/carmen_es_2.mp3": {
+   "sha256": "ad44194b07680e95c120e2c4d2392e4cfb7bb83d1a0e09d38343bd8f28615250",
+   "bytes": 4398228
+  },
+  "02_NOCANDO_ES/audio/carmen_es_3.mp3": {
+   "sha256": "ce2b0a08a0d789012deb961665aec4009595a38084c0299e0df39bde074e5eeb",
+   "bytes": 5612091
+  },
+  "02_NOCANDO_ES/audio/cristina-mem_es_1.mp3": {
+   "sha256": "dd7dfc3afe1cb05e7d16fd3a77d9d71b172a5051b7864911ded2a811b87999c8",
+   "bytes": 7837596
+  },
+  "02_NOCANDO_ES/audio/cristina-mem_es_2.mp3": {
+   "sha256": "1b7a1333691ccc0554e2ee5743e71d42ed23c2419019540028717a201521c6fc",
+   "bytes": 5616979
+  },
+  "02_NOCANDO_ES/audio/cristina-mem_es_3.mp3": {
+   "sha256": "8676aeec45d38914db5ea6dc94ac39ed3bfd949614c07f27a91244d4cb3712f1",
+   "bytes": 5909550
+  },
+  "02_NOCANDO_ES/audio/enrique2_es_1.mp3": {
+   "sha256": "45354f2b1ecb7a27d49434414978774c732b1369f8be13b3625e4218424cf23c",
+   "bytes": 3978552
+  },
+  "02_NOCANDO_ES/audio/enrique2_es_2.mp3": {
+   "sha256": "1fea4885d361721a4566aac0d9caca024c22d058621d8bbf9a4784903bf723da",
+   "bytes": 3836864
+  },
+  "02_NOCANDO_ES/audio/enrique2_es_3.mp3": {
+   "sha256": "48062be62f16b579f536512021fd84ddc96cfcc64fae7eeac495329f91b7f828",
+   "bytes": 3170637
+  },
+  "02_NOCANDO_ES/audio/enrique_es_1.mp3": {
+   "sha256": "766fa465b5ef8d55eb45831197f912d7f357a27fd68aeeeeef0b7083f5830606",
+   "bytes": 4690016
+  },
+  "02_NOCANDO_ES/audio/enrique_es_2.mp3": {
+   "sha256": "d93652ee081d58dc4b7d8d015b7a370ff31ee4355139170944a2306555336741",
+   "bytes": 4127478
+  },
+  "02_NOCANDO_ES/audio/enrique_es_3.mp3": {
+   "sha256": "adc94da45dff492e5e64abbf16f01f0aefdc52621a19a942d36c48320efc4276",
+   "bytes": 5444225
+  },
+  "02_NOCANDO_ES/audio/gemma_es_1.mp3": {
+   "sha256": "fb6bf7463b07d9a30df0e234eddfb7fbaadbe42165323360ae2b2ab14dcea49c",
+   "bytes": 2644035
+  },
+  "02_NOCANDO_ES/audio/gemma_es_2.mp3": {
+   "sha256": "99b504dd3c45a8bb3972407ec0e3bc8ccfc2b20b88aa5abe7b808ca231911cab",
+   "bytes": 3572323
+  },
+  "02_NOCANDO_ES/audio/gemma_es_3.mp3": {
+   "sha256": "f2f10a9391433cfca1c71bcaf90f72f1dcd77de00e52b18fc12ff4d1920c66cb",
+   "bytes": 3488313
+  },
+  "02_NOCANDO_ES/audio/iris_es_1.mp3": {
+   "sha256": "a9909bd605a8abb2310020af18018a8c9662ee34a4fef085356ca74ea1c26a8f",
+   "bytes": 3775006
+  },
+  "02_NOCANDO_ES/audio/iris_es_2.mp3": {
+   "sha256": "43a918b0deee1771269707520b4d1082d547c65b4bca83f4b68c595a47c2eb31",
+   "bytes": 3744077
+  },
+  "02_NOCANDO_ES/audio/iris_es_3.mp3": {
+   "sha256": "d548a09eb4e5221f1ec1c0968b5d9c3aa6b92807cbf3b04050cec08b84236db5",
+   "bytes": 2838359
+  },
+  "02_NOCANDO_ES/audio/jessica3-mem_es_1.mp3": {
+   "sha256": "1bf94b98d295af382fa33e114cf75c1c9ec60e3c50fad2ca3f962a029076b409",
+   "bytes": 646163
+  },
+  "02_NOCANDO_ES/audio/jessica3-mem_es_2.mp3": {
+   "sha256": "c2acd55e1bc4ef52fd1ce48165540aefd76a5ece53f69b3749b863bda77e81b7",
+   "bytes": 598098
+  },
+  "02_NOCANDO_ES/audio/jessica3-mem_es_3.mp3": {
+   "sha256": "668d21f0bb81c9735f4449fa48aeeeec7ada0286d5cd58d9c8bbaa93ffd87261",
+   "bytes": 1040717
+  },
+  "02_NOCANDO_ES/audio/maria_es_1.mp3": {
+   "sha256": "7251b7e332595c1a765c199729e0ae12ee1f20d8222fd2de57b5f73d45a2bb94",
+   "bytes": 2404518
+  },
+  "02_NOCANDO_ES/audio/maria_es_2.mp3": {
+   "sha256": "50a59a3bc214f29e19a0e637f75e57f1ff1645f4e2e5251f5e23564f9dbdb2a3",
+   "bytes": 2247365
+  },
+  "02_NOCANDO_ES/audio/maria_es_3.mp3": {
+   "sha256": "dcd4f150e5817530c46eead556ca181ecbea6a3969d199efe19338ecd36cb286",
+   "bytes": 2204733
+  },
+  "02_NOCANDO_ES/audio/maribel_es_1.mp3": {
+   "sha256": "eb6de6041a20c0847da4e92cf72cacca10d89c96cbbbf13bab876a1ac695de74",
+   "bytes": 3391319
+  },
+  "02_NOCANDO_ES/audio/maribel_es_2.mp3": {
+   "sha256": "d463793efe1a389ccf6123ec8bb91991ebe66e79de0705e6872b268491103a52",
+   "bytes": 3870301
+  },
+  "02_NOCANDO_ES/audio/maribel_es_3.mp3": {
+   "sha256": "8a7926818d4d42e7b056b2efa3c583b1f47e6ded805cc8bc3db632d30f2e8647",
+   "bytes": 3604479
+  },
+  "02_NOCANDO_ES/audio/nuria_es_1.mp3": {
+   "sha256": "cd8c84994b0227c8021589b54eb8db3d03cb7fa791d1d6ba36d166d2711fc535",
+   "bytes": 4103967
+  },
+  "02_NOCANDO_ES/audio/nuria_es_2.mp3": {
+   "sha256": "83bd8e228b885bfb036efcd8788ef0b51f07a3151ab66ad3c98dc9b1a492263b",
+   "bytes": 3396362
+  },
+  "02_NOCANDO_ES/audio/nuria_es_3.mp3": {
+   "sha256": "98a4545b6d0ee1b8a332ea73d307f76180567369e8740003b8b5da568e5feb67",
+   "bytes": 5427643
+  },
+  "02_NOCANDO_ES/alineamientos/berta_es_1.TextGrid": {
+   "sha256": "d2b255deb17b5214087a54c0a86e90a64904938f94d7e238602283390f12c471",
+   "bytes": 12848
+  },
+  "02_NOCANDO_ES/alineamientos/berta_es_2.TextGrid": {
+   "sha256": "6b94c05b0997573b9b53bf3b8ca00388a39a4539fb4d3810c79ff8d6daf44d67",
+   "bytes": 50744
+  },
+  "02_NOCANDO_ES/alineamientos/berta_es_3.TextGrid": {
+   "sha256": "e8a596f98c257f098c55352f2e632555f01ac56c85419fac196d8e6a32f430fa",
+   "bytes": 47308
+  },
+  "02_NOCANDO_ES/alineamientos/carmen_es_1.TextGrid": {
+   "sha256": "d8586d833bcaad37be3d307aba074cfac9b1d9c26e24735b9c71aaa5a45edcf2",
+   "bytes": 103114
+  },
+  "02_NOCANDO_ES/alineamientos/carmen_es_2.TextGrid": {
+   "sha256": "69d2e5365e6fcfb4dc8b5027a40fd84af53e8ff8b28952bfaa6b3f991825e23e",
+   "bytes": 88542
+  },
+  "02_NOCANDO_ES/alineamientos/carmen_es_3.TextGrid": {
+   "sha256": "64cb7de6916f314ed9cfea5f1fd2602489ec1ccaf7c6a8002b4015bb7f12fa81",
+   "bytes": 104414
+  },
+  "02_NOCANDO_ES/alineamientos/enrique_es_1.TextGrid": {
+   "sha256": "3775caed293036e8f6d600f17456c98bb260dc115ce36e0f2ba94087de52cb79",
+   "bytes": 70286
+  },
+  "02_NOCANDO_ES/alineamientos/enrique_es_2.TextGrid": {
+   "sha256": "218ad134da32866c70e207df2eaddbc312dfc95bfb66a2b4ff208128c4efdae9",
+   "bytes": 59112
+  },
+  "02_NOCANDO_ES/alineamientos/enrique_es_3.TextGrid": {
+   "sha256": "16c85770126d16829d45fd6620ab8ee0bf53f45aee46121f5f17e268a7a16732",
+   "bytes": 82166
+  },
+  "02_NOCANDO_ES/alineamientos/maria_es_2.TextGrid": {
+   "sha256": "ac64762c52cddf77596d230adaf75018d64fcb1c7a4a476d73a6c1688d0213c8",
+   "bytes": 33164
+  },
+  "02_NOCANDO_ES/alineamientos/maria_es_3.TextGrid": {
+   "sha256": "f9740ca1ef053f7b9144e71c7178d201dfc4366203ad0f3b75b7f3a98007f499",
+   "bytes": 29960
+  },
+  "02_NOCANDO_ES/alineamientos/nuria_es_1.TextGrid": {
+   "sha256": "d8675628279219f61dd53883ad3f5a1cf29fdac70a890fbfdfde07dd8dca8b19",
+   "bytes": 64846
+  },
+  "02_NOCANDO_ES/alineamientos/nuria_es_2.TextGrid": {
+   "sha256": "9558e476019aff12f724c18e61701c82e973541320013fca4d7eeffee8fbf895",
+   "bytes": 46384
+  },
+  "02_NOCANDO_ES/alineamientos/nuria_es_3.TextGrid": {
+   "sha256": "48b5b75f6e24f5c35d5a57ac0155e1680a10a004a70ab7178d994709e7ed02ee",
+   "bytes": 80374
+  },
+  "12_AMERESCO/source_annotation_index.csv": {
+   "sha256": "181ecd21a4c60866c5d0c2ce6e45016f130eaa36b0169eba9f2304e76f8fb6dc",
+   "bytes": 257565
+  },
+  "12_AMERESCO/BAQ_001_03_16/BAQ_001_03_16.mp3": {
+   "sha256": "a32892ed2981f9590bb266cc9336bac53c7da1d27cbeaef3f75a1e9e7e9ae190",
+   "bytes": 24415182
+  },
+  "12_AMERESCO/BUE_001_03_19/BUE_001_03_19.mp3": {
+   "sha256": "e29b6eb37f78a5331ff0ed723da3a5e787b0f639051b0c30f15359bc82f6c7e1",
+   "bytes": 26670920
+  },
+  "12_AMERESCO/HAV_001_02_12/HAV_001_02_12.mp3": {
+   "sha256": "b41fca4119b69d4eb35beb09d1dd81a8cf0b752d6efa9b0f1105a9035d2d2722",
+   "bytes": 26099558
+  },
+  "12_AMERESCO/MEX_001_02_15/MEX_001_02_15.mp3": {
+   "sha256": "159d8b32f951a81d971cb4973b0f358c6fffb5295752cb4d393bf1846fef0e79",
+   "bytes": 55140408
+  }
+ }
+}

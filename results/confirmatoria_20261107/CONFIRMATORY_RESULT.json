@@ -1,0 +1,316 @@
+{
+ "label": "CONFIRMATORY (cell nocando) + SECOND LOOK (cell ameresco_second_look); see protocol section 1 for what each can claim",
+ "system_commit": "a0510677ae2d2f906206a276e49cc88221edbe89",
+ "git_head_at_run": "6b6f0596019ea4a55e49b27d09ed059a65d1a830",
+ "system_commit_param": "a0510677ae2d",
+ "system_tree_sha256": "fca42f09db7c0a60d1986cafbcbf6b463d6dcc97e8ecbfa46a753e060621af5a",
+ "default_decision_profile": "o2026_11",
+ "protocol_sha256": "ba0c92902471728d02acd4eaee47f61f549a8492d7227e7bd010eaaeb65594c2",
+ "harness_sha256": "f5cd329b4ddd40827e0c562b6abc2adda723508a20cbd888edf96d745d55a981",
+ "environment": {
+  "python": "3.12.10",
+  "OMP_NUM_THREADS": "4",
+  "numpy": "2.5.3",
+  "torch": "2.9.1",
+  "faster-whisper": "1.2.1",
+  "ctranslate2": "4.8.2",
+  "librosa": "1.0.0",
+  "soundfile": "0.14.0",
+  "scipy": "1.18.1"
+ },
+ "continued_after_crash_annex": null,
+ "finished_utc": "2026-11-07T20:09:01+00:00",
+ "confirmatory_nocando": {
+  "n_units": 1511,
+  "n_recordings": 14,
+  "n_speakers": 5,
+  "classes": {
+   "repetition": {
+    "gate": {
+     "positives": 95,
+     "recordings_with_positives": 14,
+     "speakers_with_positives": 5,
+     "evaluable": true
+    },
+    "metrics": {
+     "default": {
+      "tp": 32,
+      "fp": 97,
+      "fn": 63,
+      "precision": 0.24806201550387597,
+      "recall": 0.3368421052631579,
+      "f1": 0.2857142857142857,
+      "f1_ci95": [
+       0.19386932192231732,
+       0.37975729678836695
+      ],
+      "recall_ci95": [
+       0.2471756195167,
+       0.43967569786535293
+      ],
+      "precision_ci95": [
+       0.1510615567696219,
+       0.36031454248366
+      ]
+     },
+     "v0": {
+      "tp": 32,
+      "fp": 97,
+      "fn": 63,
+      "precision": 0.24806201550387597,
+      "recall": 0.3368421052631579,
+      "f1": 0.2857142857142857,
+      "f1_ci95": [
+       0.19386932192231732,
+       0.37975729678836695
+      ],
+      "recall_ci95": [
+       0.2471756195167,
+       0.43967569786535293
+      ],
+      "precision_ci95": [
+       0.1510615567696219,
+       0.36031454248366
+      ]
+     },
+     "rule": {
+      "tp": 52,
+      "fp": 51,
+      "fn": 43,
+      "precision": 0.5048543689320388,
+      "recall": 0.5473684210526316,
+      "f1": 0.5252525252525253,
+      "f1_ci95": [
+       0.42999766355140184,
+       0.632267939433838
+      ],
+      "recall_ci95": [
+       0.4199938271604938,
+       0.696969696969697
+      ],
+      "precision_ci95": [
+       0.3644809746328438,
+       0.6579107830551989
+      ]
+     },
+     "always_present": {
+      "tp": 95,
+      "fp": 1416,
+      "fn": 0,
+      "precision": 0.0628722700198544,
+      "recall": 1.0,
+      "f1": 0.11830635118306351,
+      "f1_ci95": [
+       0.06781756010992264,
+       0.1757381045016246
+      ],
+      "recall_ci95": [
+       1.0,
+       1.0
+      ],
+      "precision_ci95": [
+       0.03509894239931117,
+       0.0963338131104013
+      ]
+     },
+     "default_events_equal_v0_events": true,
+     "leave_one_speaker_out_f1_default": {
+      "berta": 0.21794871794871795,
+      "carmen": 0.32978723404255317,
+      "enrique": 0.3,
+      "maria": 0.2830188679245283,
+      "nuria": 0.29
+     }
+    },
+    "tests": {
+     "H1_default_vs_always_present": {
+      "delta": 0.16740793453122219,
+      "ci": [
+       0.09777925731358687,
+       0.24662851037515968
+      ],
+      "p_two": 0.0003999200159968006,
+      "p_one_gt": 0.0001999600079984003,
+      "n_boot": 5000,
+      "expected": "gt0",
+      "one_sided": true,
+      "p_raw": 0.0001999600079984003,
+      "p_holm": 0.0007998400319936012,
+      "direction": "default_better",
+      "verdict": "supported"
+     },
+     "H2_default_vs_rule": {
+      "delta": -0.2395382395382396,
+      "ci": [
+       -0.3456797223469438,
+       -0.16100173102114665
+      ],
+      "p_two": 0.0003999200159968006,
+      "p_one_gt": 1.0,
+      "n_boot": 5000,
+      "expected": "two_sided",
+      "one_sided": false,
+      "p_raw": 0.0003999200159968006,
+      "p_holm": 0.0011997600479904018,
+      "direction": "default_worse",
+      "verdict": "supported"
+     }
+    }
+   },
+   "filler_word": {
+    "gate": {
+     "positives": 37,
+     "recordings_with_positives": 12,
+     "speakers_with_positives": 5,
+     "evaluable": true
+    },
+    "metrics": {
+     "default": {
+      "tp": 20,
+      "fn": 17,
+      "recall": 0.5405405405405406,
+      "recall_ci95": [
+       0.37920258620689656,
+       0.6829268292682927
+      ]
+     },
+     "v0": {
+      "tp": 14,
+      "fn": 23,
+      "recall": 0.3783783783783784,
+      "recall_ci95": [
+       0.25,
+       0.5143073593073592
+      ]
+     },
+     "rule": {
+      "tp": 19,
+      "fn": 18,
+      "recall": 0.5135135135135135,
+      "recall_ci95": [
+       0.38095238095238093,
+       0.6511627906976745
+      ]
+     }
+    },
+    "tests": {
+     "H3_default_vs_v0": {
+      "delta": 0.16216216216216217,
+      "ci": [
+       0.0,
+       0.3055555555555555
+      ],
+      "p_two": 0.09678064387122576,
+      "p_one_gt": 0.04839032193561288,
+      "n_boot": 5000,
+      "expected": "two_sided",
+      "one_sided": false,
+      "p_raw": 0.09678064387122576,
+      "p_holm": 0.19356128774245152,
+      "direction": "default_better",
+      "verdict": "not demonstrated"
+     },
+     "H4_default_vs_rule": {
+      "delta": 0.027027027027027084,
+      "ci": [
+       -0.17647058823529416,
+       0.20933292533659684
+      ],
+      "p_two": 0.8774245150969806,
+      "p_one_gt": 0.4387122575484903,
+      "n_boot": 5000,
+      "expected": "two_sided",
+      "one_sided": false,
+      "p_raw": 0.8774245150969806,
+      "p_holm": 0.8774245150969806,
+      "direction": "default_better",
+      "verdict": "not demonstrated"
+     }
+    },
+    "note": "recall on transcript-marked non-lexical filled pauses; no precision, no F1",
+    "descriptive": {
+     "audio_minutes_covered_by_units": 57.14573280165123,
+     "default_filler_units_per_minute": 2.3623811154644807,
+     "reference_units_with_filler_per_minute": 0.6474674168310058
+    }
+   }
+  },
+  "holm_family": {
+   "size": 4,
+   "members": [
+    "H1_default_vs_always_present",
+    "H2_default_vs_rule",
+    "H3_default_vs_v0",
+    "H4_default_vs_rule"
+   ],
+   "p_raw": [
+    0.0001999600079984003,
+    0.0003999200159968006,
+    0.09678064387122576,
+    0.8774245150969806
+   ],
+   "p_holm": [
+    0.0007998400319936012,
+    0.0011997600479904018,
+    0.19356128774245152,
+    0.8774245150969806
+   ]
+  },
+  "absolute_criteria": {
+   "A1_repetition_f1_ci_lower_ge_floor": {
+    "floor": 0.3,
+    "lower": 0.19386932192231732,
+    "met": false
+   },
+   "A2_filler_recall_ci_lower_ge_floor": {
+    "floor": 0.4,
+    "lower": 0.37920258620689656,
+    "met": false
+   }
+  },
+  "failures_recordings": {},
+  "recording_failure_rate": 0.0,
+  "interpretable": true,
+  "dropped_events_no_unit": {
+   "o2026_11": 7,
+   "v0": 10,
+   "rule": 260
+  }
+ },
+ "second_look_ameresco": {
+  "status": "SECOND LOOK - NOT CONFIRMATORY (same conversations and speakers as the contaminated 98-segment pool)",
+  "n_units": 1007,
+  "marked_positive": 172,
+  "recordings": [
+   "BAQ_001_03_16",
+   "BUE_001_03_19",
+   "HAV_001_02_12",
+   "MEX_001_02_15"
+  ],
+  "systems": {
+   "default": {
+    "recall_marked": 0.3546511627906977,
+    "recall_exact_ci95_segments_independent_assumption": [
+     0.2833257065003165,
+     0.4310821790393919
+    ],
+    "tp": 61,
+    "n_marked": 172,
+    "flag_rate_in_unmarked_segments": 0.237125748502994,
+    "flag_rate_note": "unmarked is NOT verified negative (AMERESCO negative coverage unknown): this is not a false-positive rate"
+   },
+   "v0": {
+    "recall_marked": 0.11046511627906977,
+    "recall_exact_ci95_segments_independent_assumption": [
+     0.06783158884606282,
+     0.16712187747097726
+    ],
+    "tp": 19,
+    "n_marked": 172,
+    "flag_rate_in_unmarked_segments": 0.06467065868263473,
+    "flag_rate_note": "unmarked is NOT verified negative (AMERESCO negative coverage unknown): this is not a false-positive rate"
+   }
+  },
+  "failures_recordings": {}
+ }
+}
