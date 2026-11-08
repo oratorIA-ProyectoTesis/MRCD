@@ -63,3 +63,10 @@ models/*.pt
 
 # skill registry cache
 .atl/
+
+# annotation campaign: blind keys and local clips must never be committed
+key_pass*.csv
+*_key.csv
+**/annotation_clips/
+**/clips_pass*/
+_local_annotation_clips/
