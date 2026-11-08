@@ -2,6 +2,9 @@
 
 Audacity label line:  start<TAB>end<TAB>CODE state [note words]
   CODE  in FP, LF, REP, PRO, INAUD ; state in d, f, i (INAUD takes none)
+Discourse-marker function layer (same passes): MK <token> <d|f|i> [note]
+  token from the closed list in markers.py (este, o_sea, bueno, pues, a_ver, tipo).
+  Emits class=discourse_marker, state=none, marker_token, marker_function.
 Every clip in --clips-dir must have a label file (an empty file means
 "looked, found no event"); a missing file is an error, never an implicit "none".
 """
@@ -12,6 +15,8 @@ import csv
 import sys
 from pathlib import Path
 
+from scripts.annotation.markers import MARKER_CLASS, check_marker
+
 CLASSES = {
     "FP": "filled_pause",
     "LF": "lexical_filler",
@@ -20,6 +25,22 @@ CLASSES = {
     "INAUD": "inaudible",
 }
 STATES = {"d": "disfluent", "f": "functional", "i": "uncertain"}
+HEADER = ["item_id", "annotator", "class", "state", "start_s", "end_s", "note", "marker_token", "marker_function"]
+
+
+def parse_marker(text: str) -> tuple[str, str, str]:
+    """`MK <token> <d|f|i> [note]` -> (token, function, note)."""
+    parts = text.split()
+    if len(parts) >= 3 and parts[2].lower() not in STATES:
+        two = f"{parts[1]}_{parts[2]}".lower()
+        if two in ("o_sea", "a_ver"):
+            raise ValueError(
+                f"write {two!r} with an underscore: 'MK {two} <d|f|i>', got {text!r}"
+            )
+    if len(parts) < 3 or parts[2].lower() not in STATES:
+        raise ValueError(f"marker label needs 'MK <token> <d|f|i>', got {text!r}")
+    token, function = check_marker(parts[1], STATES[parts[2].lower()])
+    return token, function, " ".join(parts[3:])
 
 
 def parse_label(text: str) -> tuple[str, str, str]:
@@ -63,13 +84,17 @@ def convert(clips_dir: Path, labels_dir: Path, annotator: str) -> tuple[list[lis
             raise ValueError(f"missing label file for {cid}")
         events = read_events(f)
         if not events:
-            rows.append([cid, annotator, "none", "none", "", "", ""])
+            rows.append([cid, annotator, "none", "none", "", "", "", "", ""])
         for s, e, text in events:
             try:
+                if text.split()[0].upper() == "MK":
+                    tok, fn, note = parse_marker(text)
+                    rows.append([cid, annotator, MARKER_CLASS, "none", f"{s:.3f}", f"{e:.3f}", note, tok, fn])
+                    continue
                 cls, state, note = parse_label(text)
             except ValueError as exc:
                 raise ValueError(f"{cid}: {exc}") from None
-            rows.append([cid, annotator, cls, state, f"{s:.3f}", f"{e:.3f}", note])
+            rows.append([cid, annotator, cls, state, f"{s:.3f}", f"{e:.3f}", note, "", ""])
     orphans = sorted(p.stem for p in labels_dir.glob("*.txt") if p.stem not in set(clips))
     return rows, orphans
 
@@ -89,7 +114,7 @@ def main() -> int:
         print(f"WARNING: label file {o}.txt matches no clip in {a.clips_dir}", file=sys.stderr)
     with a.out.open("w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh, lineterminator="\n")
-        w.writerow(["item_id", "annotator", "class", "state", "start_s", "end_s", "note"])
+        w.writerow(HEADER)
         w.writerows(rows)
     print(f"{len(rows)} rows -> {a.out}")
     return 0

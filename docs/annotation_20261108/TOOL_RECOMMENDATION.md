@@ -5,7 +5,7 @@
 ## How to annotate
 
 1. Open one blind clip (`<blind_id>.wav`). Do not rename it.
-2. Select the region of an event, press `Ctrl+B` to add a label and type `CODE state [note]`, e.g. `REP d`, `FP d`, `LF f`, `PRO i`, `INAUD`. Codes: `FP LF REP PRO INAUD`; states: `d` disfluent, `f` functional, `i` uncertain.
+2. Select the region of an event, press `Ctrl+B` to add a label and type `CODE state [note]`, e.g. `REP d`, `FP d`, `LF f`, `PRO i`, `INAUD`. Codes: `FP LF REP PRO INAUD`; discourse markers (guide §3) are labelled `MK <token> <d|f|i>`, e.g. `MK o_sea f`, with token from the closed list `este o_sea bueno pues a_ver tipo` (write `o_sea` and `a_ver` with an underscore); states: `d` disfluent, `f` functional, `i` uncertain.
 3. Export with `File > Export > Export Labels...` as `<blind_id>.txt` in the labels folder. **Export an empty file for a clip with no events**: a missing file is an error, not "none".
 4. Convert and hash:
    - `python -m scripts.annotation.labels_to_csv --clips-dir <clips> --labels-dir <labels> --annotator <id> --out passN.csv`

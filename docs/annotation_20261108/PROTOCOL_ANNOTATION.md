@@ -40,8 +40,19 @@ Produce a human reference for filled pauses, lexical fillers, repetitions and pr
 
 ## 6. Annotation schema and tool
 
-CSV columns: `item_id, annotator, class, state, start_s, end_s, note`.
-`class` in `filled_pause, lexical_filler, repetition, prolongation, inaudible, none`; `state` in `disfluent, functional, uncertain, none`; times in seconds relative to the clip start. An item with no events has exactly one row with `class=none, state=none` and empty times, so "looked, found nothing" differs from "not annotated". Tool: `TOOL_RECOMMENDATION.md`.
+CSV columns: `item_id, annotator, class, state, start_s, end_s, note, marker_token, marker_function`. The last two are the discourse-marker function layer (§6.1); the first seven are unchanged, and sheets without the last two remain valid (no marker spans).
+`class` in `filled_pause, lexical_filler, repetition, prolongation, inaudible, discourse_marker, none`; `state` in `disfluent, functional, uncertain, none`; times in seconds relative to the clip start. An item with no events has exactly one row with `class=none, state=none` and empty times, so "looked, found nothing" differs from "not annotated". Tool: `TOOL_RECOMMENDATION.md`.
+
+### 6.1 Discourse-marker function (`marker_function`)
+
+Revision of 2026-11-08 (pre-annotation; see the annex). Purpose: a human label for the function of discourse markers, so a later contribution can compare functional vs disfluent markers, with an explicit uncertain state and measured agreement.
+
+- For every occurrence the annotator hears of a token in the closed list (`este, o_sea, bueno, pues, a_ver, tipo`; `eh`, `em` and `mm` are not in the list and remain `filled_pause`), one row is added with `class=discourse_marker`, `state=none`, the span of the token, `marker_token` (normalized form from the list) and `marker_function` in `functional, disfluent, uncertain`. Other rows leave both columns empty. The definitions use observable cues only (`GUIA_ANOTACION.md` §3); Decision order (exhaustive, `GUIA_ANOTACION.md` §3.2): `functional` if there is an observable syntactic role; else `disfluent` only if there is no syntactic role AND the token is deletable without changing content AND at least one adjacency cue is present (silent or filled pause, prolongation, restart or repair); else `uncertain`, including no role but no adjacency cue, and unclear audio. This layer is separate from and stricter than `LF`: "no own tone" alone can justify `LF`=disfluent but gives `MK`=uncertain without an adjacency cue; disagreement between the two layers is expected by design and both are analysed separately.
+- The layer is labelled in **both main passes** and in the **rater-2 subset**, and in the calibration passes. It is independent of the existing classes: an `este` can carry both an `LF` row and a marker row.
+- Audacity label: `MK <token> <d|f|i>` (`labels_to_csv.py` validates the closed list and the value).
+- Agreement (`agreement.py --field marker_function`, same `--mode` options): spans are matched per item and token with the same greedy IoU >= 0.10 matcher as events. On the **matched** spans we report intra-rater Cohen κ and Krippendorff α (nominal) for `intra`, the same for `subset` against each pass, the proportion of `uncertain` (per rater and pooled, over all spans) and the unmatched span counts. Pre-declared minimum: 30 matched spans; below it κ and α are reported as `not_available` with the reason, never as 0. κ and α are **always reported together with** `match_rate` (matched / max(n spans A, n spans B)) and detection F1 (2·matched / (n spans A + n spans B)), pooled over common items, in a token-aware version and in a token-agnostic version (IoU only) with the count of token mismatches. A low match rate makes κ and α non-interpretable: pre-declared, if detection F1 < 0.5 the function κ (and α) is reported as descriptive only (`function_kappa_descriptive_only`). In `subset` mode the same coverage flag as for events applies (`subset_below_minimum`, fewer than 40 common items). Computed before any adjudication, on raw CSVs.
+- Marker rows do not enter the event statistics of §7 (they are skipped by the event reader), so existing results keep their meaning.
+- Forbidden here too: any statement about intention, emotion or mental state; `marker_function` is a label of observable use in the sentence.
 
 ## 7. Agreement, then adjudication
 
@@ -86,4 +97,4 @@ After the single run the cell is spent. Results carry the label "blind single-ra
 
 ## 10. Time estimate
 
-150 items × ~8 s is about 20 min of audio; at ~10× real time that is about 3.3 h per pass, about 4 h with breaks (sessions <= 1 h). Calibration (20 clips) about 0.5 h. Primary path: 2 passes about 8 h, rater 2 on 40 items about 1 h, adjudication about 1 h, computation and freeze about 1 h: roughly 10-11 h of author time over at least 2 weeks. EXT: two raters × ~4 h plus 1-2 h for the adjudicator.
+150 items × ~8 s is about 20 min of audio; at ~10× real time that is about 3.3 h per pass, about 4 h with breaks (sessions <= 1 h). Calibration (20 clips) about 0.5 h. Discourse-marker layer (revision 2026-11-08): about +2 h in total across the two passes and the rater-2 subset. Primary path: 2 passes about 8 h, rater 2 on 40 items about 1 h, adjudication about 1 h, computation and freeze about 1 h: roughly 12-13 h of author time over at least 2 weeks. EXT: two raters × ~4 h plus 1-2 h for the adjudicator.

@@ -1,6 +1,6 @@
 # Annex 2026-11-08: declared deviation from PREREGISTRO §7 (self-annotation)
 
-Status: DRAFT drafted 2026-11-07. This file must be committed, and its commit hash recorded in the README, **before any annotation pass starts**. Any later change is a new dated annex, never an edit.
+Status: DRAFT drafted 2026-11-07; revised 2026-11-08 (pre-annotation, still unsigned: no annotation had started and the annex had not been committed/signed; see §5). This file must be committed, and its commit hash recorded in the README, **before any annotation pass starts**. Any later change is a new dated annex, never an edit.
 
 ## 1. Deviation
 
@@ -42,3 +42,14 @@ Status: DRAFT drafted 2026-11-07. This file must be committed, and its commit ha
 ## 4. Sign-off
 
 Author: ______________________ Date of commit: __________ Commit hash recorded in README: ______________
+
+## 5. Revision 2026-11-08: discourse-marker function layer
+
+Made before the annex was signed and before any annotation started, so it is part of the pre-registered design and not a post-hoc change.
+
+- **Added:** in the same passes, a human label `marker_function` in `functional, disfluent, uncertain` (plus `marker_token`) for every occurrence of the closed list `este, o_sea, bueno, pues, a_ver, tipo` (`eh`, `em` and `mm` stay `filled_pause`). Definitions use observable cues only (`GUIA_ANOTACION.md` v1.1, §3).
+- **Further revisions, same date (2026-11-08), still before sign-off and before any annotation:** (1) exhaustive decision order `functional` > `disfluent` (only with no syntactic role, deletable and at least one adjacency cue) > `uncertain`; (2) the marker layer is declared separate from and stricter than `LF`, with expected disagreement between layers, both analysed separately; (3) `eh` and `em_mm` removed from the closed list; (4) marker agreement now also reports `match_rate` and detection F1 next to κ/α, with κ/α descriptive only if detection F1 < 0.5; (5) the subset-coverage flag (fewer than 40 items) also applies to the marker layer.
+- **Unchanged:** classes, existing columns, sampling, controls (a)-(f), event-level agreement. Marker rows are excluded from the event statistics.
+- **Reliability on the new field:** intra-rater κ and α on matched marker spans, rater-2 subset agreement, proportion of `uncertain`; not available (with reason) below a pre-declared minimum of 30 matched spans.
+- **Cost:** about +2 h of author time (README time budget).
+- **Limit:** the same single-rater caveats of §2(f) apply; the author also knows the hypothesis that functional and disfluent markers differ, an unmeasured expectation-bias threat to be listed in the limitations.

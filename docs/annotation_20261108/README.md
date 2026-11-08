@@ -1,6 +1,6 @@
 # Annotation kit 2026-11-08 (Phase 0.5): what to do next
 
-Goal: a new human reference cell (filled pause, lexical filler, repetition, prolongation) on NOCANDO audio no system has touched. Primary path: **blind self-annotation** under a declared deviation. Preferred alternative if resources appear: two external annotators (`PROTOCOL_ANNOTATION.md`, EXT).
+Goal: a new human reference cell (filled pause, lexical filler, repetition, prolongation, plus the function of discourse markers: functional / disfluent / uncertain, revision 2026-11-08) on NOCANDO audio no system has touched. Primary path: **blind self-annotation** under a declared deviation. Preferred alternative if resources appear: two external annotators (`PROTOCOL_ANNOTATION.md`, EXT).
 
 ## Contents
 
@@ -12,8 +12,8 @@ Goal: a new human reference cell (filled pause, lexical filler, repetition, prol
 | `TOOL_RECOMMENDATION.md`            | Audacity label workflow.                                                                                |
 | `manifest_nocando_unlabeled.csv`    | 150 items (seed 20261108).                                                                              |
 | `manifest_nocando_calibration.csv`  | 20 disjoint calibration items.                                                                          |
-| `annotation_sheet_template.csv`     | CSV schema.                                                                                             |
-| `../../scripts/annotation/`         | `sample_items.py`, `cut_clips.py`, `blind_session.py`, `labels_to_csv.py`, `unblind.py`, `agreement.py` |
+| `annotation_sheet_template.csv`     | CSV schema (incl. `marker_token`, `marker_function`).                                                                                             |
+| `../../scripts/annotation/`         | `sample_items.py`, `cut_clips.py`, `blind_session.py`, `labels_to_csv.py`, `unblind.py`, `agreement.py` (events; `--field marker_function` for the marker layer), `markers.py` (closed list) |
 
 Run from the repo root with `PYTHONPATH` set to the repo root and the project venv (`.venv\Scripts\python.exe`, see `comandos-ejecutar/COMANDOS.MD`).
 
@@ -30,7 +30,7 @@ Run from the repo root with `PYTHONPATH` set to the repo root and the project ve
    - `labels_to_csv.py`, then `unblind.py --write-hash`; commit the CSV and its `.sha256`.
 5. **Wait at least 7 days.** Do not look at pass 1.
 6. **Pass 2.** Same as step 4 with a different `--seed` and `--prev-key`, new key, new clip folder.
-7. **Intra-rater reliability.** Unblind both CSVs to original ids, then `python -m scripts.annotation.agreement pass1_orig.csv pass2_orig.csv --mode intra` (also with `--tol 0.1` and `--tol 0.5`). Save the JSON and commit it **before adjudicating**.
+7. **Intra-rater reliability.** Unblind both CSVs to original ids, then `python -m scripts.annotation.agreement pass1_orig.csv pass2_orig.csv --mode intra` (also with `--tol 0.1` and `--tol 0.5`) and, for the marker layer, `... --mode intra --field marker_function` (not available below 30 matched spans). Save the JSON and commit it **before adjudicating**.
 8. **Rater 2** (native speaker, unpaid, never exposed to system output) on at least 40 items. Draw them first: `python -m scripts.annotation.draw_subset --manifest docs/annotation_20261108/manifest_nocando_unlabeled.csv --seed <DECLARED_SEED> --n 40 --out docs/annotation_20261108/rater2_subset_ids.csv` (declare the seed in the annex before drawing). Blind them with `blind_session.py --only-ids rater2_subset_ids.csv`. Then compute `agreement.py pass1_orig.csv rater2_orig.csv --mode subset` and `agreement.py pass2_orig.csv rater2_orig.csv --mode subset`. **Never against the adjudicated file** (circular). Report both as is.
 9. **Adjudicate your own disagreements** with the written rules (protocol §7), never looking at system output. Keep raw CSVs untouched; write a separate adjudicated CSV with rule numbers in `note`.
 10. **Commit hashed CSVs** (pass 1, pass 2, rater 2, adjudicated, agreement reports).
@@ -38,7 +38,7 @@ Run from the repo root with `PYTHONPATH` set to the repo root and the project ve
 
 ## Time estimate
 
-150 items × ~8 s is about 20 min of audio. At ~10× real time: about 3.3 h per pass, about 4 h with breaks. Calibration about 0.5 h plus the 0.5 h re-pass. Two passes about 8 h, rater 2 about 1 h (40 items), adjudication about 1 h, computation and freeze about 1 h. Total about 12 h of author time (0.5 + 0.5 + 8 + 1 + 1 + 1), over at least 2-3 weeks because of the 48 h and 7-day gaps. Use sessions of at most 1 h to limit fatigue drift.
+150 items × ~8 s is about 20 min of audio. At ~10× real time: about 3.3 h per pass, about 4 h with breaks. Calibration about 0.5 h plus the 0.5 h re-pass. Two passes about 8 h, rater 2 about 1 h (40 items), adjudication about 1 h, computation and freeze about 1 h. Discourse-marker function layer (labelled in the same passes, rater-2 subset and calibration): about +2 h. Total about 14 h of author time (0.5 + 0.5 + 8 + 1 + 1 + 1 + 2), over at least 2-3 weeks because of the 48 h and 7-day gaps. Use sessions of at most 1 h to limit fatigue drift.
 
 ## NOCANDO licence status
 

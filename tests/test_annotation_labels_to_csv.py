@@ -24,12 +24,14 @@ def test_bom_and_frequency_lines_are_handled(tmp_path):
 def test_empty_file_means_none(tmp_path):
     clips, lab = setup(tmp_path, {"c1": ""})
     rows, _ = convert(clips, lab, "me")
-    assert rows == [["c1", "me", "none", "none", "", "", ""]]
+    assert rows == [["c1", "me", "none", "none", "", "", "", "", ""]]
 
 
 def test_short_line_and_empty_text_report_clip_and_line(tmp_path):
     for bad in ("1.0\t2.0\n", "1.0\t2.0\t \n", "1.0\n"):
-        clips, lab = setup(tmp_path / str(abs(hash(bad))), {"cx": "1.0\t1.2\tFP d\n" + bad})
+        clips, lab = setup(
+            tmp_path / str(abs(hash(bad))), {"cx": "1.0\t1.2\tFP d\n" + bad}
+        )
         with pytest.raises(ValueError, match=r"cx line 2"):
             convert(clips, lab, "me")
 
