@@ -535,7 +535,8 @@ def build_analysis(
             warnings.append(
                 {
                     "code": "decision_profile_asr_mismatch",
-                    "message": f"The {options.decision_profile} filler/prolongation pipelines were trained on P0 ASR "
+                    "message": f"The {options.decision_profile} "
+                    f"{'prolongation' if options.decision_profile == DP.PROFILE_13 else 'filler/prolongation'} pipelines were trained on P0 ASR "
                     "text; this run used another ASR profile. "
                     "The pipelines read the words of the REQUESTED profile (not rejected, not re-decoded as p0).",
                 }
@@ -646,7 +647,7 @@ def build_analysis(
 def _profile_provenance(
     options: AnalysisOptions, secondary_asr: dict | None, stats: dict | None = None
 ) -> dict:
-    if options.decision_profile == DP.PROFILE_12:
+    if options.decision_profile in (DP.PROFILE_12, DP.PROFILE_13):
         return DP.profile_meta(options.decision_profile, stats=_jsonable(stats) if stats else None)
     if options.decision_profile == DP.PROFILE_OB:
         meta = DP.profile_meta(options.decision_profile, asr_profile=options.asr_profile)
@@ -991,6 +992,10 @@ class MrcdAnalyzer:
                 result = engine.analyze(audio.samples, sample_rate=audio.sample_rate, **kw)
                 if options.decision_profile == DP.PROFILE_12:
                     profile_events, profile_stats = DP.apply_profile_12(
+                        engine, audio.samples, audio.sample_rate, getattr(result, "words", None)
+                    )
+                elif options.decision_profile == DP.PROFILE_13:
+                    profile_events, profile_stats = DP.apply_profile_13(
                         engine, audio.samples, audio.sample_rate, getattr(result, "words", None)
                     )
                 elif use_profile:

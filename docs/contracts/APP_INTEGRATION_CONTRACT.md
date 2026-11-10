@@ -119,6 +119,16 @@ Not the default: the service default stays `o2026_11`. Selected only with `decis
 - **Evidence.** `results/plan_a_20261108/RESULTS_A.md` (exploratory, DIHANA folds 1-4, turn-level; protocol
   `PROTOCOL_EXPLORATORY_A.md`). Not validated on any other corpus.
 
+### B.3e Decision profile `o2026_13` (additive, opt-in, 2026-11-08, plan F; exploratory)
+
+Not the default: the service default stays `o2026_11`. Selected only with `decision_profile=o2026_13`. `contract_revision` stays "1.4"; the only schema change is the new enum value.
+
+- **One ASR pass.** The profile owns its ASR profile: `request.asr_profile` becomes `ft_small_v1` (the default `p0` is mapped to it; any other value is `invalid_request`). `ft_small_v1` is `openai/whisper-small` fine-tuned on DIHANA transcripts, CTranslate2 int8 on CPU, loaded from `MRCD_FT_CT2_DIR` (weights are never shipped; see `ASR_PROFILES_CONTRACT.md` section 9). The service needs that directory at start-up.
+- **repetition.** The plain lexical rule (immediate exact repetition of 1-4 tokens, non-lexical filled pauses removed, interval = second copy) with **no demotion layer**; score kind `lexical_rule_indicator`, `context = {state: "disfluent", subclass: null, basis: "rule_primary_lexical"}`.
+- **filler_word.** The filled-pause tokens the fine-tune writes (`eh`, `ah`, `mm`, recognised by the engine's non-lexical filler pattern; the conjunction `e` before `i`/`hi` is excluded), one event per token, `context.subclass: "filled_pause"`. Lexical fillers (`este`, `pues`, ...) are not emitted.
+- **prolongation.** The `o2026_11` unit pipeline, unchanged and not refitted: it was fitted on P0 text, so every document carries `decision_profile_asr_mismatch` (this is expected).
+- **Evidence.** `results/plan_f_20261108/RESULTS_F.md` (exploratory, DIHANA folds 1-4 held-out speakers; protocol `PROTOCOL_EXPLORATORY_F.md`). Not validated on any other corpus.
+
 ### B.6 What the report may show (`oratoria.mrcd-report/v1`)
 
 Schema `$defs.report_section`; reference mapping `build_report_section.py`; real examples `examples/app_report_section_example.json` (from the real success document) and `examples/app_report_section_failed_example.json`. Rules:

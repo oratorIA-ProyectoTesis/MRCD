@@ -89,7 +89,7 @@ export interface DisfluencyEvent {
   experimental: boolean;
   in_scope?: boolean;
   decision?: Decision;
-  /** Only decision profile o2026_12 (opt-in): contextual state of the candidate layer and the filler subclass. */
+  /** Only decision profiles o2026_12 and o2026_13 (opt-in): contextual state of the candidate layer and the filler subclass. */
   context?: {
     state: "disfluent";
     subclass: "filled_pause" | "lexical_filler" | null;
@@ -111,7 +111,7 @@ export interface AnalysisRequestEcho {
   decision_profile?: DecisionProfileName;
 }
 
-export type DecisionProfileName = "v0" | "o2026_11" | "o2026_11b" | "o2026_12";
+export type DecisionProfileName = "v0" | "o2026_11" | "o2026_11b" | "o2026_12" | "o2026_13";
 
 export interface Summary {
   n_events: number;

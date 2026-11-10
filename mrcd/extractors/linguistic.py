@@ -97,6 +97,10 @@ class VerbatimASR:
             return
         from faster_whisper import WhisperModel  # type: ignore
 
+        if self.profile.backend == "faster_whisper_local":  # opt-in ft_small_v1: local fine-tune, same decode path as p0
+            from mrcd import ft_whisper
+
+            model_size = str(ft_whisper.resolve_model_dir())  # model_info() hashes <dir>/model.bin lazily
         strict_device = self.profile.device
         if strict_device is not None:  # opt-in GPU profile: demand it, never fall back silently
             if device not in ("auto", strict_device):

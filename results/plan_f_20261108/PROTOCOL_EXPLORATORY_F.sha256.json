@@ -1,0 +1,6 @@
+{
+ "file": "PROTOCOL_EXPLORATORY_F.md",
+ "sha256_lf": "b16c0c026410b1f37b4ddd2ba9626c8826613a993bd0595981ecf60cd2db7929",
+ "frozen_utc": "2026-11-08T14:45:34+00:00",
+ "note": "sha256 of the file with CRLF normalised to LF; written before any decode, fit or metric of plan F"
+}

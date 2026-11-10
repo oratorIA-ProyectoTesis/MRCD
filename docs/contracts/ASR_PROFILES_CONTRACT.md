@@ -91,3 +91,13 @@ WER of any profile against a legitimate human reference outside DIHANA folds 1-4
 - Tag mapping (`mrcd/verbatim.py`, declared before measuring): `[UH] [UM] [EH] [EM] [ER] [AH] [AHH] [HM] [HMM] [MM] [MMM]` become the lexicon words `eh em eh em eh ah ah mm mm mm mm`; any other tag is dropped and listed in `VerbatimASR.dropped_tags`. `Word.prob` is 1.0 (the model gives none; not a confidence). Long audio uses the package's own long-form strategy, not the 8 s MRCD chunking.
 - Route `verbatim_or` (`mrcd.verbatim.route_decisions`): per class, MRCD classifier decision OR a lexical rule on the tag-stripped verbatim text. Library function only; the service default and `DisfluencyEngine.load` default (`p0`) are unchanged. Whether it is worth adopting: `results/verbatim_profile_20261107/README_RESULTADOS.md`.
 - Not measured: the classifier fed with `cw2` words (distribution shift: it was trained on P0 text); `cw2` on pause-segmented service audio.
+
+## 9. Opt-in fine-tuned profile `ft_small_v1` (2026-11-08, Plan F, EXPERIMENTAL; additive)
+
+Registered in `PROFILES` (the service accepts it as `asr_profile`) and selected only explicitly; `p0` stays the default and the descriptions and cache keys of every earlier profile are unchanged (pinned by tests).
+
+- **Model.** `openai/whisper-small` (MIT) fully fine-tuned on DIHANA folds 1-4 human transcripts only (CC BY 4.0; no CrisperWhisper output), best checkpoint by dev loss, converted to CTranslate2 int8 (`results/plan_b_20261108`). The weights are never shipped: the directory is read from the environment variable `MRCD_FT_CT2_DIR`, else from a repository-relative `_models_ft/ct2/capped_best_int8` next to the checkout (`mrcd/ft_whisper.py`); a missing or malformed directory raises `RuntimeError` (no silent fallback to another model).
+- **Decoding.** The faster-whisper call of `p0` without a prompt (`initial_prompt` empty means no prompt): `beam_size` 5, `temperature` 0, `condition_on_previous_text` False, `suppress_tokens` none, `vad_filter` False, word timestamps, 8 s chunks with 2 s overlap. CPU int8 only (`device="cpu"`; another device raises `ValueError`).
+- **Provenance.** `describe()` reports `backend: faster_whisper_local`, the model id, `license_note` and a `decode_note`; the model identity is `provenance.model.model_bin_sha256` (sha256 of `model.bin`, hashed lazily once) and is part of the ASR cache key.
+- **Output convention.** The model writes a DIHANA filled pause as `eh`, `ah` or `mm` (Plan B targets); the `filler_word` events of decision profile `o2026_13` are those tokens.
+- **Not measured.** Anything outside DIHANA folds 1-4 (speakers outside the 36 held-out ones were seen in training); the engine heads fed with these words (they were trained on P0 text); GPU decoding.

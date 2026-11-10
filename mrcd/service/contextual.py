@@ -264,3 +264,37 @@ def lexical_stats(cands: list[dict]) -> dict:
     for c in cands:
         st[c["state"]] += 1
     return {"n_candidates": len(cands), "by_state": st}
+
+
+# ------------------------------------------------------------------------------------------- o2026_13 (plan F)
+def primary_repetition_candidates(words: list[dict]) -> list[dict]:
+    """The primary lexical rule alone (decision profile ``o2026_13``): every generator candidate, NO demotion layer.
+
+    Same generator as ``p0_rule`` / ``p1_rule`` of plan A (``classify_repetitions`` with every rule off), so each candidate
+    is ``disfluent``. The ASR chunk duration is irrelevant without the seam rule."""
+    return classify_repetitions(words, None, rules=())
+
+
+def ft_filler_words(words: list[dict]) -> list[dict]:
+    """Filled-pause words of an ASR output: tokens matching ``NONLEXICAL_FILLER_RE`` (the engine predicate; for the
+    fine-tuned model they are the ``eh | ah | mm`` it was trained to write), with the conjunction-``e`` exception.
+
+    Returns ``{"token", "start_s", "end_s", "word_index"}`` per filler word, in order. Pure function of the words."""
+    stream = []
+    for i, w in enumerate(words or []):
+        for t in norm_tokens(str(w.get("text", ""))):
+            stream.append((t, i))
+    out = []
+    for k, (tok, wi) in enumerate(stream):
+        nxt = stream[k + 1][0] if k + 1 < len(stream) else None
+        if is_filler(tok, nxt):
+            w = words[wi]
+            out.append(
+                {
+                    "token": tok,
+                    "start_s": float(w["start"]),
+                    "end_s": float(w["end"]),
+                    "word_index": wi,
+                }
+            )
+    return out

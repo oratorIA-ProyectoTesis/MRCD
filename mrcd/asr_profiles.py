@@ -263,6 +263,44 @@ PROFILES["cw2_ct2"] = ASRProfile(
 )
 
 
+# Opt-in fine-tuned verbatim profile (2026-11-08, Plan F, ``results/plan_f_20261108``). The Plan B model: openai/whisper-small
+# fully fine-tuned on DIHANA folds 1-4 human transcripts only and converted to CTranslate2 int8 (``mrcd/ft_whisper.py``).
+# Decoding = p0 without the prompt, on CPU int8, exactly the measured Plan B configuration. EXPLORATORY: the gain was measured
+# in-domain (DIHANA, 36 held-out speakers) and nothing is known outside it. The weights stay outside the repository.
+FT_SMALL_V1_VALIDATION = (
+    "experimental; exploratory Plan B/F evidence on 36 held-out DIHANA folds 1-4 speakers only (in-domain upper bound); "
+    "not validated on other corpora, speakers or presentations"
+)
+PROFILES["ft_small_v1"] = ASRProfile(
+    name="ft_small_v1",
+    initial_prompt="",
+    experimental=True,
+    validation=FT_SMALL_V1_VALIDATION,
+    description=(
+        "Whisper small fine-tuned on DIHANA human transcripts (verbatim: keeps repetitions and writes filled pauses as "
+        "eh/ah/mm), CTranslate2 int8 on CPU, no prompt. Needs MRCD_FT_CT2_DIR (or the repo-relative default). Opt-in; "
+        "never selected by default."
+    ),
+    device="cpu",
+    compute_type="int8",
+    backend="faster_whisper_local",
+    model_id="openai/whisper-small fine-tuned on DIHANA folds 1-4 (Plan B step 200), CTranslate2 int8, local",
+    model_revision=None,
+    license_note=(
+        "Base model openai/whisper-small is MIT. Fine-tuned only on DIHANA human transcripts (CC BY 4.0, credit: DIHANA "
+        "consortium); no CrisperWhisper output was used. The weights are not published and are never shipped with MRCD."
+    ),
+    decode_note=(
+        "initial_prompt '' means NO prompt is passed to the decoder. The weights are read from MRCD_FT_CT2_DIR (or the "
+        "repo-relative default); their identity is the sha256 of model.bin in provenance.model.model_bin_sha256 (hashed "
+        "lazily), not a Hugging Face revision. Decoding is the p0 faster-whisper call without a prompt: beam_size 5, "
+        "temperature 0, condition_on_previous_text False, suppress_tokens [] (none), vad_filter False, word_timestamps "
+        "True, language es; audio is cut into chunk_s/overlap_s chunks by transcribe_chunked; CPU int8 only (the profile "
+        "rejects another device)."
+    ),
+)
+
+
 def get_profile(profile: str | ASRProfile | None) -> ASRProfile:
     """Resolve a profile name; ``None`` -> default. Unknown names are rejected (never silently defaulted)."""
     if profile is None:

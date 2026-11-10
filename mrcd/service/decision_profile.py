@@ -8,6 +8,11 @@
                  lexical rule as candidate generator followed by a demotion-only contextual layer; lexical fillers are a
                  second ``filler_word`` subclass (``lexical_filler``). See ``mrcd/service/contextual.py`` and
                  ``results/plan_a_20261108/PROTOCOL_EXPLORATORY_A.md``.
+* ``o2026_13`` - EXPLORATORY, opt-in (plan F, 2026-11-08). ONE ASR pass with ``ft_small_v1`` (the Plan B verbatim fine-tune of
+                 Whisper small) feeds every class: ``repetition`` = the primary lexical rule alone (no demotion layer),
+                 ``filler_word`` = the filled-pause tokens (``eh | ah | mm``) of the ASR output (subclass ``filled_pause``),
+                 ``prolongation`` = the shipped ``o2026_11`` unit pipeline, unchanged and not refitted. See
+                 ``results/plan_f_20261108/PROTOCOL_EXPLORATORY_F.md``.
 * ``o2026_11`` - PRODUCT DEFAULT of the service. ``filler_word`` and ``prolongation`` come from the per-class pipelines
                  of the O-campaign (2026-11-01) applied to pause-delimited ASR segments; ``repetition`` and every other class
                  keep the engine decision (the campaign did not beat the one-line rule / S3 route for repetition).
@@ -47,15 +52,19 @@ PROFILE_O = "o2026_11"
 PROFILE_OB = "o2026_11b"
 #: single P1 pass for every class + candidate/demotion repetition + filler subclasses (plan A, opt-in)
 PROFILE_12 = "o2026_12"
-DECISION_PROFILES = (PROFILE_V0, PROFILE_O, PROFILE_OB, PROFILE_12)
+#: single ``ft_small_v1`` pass for every class: primary repetition rule + filler tokens + o2026_11 prolongation (plan F, opt-in)
+PROFILE_13 = "o2026_13"
+DECISION_PROFILES = (PROFILE_V0, PROFILE_O, PROFILE_OB, PROFILE_12, PROFILE_13)
 DEFAULT_DECISION_PROFILE = (
     PROFILE_O  # service / app default; the library default stays V0
 )
 O_CLASSES = ("filler_word", "prolongation")
 #: profiles whose filler_word / prolongation come from the O-campaign unit pipelines
-UNIT_PIPELINE_PROFILES = (PROFILE_O, PROFILE_OB, PROFILE_12)
+UNIT_PIPELINE_PROFILES = (PROFILE_O, PROFILE_OB, PROFILE_12, PROFILE_13)
 #: ASR profile of the second pass used by ``o2026_11b`` for repetition only (and the single pass of ``o2026_12``)
 P1_ASR_PROFILE = "p1_disfluent_prompt"
+#: ASR profile owned by ``o2026_13``
+FT_ASR_PROFILE = "ft_small_v1"
 #: repetition routes on P1 segment text: the one-line lexical rule, or the S3 text route (ctx_LR)
 REPETITION_ROUTES = ("rule_p1", "rep_ctx_p1")
 #: route used by ``o2026_11b`` (fixed by the frozen protocol of results/mejora_servicio_20261102)
@@ -66,13 +75,16 @@ def replaced_classes(profile: str) -> tuple[str, ...]:
     """Classes whose engine (V0) events the profile drops and replaces with its own."""
     if profile == PROFILE_O:
         return O_CLASSES
-    if profile in (PROFILE_OB, PROFILE_12):
+    if profile in (PROFILE_OB, PROFILE_12, PROFILE_13):
         return (*O_CLASSES, "repetition")
     return ()
 
 
 def required_asr_profile(profile: str) -> str | None:
-    """The ASR profile a decision profile owns (``o2026_12`` -> P1), or None when any requested profile is used."""
+    """The ASR profile a decision profile owns (``o2026_12`` -> P1, ``o2026_13`` -> ft_small_v1), or None when any
+    requested profile is used."""
+    if profile == PROFILE_13:
+        return FT_ASR_PROFILE
     return P1_ASR_PROFILE if profile == PROFILE_12 else None
 
 
@@ -188,6 +200,8 @@ def profile_meta(
         }
     if profile == PROFILE_12:
         return _profile_12_meta(applied, stats)
+    if profile == PROFILE_13:
+        return _profile_13_meta(applied, stats)
     classes = {
         c: {
             "route": "o_campaign_unit_pipeline",
@@ -279,7 +293,61 @@ def _profile_12_meta(applied: bool | None, stats: dict | None) -> dict:
     }
 
 
+def _profile_13_meta(applied: bool | None, stats: dict | None) -> dict:
+    from mrcd import ft_whisper
+    from mrcd.service import contextual as CX
+
+    stats = stats or {}
+    return {
+        "name": PROFILE_13,
+        "status": "exploratory",
+        "classes": {
+            "repetition": {
+                "route": "primary_lexical_rule",
+                "asr_profile_used": FT_ASR_PROFILE,
+                "rule": "immediate exact repetition of 1-4 norm_tokens, non-lexical fillers removed, interval = second "
+                "copy; the same generator as the confirmatory rule; NO demotion layer",
+                "candidates": stats.get("repetition"),
+            },
+            "filler_word": {
+                "route": "asr_filled_pause_tokens",
+                "asr_profile_used": FT_ASR_PROFILE,
+                "subclass": CX.FILLED_PAUSE,
+                "tokens": "words matching the engine NONLEXICAL_FILLER_RE (the fine-tune writes "
+                + " | ".join(sorted(set(ft_whisper.FT_FILLER_TOKENS.values())))
+                + "); the conjunction 'e' before i/hi is not a filler",
+                "candidates": stats.get("filler_word"),
+            },
+            "prolongation": {
+                "route": "o_campaign_unit_pipeline",
+                "unit": f"ASR segment split at pauses >= {S3F.GAP_S} s (max {S3F.MAX_WORDS} words)",
+                "artifact": "prolongation.json",
+                "artifact_sha256": PINNED_SHA256["prolongation.json"],
+                "source_pickle_sha256": SOURCE_PICKLE_SHA256["prolongation"],
+                "pipeline_version": "o-campaign/1",
+                "asr_profile_trained_on": "p0",
+                "asr_profile_used": FT_ASR_PROFILE,
+            },
+        },
+        "calibration_claim": "none",
+        "pipelines_verified": None if applied is None else bool(applied),
+        "note": "single ASR pass with ft_small_v1 (Plan B verbatim fine-tune of Whisper small) for every class; "
+        "exploratory (DIHANA folds 1-4, plan F protocol results/plan_f_20261108). prolongation is the o2026_11 head "
+        "fitted on P0 text, not refitted for these words. The library default stays v0.",
+    }
+
+
 def warning_for(profile: str) -> dict | None:
+    if profile == PROFILE_13:
+        return {
+            "code": "decision_profile_exploratory",
+            "message": "Decision profile o2026_13 (opt-in, exploratory, DIHANA folds 1-4 only): one ASR pass with ft_small_v1, "
+            "a Whisper small fine-tuned on DIHANA transcripts, feeds every class. repetition is the plain lexical rule "
+            "(immediate exact repetition of 1-4 tokens, no demotion layer); filler_word are the filled-pause tokens the "
+            "model writes (eh, ah, mm); prolongation is the o2026_11 pipeline fitted on P0 text and not refitted for "
+            "these words. The ASR gain was measured in-domain on 36 held-out DIHANA speakers and is unknown elsewhere. "
+            "Scores are not calibrated probabilities. Use decision_profile=o2026_11 or v0 to reproduce earlier outputs.",
+        }
     if profile == PROFILE_12:
         return {
             "code": "decision_profile_exploratory",
@@ -362,11 +430,13 @@ def profile_events(
     spans: list[dict],
     key: str = "p0",
     subclass: dict | None = None,
+    classes: tuple[str, ...] = O_CLASSES,
 ) -> list[dict]:
     """Positive units of each pipelined class as raw event dicts (analyzer layout, plus ``_decision``).
+    ``classes`` restricts the pipelined classes (``o2026_13`` uses only ``prolongation``).
     ``subclass`` (o2026_12): ``{cls: subclass}`` adds a ``context`` (state disfluent + subclass) to those events."""
     out = []
-    for cls in O_CLASSES:
+    for cls in classes:
         if not recs:
             break
         pipe = pipelines[cls]
@@ -482,6 +552,74 @@ def apply_profile_12(
     stats = {
         "repetition": CX.demotion_stats(cands),
         "lexical_filler": CX.lexical_stats(lex),
+    }
+    return events, stats
+
+
+def apply_profile_13(
+    engine, audio: np.ndarray, sample_rate: int, words: list[dict] | None
+) -> tuple[list[dict], dict]:
+    """Events and candidate statistics of ``o2026_13`` for one recording (the words ARE the single ``ft_small_v1`` pass).
+
+    repetition = primary lexical rule alone (no demotion); filler_word = ASR filled-pause tokens; prolongation = the
+    o2026_11 unit pipeline on pause-delimited segments (it was fitted on P0 text; the words key ``p0`` is the pipeline's
+    internal convention, not a statement about the ASR used)."""
+    from mrcd.service import contextual as CX
+
+    words = list(words or [])
+    pipes = o_pipelines()
+    recs, spans = unit_records(engine, audio, sample_rate, words)
+    events = profile_events(pipes, recs, spans, key="p0", classes=("prolongation",))
+    cands = CX.primary_repetition_candidates(words)
+    for ev in CX.merge_disfluent(cands):
+        events.append(
+            {
+                "class": "repetition",
+                "start_s": round(float(ev["start_s"]), 3),
+                "end_s": round(float(ev["end_s"]), 3),
+                "score": 1.0,
+                "score_kind": SCORE_KIND_RULE,
+                "n_windows": 1,
+                "modalities_used": ["linguistic"],
+                "validation": "primary lexical rule (immediate exact repetition of 1-4 tokens, no demotion layer) on "
+                "ft_small_v1 ASR text; evaluated on DIHANA folds 1-4 held-out speakers only (exploratory)",
+                "text": None,
+                "basis": "rule_primary_lexical",
+                "decision": None,
+                "context": {
+                    "state": CX.DISFLUENT,
+                    "subclass": None,
+                    "basis": "rule_primary_lexical",
+                },
+            }
+        )
+    fillers = CX.ft_filler_words(words)
+    for f in fillers:
+        events.append(
+            {
+                "class": "filler_word",
+                "start_s": round(f["start_s"], 3),
+                "end_s": round(f["end_s"], 3),
+                "score": 1.0,
+                "score_kind": SCORE_KIND_RULE,
+                "n_windows": 1,
+                "modalities_used": ["linguistic"],
+                "validation": "filled-pause token written by the ft_small_v1 ASR (eh, ah, mm); exploratory, compared "
+                "only with DIHANA f marks (folds 1-4, held-out speakers)",
+                "text": f["token"],
+                "basis": "asr_filled_pause_token",
+                "decision": None,
+                "context": {
+                    "state": CX.DISFLUENT,
+                    "subclass": CX.FILLED_PAUSE,
+                    "basis": "asr_filled_pause_token",
+                },
+            }
+        )
+    events.sort(key=lambda e: (e["start_s"], e["end_s"]))
+    stats = {
+        "repetition": CX.demotion_stats(cands),
+        "filler_word": {"n_candidates": len(fillers)},
     }
     return events, stats
 
