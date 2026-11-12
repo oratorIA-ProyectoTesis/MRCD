@@ -13,7 +13,7 @@ The trained checkpoint `ckpt_audio_text.pt` is not distributed (on request, see 
 | `examples/` | `curl.sh`, `python_client.py`, `analyze.mjs` |
 | `scripts/docker_smoke.py` | End-to-end smoke test of a running service |
 | `Dockerfile`, `Dockerfile.cuda`, `docker/entrypoint.sh`, `docker-compose.yml` | Images and compose |
-| `tests/` | pytest suite (some tests need local data and skip without it) |
+| `tests/` | pytest suite (some tests need local data and skip without it); CI runs it all on every PR (`.github/workflows/tests.yml`) |
 
 ## Golden commands
 

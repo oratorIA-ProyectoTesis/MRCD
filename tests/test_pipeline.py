@@ -125,6 +125,7 @@ def test_euler_and_vector_order():
 # ------------------------------------------------------- data mining (offline)
 def test_ffmpeg_track_extraction_and_crop(tmp_path, monkeypatch):
     import shutil, subprocess, soundfile as sf
+    pytest.importorskip("cv2", reason="needs the [video] extra (opencv-python-headless)")
     import scripts.data_mining as dm
     if not shutil.which("ffmpeg"):
         pytest.skip("sin ffmpeg")
