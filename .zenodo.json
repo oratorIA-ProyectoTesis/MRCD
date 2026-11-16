@@ -1,0 +1,38 @@
+{
+  "title": "MRCD: contextual recognition engine for disfluency detection in Spanish speech",
+  "description": "MRCD (Motor de Reconocimiento Contextual de Disfluencias) is a local HTTP service that detects filler words, prolongations and repetitions in Spanish speech through the versioned JSON contract mrcd.analysis/v1. This archive contains the source code only (MIT license); the trained checkpoint is distributed separately under its own terms.",
+  "license": "MIT",
+  "upload_type": "software",
+  "access_right": "open",
+  "language": "eng",
+  "keywords": [
+    "disfluency detection",
+    "Spanish speech",
+    "automatic speech recognition",
+    "filler words",
+    "repetitions",
+    "prolongations",
+    "reproducible research"
+  ],
+  "creators": [
+    {
+      "name": "Cortez Flores, Ely Rivaldo",
+      "affiliation": "Universidad Peruana de Ciencias Aplicadas"
+    },
+    {
+      "name": "Ventura Chancafe, Eduardo Renato",
+      "affiliation": "Universidad Peruana de Ciencias Aplicadas"
+    },
+    {
+      "name": "Castro Veramendi, Rafael Oswaldo",
+      "affiliation": "Universidad Peruana de Ciencias Aplicadas"
+    }
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/oratorIA-ProyectoTesis/MRCD",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
+}
