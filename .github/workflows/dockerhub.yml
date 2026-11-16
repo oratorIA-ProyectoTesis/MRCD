@@ -1,0 +1,57 @@
+# Mirror the published GHCR image to Docker Hub without rebuilding.
+#
+# Copies the manifests of ghcr.io/<owner>/mrcd:{version}, :latest, :{version}-cuda and
+# :latest-cuda to docker.io/${DOCKERHUB_USERNAME}/mrcd with the same tags.
+# Runs on every published release and on demand (workflow_dispatch with a version).
+# Needs two repository secrets: DOCKERHUB_USERNAME and DOCKERHUB_TOKEN (read/write token).
+
+name: dockerhub-mirror
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Image version to mirror, without the leading v (e.g. 0.4.0)"
+        required: true
+        default: "0.4.0"
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Copy manifests to Docker Hub
+        env:
+          RAW_VERSION: ${{ github.event.inputs.version || github.event.release.tag_name }}
+          OWNER: ${{ github.repository_owner }}
+          HUB_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+        run: |
+          set -euo pipefail
+          V="${RAW_VERSION#v}"
+          SRC="ghcr.io/${OWNER,,}/mrcd"
+          DST="docker.io/${HUB_USER}/mrcd"
+          for t in "$V" latest "$V-cuda" latest-cuda; do
+            echo "copy $SRC:$t -> $DST:$t"
+            docker buildx imagetools create --tag "$DST:$t" "$SRC:$t"
+          done
+          docker buildx imagetools inspect "$DST:$V"
