@@ -184,6 +184,7 @@ footer { padding-block: 2rem calc(2rem + env(safe-area-inset-bottom, 0px)); colo
         <li><a href="#pruebalo">Pruébalo</a></li>
         <li><a href="#ventajas">Ventajas</a></li>
         <li><a href="#instalacion">Instalación</a></li>
+        <li><a href="#descargas">Descargas</a></li>
         <li><a href="#arquitectura">Arquitectura</a></li>
         <li><a href="#api">API</a></li>
         <li><a href="#integracion">Integración</a></li>
@@ -300,7 +301,7 @@ footer { padding-block: 2rem calc(2rem + env(safe-area-inset-bottom, 0px)); colo
         <h3>1. Docker, un comando</h3>
         <p>Imagen con PyTorch para CPU y Whisper small ya incluidos; corre como usuario sin privilegios y tiene verificación de salud.</p>
         <div class="code"><pre><code>docker run --rm -e MRCD_SERVICE_TOKEN="$TOKEN" -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" ghcr.io/oratoria-proyectotesis/mrcd:0.4.0</code></pre></div>
-        <p>Luego abre <a href="http://127.0.0.1:8765/">http://127.0.0.1:8765/</a>. El puerto se publica solo en <code>127.0.0.1</code>; dentro del contenedor el servicio exige un token portador (<code>TOKEN</code> de 32 caracteres o más). <code>./models</code> debe contener el checkpoint, que no se distribuye (ver <code>models/README.md</code>). Para construirla tú: <code>docker build -t ghcr.io/oratoria-proyectotesis/mrcd:0.4.0 https://github.com/oratorIA-ProyectoTesis/MRCD.git#v0.4.0</code>, o <code>docker compose up --build</code> con el repositorio clonado.</p>
+        <p>Luego abre <a href="http://127.0.0.1:8765/">http://127.0.0.1:8765/</a>. El puerto se publica solo en <code>127.0.0.1</code>; dentro del contenedor el servicio exige un token portador (<code>TOKEN</code> de 32 caracteres o más). <code>./models</code> debe contener el checkpoint, que no viene en la imagen ni en ninguna descarga: se entrega a pedido (ver <a href="#descargas">Descargas</a> y <code>models/README.md</code>). Para construirla tú: <code>docker build -t ghcr.io/oratoria-proyectotesis/mrcd:0.4.0 https://github.com/oratorIA-ProyectoTesis/MRCD.git#v0.4.0</code>, o <code>docker compose up --build</code> con el repositorio clonado.</p>
       </article>
       <article class="card">
         <h3>2. pip</h3>
@@ -325,6 +326,34 @@ pytest -q</code></pre></div>
     <h3>Primer análisis desde la terminal</h3>
     <div class="code"><pre><code>mrcd sample sample_es.wav        # escribe el audio de muestra incluido
 mrcd analyze sample_es.wav --include-text</code></pre></div>
+  </div>
+</section>
+
+<section id="descargas" aria-labelledby="descargas-t">
+  <div class="wrap">
+    <h2 id="descargas-t">Descargas</h2>
+    <p>Versión 0.4.0 (<a href="https://github.com/oratorIA-ProyectoTesis/MRCD/releases/tag/v0.4.0">página de la versión</a>). El paquete no está en PyPI. Verifica cada archivo con <code>SHA256SUMS.txt</code>.</p>
+    <div class="grid">
+      <article class="card">
+        <h3>Paquetes Python</h3>
+        <ul>
+          <li><a href="https://github.com/oratorIA-ProyectoTesis/MRCD/releases/download/v0.4.0/mrcd-0.4.0-py3-none-any.whl">mrcd-0.4.0-py3-none-any.whl</a> (703 661 bytes)<br><code>sha256 e02bede0627ff28b31983f49f823abe384c6a8f02bb98485eb5a17786eb38be5</code></li>
+          <li><a href="https://github.com/oratorIA-ProyectoTesis/MRCD/releases/download/v0.4.0/mrcd-0.4.0.tar.gz">mrcd-0.4.0.tar.gz</a> (880 669 bytes)<br><code>sha256 e872783514a31ce145677ac8978c5276943ab105c4129fbf26cb5fd0df18e981</code></li>
+          <li><a href="https://github.com/oratorIA-ProyectoTesis/MRCD/releases/download/v0.4.0/SHA256SUMS.txt">SHA256SUMS.txt</a></li>
+        </ul>
+        <div class="code"><pre><code>pip install https://github.com/oratorIA-ProyectoTesis/MRCD/releases/download/v0.4.0/mrcd-0.4.0-py3-none-any.whl</code></pre></div>
+      </article>
+      <article class="card">
+        <h3>Imágenes Docker</h3>
+        <p>Docker Hub: <a href="https://hub.docker.com/r/rivacortezf/mrcd">rivacortezf/mrcd</a> (etiquetas 0.4.0, latest, 0.4.0-cuda, latest-cuda).</p>
+        <div class="code"><pre><code>docker pull rivacortezf/mrcd:0.4.0
+docker pull ghcr.io/oratoria-proyectotesis/mrcd:0.4.0</code></pre></div>
+      </article>
+      <article class="card">
+        <h3>Checkpoint del modelo</h3>
+        <p>El checkpoint <code>ckpt_audio_text.pt</code> no está incluido en ninguna descarga (ni en los paquetes, ni en las imágenes, ni en la versión). Se entrega a pedido a la autora de correspondencia, Ely Cortez Flores (<code>u202215313@upc.edu.pe</code>), solo para investigación no comercial. El motor verifica su sha256 (<code>87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669</code>) antes de cargarlo. Sin el checkpoint el servicio arranca y <code>/v1/health</code> responde, pero el análisis no se ejecuta.</p>
+      </article>
+    </div>
   </div>
 </section>
 
@@ -597,7 +626,7 @@ with client.open_session() as s:
 <section id="licencia" aria-labelledby="licencia-t">
   <div class="wrap">
     <h2 id="licencia-t">Licencia y cita</h2>
-    <p>El código está bajo licencia MIT. Los pesos del modelo (<code>ckpt_audio_text.pt</code>) se entrenaron con etiquetas derivadas de corpus con sus propias condiciones y se distribuyen como artefacto de investigación: revisa <code>THIRD_PARTY_NOTICES.md</code> antes de un uso comercial. El audio de muestra es voz sintética generada con espeak-ng.</p>
+    <p>El código está bajo licencia MIT. La licencia MIT cubre solo el código. Los pesos del modelo (<code>ckpt_audio_text.pt</code>) no se distribuyen: se entrenaron con etiquetas derivadas de corpus con sus propias condiciones y se entregan a pedido, solo para investigación no comercial (ver <a href="#descargas">Descargas</a>; revisa <code>THIRD_PARTY_NOTICES.md</code>). El audio de muestra es voz sintética generada con espeak-ng.</p>
     <div class="code"><pre><code>MRCD authors (2026). MRCD: motor de reconocimiento contextual mediante la fusión
 multimodal para la detección de disfluencias del habla en español (versión 0.4.0)
 [software]. https://github.com/oratorIA-ProyectoTesis/MRCD</code></pre></div>

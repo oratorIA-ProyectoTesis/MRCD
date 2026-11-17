@@ -4,7 +4,6 @@ MRCD (Motor de Reconocimiento Contextual de Disfluencias) detects **filler words
 
 - Source, tests and protocols: https://github.com/oratorIA-ProyectoTesis/MRCD (branch `mrcd-oe-closure`, MIT license)
 - Release used for this image: https://github.com/oratorIA-ProyectoTesis/MRCD/releases/tag/v0.4.0
-- Archived snapshot: DOI 10.5281/zenodo.24269766 (all versions: 10.5281/zenodo.24269765)
 - Same image on GHCR: `ghcr.io/oratoria-proyectotesis/mrcd`
 
 ## Tags
@@ -16,7 +15,7 @@ MRCD (Motor de Reconocimiento Contextual de Disfluencias) detects **filler words
 
 ## Quick start
 
-The trained checkpoint `ckpt_audio_text.pt` is **not inside the image**. Put it in a local `models/` folder and mount it read-only (see `models/README.md` in the repository for how to obtain it and its sha256; the service verifies the hash before loading).
+The trained checkpoint `ckpt_audio_text.pt` is **not inside the image** and is not distributed in any download. It is available on request from the corresponding author (Ely Cortez Flores, u202215313@upc.edu.pe) for non-commercial research use only. Put it in a local `models/` folder and mount it read-only (see `models/README.md` for its sha256; the service verifies the hash before loading).
 
 ```bash
 docker run --rm -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" rivacortezf/mrcd:0.4.0
@@ -38,6 +37,6 @@ One JSON document per analysed recording with the detected events (type, start, 
 
 ## Licenses
 
-Code: MIT. The checkpoint is distributed separately under its own terms (see `models/README.md`).
+Code: MIT. The checkpoint is not distributed; it is available on request for non-commercial research use only (see `models/README.md`).
 
 MRCD is part of a software-engineering thesis at Universidad Peruana de Ciencias Aplicadas (Cortez Flores, Ventura Chancafe; advisor Castro Veramendi).
