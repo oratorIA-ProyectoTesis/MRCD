@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self' http://127.0.0.1:* http://localhost:* http://[::1]:*; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self' http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="light dark">
 <meta name="description" content="MRCD: motor local que detecta muletillas, prolongaciones y repeticiones en habla española y las entrega por una API HTTP versionada.">
@@ -431,7 +431,7 @@ footer p { margin: 0; }
     <a class="brand" href="#inicio"><svg aria-hidden="true" focusable="false"><use href="#g-repetition"/></svg>MRCD <span class="ver">v0.4.0</span></a>
     <nav class="dest" aria-label="Destinos principales">
       <a href="#pruebalo" data-ch="A">Demo</a>
-      <a href="#resultados" data-ch="B">Evidencia</a>
+      <a href="#resultados" data-ch="B">Evidencia y límites</a>
       <a href="#instalacion" data-ch="C">Integrar</a>
       <a class="ext" href="https://github.com/oratorIA-ProyectoTesis/MRCD">Código <span aria-hidden="true">↗</span></a>
     </nav>
@@ -467,7 +467,7 @@ footer p { margin: 0; }
           <p class="label" style="margin:0">Audio de muestra y resultado del motor</p>
           <p class="inst-src">sample_es.wav · voz sintética · 14,9 s · 16 kHz · mono</p>
         </div>
-        <button class="play" id="hero-play" type="button" aria-pressed="false"><span aria-hidden="true">▶</span> <span class="t">Escuchar</span></button>
+        <button class="play" id="hero-play" type="button"><span aria-hidden="true">▶</span> <span class="t">Escuchar</span></button>
       </div>
       <div class="inst" id="hero-inst"></div>
       <ul class="legend" aria-label="Clases">
@@ -492,7 +492,7 @@ footer p { margin: 0; }
         <li><a href="#pruebalo" data-ch="A"><span class="n">03</span>Pruébalo</a></li>
       </ol>
     </li>
-    <li class="ch"><span class="chk">B · Confiar</span>
+    <li class="ch"><span class="chk">B · Evidencia y límites</span>
       <ol>
         <li><a href="#resultados" data-ch="B"><span class="n">04</span>Resultados</a></li>
         <li><a href="#limites" data-ch="B"><span class="n">05</span>Límites</a></li>
@@ -520,7 +520,7 @@ footer p { margin: 0; }
 
 <section class="sec" id="que-es" aria-labelledby="que-es-t">
   <p class="secno"><span>02 / Qué es</span><span>A</span></p>
-  <h2 id="que-es-t">El ASR borra la evidencia que quieres medir</h2>
+  <h2 id="que-es-t">El ASR por defecto puede borrar la evidencia que quieres medir</h2>
   <div class="g12 reveal">
     <div class="c-7">
       <p class="measure">Las herramientas de retroalimentación oral necesitan saber <em>dónde</em> y <em>cuántas veces</em> alguien dice “eh”, alarga un sonido o repite una palabra. El reconocimiento de voz estándar tiende a limpiar justo esa evidencia: en el corpus DIHANA, la configuración por defecto del ASR borró <span class="num">109</span> de <span class="num">214</span> repeticiones (<span class="num">51 %</span>). Una aplicación que solo mira la transcripción pierde lo que quiere medir.</p>
@@ -534,7 +534,7 @@ footer p { margin: 0; }
     </div>
     <figure class="c-5 mini needs-js" aria-labelledby="qe-cap">
       <div class="inst" id="qe-inst"></div>
-      <figcaption id="qe-cap">La misma muestra, clase por clase: el corchete es el intervalo de decisión de la muletilla (un segmento del ASR, no un instante) y las marcas son las dos repeticiones. La muestra no tiene prolongaciones detectadas.</figcaption>
+      <figcaption id="qe-cap">La misma muestra, clase por clase: el corchete es el intervalo de decisión de la muletilla (un segmento del ASR, no un instante) y las marcas son <span id="qe-rep">las repeticiones</span>.<span id="qe-prol"></span></figcaption>
     </figure>
   </div>
 </section>
@@ -578,7 +578,7 @@ footer p { margin: 0; }
       <button class="btn" id="btn-sample" type="button" disabled>Analizar la muestra</button>
       <button class="btn secondary" id="btn-upload" type="button" disabled>Subir un audio</button>
       <input id="file" type="file" accept="audio/*,.wav" hidden>
-      <button class="btn secondary" id="btn-rec" type="button" disabled aria-pressed="false">Grabar con el micrófono</button>
+      <button class="btn secondary" id="btn-rec" type="button" disabled>Grabar con el micrófono</button>
     </div>
     <fieldset class="opts" id="opts">
       <legend>Opciones de la petición</legend>
@@ -595,7 +595,7 @@ footer p { margin: 0; }
   </div>
 </section>
 
-<div class="chapter"><span class="l" aria-hidden="true">B</span><span class="t">Confiar</span><p class="s">Resultados y límites primero; después, las ventajas y su evidencia.</p></div>
+<div class="chapter"><span class="l" aria-hidden="true">B</span><span class="t">Evidencia y límites</span><p class="s">Resultados y límites primero; después, las ventajas y su evidencia.</p></div>
 
 <div class="g12">
 <section class="sec c-7" id="resultados" aria-labelledby="resultados-t">
@@ -627,7 +627,7 @@ footer p { margin: 0; }
       <caption class="visually-hidden">Seis puntos de la comparación cualitativa: lo que hace MRCD y lo que dicen las fuentes de las demás soluciones</caption>
       <thead><tr><th scope="col">Punto</th><th scope="col">Qué hace MRCD</th><th scope="col">Frente a las soluciones comparadas</th></tr></thead>
       <tbody>
-        <tr><th scope="row">Conserva, medido, la evidencia que el ASR omite</th><td data-label="Qué hace MRCD">En habla española y con control: el ASR por defecto borra <span class="num">109</span> de <span class="num">214</span> repeticiones (<span class="num">51 %</span>); con el perfil P1 sobreviven <span class="num">144</span> de <span class="num">214</span>, frente a <span class="num">42</span> de <span class="num">214</span> del control fluido. Diferencia P1 − control: <span class="num">+0,387</span> de F1 <span class="num">[0,298; 0,478]</span>.</td><td data-label="Frente a las demás">Ninguna fuente consultada de las otras soluciones mide esto en español frente a un control. <span class="na">Un corpus (DIHANA), exploratorio; P1 es experimental.</span></td></tr>
+        <tr><th scope="row">Conserva, medido, la evidencia que el ASR omite</th><td data-label="Qué hace MRCD">En habla española y con control: el ASR por defecto borra <span class="num">109</span> de <span class="num">214</span> repeticiones (<span class="num">51 %</span>); con el perfil P1 sobreviven <span class="num">144</span> de <span class="num">214</span>, frente a <span class="num">42</span> de <span class="num">214</span> del control fluido. Diferencia P1 − control: <span class="num">+0,387</span> de F1 <span class="num">[0,298; 0,478]</span>. <span class="na">Un corpus (DIHANA), exploratorio; P1 es experimental.</span></td><td data-label="Frente a las demás">Ninguna fuente consultada de las otras soluciones mide esto en español frente a un control.</td></tr>
         <tr><th scope="row">Reporte por clase con procedencia y límites</th><td data-label="Qué hace MRCD">Cada evento trae su intervalo en segundos y un puntaje rotulado “no calibrado”; cada documento lleva la procedencia (perfil de decisión, sha256 de los artefactos, modelo ASR) y advertencias de alcance.</td><td data-label="Frente a las demás"><span class="na">—</span><span class="visually-hidden">sin comparación en la fuente</span></td></tr>
         <tr><th scope="row">Estados honestos verificados por pruebas</th><td data-label="Qué hace MRCD">La ausencia nunca se codifica como 0 (“no disponible: motivo”), existe el estado incierto y los puntajes se marcan como no calibrados.</td><td data-label="Frente a las demás">En las demás soluciones este criterio no está documentado.</td></tr>
         <tr><th scope="row">Reproducibilidad</th><td data-label="Qué hace MRCD">Protocolos congelados por hash (<code>PROTOCOL.sha256.json</code>) y revisiones que reproducen las cifras del ASR; código MIT en un repositorio público.</td><td data-label="Frente a las demás"><span class="na">—</span><span class="visually-hidden">sin comparación en la fuente</span></td></tr>
@@ -636,7 +636,7 @@ footer p { margin: 0; }
       </tbody>
     </table>
   </div>
-  <p class="measure" style="font-size:.88rem;color:var(--muted)">Fuente: benchmarking cualitativo del proyecto (02/11/2026), criterios K1 a K12 congelados por sha256 antes de llenar la matriz; los seis puntos son los de su sección de ventajas. Todo es exploratorio. La desventaja principal es la madurez: no hay estudios con usuarios (criterio K12).</p>
+  <p class="measure" style="font-size:.88rem;color:var(--muted)">Fuente: benchmarking cualitativo del proyecto (02/11/2026), criterios congelados por sha256 antes de llenar la matriz; los seis puntos son los de su sección de ventajas. Todo es exploratorio. La desventaja principal es la madurez: no hay estudios con usuarios.</p>
 </section>
 
 <section class="sec" id="privacidad" aria-labelledby="privacidad-t">
@@ -653,7 +653,7 @@ footer p { margin: 0; }
     <figure class="fig c-5" style="margin-top:0">
       <svg viewBox="0 0 440 600" role="img" aria-labelledby="priv-t priv-d">
         <title id="priv-t">Frontera de confianza del servicio MRCD</title>
-        <desc id="priv-d">Dentro de tu equipo: tu aplicación o navegador llama por HTTP a 127.0.0.1:8765 y el servicio pasa el audio en memoria al motor con el ASR. Lo único que cruza el borde: la descarga inicial del modelo y el checkpoint, que se entrega a pedido. Fuera del bucle local hacen falta la opción --allow-non-loopback y un token portador, sin TLS.</desc>
+        <desc id="priv-d">Dentro de tu equipo: tu aplicación o navegador llama por HTTP a 127.0.0.1:8765 y el servicio pasa el audio en memoria al motor con el ASR. Lo que entra desde fuera: la descarga inicial del modelo y el checkpoint, que se entrega a pedido. Fuera del bucle local hacen falta la opción --allow-non-loopback y un token portador, sin TLS.</desc>
         <defs><marker id="ah-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0 0L10 5L0 10z"/></marker></defs>
         <text class="k" x="10" y="18">FUERA DE TU EQUIPO</text>
         <text x="10" y="44">Descarga inicial</text>
@@ -681,7 +681,7 @@ footer p { margin: 0; }
         <text class="s" x="10" y="546">sin TLS: no exponer sin proxy inverso</text>
         <text class="s" x="10" y="584">Esta página: sin recursos de terceros</text>
       </svg>
-      <figcaption>Recinto de confianza: lo que corre dentro de tu equipo y lo único que cruza su borde.</figcaption>
+      <figcaption>Recinto de confianza: lo que corre dentro de tu equipo y lo que entra desde fuera, la descarga inicial del modelo y el checkpoint.</figcaption>
     </figure>
   </div>
 </section>
@@ -1084,7 +1084,8 @@ python -c "import wave,array,json;w=wave.open('mrcd/service/web/sample_es.wav');
   const PAGES_ORIGIN = location.origin;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const st = { base: null, local: false, health: null, busy: false, rec: null, audioUrl: null };
-  const nf = (n, d = 2) => Number(n).toLocaleString("es-419", { minimumFractionDigits: d, maximumFractionDigits: d });
+  // decimal comma, as in the static copy of the page
+  const nf = (n, d = 2) => Number(n).toFixed(d).replace(".", ",");
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const status = (msg) => { $("#status").textContent = msg; };
   const readJson = (id) => { try { return JSON.parse($("#" + id).textContent); } catch (_) { return null; } };
@@ -1471,7 +1472,7 @@ python -c "import wave,array,json;w=wave.open('mrcd/service/web/sample_es.wav');
     if (hp) { hp.hidden = !isSample(); hp.style.left = f; }
   });
   const heroPlay = $("#hero-play");
-  const syncHero = () => { const on = !player.paused && isSample(); heroPlay.setAttribute("aria-pressed", String(on)); heroPlay.querySelector(".t").textContent = on ? "Pausar" : "Escuchar"; heroPlay.firstElementChild.textContent = on ? "❚❚" : "▶"; };
+  const syncHero = () => { const on = !player.paused && isSample(); heroPlay.querySelector(".t").textContent = on ? "Pausar" : "Escuchar"; heroPlay.firstElementChild.textContent = on ? "❚❚" : "▶"; };
   ["play", "pause", "ended", "emptied"].forEach((t) => player.addEventListener(t, syncHero));
   heroPlay.addEventListener("click", () => { if (!player.paused && isSample()) player.pause(); else playSample(isSample() && player.currentTime < (player.duration || 0) ? player.currentTime : 0); });
 
@@ -1526,13 +1527,13 @@ python -c "import wave,array,json;w=wave.open('mrcd/service/web/sample_es.wav');
     };
     src.connect(proc); proc.connect(ctx.destination);
     st.rec = rec; setBusy(true);
-    const b = $("#btn-rec"); b.textContent = "Detener y analizar"; b.classList.add("rec"); b.setAttribute("aria-pressed", "true");
+    const b = $("#btn-rec"); b.textContent = "Detener y analizar"; b.classList.add("rec");
     $("#rec-panel").hidden = false; status(rec.session ? "Grabando; el audio se envía al servicio mientras hablas." : "Grabando… habla al menos 13 s.");
   }
   async function stopRec() {
     const rec = st.rec; if (!rec) return; st.rec = null;
     rec.proc.disconnect(); rec.src.disconnect(); rec.stream.getTracks().forEach((t) => t.stop()); rec.ctx.close();
-    const b = $("#btn-rec"); b.textContent = "Grabar con el micrófono"; b.classList.remove("rec"); b.setAttribute("aria-pressed", "false");
+    const b = $("#btn-rec"); b.textContent = "Grabar con el micrófono"; b.classList.remove("rec");
     $("#rec-panel").hidden = true;
     const pcm = concat(rec.parts), wav = wavFromPcm(pcm);
     if (st.audioUrl) URL.revokeObjectURL(st.audioUrl);
@@ -1549,7 +1550,7 @@ python -c "import wave,array,json;w=wave.open('mrcd/service/web/sample_es.wav');
   }
 
   /* ------------------------------------------------------------ where am I? */
-  const LOOPBACK = ["127.0.0.1", "localhost", "[::1]"];
+  const LOOPBACK = ["127.0.0.1", "localhost"];
   function svcRead(where, state) { $("#svc-read").innerHTML = "Servicio local · " + esc(where) + " · <b>" + esc(state) + "</b>"; }
   async function probe(base) {
     const target = new URL("v1/health", base);
@@ -1593,7 +1594,7 @@ python -c "import wave,array,json;w=wave.open('mrcd/service/web/sample_es.wav');
     try { where = new URL(base).host; svcRead(where, "conectando…"); p = await probe(base); } catch (_) { p = { ok: false, kind: "invalid" }; }
     if (p.ok) { connected(base, p.health, false); $("#connect-help").innerHTML = ""; return; }
     let msg, state;
-    if (p.kind === "csp") { state = "bloqueado por la política de la página (CSP)"; msg = '<div class="note err"><p><span class="k">Dirección no permitida (CSP)</span>Esta página solo puede conectarse a tu propio equipo: <code>127.0.0.1</code>, <code>localhost</code> o <code>[::1]</code>. Su política de seguridad de contenido bloquea cualquier otra dirección.</p></div>'; }
+    if (p.kind === "csp") { state = "bloqueado por la política de la página (CSP)"; msg = '<div class="note err"><p><span class="k">Dirección no permitida (CSP)</span>Esta página solo puede conectarse a tu propio equipo: <code>127.0.0.1</code> o <code>localhost</code>. Su política de seguridad de contenido bloquea cualquier otra dirección.</p></div>'; }
     else if (p.kind === "invalid") { state = "dirección no válida"; msg = '<div class="note err"><p><span class="k">Dirección no válida</span>Escribe una dirección como <code>http://127.0.0.1:8765</code>.</p></div>'; }
     else if (p.kind === "token") { state = "pide un token"; msg = '<div class="note err"><p><span class="k">El servicio pide autenticación (HTTP ' + esc(p.status) + ")</span>Se levantó con un token portador (<code>MRCD_SERVICE_TOKEN</code>) y esta página no envía tokens. Abre la página que sirve tu servicio, <a href=\"" + esc(base) + "\">" + esc(base) + "</a>, o usa los clientes de la sección Integración.</p></div>"; }
     else if (p.kind === "cors") { state = "no autoriza este origen (CORS)"; msg = '<div class="note err"><p><span class="k">El servicio responde, pero no autoriza este origen (CORS)</span>Reinícialo permitiendo <code>' + esc(PAGES_ORIGIN) + "</code>:</p>" + corsCommands() + "</div>"; }
@@ -1665,6 +1666,11 @@ python -c "import wave,array,json;w=wave.open('mrcd/service/web/sample_es.wav');
   function fillSample(doc) {
     const counts = (doc && doc.summary && doc.summary.counts_by_class) || null;
     if (counts) $$("[data-count]").forEach((b) => { const n = Number(counts[b.dataset.count]) || 0; b.textContent = n + (n === 1 ? " evento" : " eventos"); });
+    if (counts) {
+      const nr = Number(counts.repetition) || 0, np = Number(counts.prolongation) || 0;
+      $("#qe-rep").textContent = nr === 1 ? "la repetición" : "las " + nr + " repeticiones";
+      $("#qe-prol").textContent = np ? "" : " La muestra no tiene prolongaciones detectadas.";
+    }
     const notice = noticeOf(doc);
     if (notice) { const p = $("#hero-notice"); p.querySelector(".v").textContent = notice; p.hidden = false; }
   }
