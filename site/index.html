@@ -5,379 +5,921 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self' http://127.0.0.1:* http://localhost:* http://[::1]:*; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
 <meta name="description" content="MRCD: motor local que detecta muletillas, prolongaciones y repeticiones en habla española y las entrega por una API HTTP versionada.">
 <title>MRCD · Detección de disfluencias del habla en español</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%2314261B'/%3E%3Crect x='3' y='6' width='7' height='12' rx='1' fill='%23C6EC3B'/%3E%3Crect x='15' y='7' width='6' height='10' rx='1' fill='none' stroke='%23C6EC3B' stroke-width='2'/%3E%3Cpath d='M10.5 12h3.5' stroke='%23C6EC3B' stroke-width='2' stroke-dasharray='1.5 1.5'/%3E%3C/svg%3E">
+<script>document.documentElement.classList.add("js");</script>
 <style>
+/* Type: system stacks only (display serif, humanist sans, mono); the page loads no font files. */
 :root {
   color-scheme: light;
-  --bg: #f7f6f2;
-  --surface: #ffffff;
-  --surface-2: #efede7;
-  --ink: #1c1f23;
-  --muted: #4c535d;
-  --line: #d6d2c9;
-  --accent: #0c6a62;
-  --accent-ink: #ffffff;
-  --accent-soft: #e2f1ee;
-  --warn-bg: #fff4e0;
-  --warn-line: #c98a1b;
-  --err-bg: #fdeceb;
-  --err-line: #b4372f;
-  --code-bg: #f0eee8;
-  --c-filler_word: #a3470b;
-  --c-prolongation: #5a3fae;
-  --c-repetition: #0c6a62;
-  --focus: #1f5fd6;
-  --radius: 10px;
-  --shadow: 0 1px 2px rgb(0 0 0 / .06), 0 4px 16px rgb(0 0 0 / .04);
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --bg: #F6F8F1; --surface: #FFFFFF; --sunk: #ECF0E4;
+  --ink: #14261B; --muted: #5E6B61; --line: #E2E8D9; --line-d: #CDD6C3; --ctl: #7D8A80;
+  --forest: #245C36; --forest-soft: #E1EFDF;
+  --lime: #C6EC3B; --lime-d: #9DBF22;
+  --c-filler_word: #B8381C; --c-prolongation: #1F3A8A; --c-repetition: #7A5200;
+  --wave: #3E5546; --code-bg: #ECF0E4; --focus: #14261B;
+  --stage-line: #26302A;
+  --f-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --f-body: Seravek, "Gill Sans Nova", "Segoe UI", Ubuntu, Calibri, "DejaVu Sans", sans-serif;
+  --f-mono: ui-monospace, "Cascadia Mono", "Cascadia Code", Consolas, Menlo, monospace;
+  --header-h: 3.25rem; --tl-label: 8.75rem;
+  --gl: max(1rem, env(safe-area-inset-left)); --gr: max(1rem, env(safe-area-inset-right));
 }
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --bg: #131619;
-    --surface: #1b1f23;
-    --surface-2: #23292e;
-    --ink: #ebe8e2;
-    --muted: #aab1ba;
-    --line: #343b42;
-    --accent: #5fc6b9;
-    --accent-ink: #0a1513;
-    --accent-soft: #173330;
-    --warn-bg: #33270f;
-    --warn-line: #d9a441;
-    --err-bg: #3a1a18;
-    --err-line: #ef7d72;
-    --code-bg: #20252a;
-    --c-filler_word: #f2a560;
-    --c-prolongation: #b8a5f6;
-    --c-repetition: #5fc6b9;
-    --focus: #8ab4ff;
-    --shadow: none;
+    --bg: #0D1310; --surface: #161E19; --sunk: #1C2620;
+    --ink: #EEF3EA; --muted: #A9B6AC; --line: #26302A; --line-d: #3A473F; --ctl: #76857A;
+    --forest: #8FD19E; --forest-soft: #1A2E21;
+    --c-filler_word: #F2896B; --c-prolongation: #9DB8F2; --c-repetition: #E2B35A;
+    --wave: #B9C7BC; --code-bg: #161E19; --focus: #C6EC3B;
   }
 }
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; animation: none !important; } }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 var(--font); -webkit-text-size-adjust: 100%; }
-a { color: var(--accent); text-underline-offset: .18em; }
-a:hover { text-decoration-thickness: 2px; }
-:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
-.skip { position: absolute; left: -999px; top: 0; background: var(--surface); padding: .6rem 1rem; z-index: 20; }
-.skip:focus { left: 1rem; top: 1rem; }
-.wrap { max-width: 72rem; margin: 0 auto; padding-inline: max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-right)); }
-header.top { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top, 0px); }
-.top .wrap { display: flex; align-items: center; gap: 1rem; min-height: 3.5rem; flex-wrap: wrap; }
-.brand { font-weight: 700; letter-spacing: .02em; color: var(--ink); text-decoration: none; font-size: 1.05rem; }
-.brand span { color: var(--muted); font-weight: 500; margin-left: .35rem; font-size: .85rem; }
-nav.sections { margin-left: auto; overflow-x: auto; }
-nav.sections ul { display: flex; gap: .2rem; list-style: none; margin: 0; padding: 0; white-space: nowrap; }
-nav.sections a { display: block; padding: .35rem .55rem; color: var(--muted); text-decoration: none; border-radius: 6px; font-size: .92rem; }
-nav.sections a:hover { color: var(--ink); background: var(--surface-2); }
-@media (max-width: 720px) { header.top { position: static; } nav.sections { margin-left: 0; width: 100%; padding-bottom: .4rem; } .top .wrap { gap: .2rem; } main section { scroll-margin-top: 0; } }
-main section { padding-block: 3rem; border-bottom: 1px solid var(--line); scroll-margin-top: 4rem; }
-main section:last-of-type { border-bottom: 0; }
-h1, h2, h3 { line-height: 1.2; letter-spacing: -.01em; }
-h1 { font-size: clamp(1.9rem, 4.2vw, 2.9rem); margin: 0 0 1rem; max-width: 22ch; }
-h2 { font-size: clamp(1.45rem, 2.6vw, 1.9rem); margin: 0 0 1rem; }
-h3 { font-size: 1.1rem; margin: 1.6rem 0 .5rem; }
-p, li { max-width: 72ch; }
-.lead { font-size: 1.15rem; color: var(--muted); max-width: 62ch; }
-.hero { padding-block: 3.5rem 3rem; }
-.eyebrow { font-size: .85rem; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); font-weight: 700; margin: 0 0 .6rem; }
-.chips { display: flex; flex-wrap: wrap; gap: .45rem; margin: 1.2rem 0 1.6rem; padding: 0; list-style: none; }
-.chips li { font-size: .82rem; border: 1px solid var(--line); background: var(--surface); padding: .2rem .6rem; border-radius: 999px; color: var(--muted); }
-.cta { display: flex; flex-wrap: wrap; gap: .7rem; }
-.btn { display: inline-flex; align-items: center; gap: .45rem; font: inherit; font-weight: 600; font-size: .95rem; padding: .62rem 1.05rem; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); cursor: pointer; text-decoration: none; min-height: 44px; }
-.btn.secondary { background: transparent; color: var(--accent); }
-.btn:hover { filter: brightness(1.06); }
-.btn[disabled] { opacity: .5; cursor: not-allowed; filter: none; }
-.btn.rec { border-color: var(--err-line); background: var(--err-line); color: #fff; }
-.note { border-left: 4px solid var(--warn-line); background: var(--warn-bg); padding: .8rem 1rem; border-radius: 0 var(--radius) var(--radius) 0; margin: 1rem 0; }
-.note.info { border-color: var(--accent); background: var(--accent-soft); }
-.note.err { border-color: var(--err-line); background: var(--err-bg); }
-.note p { margin: .2rem 0; }
-.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); }
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.2rem; box-shadow: var(--shadow); }
-.card h3 { margin-top: 0; }
-.card p { margin: .4rem 0; }
-.card .src { font-size: .82rem; color: var(--muted); }
-.tag { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .04em; padding: .1rem .45rem; border-radius: 4px; background: var(--surface-2); color: var(--muted); margin-right: .35rem; vertical-align: .1em; }
-code, pre, kbd { font-family: var(--mono); font-size: .88em; }
-:not(pre) > code { background: var(--code-bg); padding: .08rem .32rem; border-radius: 4px; overflow-wrap: break-word; }
-.code { position: relative; margin: .7rem 0 1rem; }
-.code pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: .85rem 1rem; overflow-x: auto; line-height: 1.5; }
-.copy { position: absolute; top: .4rem; right: .4rem; font: 600 .75rem var(--font); padding: .25rem .55rem; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; min-height: 28px; }
-.copy:hover { color: var(--ink); }
-.steps { counter-reset: s; list-style: none; padding: 0; }
-.steps > li { counter-increment: s; position: relative; padding-left: 2.2rem; margin-bottom: .6rem; }
-.steps > li::before { content: counter(s); position: absolute; left: 0; top: .1rem; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: .8rem; display: grid; place-items: center; }
-/* try block */
-.try { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: clamp(1rem, 2.5vw, 1.6rem); box-shadow: var(--shadow); }
-.mode { display: flex; gap: .6rem; align-items: flex-start; }
-.dot { width: .7rem; height: .7rem; border-radius: 50%; margin-top: .45rem; flex: none; background: var(--muted); }
-.dot.on { background: #1e9e5a; }
-.actions { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0 .6rem; }
-.opts { display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; margin: .4rem 0 .8rem; padding: 0; border: 0; }
-.opts legend { font-weight: 600; font-size: .9rem; margin-bottom: .2rem; padding: 0; }
-.opts label { display: inline-flex; align-items: center; gap: .45rem; font-size: .95rem; min-height: 32px; }
-.opts input { width: 1.1rem; height: 1.1rem; accent-color: var(--accent); flex: none; }
-.opts code { white-space: nowrap; font-size: .8em; color: var(--muted); }
-.connect { display: flex; flex-wrap: wrap; gap: .5rem; align-items: end; margin: .8rem 0; }
-.connect label { display: grid; gap: .25rem; font-size: .9rem; font-weight: 600; flex: 1 1 16rem; }
-.connect input { font: inherit; padding: .55rem .7rem; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); min-height: 44px; }
-.status { min-height: 1.6rem; font-weight: 600; margin: .6rem 0; }
-.sample { display: grid; gap: .5rem; margin: .8rem 0; padding: .8rem 1rem; background: var(--surface-2); border-radius: var(--radius); }
-.sample audio { width: 100%; max-width: 32rem; }
-.sample q { font-style: italic; }
-.result { margin-top: 1.2rem; }
-.kpis { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); margin: .8rem 0 1.2rem; }
-.kpi { background: var(--surface-2); border-radius: 8px; padding: .6rem .8rem; }
-.kpi b { display: block; font-size: 1.35rem; }
-.kpi span { font-size: .82rem; color: var(--muted); }
-.timeline { margin: .6rem 0 1rem; }
-.tl-row { display: grid; grid-template-columns: 8.5rem 1fr; gap: .6rem; align-items: center; margin-bottom: .45rem; }
-.tl-label { font-size: .9rem; font-weight: 600; display: flex; align-items: center; gap: .4rem; }
-.swatch { width: .8rem; height: .8rem; border-radius: 3px; flex: none; }
-.tl-track { position: relative; height: 2.1rem; background: var(--surface-2); border-radius: 6px; border: 1px solid var(--line); }
-.tl-ev { position: absolute; top: 3px; bottom: 3px; min-width: 6px; border-radius: 4px; border: 0; padding: 0; cursor: pointer; }
-.tl-ev:hover { filter: brightness(1.12); }
-.tl-ev[data-state="uncertain"] { background-image: repeating-linear-gradient(45deg, transparent 0 4px, rgb(255 255 255 / .35) 4px 7px); }
-.tl-axis { position: relative; height: 1.3rem; margin-left: 9.1rem; font-size: .75rem; color: var(--muted); }
-.tl-axis span { position: absolute; transform: translateX(-50%); }
-.tl-playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); opacity: .7; pointer-events: none; }
-@media (max-width: 560px) { .tl-row { grid-template-columns: 1fr; gap: .2rem; } .tl-axis { margin-left: 0; } }
-.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
-table { border-collapse: collapse; width: 100%; font-size: .9rem; }
-th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--line); vertical-align: top; }
-thead th { background: var(--surface-2); font-weight: 650; white-space: nowrap; }
-tbody tr:last-child td { border-bottom: 0; }
-td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* "stage": the brand's dark jury room, used for the instrument and the demo in both schemes */
+.stage {
+  color-scheme: dark;
+  --bg: #0D1310; --surface: #161E19; --sunk: #1C2620;
+  --ink: #EEF3EA; --muted: #A9B6AC; --line: #26302A; --line-d: #3A473F; --ctl: #76857A;
+  --forest: #8FD19E; --forest-soft: #1A2E21;
+  --c-filler_word: #F2896B; --c-prolongation: #9DB8F2; --c-repetition: #E2B35A;
+  --wave: #B9C7BC; --code-bg: #161E19; --focus: #C6EC3B;
+  background: var(--bg); color: var(--ink);
+}
+@media (prefers-color-scheme: dark) { .stage { --bg: #121A15; --surface: #19221C; --sunk: #202B24; --code-bg: #19221C; } }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-padding-top: calc(var(--header-h) + .75rem); -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 1.0625rem/1.6 var(--f-body); }
+::selection { background: var(--ink); color: var(--bg); }
+a { color: inherit; text-decoration-color: var(--forest); text-decoration-thickness: 1.5px; text-underline-offset: .2em; }
+a:hover { text-decoration-thickness: 3px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 2px; }
+h1, h2, h3 { text-wrap: balance; }
+p, li, dd, td { text-wrap: pretty; }
+code, pre, kbd, .mono, .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+code, kbd { font-size: .86em; }
+:not(pre) > code { background: var(--sunk); padding: .05rem .3rem; border-radius: 2px; overflow-wrap: anywhere; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .na { color: var(--muted); font-style: italic; }
-details { margin: .8rem 0; }
-details > summary { cursor: pointer; font-weight: 600; padding: .3rem 0; }
-details pre { max-height: 28rem; overflow: auto; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: .8rem 1rem; font-size: .8rem; }
-.diagram { display: grid; gap: .5rem; margin: 1rem 0; }
-.diagram .node { background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--accent); border-radius: 8px; padding: .7rem 1rem; }
-.diagram .node b { display: block; }
-.diagram .node small { color: var(--muted); }
-.diagram .edge { font-size: .82rem; color: var(--muted); padding-left: 1.4rem; position: relative; }
-.diagram .edge::before { content: "↓"; position: absolute; left: .35rem; color: var(--accent); font-weight: 700; }
-.c4 { overflow-x: auto; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .5rem; }
-.c4 svg { display: block; width: 100%; min-width: 760px; height: auto; }
-.endpoints td:first-child { white-space: nowrap; font-family: var(--mono); font-size: .85rem; }
-footer { padding-block: 2rem calc(2rem + env(safe-area-inset-bottom, 0px)); color: var(--muted); font-size: .9rem; }
-.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.pill { font-size: .78rem; padding: .1rem .5rem; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
-.meter { height: .5rem; background: var(--surface-2); border-radius: 999px; overflow: hidden; max-width: 18rem; }
-.meter i { display: block; height: 100%; width: 0; background: var(--accent); }
+html:not(.js) .needs-js { display: none !important; }
+
+/* skip links */
+.skips a { position: absolute; left: -999px; top: .5rem; z-index: 60; background: var(--ink); color: var(--bg); padding: .7rem 1rem; font-weight: 700; text-decoration: none; }
+.skips a:focus { left: 1rem; }
+
+/* header: solid, sticky at every width, never animated */
+.top { position: sticky; top: 0; z-index: 40; background: var(--bg); border-bottom: 1px solid var(--line-d); padding-top: env(safe-area-inset-top, 0px); }
+.bar { display: flex; flex-wrap: wrap; align-items: center; column-gap: 1rem; max-width: 90rem; margin-inline: auto; padding-inline: var(--gl) var(--gr); }
+.brand { display: inline-flex; align-items: center; gap: .55rem; height: 3.25rem; font: 700 1rem var(--f-mono); letter-spacing: .08em; text-decoration: none; }
+.brand svg { width: 1.35rem; height: 1.35rem; color: var(--forest); }
+.brand .ver { font-weight: 400; letter-spacing: 0; color: var(--muted); font-size: .82rem; }
+.dest { margin-left: auto; display: flex; flex-wrap: wrap; }
+.dest a { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 .75rem; text-decoration: none; font-weight: 600; font-size: .95rem; }
+.dest a:hover { background: var(--sunk); }
+.dest a[aria-current] { box-shadow: inset 0 -3px 0 var(--forest); }
+.dest .ext { color: var(--muted); }
+.toc-btn { display: none; }
+.js .toc-btn { display: flex; align-items: center; gap: .6rem; font: 600 .9rem var(--f-body); color: var(--ink); background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+.toc-btn .k { font: 700 .75rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; }
+.toc-btn .cur { font-family: var(--f-mono); font-size: .82rem; color: var(--muted); }
+.toc-btn .chev { margin-left: auto; transition: transform .2s; }
+.toc-btn[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; }
+.progress i { display: block; height: 100%; background: var(--forest); transform-origin: 0 50%; transform: scaleX(0); }
+@media (prefers-reduced-motion: reduce) { .progress i { display: none; } }
+@media (min-width: 641px) and (max-width: 1099px) {
+  :root.js { --header-h: 5.75rem; }
+  .js .toc-btn { flex-basis: 100%; height: 2.5rem; border-top: 1px solid var(--line); }
+}
+@media (max-width: 640px) {
+  .js .dest { display: none; }
+  .js .toc-btn { margin-left: auto; min-height: 2.75rem; padding-inline: .75rem; border: 1.5px solid var(--ctl); border-radius: 2px; }
+  .js .toc-btn .cur { display: none; }
+}
+@media (min-width: 1100px) { .js .toc-btn { display: none; } }
+
+/* layout */
+.wrap, .shell { max-width: 90rem; margin-inline: auto; padding-inline: var(--gl) var(--gr); }
+.flow { min-width: 0; }
+@media (min-width: 1100px) {
+  .shell { display: grid; grid-template-columns: 13.5rem minmax(0, 1fr); column-gap: clamp(2rem, 4vw, 4.5rem); }
+}
+.g12 { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: clamp(1rem, 2.6vw, 2.75rem); row-gap: 1.5rem; }
+.g12 > * { grid-column: 1 / -1; min-width: 0; }
+@media (min-width: 900px) {
+  .c-7 { grid-column: span 7; } .c-5 { grid-column: span 5; } .c-6 { grid-column: span 6; }
+}
+.measure { max-width: 68ch; }
+
+/* index: sticky side column at >= 1100 px, panel under the header below that */
+.toc { font-size: .95rem; }
+.toc-h { font: 700 .75rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 .5rem; }
+.toc ol { list-style: none; margin: 0; padding: 0; }
+.toc .ch { margin-bottom: 1rem; }
+.toc .chk { display: block; font: 700 .75rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; padding: .4rem 0; border-bottom: 1px solid var(--ink); }
+.toc a { display: flex; align-items: center; gap: .7rem; min-height: 2.75rem; text-decoration: none; border-bottom: 1px solid var(--line); }
+.toc a .n { font: .78rem var(--f-mono); color: var(--muted); min-width: 1.5rem; }
+.toc a:hover { background: var(--sunk); }
+.toc a[aria-current] { font-weight: 700; text-decoration: underline 2px var(--forest); text-underline-offset: .3em; }
+.toc a[aria-current] .n { color: var(--forest); font-weight: 700; }
+.toc .toc-ext { margin-top: .5rem; }
+.toc .toc-ext a { border: 0; color: var(--muted); }
+@media (min-width: 1100px) {
+  .toc { position: sticky; top: calc(var(--header-h) + 1rem); align-self: start; max-height: calc(100vh - var(--header-h) - 2rem); overflow: auto; padding: 2.5rem .25rem 1rem 0; }
+  .toc a { min-height: 2rem; }
+  .toc .toc-ext { display: none; }
+}
+@media (max-width: 1099px) {
+  .toc { margin: 2rem 0; }
+  .js .toc { display: none; position: fixed; z-index: 35; left: 0; right: 0; top: calc(var(--header-h) + env(safe-area-inset-top, 0px)); max-height: calc(100dvh - var(--header-h) - env(safe-area-inset-top, 0px)); overflow: auto; margin: 0; background: var(--bg); border-bottom: 2px solid var(--ink); padding: 1rem var(--gr) 1.5rem var(--gl); box-shadow: 0 24px 40px -28px rgb(0 0 0 / .45); }
+  .js .toc.open { display: block; }
+  .toc .chs { display: grid; gap: 0 2rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+}
+
+/* type */
+h1 { font: 400 clamp(2.5rem, 5.4vw, 6.5rem)/.98 var(--f-display); letter-spacing: -.012em; margin: 0 0 1.5rem; overflow-wrap: break-word; }
+h2 { font: 400 clamp(2rem, 2.6vw + 1rem, 3.5rem)/1.04 var(--f-display); letter-spacing: -.008em; margin: 0 0 1.25rem; max-width: 22ch; }
+h3 { font: 700 1.1rem/1.3 var(--f-body); margin: 2rem 0 .6rem; }
+.lead { font-size: clamp(1.1rem, .4vw + 1rem, 1.3rem); line-height: 1.5; max-width: 40ch; }
+.label { font: 600 .75rem var(--f-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+
+/* hero */
+.strip { background: var(--sunk); border-bottom: 1px solid var(--line-d); }
+.strip p { margin: 0; padding-block: .55rem; display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; font: .8rem var(--f-mono); color: var(--muted); }
+.strip b { color: var(--ink); letter-spacing: .07em; text-transform: uppercase; }
+.hero { padding-block: clamp(2.5rem, 6vw, 5.5rem) clamp(2.5rem, 5vw, 4.5rem); }
+.hero .g12 { align-items: start; }
+.kicker { font: 600 .8rem var(--f-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin: 0 0 1.25rem; }
+.cta { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.6rem; margin: 2rem 0; }
+.btn-lime { display: inline-flex; align-items: center; gap: .6rem; min-height: 3.5rem; padding: 0 1.6rem; border-radius: 18px; background: var(--lime); color: #14261B; border: 1.5px solid #14261B; box-shadow: 0 4px 0 var(--lime-d); font: 800 1.05rem var(--f-body); text-decoration: none; }
+.btn-lime:hover { box-shadow: 0 6px 0 var(--lime-d); transform: translateY(-2px); }
+.btn-lime:active { box-shadow: 0 1px 0 var(--lime-d); transform: translateY(3px); }
+.paths { display: flex; flex-wrap: wrap; gap: .75rem 1.6rem; }
+.arrow { font-weight: 700; text-decoration: none; border-bottom: 2px solid var(--forest); padding-block: .5rem .1rem; }
+.arrow::after { content: " →"; }
+.sheet { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr)); border-top: 1px solid var(--ink); }
+.sheet div { padding: .55rem .75rem .55rem 0; border-bottom: 1px solid var(--line-d); }
+.sheet dt { font: 600 .7rem var(--f-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.sheet dd { margin: 0; font: .92rem var(--f-mono); overflow-wrap: anywhere; }
+
+/* instrument: the sample's real waveform with the engine's events */
+.instrument { margin: 0; border-radius: 20px; padding: clamp(1rem, 2.4vw, 1.6rem); box-shadow: 0 0 0 1px var(--stage-line) inset, 0 28px 50px -30px rgb(13 19 16 / .6); }
+.inst-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; margin-bottom: 1rem; }
+.inst-src { font: .78rem var(--f-mono); color: var(--muted); margin: .15rem 0 0; }
+.play { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: 0 1rem; border-radius: 12px; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); font: 700 .9rem var(--f-body); cursor: pointer; }
+.play:hover { background: var(--sunk); }
+.inst { position: relative; }
+.inst-marks { position: relative; height: 2.4rem; }
+.inst-wave { position: relative; height: clamp(6rem, 12vw, 9.5rem); }
+.inst-wave svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.inst-wave path { fill: var(--wave); }
+.inst-wave .mid { position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--line-d); }
+.band { position: absolute; top: 0; bottom: 0; background: color-mix(in srgb, var(--c) 26%, transparent); box-shadow: inset 1px 0 0 var(--c), inset -1px 0 0 var(--c); }
+.mk { position: absolute; bottom: 0; transform: translateX(-50%); display: inline-flex; align-items: center; gap: .3rem; border: 0; padding: 0 .2rem; background: none; color: var(--c); font: 600 .72rem var(--f-mono); cursor: pointer; white-space: nowrap; }
+.mk svg { width: 1.3rem; height: 1.3rem; }
+.mk::before, .seg::before { content: ""; position: absolute; inset: -6px -8px; }
+.mk .id { color: var(--muted); }
+span.mk, span.seg { cursor: default; }
+.inst-segs { position: relative; min-height: 3.6rem; margin-top: .4rem; }
+.seg { position: absolute; top: 0; display: block; border: 0; padding: 0; background: none; color: var(--ink); text-align: left; cursor: pointer; font: inherit; }
+.seg .br { display: block; height: .65rem; border: 2.5px solid var(--c); border-top: 0; }
+.seg .t { display: block; margin-top: .35rem; font: .76rem/1.4 var(--f-mono); color: var(--ink); }
+.seg .t b { color: var(--c); font-weight: 700; }
+.inst-ph { position: absolute; top: -2.4rem; bottom: 0; width: 2px; background: var(--forest); pointer-events: none; }
+.mk.hl, .seg.hl { outline: 2px solid var(--ink); outline-offset: 2px; }
+.axis { position: relative; height: 1.5rem; margin-top: .3rem; font: .72rem var(--f-mono); color: var(--muted); border-top: 1px solid var(--line-d); }
+.axis span { position: absolute; top: .25rem; transform: translateX(-50%); white-space: nowrap; }
+.axis span.first { transform: none; }
+.axis span.last { transform: translateX(-100%); }
+.legend { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; margin: 1rem 0 0; padding: 0; list-style: none; font-size: .85rem; }
+.legend li { display: inline-flex; align-items: center; gap: .4rem; }
+.legend svg { width: 1.1rem; height: 1.1rem; color: var(--c); }
+.inst-cap { margin: 1rem 0 0; font-size: .88rem; color: var(--muted); }
+.notice { display: flex; flex-wrap: wrap; gap: .2rem .7rem; margin: .8rem 0 0; padding-top: .6rem; border-top: 1px solid var(--line-d); font: .78rem/1.5 var(--f-mono); }
+.notice b { letter-spacing: .07em; text-transform: uppercase; }
+.qe-l { transition: opacity .6s ease; }
+.js .reveal .qe-l { opacity: 0; }
+.js .reveal .qe-l.seen { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .js .reveal .qe-l { opacity: 1; } }
+
+/* sections and chapters */
+.sec { padding-top: clamp(3rem, 6vw, 5.5rem); }
+.sec.tight { padding-top: clamp(2rem, 4vw, 3.5rem); }
+.secno { display: flex; justify-content: space-between; gap: 1rem; margin: 0 0 1.25rem; padding-top: .6rem; border-top: 1px solid var(--ink); font: 600 .78rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+:target > .secno { border-top: 3px solid var(--forest); color: var(--ink); }
+.chapter { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: end; column-gap: 1rem; margin: clamp(4.5rem, 10vw, 8.5rem) 0 0; padding-bottom: .7rem; border-bottom: 3px solid var(--ink); }
+.chapter.first { margin-top: clamp(2.5rem, 5vw, 4rem); }
+.chapter .l { font: 700 clamp(2.6rem, 5vw, 4.5rem)/.85 var(--f-mono); }
+.chapter .t { font: 400 clamp(1.5rem, 2vw + .5rem, 2.25rem)/1 var(--f-display); }
+.chapter .s { grid-column: 1 / -1; margin: .6rem 0 0; font: .8rem var(--f-mono); color: var(--muted); }
+
+/* callouts: mono label + top rule */
+.note { margin: 1.5rem 0; padding-top: .7rem; border-top: 2px solid var(--ink); max-width: 72ch; }
+.note p { margin: .25rem 0; }
+.note .k { display: block; font: 700 .74rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; margin-bottom: .2rem; }
+.note.info { border-top-color: var(--forest); }
+.note.info .k { color: var(--forest); }
+.note.err { border-top-width: 5px; }
+
+/* classes glossary */
+.classes { list-style: none; margin: 2rem 0 1.5rem; padding: 0; border-top: 1px solid var(--ink); }
+.classes li { display: grid; grid-template-columns: 2.75rem minmax(0, 1fr); gap: .3rem 1rem; padding: 1.1rem 0; border-bottom: 1px solid var(--line-d); }
+.classes .g { width: 2.25rem; height: 2.25rem; color: var(--c); grid-row: span 3; margin-top: .1rem; }
+.classes .nm { font: 400 1.6rem/1.1 var(--f-display); }
+.classes p { margin: 0; }
+.classes .ex { font: .8rem var(--f-mono); color: var(--muted); }
+@media (min-width: 1300px) {
+  .classes li { grid-template-columns: 2.75rem 10rem minmax(0, 1fr); }
+  .classes .nm { grid-row: span 2; }
+  .classes .ex { grid-column: 3; }
+}
+.mini { margin: 0; }
+@media (min-width: 900px) { .mini { position: sticky; top: calc(var(--header-h) + 2rem); margin-top: 1rem; } }
+.mini .inst-wave { height: 6rem; }
+.mini figcaption { font-size: .85rem; color: var(--muted); margin-top: .75rem; }
+
+/* demo (stage band) */
+.demo { margin-top: clamp(3rem, 6vw, 5.5rem); padding: clamp(1.5rem, 4vw, 3rem) var(--gr) clamp(2rem, 4vw, 3rem) var(--gl); margin-inline: calc(-1 * var(--gl)) calc(-1 * var(--gr)); }
+@media (min-width: 1100px) { .demo { border-radius: 28px; margin-inline: 0; padding-inline: clamp(1.5rem, 3vw, 3rem); } }
+.mode { display: flex; gap: .7rem; align-items: flex-start; padding: .8rem 0; border-block: 1px solid var(--line-d); }
+.mode p { margin: .15rem 0; }
+.dot { width: .75rem; height: .75rem; margin-top: .4rem; flex: none; background: transparent; border: 2px solid var(--muted); }
+.dot.on { background: var(--forest); border-color: var(--forest); }
+.svc-read { font: .78rem var(--f-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.svc-read b { color: var(--ink); }
+.connect { display: flex; flex-wrap: wrap; gap: .6rem; align-items: end; margin: 1rem 0; }
+.connect label { display: grid; gap: .3rem; font-size: .9rem; font-weight: 600; flex: 1 1 16rem; }
+.connect input { font: .95rem var(--f-mono); padding: .55rem .75rem; border-radius: 2px; border: 1.5px solid var(--ctl); background: var(--surface); color: var(--ink); min-height: 2.75rem; }
+.sample { display: grid; gap: 1rem 2rem; margin: 1.5rem 0; }
+@media (min-width: 900px) { .sample { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); } }
+.sample audio { width: 100%; margin-top: .5rem; }
+.compare { display: grid; gap: 1rem; }
+@media (min-width: 640px) { .compare { grid-template-columns: 1fr 1fr; } }
+.compare p { margin: .25rem 0 0; }
+.compare q { quotes: "«" "»"; }
+mark.diff { background: none; color: inherit; text-decoration: underline wavy var(--c-filler_word); text-decoration-thickness: 1.5px; text-underline-offset: .25em; }
+.btn { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: .5rem 1.1rem; border: 2px solid var(--ink); border-radius: 12px; background: var(--ink); color: var(--bg); font: 700 .95rem var(--f-body); cursor: pointer; text-decoration: none; box-shadow: 0 3px 0 var(--line-d); }
+.btn.secondary { background: transparent; color: var(--ink); }
+.btn:hover { transform: translateY(-1px); box-shadow: 0 4px 0 var(--line-d); }
+.btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line-d); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn.rec { background: transparent; color: var(--ink); border-color: var(--c-filler_word); box-shadow: 0 3px 0 var(--c-filler_word); }
+.actions { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1.25rem 0 .75rem; }
+.opts { display: flex; flex-wrap: wrap; gap: .3rem 1.6rem; margin: .5rem 0 .75rem; padding: 0; border: 0; min-width: 0; }
+.opts legend { font: 600 .74rem var(--f-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); padding: 0; margin-bottom: .3rem; }
+.opts label { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .2rem .5rem; font-size: .95rem; min-height: 2.75rem; }
+.opts input { width: 1.15rem; height: 1.15rem; accent-color: var(--forest); flex: none; }
+.opts code { font-size: .78em; color: var(--muted); }
+.status { min-height: 1.6rem; font: 600 .9rem var(--f-mono); margin: .75rem 0; }
+.meter { height: .5rem; background: var(--sunk); max-width: 18rem; box-shadow: inset 0 0 0 1px var(--line-d); }
+.meter i { display: block; height: 100%; width: 0; background: var(--forest); }
+.result { margin-top: 1rem; }
+.result h3 { margin-top: 1.75rem; }
+.kpis { display: flex; flex-wrap: wrap; margin: 1rem 0; border-block: 1px solid var(--line-d); }
+.kpis div { padding: .65rem 1.25rem .65rem 0; margin-right: 1.25rem; border-right: 1px solid var(--line); }
+.kpis div:last-child { border-right: 0; }
+.kpis dt { font: 600 .7rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: .3rem; }
+.kpis dt svg { width: .9rem; height: .9rem; color: var(--c); }
+.kpis dd { margin: 0; font: 600 1.35rem var(--f-mono); font-variant-numeric: tabular-nums; }
+.kpis dd .na { font: italic .85rem var(--f-body); }
+
+/* timeline */
+.timeline { margin: .75rem 0 .5rem; }
+.tl-row { display: grid; grid-template-columns: var(--tl-label) minmax(0, 1fr); gap: .75rem; align-items: center; margin-bottom: .45rem; }
+.tl-label { display: flex; align-items: center; gap: .45rem; font-size: .9rem; font-weight: 600; }
+.tl-label svg { width: 1.1rem; height: 1.1rem; color: var(--c); flex: none; }
+.tl-label .na { font-weight: 400; }
+.tl-track { position: relative; height: 2.25rem; background: var(--sunk); box-shadow: inset 0 0 0 1px var(--line-d); }
+.tl-wave { height: 3.75rem; background: none; box-shadow: none; }
+.tl-wave svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tl-wave path { fill: var(--wave); }
+.tl-ev { position: absolute; top: 6px; bottom: 6px; min-width: 6px; border: 0; padding: 0; border-radius: 2px; background: var(--c); color: var(--c); cursor: pointer; }
+.tl-ev::before { content: ""; position: absolute; inset: -8px -10px; }
+.tl-ev.seg-ev { background: transparent; top: auto; bottom: 7px; height: 12px; border: 2.5px solid var(--c); border-top: 0; border-radius: 0; }
+.tl-ev[data-state="uncertain"] { background: transparent; border: 2px dotted currentColor; background-image: radial-gradient(currentColor 1px, transparent 1.6px); background-size: 5px 5px; }
+.tl-ev:hover, .tl-ev.hl { outline: 2px solid var(--ink); outline-offset: 2px; }
+.tl-ev:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.tl-playhead { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--forest); pointer-events: none; }
+.timeline .axis { margin-left: calc(var(--tl-label) + .75rem); }
+.tl-help { font-size: .82rem; color: var(--muted); margin: .4rem 0 1rem; }
+.tl-help kbd { border: 1px solid var(--ctl); border-bottom-width: 2px; border-radius: 3px; padding: 0 .3rem; }
+@media (max-width: 560px) { .tl-row { grid-template-columns: minmax(0, 1fr); gap: .25rem; } .timeline .axis { margin-left: 0; } }
+
+/* tables */
+.table-wrap { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+th, td { text-align: left; padding: .6rem .75rem .6rem 0; border-bottom: 1px solid var(--line-d); vertical-align: top; }
+thead th { font: 600 .72rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--ink); white-space: nowrap; }
+td.num, .num { white-space: nowrap; }
+tr.hl td { background: var(--sunk); }
+.row-play { display: inline-flex; align-items: center; gap: .4rem; min-height: 2.25rem; padding: 0 .5rem 0 0; border: 0; background: none; color: var(--ink); font: 600 .92rem var(--f-body); cursor: pointer; text-align: left; }
+.row-play svg { width: 1.1rem; height: 1.1rem; color: var(--c); flex: none; }
+.hash { font-size: .78rem; word-break: break-all; }
+@media (max-width: 640px) {
+  table.stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  table.stack tr { display: block; padding: .6rem 0; border-bottom: 1px solid var(--line-d); }
+  table.stack td { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: .6rem; padding: .2rem 0; border: 0; }
+  table.stack td::before { content: attr(data-label); font: 600 .7rem/1.9 var(--f-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+  table.stack td.full { display: block; }
+  table.stack td.full::before { content: none; }
+}
+.endpoints td:first-child { font: .86rem var(--f-mono); white-space: nowrap; }
+@media (max-width: 640px) { .endpoints td:first-child { white-space: normal; overflow-wrap: anywhere; font-weight: 700; } }
+.matrix tbody th { width: 26%; font: 400 1.3rem/1.15 var(--f-display); }
+.matrix td { width: 37%; }
+@media (max-width: 760px) {
+  .matrix thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .matrix tr { display: block; padding: .9rem 0; border-bottom: 1px solid var(--line-d); }
+  .matrix tbody th, .matrix td { display: block; width: auto; border: 0; padding: .2rem 0; }
+  .matrix td::before { content: attr(data-label); display: block; font: 600 .7rem var(--f-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+}
+
+/* code: full-width panels, copy button in the header, scroll shadows */
+.code { margin: 1rem 0; border: 1px solid var(--line-d); border-radius: 12px; background: var(--code-bg); overflow: hidden; }
+.code-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; min-height: 2.6rem; padding: .2rem .3rem .2rem .9rem; border-bottom: 1px solid var(--line-d); font: .74rem var(--f-mono); letter-spacing: .04em; color: var(--muted); }
+.code-head .btns { display: flex; gap: .3rem; }
+.code pre { margin: 0; padding: .9rem 1rem; overflow-x: auto; line-height: 1.55; font-size: .86rem;
+  background: linear-gradient(to right, var(--code-bg) 30%, transparent) 0 0 / 2rem 100% no-repeat local,
+    linear-gradient(to left, var(--code-bg) 30%, transparent) 100% 0 / 2rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / .22), transparent) 0 0 / .7rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgb(0 0 0 / .22), transparent) 100% 0 / .7rem 100% no-repeat scroll;
+  background-color: var(--code-bg); }
+.code pre code { font-size: inherit; }
+.copy, .json-fmt { font: 600 .74rem var(--f-mono); min-height: 2.25rem; padding: 0 .75rem; border: 1.5px solid var(--ctl); border-radius: 2px; background: var(--surface); color: var(--ink); cursor: pointer; }
+.copy:hover, .json-fmt:hover { border-color: var(--ink); }
+.json-fmt[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+details { margin: 1rem 0; }
+details > summary { cursor: pointer; font-weight: 700; min-height: 2.75rem; display: flex; align-items: center; gap: .5rem; }
+details > summary::before { content: "▸"; font-family: var(--f-mono); }
+details[open] > summary::before { content: "▾"; }
+details > summary::-webkit-details-marker { display: none; }
+details .code pre { max-height: 28rem; overflow: auto; font-size: .8rem; }
+
+/* tabs (all panels visible without JS) */
+.tablist { display: flex; overflow-x: auto; border-bottom: 1px solid var(--line-d); margin-top: 1.25rem; }
+.tablist[hidden] { display: none; }
+[role="tab"] { flex: none; min-height: 2.75rem; padding: 0 1.1rem; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--muted); font: 700 .95rem var(--f-body); cursor: pointer; white-space: nowrap; }
+[role="tab"]:hover { color: var(--ink); }
+[role="tab"][aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+.panel { padding-top: .5rem; }
+.panel > h3 { margin-top: 1.25rem; }
+.tabbed .panel > h3 { font: 600 .74rem var(--f-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.panel p { max-width: 72ch; }
+
+/* lists */
+.ruled { list-style: none; padding: 0; margin: 1rem 0; border-top: 1px solid var(--ink); max-width: 72ch; }
+.ruled > li { padding: .75rem 0; border-bottom: 1px solid var(--line-d); }
+.steps { list-style: none; padding: 0; margin: 1.25rem 0; counter-reset: s; border-top: 1px solid var(--ink); }
+.steps > li { counter-increment: s; display: grid; grid-template-columns: 2.5rem minmax(0, 1fr); gap: .1rem 1rem; padding: .7rem 0; border-bottom: 1px solid var(--line-d); }
+.steps > li::before { content: counter(s, decimal-leading-zero); font: 600 .8rem/1.9 var(--f-mono); color: var(--muted); grid-row: span 2; }
+.steps b { display: block; }
+.steps small { color: var(--muted); font-size: .9rem; }
+
+/* figures */
+.fig { margin: 1.5rem 0; }
+.fig svg { display: block; width: 100%; height: auto; }
+.fig figcaption { font-size: .85rem; color: var(--muted); margin-top: .6rem; max-width: 72ch; }
+.fig text { font-family: var(--f-mono); font-size: 16px; fill: var(--ink); }
+.fig text.s { font-size: 13.5px; fill: var(--muted); }
+.fig text.k { font-size: 12.5px; fill: var(--forest); font-weight: 700; letter-spacing: .06em; }
+.fig .box { fill: var(--surface); stroke: var(--line-d); stroke-width: 1.5; }
+.fig .box.hot { fill: var(--forest-soft); stroke: var(--forest); }
+.fig .edge { fill: none; stroke: var(--forest); stroke-width: 2; }
+.fig .enc { fill: none; stroke: var(--forest); stroke-width: 2; stroke-dasharray: 7 6; }
+.fig .ah { fill: var(--forest); }
+.fig .flow-v { display: none; }
+@media (max-width: 719px) { .fig .flow-h { display: none; } .fig .flow-v { display: block; max-width: 26rem; } }
+.anat { display: grid; gap: 1rem 2rem; margin: 1.5rem 0; }
+@media (min-width: 980px) { .anat { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: start; } }
+.anat .code { margin: 0; }
+.anat pre .ln { display: block; }
+.anat pre .ln.on { background: color-mix(in srgb, var(--forest) 18%, transparent); }
+.pin { display: inline-grid; place-items: center; min-width: 1.35rem; height: 1.35rem; margin-left: .5rem; border-radius: 50%; border: 1.5px solid var(--forest); color: var(--forest); font: 700 .68rem var(--f-mono); vertical-align: .1em; }
+.notes { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--ink); }
+.notes li { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: .5rem; padding: .7rem .25rem; border-bottom: 1px solid var(--line-d); font-size: .95rem; }
+.notes li .pin { margin: .15rem 0 0; justify-self: start; }
+.notes li.on, .notes li:hover { background: var(--forest-soft); }
+.c4-tools { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: .75rem 0; }
+.c4-tools button { font: 600 .78rem var(--f-mono); min-height: 2.5rem; padding: 0 .8rem; border: 1.5px solid var(--ctl); border-radius: 2px; background: var(--surface); color: var(--ink); cursor: pointer; }
+.c4-tools button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.c4 { --z: 1; overflow: auto; max-height: 80vh; background: #fff; border: 1px solid var(--line-d); padding: .5rem; touch-action: pan-x pan-y pinch-zoom; cursor: grab; }
+.c4.drag { cursor: grabbing; user-select: none; }
+.c4 svg { display: block; width: calc(100% * var(--z)); max-width: none; height: auto; }
+
+footer { margin-top: clamp(4rem, 8vw, 7rem); padding-block: 2rem calc(2rem + env(safe-area-inset-bottom, 0px)); border-top: 3px solid var(--ink); font-size: .9rem; color: var(--muted); }
+footer p { margin: 0; }
 </style>
 </head>
 <body>
-<a class="skip" href="#contenido">Saltar al contenido</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="g-filler_word" viewBox="0 0 24 24"><path d="M4 5h16l-8 14z" fill="currentColor"/></symbol>
+  <symbol id="g-prolongation" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 6v12M21 6v12"/><path d="M3 12c1.5-3.2 3-3.2 4.5 0s3 3.2 4.5 0 3-3.2 4.5 0 3 3.2 4.5 0"/></g></symbol>
+  <symbol id="g-repetition" viewBox="0 0 24 24"><rect x="2" y="6" width="7" height="12" rx="1" fill="currentColor"/><rect x="15" y="6" width="7" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 12h4" stroke="currentColor" stroke-width="2" stroke-dasharray="1.5 1.5"/></symbol>
+  <symbol id="g-uncertain" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="0.1 3.6" stroke-linecap="round"/></symbol>
+</svg>
+<div class="skips">
+  <a href="#contenido">Saltar al contenido</a>
+  <a href="#pruebalo">Saltar a la demo</a>
+  <a href="#indice" id="skip-toc">Saltar al índice</a>
+</div>
 <header class="top">
-  <div class="wrap">
-    <a class="brand" href="#inicio">MRCD <span>v0.4.0</span></a>
-    <nav class="sections" aria-label="Secciones">
-      <ul>
-        <li><a href="#pruebalo">Pruébalo</a></li>
-        <li><a href="#ventajas">Ventajas</a></li>
-        <li><a href="#instalacion">Instalación</a></li>
-        <li><a href="#descargas">Descargas</a></li>
-        <li><a href="#arquitectura">Arquitectura</a></li>
-        <li><a href="#api">API</a></li>
-        <li><a href="#integracion">Integración</a></li>
-        <li><a href="#limites">Límites</a></li>
-        <li><a href="https://github.com/oratorIA-ProyectoTesis/MRCD">Código</a></li>
-      </ul>
+  <div class="bar">
+    <a class="brand" href="#inicio"><svg aria-hidden="true" focusable="false"><use href="#g-repetition"/></svg>MRCD <span class="ver">v0.4.0</span></a>
+    <nav class="dest" aria-label="Destinos principales">
+      <a href="#pruebalo" data-ch="A">Demo</a>
+      <a href="#resultados" data-ch="B">Evidencia</a>
+      <a href="#instalacion" data-ch="C">Integrar</a>
+      <a class="ext" href="https://github.com/oratorIA-ProyectoTesis/MRCD">Código <span aria-hidden="true">↗</span></a>
     </nav>
+    <button class="toc-btn" id="toc-btn" type="button" aria-expanded="false" aria-controls="indice"><span class="k">Índice</span><span class="cur" id="toc-cur">A · 01 Inicio</span><span class="chev" aria-hidden="true">▾</span></button>
   </div>
+  <div class="progress" aria-hidden="true"><i id="progress-bar"></i></div>
 </header>
 
 <main id="contenido">
-<section class="hero" id="inicio">
-  <div class="wrap">
-    <p class="eyebrow">Motor de reconocimiento contextual · español</p>
-    <h1>Detecta muletillas, prolongaciones y repeticiones en el habla, en tu propia máquina.</h1>
-    <p class="lead">MRCD analiza una grabación en español y devuelve cada disfluencia con su marca temporal, en un documento JSON versionado que cualquier aplicación puede consumir por HTTP. El audio no sale de tu equipo.</p>
-    <ul class="chips" aria-label="Datos del producto">
-      <li>Versión 0.4.0</li>
-      <li>Licencia MIT (código)</li>
-      <li>Python 3.11 y 3.12</li>
-      <li>Contrato <code>mrcd.analysis/v1</code>, revisión 1.4</li>
-      <li>Prototipo de investigación</li>
-    </ul>
-    <div class="cta">
-      <a class="btn" href="#pruebalo">Pruébalo con un audio de muestra</a>
-      <a class="btn secondary" href="#instalacion">Instalar en 5 minutos</a>
+<div class="strip"><div class="wrap"><p><b>Prototipo de investigación</b><span>Puntajes no calibrados</span><span>Resultados exploratorios</span><span>Código MIT · checkpoint a pedido</span></p></div></div>
+
+<section class="hero" id="inicio" aria-labelledby="inicio-t">
+  <div class="wrap g12">
+    <div class="c-6">
+      <p class="kicker">Motor de reconocimiento contextual · español</p>
+      <h1 id="inicio-t">Muletillas, prolongaciones y repeticiones, con su tiempo.</h1>
+      <p class="lead">MRCD analiza una grabación en español y devuelve cada disfluencia con su marca temporal, en un documento JSON versionado que cualquier aplicación puede consumir por HTTP. El audio no sale de tu equipo.</p>
+      <div class="cta">
+        <a class="btn-lime" href="#pruebalo">Pruébalo con el audio de muestra</a>
+        <span class="paths"><a class="arrow" href="#resultados">Evaluar el motor</a><a class="arrow" href="#instalacion">Integrarlo</a></span>
+      </div>
+      <dl class="sheet" aria-label="Ficha técnica">
+        <div><dt>Versión</dt><dd>0.4.0</dd></div>
+        <div><dt>Contrato</dt><dd>mrcd.analysis/v1 · rev. 1.4</dd></div>
+        <div><dt>Python</dt><dd>3.11 y 3.12</dd></div>
+        <div><dt>Licencia</dt><dd>MIT (código)</dd></div>
+        <div><dt>Servicio</dt><dd>local · mrcd serve</dd></div>
+      </dl>
     </div>
+    <figure class="c-6 instrument stage needs-js" aria-labelledby="hero-cap">
+      <div class="inst-head">
+        <div>
+          <p class="label" style="margin:0">Audio de muestra y resultado del motor</p>
+          <p class="inst-src">sample_es.wav · voz sintética · 14,9 s · 16 kHz · mono</p>
+        </div>
+        <button class="play" id="hero-play" type="button" aria-pressed="false"><span aria-hidden="true">▶</span> <span class="t">Escuchar</span></button>
+      </div>
+      <div class="inst" id="hero-inst"></div>
+      <ul class="legend" aria-label="Clases">
+        <li style="--c:var(--c-filler_word)"><svg aria-hidden="true"><use href="#g-filler_word"/></svg>Muletilla</li>
+        <li style="--c:var(--c-prolongation)"><svg aria-hidden="true"><use href="#g-prolongation"/></svg>Prolongación</li>
+        <li style="--c:var(--c-repetition)"><svg aria-hidden="true"><use href="#g-repetition"/></svg>Repetición</li>
+      </ul>
+      <figcaption class="inst-cap" id="hero-cap">Onda real del audio de muestra (picos mínimo y máximo en 360 tramos) con el resultado real precalculado por el servicio. Cada marca es un intervalo de decisión del motor, no un límite marcado por una persona; los puntajes no están calibrados.</figcaption>
+      <p class="notice" id="hero-notice" hidden><b>Checkpoint</b><span class="v"></span></p>
+    </figure>
   </div>
 </section>
 
-<section id="que-es" aria-labelledby="que-es-t">
-  <div class="wrap">
-    <h2 id="que-es-t">Qué es y qué problema resuelve</h2>
-    <p>Las herramientas de retroalimentación oral necesitan saber <em>dónde</em> y <em>cuántas veces</em> alguien dice “eh”, alarga un sonido o repite una palabra. El reconocimiento de voz estándar tiende a limpiar justo esa evidencia: en el corpus DIHANA, la configuración por defecto del ASR borró 109 de 214 repeticiones (51 %). Una aplicación que solo mira la transcripción pierde lo que quiere medir.</p>
-    <p>MRCD es un motor local que combina evidencia acústica (energía, tono, actividad de voz) con el texto de un ASR Whisper que también se ejecuta en tu máquina, y marca tres clases:</p>
-    <div class="grid" role="list">
-      <div class="card" role="listitem"><h3><span class="swatch" style="background:var(--c-filler_word);display:inline-block"></span> Muletilla</h3><p>Pausa llena o relleno, por ejemplo “eh”. Clase <code>filler_word</code>.</p></div>
-      <div class="card" role="listitem"><h3><span class="swatch" style="background:var(--c-prolongation);display:inline-block"></span> Prolongación</h3><p>Alargamiento observable de un sonido. Se reporta como observación acústica, sin afirmar su función disfluente. Clase <code>prolongation</code>.</p></div>
-      <div class="card" role="listitem"><h3><span class="swatch" style="background:var(--c-repetition);display:inline-block"></span> Repetición</h3><p>Repetición literal de una palabra o parte de ella, por ejemplo “el motor, el motor”. Clase <code>repetition</code>.</p></div>
+<div class="shell">
+<nav class="toc" id="indice" aria-label="Índice de la página" tabindex="-1">
+  <p class="toc-h">Índice</p>
+  <ol class="chs">
+    <li class="ch"><span class="chk">A · Entender</span>
+      <ol>
+        <li><a href="#inicio" data-ch="A"><span class="n">01</span>Inicio</a></li>
+        <li><a href="#que-es" data-ch="A"><span class="n">02</span>Qué es</a></li>
+        <li><a href="#pruebalo" data-ch="A"><span class="n">03</span>Pruébalo</a></li>
+      </ol>
+    </li>
+    <li class="ch"><span class="chk">B · Confiar</span>
+      <ol>
+        <li><a href="#resultados" data-ch="B"><span class="n">04</span>Resultados</a></li>
+        <li><a href="#limites" data-ch="B"><span class="n">05</span>Límites</a></li>
+        <li><a href="#ventajas" data-ch="B"><span class="n">06</span>Ventajas</a></li>
+        <li><a href="#privacidad" data-ch="B"><span class="n">07</span>Privacidad</a></li>
+        <li><a href="#reproducibilidad" data-ch="B"><span class="n">08</span>Reproducibilidad</a></li>
+      </ol>
+    </li>
+    <li class="ch"><span class="chk">C · Integrar</span>
+      <ol>
+        <li><a href="#instalacion" data-ch="C"><span class="n">09</span>Instalación</a></li>
+        <li><a href="#descargas" data-ch="C"><span class="n">10</span>Descargas</a></li>
+        <li><a href="#api" data-ch="C"><span class="n">11</span>API y contrato</a></li>
+        <li><a href="#integracion" data-ch="C"><span class="n">12</span>Integración</a></li>
+        <li><a href="#arquitectura" data-ch="C"><span class="n">13</span>Arquitectura</a></li>
+        <li><a href="#licencia" data-ch="C"><span class="n">14</span>Licencia y cita</a></li>
+      </ol>
+    </li>
+  </ol>
+  <p class="toc-ext"><a href="https://github.com/oratorIA-ProyectoTesis/MRCD">Código en GitHub ↗</a></p>
+</nav>
+
+<div class="flow">
+<div class="chapter first"><span class="l" aria-hidden="true">A</span><span class="t">Entender</span></div>
+
+<section class="sec" id="que-es" aria-labelledby="que-es-t">
+  <p class="secno"><span>02 / Qué es</span><span>A</span></p>
+  <h2 id="que-es-t">El ASR borra la evidencia que quieres medir</h2>
+  <div class="g12 reveal">
+    <div class="c-7">
+      <p class="measure">Las herramientas de retroalimentación oral necesitan saber <em>dónde</em> y <em>cuántas veces</em> alguien dice “eh”, alarga un sonido o repite una palabra. El reconocimiento de voz estándar tiende a limpiar justo esa evidencia: en el corpus DIHANA, la configuración por defecto del ASR borró <span class="num">109</span> de <span class="num">214</span> repeticiones (<span class="num">51 %</span>). Una aplicación que solo mira la transcripción pierde lo que quiere medir.</p>
+      <p class="measure">MRCD es un motor local que combina evidencia acústica (energía, tono, actividad de voz) con el texto de un ASR Whisper que también se ejecuta en tu máquina, y marca tres clases:</p>
+      <ol class="classes">
+        <li data-cls="filler_word" style="--c:var(--c-filler_word)"><svg class="g" aria-hidden="true"><use href="#g-filler_word"/></svg><span class="nm">Muletilla</span><p>Pausa llena o relleno, por ejemplo “eh”. Clase <code>filler_word</code>.</p><span class="ex">en la muestra: <b data-count="filler_word">–</b></span></li>
+        <li data-cls="prolongation" style="--c:var(--c-prolongation)"><svg class="g" aria-hidden="true"><use href="#g-prolongation"/></svg><span class="nm">Prolongación</span><p>Alargamiento observable de un sonido. Se reporta como observación acústica, sin afirmar su función disfluente. Clase <code>prolongation</code>.</p><span class="ex">en la muestra: <b data-count="prolongation">–</b></span></li>
+        <li data-cls="repetition" style="--c:var(--c-repetition)"><svg class="g" aria-hidden="true"><use href="#g-repetition"/></svg><span class="nm">Repetición</span><p>Repetición literal de una palabra o parte de ella, por ejemplo “el motor, el motor”. Clase <code>repetition</code>.</p><span class="ex">en la muestra: <b data-count="repetition">–</b></span></li>
+      </ol>
+      <p class="measure">El resultado se entrega por un servicio HTTP local (<code>mrcd serve</code>), una biblioteca de Python o la línea de comandos. Los puntajes <strong>no están calibrados</strong>: ordenan la evidencia, no son probabilidades de acierto.</p>
     </div>
-    <p>El resultado se entrega por un servicio HTTP local (<code>mrcd serve</code>), una biblioteca de Python o la línea de comandos. Los puntajes <strong>no están calibrados</strong>: ordenan la evidencia, no son probabilidades de acierto.</p>
+    <figure class="c-5 mini needs-js" aria-labelledby="qe-cap">
+      <div class="inst" id="qe-inst"></div>
+      <figcaption id="qe-cap">La misma muestra, clase por clase: el corchete es el intervalo de decisión de la muletilla (un segmento del ASR, no un instante) y las marcas son las dos repeticiones. La muestra no tiene prolongaciones detectadas.</figcaption>
+    </figure>
   </div>
 </section>
 
-<section id="pruebalo" aria-labelledby="pruebalo-t">
-  <div class="wrap">
-    <h2 id="pruebalo-t">Pruébalo</h2>
-    <div class="try">
-      <div class="mode" id="mode" role="status">
-        <span class="dot" id="mode-dot" aria-hidden="true"></span>
+<section class="stage demo" id="pruebalo" aria-labelledby="pruebalo-t">
+  <p class="secno"><span>03 / Pruébalo</span><span>A</span></p>
+  <h2 id="pruebalo-t">Pruébalo</h2>
+  <div class="try">
+    <div class="mode" id="mode" role="status">
+      <span class="dot" id="mode-dot" aria-hidden="true"></span>
+      <div>
+        <p class="svc-read" id="svc-read">Servicio local · <b>comprobando…</b></p>
         <div id="mode-text"><p>Comprobando si hay un servicio MRCD disponible…</p></div>
       </div>
-
-      <div id="connect-panel" hidden>
-        <div class="connect">
-          <label for="svc-url">Dirección de tu servicio local
-            <input id="svc-url" type="url" value="http://127.0.0.1:8765" inputmode="url" autocomplete="off" spellcheck="false">
-          </label>
-          <button class="btn secondary" id="btn-connect" type="button">Conectar</button>
-        </div>
-        <div id="connect-help"></div>
-      </div>
-
-      <div class="sample">
-        <div><strong>Audio de muestra</strong> <span class="pill">voz sintética · 14,9 s · 16 kHz mono</span></div>
-        <audio id="player" controls preload="none" src="sample_es.wav"></audio>
-        <p style="margin:0">Texto leído: <q>Buenos días. Eh, hoy les presento el proyecto. El motor, el motor escucha el audio y busca muletillas. Luego, eh, marca cada repetición con su tiempo. Así se arma el reporte final.</q></p>
-      </div>
-
-      <div class="actions">
-        <button class="btn" id="btn-sample" type="button" disabled>Analizar la muestra</button>
-        <button class="btn secondary" id="btn-upload" type="button" disabled>Subir un audio</button>
-        <input id="file" type="file" accept="audio/*,.wav" hidden>
-        <button class="btn secondary" id="btn-rec" type="button" disabled aria-pressed="false">Grabar con el micrófono</button>
-      </div>
-      <fieldset class="opts" id="opts">
-        <legend>Opciones de la petición</legend>
-        <label><input type="checkbox" id="opt-text" checked> Incluir el texto <code>include_text</code></label>
-        <label><input type="checkbox" id="opt-decision"> Decisión de tres estados, experimental <code>decision</code></label>
-        <label id="opt-inc-wrap"><input type="checkbox" id="opt-inc" disabled> Sesión incremental <code>/v1/sessions</code></label>
-      </fieldset>
-      <div id="rec-panel" hidden>
-        <p style="margin:.2rem 0">Grabando: <strong id="rec-time">0,0 s</strong> <span class="na">(mínimo 13 s, máximo 120 s)</span></p>
-        <div class="meter" aria-hidden="true"><i id="rec-level"></i></div>
-      </div>
-      <p class="status" id="status" role="status" aria-live="polite"></p>
-      <div class="result" id="result" aria-live="off"></div>
     </div>
+
+    <div id="connect-panel" hidden>
+      <div class="connect">
+        <label for="svc-url">Dirección de tu servicio local
+          <input id="svc-url" type="url" value="http://127.0.0.1:8765" inputmode="url" autocomplete="off" spellcheck="false">
+        </label>
+        <button class="btn secondary" id="btn-connect" type="button">Conectar</button>
+      </div>
+      <div id="connect-help"></div>
+    </div>
+
+    <div class="sample">
+      <div>
+        <p class="label" style="margin:0">Audio de muestra</p>
+        <p class="mono" style="margin:.2rem 0 0;font-size:.85rem">voz sintética · 14,9 s · 16 kHz · mono</p>
+        <audio id="player" controls preload="none" src="sample_es.wav"></audio>
+      </div>
+      <div class="compare">
+        <div><p class="label">Texto leído</p><p id="read-text"><q>Buenos días. Eh, hoy les presento el proyecto. El motor, el motor escucha el audio y busca muletillas. Luego, eh, marca cada repetición con su tiempo. Así se arma el reporte final.</q></p></div>
+        <div class="needs-js"><p class="label">Transcripción del ASR (precalculada)</p><p id="asr-text"><q>Se muestra al cargar la página.</q></p></div>
+        <p class="tl-help needs-js" style="grid-column:1/-1;margin:0">Subrayado ondulado: palabras que difieren entre el texto leído y la transcripción del ASR.</p>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btn-sample" type="button" disabled>Analizar la muestra</button>
+      <button class="btn secondary" id="btn-upload" type="button" disabled>Subir un audio</button>
+      <input id="file" type="file" accept="audio/*,.wav" hidden>
+      <button class="btn secondary" id="btn-rec" type="button" disabled aria-pressed="false">Grabar con el micrófono</button>
+    </div>
+    <fieldset class="opts" id="opts">
+      <legend>Opciones de la petición</legend>
+      <label><input type="checkbox" id="opt-text" checked> Incluir el texto <code>include_text</code></label>
+      <label><input type="checkbox" id="opt-decision"> Decisión de tres estados, experimental <code>decision</code></label>
+      <label id="opt-inc-wrap"><input type="checkbox" id="opt-inc" disabled> Sesión incremental <code>/v1/sessions</code></label>
+    </fieldset>
+    <div id="rec-panel" hidden>
+      <p style="margin:.2rem 0">Grabando: <strong id="rec-time" class="num">0,0 s</strong> <span class="na">(mínimo 13 s, máximo 120 s)</span></p>
+      <div class="meter" aria-hidden="true"><i id="rec-level"></i></div>
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+    <div class="result" id="result" aria-live="off"></div>
   </div>
 </section>
 
-<section id="ventajas" aria-labelledby="ventajas-t">
-  <div class="wrap">
-    <h2 id="ventajas-t">Ventajas, con su evidencia</h2>
-    <p>Comparación cualitativa por criterios definidos y congelados por hash antes de llenar la matriz (02/11/2026), sobre la documentación pública de nueve soluciones. En las fuentes consultadas no se identificó otra de las soluciones comparadas que reúna estos seis puntos a la vez. Es una evaluación de documentación, hecha por el propio equipo; ninguna solución se ejecutó.</p>
-    <ol class="grid" style="list-style:none;padding:0">
-      <li class="card"><h3><span class="tag">K4</span>Conserva, medido, la evidencia que el ASR omite</h3><p>En habla española y con control: el ASR por defecto borra 109 de 214 repeticiones (51 %); con el perfil P1 sobreviven 144 de 214, frente a 42 de 214 del control fluido. Diferencia P1 − control: +0,387 de F1 [0,298; 0,478]. Ninguna fuente consultada de las otras soluciones mide esto en español frente a un control.</p><p class="src">Un corpus (DIHANA), exploratorio; P1 es experimental.</p></li>
-      <li class="card"><h3><span class="tag">K5</span>Reporte por clase con procedencia y límites</h3><p>Cada evento trae su intervalo en segundos y un puntaje rotulado “no calibrado”; cada documento lleva la procedencia (perfil de decisión, sha256 de los artefactos, modelo ASR) y advertencias de alcance.</p></li>
-      <li class="card"><h3><span class="tag">K6</span>Estados honestos verificados por pruebas</h3><p>La ausencia nunca se codifica como 0 (“no disponible: motivo”), existe el estado incierto y los puntajes se marcan como no calibrados. En las demás soluciones este criterio no está documentado.</p></li>
-      <li class="card"><h3><span class="tag">K8</span>Reproducibilidad</h3><p>Protocolos congelados por hash (<code>PROTOCOL.sha256.json</code>) y revisiones que reproducen las cifras del ASR; código MIT en un repositorio público.</p></li>
-      <li class="card"><h3><span class="tag">K9 + K7</span>Contrato versionado con análisis local</h3><p>Esquema <code>mrcd.analysis/v1</code> con revisiones aditivas 1.0 a 1.4, <code>POST /v1/jobs</code> y CLI, ejecutado en tu máquina. AssemblyAI y Deepgram tienen API versionada, pero en la nube; CrisperWhisper y OpenOPAF son locales, pero sin contrato de eventos versionado.</p></li>
-      <li class="card"><h3><span class="tag">K2 + K1</span>Tres clases en español en un mismo motor</h3><p>Muletilla, prolongación y repetición literal, evaluadas con habla española. El RAP de ESPOL trata pausas llenas (con prolongaciones dentro de esa definición) y muletillas, sin repeticiones.</p></li>
-    </ol>
-    <p class="src" style="color:var(--muted);font-size:.88rem">Fuente: benchmarking cualitativo del proyecto (02/11/2026), criterios K1 a K12 congelados por sha256 antes de llenar la matriz; los seis puntos son los de su sección de ventajas. Todo es exploratorio. La desventaja principal es la madurez: no hay estudios con usuarios (criterio K12).</p>
+<div class="chapter"><span class="l" aria-hidden="true">B</span><span class="t">Confiar</span><p class="s">Resultados y límites primero; después, las ventajas y su evidencia.</p></div>
+
+<div class="g12">
+<section class="sec c-7" id="resultados" aria-labelledby="resultados-t">
+  <p class="secno"><span>04 / Resultados</span><span>B</span></p>
+  <h2 id="resultados-t">Resultados</h2>
+  <p class="measure">F1 por clase entre <span class="num">0,51</span> y <span class="num">0,70</span>, con intervalos por hablante, según clase, corpus y condición. Frente a comparadores fijos en las mismas unidades, la ganancia es modesta en muletillas (<span class="num">+0,036 [0,008; 0,064]</span> frente a la regla léxica) y nula en repeticiones (<span class="num">−0,002</span> frente a la regla de una línea). Costo local: factor de tiempo real de <span class="num">0,45</span> a <span class="num">0,51</span> en CPU.</p>
+  <div class="note"><p><span class="k">Salvedad</span>Son resultados exploratorios. El F1 se midió sobre turnos del corpus DIHANA (telefónico, español peninsular); el perfil por defecto se entrenó con esos turnos y se aplica a segmentos separados por pausas, un cambio de dominio no medido. La ganancia externa no está demostrada (EPIC: <span class="num">+0,006 [−0,050; 0,068]</span>). Estas cifras no son comparables con las de otros sistemas, que miden otra tarea, unidad o corpus.</p></div>
+</section>
+
+<section class="sec c-5" id="limites" aria-labelledby="limites-t">
+  <p class="secno"><span>05 / Límites</span><span>B</span></p>
+  <h2 id="limites-t">Límites conocidos</h2>
+  <ul class="ruled">
+    <li>Puntajes sin calibrar y sin concordancia interanotador: no los presentes como probabilidades ni como diagnóstico.</li>
+    <li>Validado en un solo corpus de audio con ASR; ningún corpus peruano ni estudio con usuarios.</li>
+    <li>La desambiguación contextual de formas como “este” o “bueno” no está demostrada.</li>
+    <li>Bloqueos, revisiones y pausas quedan fuera del alcance evaluado y se ocultan por defecto. El servicio analiza solo audio; el canal de video no forma parte de él.</li>
+    <li>Servicio de desarrollo: sin TLS; token portador solo fuera del bucle local (obligatorio en el contenedor).</li>
+  </ul>
+</section>
+</div>
+
+<section class="sec" id="ventajas" aria-labelledby="ventajas-t">
+  <p class="secno"><span>06 / Ventajas</span><span>B</span></p>
+  <h2 id="ventajas-t">Ventajas, con su evidencia</h2>
+  <p class="measure">Comparación cualitativa por criterios definidos y congelados por hash antes de llenar la matriz (02/11/2026), sobre la documentación pública de nueve soluciones. En las fuentes consultadas no se identificó otra de las soluciones comparadas que reúna estos seis puntos a la vez. Es una evaluación de documentación, hecha por el propio equipo; ninguna solución se ejecutó.</p>
+  <div class="table-wrap">
+    <table class="matrix">
+      <caption class="visually-hidden">Seis puntos de la comparación cualitativa: lo que hace MRCD y lo que dicen las fuentes de las demás soluciones</caption>
+      <thead><tr><th scope="col">Punto</th><th scope="col">Qué hace MRCD</th><th scope="col">Frente a las soluciones comparadas</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Conserva, medido, la evidencia que el ASR omite</th><td data-label="Qué hace MRCD">En habla española y con control: el ASR por defecto borra <span class="num">109</span> de <span class="num">214</span> repeticiones (<span class="num">51 %</span>); con el perfil P1 sobreviven <span class="num">144</span> de <span class="num">214</span>, frente a <span class="num">42</span> de <span class="num">214</span> del control fluido. Diferencia P1 − control: <span class="num">+0,387</span> de F1 <span class="num">[0,298; 0,478]</span>.</td><td data-label="Frente a las demás">Ninguna fuente consultada de las otras soluciones mide esto en español frente a un control. <span class="na">Un corpus (DIHANA), exploratorio; P1 es experimental.</span></td></tr>
+        <tr><th scope="row">Reporte por clase con procedencia y límites</th><td data-label="Qué hace MRCD">Cada evento trae su intervalo en segundos y un puntaje rotulado “no calibrado”; cada documento lleva la procedencia (perfil de decisión, sha256 de los artefactos, modelo ASR) y advertencias de alcance.</td><td data-label="Frente a las demás"><span class="na">—</span><span class="visually-hidden">sin comparación en la fuente</span></td></tr>
+        <tr><th scope="row">Estados honestos verificados por pruebas</th><td data-label="Qué hace MRCD">La ausencia nunca se codifica como 0 (“no disponible: motivo”), existe el estado incierto y los puntajes se marcan como no calibrados.</td><td data-label="Frente a las demás">En las demás soluciones este criterio no está documentado.</td></tr>
+        <tr><th scope="row">Reproducibilidad</th><td data-label="Qué hace MRCD">Protocolos congelados por hash (<code>PROTOCOL.sha256.json</code>) y revisiones que reproducen las cifras del ASR; código MIT en un repositorio público.</td><td data-label="Frente a las demás"><span class="na">—</span><span class="visually-hidden">sin comparación en la fuente</span></td></tr>
+        <tr><th scope="row">Contrato versionado con análisis local</th><td data-label="Qué hace MRCD">Esquema <code>mrcd.analysis/v1</code> con revisiones aditivas 1.0 a 1.4, <code>POST /v1/jobs</code> y CLI, ejecutado en tu máquina.</td><td data-label="Frente a las demás">AssemblyAI y Deepgram tienen API versionada, pero en la nube; CrisperWhisper y OpenOPAF son locales, pero sin contrato de eventos versionado.</td></tr>
+        <tr><th scope="row">Tres clases en español en un mismo motor</th><td data-label="Qué hace MRCD">Muletilla, prolongación y repetición literal, evaluadas con habla española.</td><td data-label="Frente a las demás">El RAP de ESPOL trata pausas llenas (con prolongaciones dentro de esa definición) y muletillas, sin repeticiones.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="measure" style="font-size:.88rem;color:var(--muted)">Fuente: benchmarking cualitativo del proyecto (02/11/2026), criterios K1 a K12 congelados por sha256 antes de llenar la matriz; los seis puntos son los de su sección de ventajas. Todo es exploratorio. La desventaja principal es la madurez: no hay estudios con usuarios (criterio K12).</p>
+</section>
+
+<section class="sec" id="privacidad" aria-labelledby="privacidad-t">
+  <p class="secno"><span>07 / Privacidad</span><span>B</span></p>
+  <h2 id="privacidad-t">Privacidad</h2>
+  <div class="g12">
+    <ul class="ruled c-7">
+      <li>El análisis completo, incluido el ASR, corre en tu equipo. Tras la descarga inicial del modelo no hay llamadas de red.</li>
+      <li>El audio se decodifica en memoria y se descarta al terminar el trabajo; nunca se escribe en disco. Los buffers de las sesiones se sobrescriben con ceros al cerrar.</li>
+      <li>El texto transcrito solo vuelve si lo pides con <code>include_text=true</code>. Los resultados se guardan en memoria, con un límite, y desaparecen al detener el proceso.</li>
+      <li>El servicio se niega a escuchar fuera del bucle local salvo con <code>--allow-non-loopback</code>. En el bucle local no tiene autenticación salvo que se defina <code>MRCD_SERVICE_TOKEN</code>; fuera de él exige un token portador (el contenedor lo hace) y no tiene TLS, así que no debe exponerse a una red sin un proxy inverso.</li>
+      <li>Esta página no carga recursos de terceros ni usa rastreadores.</li>
+    </ul>
+    <figure class="fig c-5" style="margin-top:0">
+      <svg viewBox="0 0 440 600" role="img" aria-labelledby="priv-t priv-d">
+        <title id="priv-t">Frontera de confianza del servicio MRCD</title>
+        <desc id="priv-d">Dentro de tu equipo: tu aplicación o navegador llama por HTTP a 127.0.0.1:8765 y el servicio pasa el audio en memoria al motor con el ASR. Lo único que cruza el borde: la descarga inicial del modelo y el checkpoint, que se entrega a pedido. Fuera del bucle local hacen falta la opción --allow-non-loopback y un token portador, sin TLS.</desc>
+        <defs><marker id="ah-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0 0L10 5L0 10z"/></marker></defs>
+        <text class="k" x="10" y="18">FUERA DE TU EQUIPO</text>
+        <text x="10" y="44">Descarga inicial</text>
+        <text class="s" x="10" y="64">Whisper small, luego caché</text>
+        <text x="250" y="44">Checkpoint</text>
+        <text class="s" x="250" y="64">se entrega a pedido</text>
+        <path class="edge" d="M60 72V112" marker-end="url(#ah-p)"/>
+        <path class="edge" d="M290 72V112" marker-end="url(#ah-p)"/>
+        <rect class="enc" x="6" y="118" width="428" height="352" rx="14"/>
+        <text class="k" x="22" y="142">TU EQUIPO</text>
+        <rect class="box" x="30" y="156" width="380" height="52" rx="8"/>
+        <text x="46" y="188">Tu app o navegador</text>
+        <path class="edge" d="M120 208V250" marker-end="url(#ah-p)"/>
+        <text class="s" x="134" y="235">HTTP · 127.0.0.1:8765</text>
+        <rect class="box" x="30" y="254" width="380" height="52" rx="8"/>
+        <text x="46" y="286">Servicio mrcd serve</text>
+        <path class="edge" d="M120 306V344" marker-end="url(#ah-p)"/>
+        <text class="s" x="134" y="331">audio en memoria, nunca en disco</text>
+        <rect class="box hot" x="30" y="348" width="380" height="52" rx="8"/>
+        <text x="46" y="380">Motor + ASR, en tu equipo</text>
+        <text class="s" x="30" y="428">texto solo con include_text=true</text>
+        <text class="s" x="30" y="450">bucle local: sin autenticación salvo token</text>
+        <text class="k" x="10" y="500">FUERA DEL BUCLE LOCAL</text>
+        <text class="s" x="10" y="524">--allow-non-loopback + token portador</text>
+        <text class="s" x="10" y="546">sin TLS: no exponer sin proxy inverso</text>
+        <text class="s" x="10" y="584">Esta página: sin recursos de terceros</text>
+      </svg>
+      <figcaption>Recinto de confianza: lo que corre dentro de tu equipo y lo único que cruza su borde.</figcaption>
+    </figure>
   </div>
 </section>
 
-<section id="instalacion" aria-labelledby="instalacion-t">
-  <div class="wrap">
-    <h2 id="instalacion-t">Instalación: tres rutas</h2>
-    <p>La primera ejecución descarga Whisper small (~486 MB) desde Hugging Face con un aviso de progreso; las siguientes usan la caché. Con <code>HF_HUB_OFFLINE=1</code> se prohíbe cualquier descarga. Python 3.11 o 3.12; probado con 3.12 en Windows y en Linux (Docker).</p>
-    <div class="grid">
-      <article class="card">
-        <h3>1. Docker, un comando</h3>
-        <p>Imagen con PyTorch para CPU y Whisper small ya incluidos; corre como usuario sin privilegios y tiene verificación de salud.</p>
-        <div class="code"><pre><code>docker run --rm -e MRCD_SERVICE_TOKEN="$TOKEN" -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" ghcr.io/oratoria-proyectotesis/mrcd:0.4.0</code></pre></div>
-        <p>Luego abre <a href="http://127.0.0.1:8765/">http://127.0.0.1:8765/</a>. El puerto se publica solo en <code>127.0.0.1</code>; dentro del contenedor el servicio exige un token portador (<code>TOKEN</code> de 32 caracteres o más). <code>./models</code> debe contener el checkpoint, que no viene en la imagen ni en ninguna descarga: se entrega a pedido (ver <a href="#descargas">Descargas</a> y <code>models/README.md</code>). Para construirla tú: <code>docker build -t ghcr.io/oratoria-proyectotesis/mrcd:0.4.0 https://github.com/oratorIA-ProyectoTesis/MRCD.git#v0.4.0</code>, o <code>docker compose up --build</code> con el repositorio clonado.</p>
-      </article>
-      <article class="card">
-        <h3>2. pip</h3>
-        <div class="code"><pre><code>python -m venv .venv
+<section class="sec tight" id="reproducibilidad" aria-labelledby="reproducibilidad-t">
+  <p class="secno"><span>08 / Reproducibilidad</span><span>B</span></p>
+  <h2 id="reproducibilidad-t">Reproducibilidad</h2>
+  <ul class="ruled">
+    <li>Cada respuesta registra el sha256 del checkpoint y del modelo Whisper, el perfil ASR, el perfil de decisión con el hash de sus artefactos y el entorno (incluido <code>OMP_NUM_THREADS</code>).</li>
+    <li>El checkpoint no se distribuye (a pedido, solo para investigación; ver <code>models/README.md</code>); se busca en <code>models/ckpt_audio_text.pt</code> y se verifica por sha256 antes de cargarlo.</li>
+    <li>Los protocolos de evaluación están congelados por hash (<code>PROTOCOL.sha256.json</code>) y las cifras del ASR se reprodujeron en revisiones independientes.</li>
+    <li>Más de mil pruebas automáticas (<code>pytest -q</code>) y un verificador que comprueba que los diagramas de arquitectura no contradicen el código.</li>
+  </ul>
+</section>
+
+<div class="chapter"><span class="l" aria-hidden="true">C</span><span class="t">Integrar</span></div>
+
+<section class="sec" id="instalacion" aria-labelledby="instalacion-t">
+  <p class="secno"><span>09 / Instalación</span><span>C</span></p>
+  <h2 id="instalacion-t">Instalación: tres rutas</h2>
+  <p class="measure">La primera ejecución descarga Whisper small (~486 MB) desde Hugging Face con un aviso de progreso; las siguientes usan la caché. Con <code>HF_HUB_OFFLINE=1</code> se prohíbe cualquier descarga. Python 3.11 o 3.12; probado con 3.12 en Windows y en Linux (Docker).</p>
+  <div class="tabs">
+    <div class="tablist" role="tablist" aria-label="Rutas de instalación" hidden>
+      <button type="button" role="tab" id="tab-inst-docker" aria-controls="inst-docker" aria-selected="true">Docker</button>
+      <button type="button" role="tab" id="tab-inst-pip" aria-controls="inst-pip" aria-selected="false" tabindex="-1">pip</button>
+      <button type="button" role="tab" id="tab-inst-src" aria-controls="inst-src" aria-selected="false" tabindex="-1">Desde el código</button>
+    </div>
+    <div class="panel" role="tabpanel" id="inst-docker" aria-labelledby="tab-inst-docker">
+      <h3>1. Docker, un comando</h3>
+      <p>Imagen con PyTorch para CPU y Whisper small ya incluidos; corre como usuario sin privilegios y tiene verificación de salud.</p>
+      <div class="code" data-name="docker run"><div class="code-head"><span>terminal · docker run</span></div><pre><code>docker run --rm -e MRCD_SERVICE_TOKEN="$TOKEN" -p 127.0.0.1:8765:8765 -v "$PWD/models:/models:ro" ghcr.io/oratoria-proyectotesis/mrcd:0.4.0</code></pre></div>
+      <p>Luego abre <a href="http://127.0.0.1:8765/">http://127.0.0.1:8765/</a>. El puerto se publica solo en <code>127.0.0.1</code>; dentro del contenedor el servicio exige un token portador (<code>TOKEN</code> de 32 caracteres o más). <code>./models</code> debe contener el checkpoint, que no viene en la imagen ni en ninguna descarga: se entrega a pedido (ver <a href="#descargas">Descargas</a> y <code>models/README.md</code>). Para construirla tú: <code>docker build -t ghcr.io/oratoria-proyectotesis/mrcd:0.4.0 https://github.com/oratorIA-ProyectoTesis/MRCD.git#v0.4.0</code>, o <code>docker compose up --build</code> con el repositorio clonado.</p>
+    </div>
+    <div class="panel" role="tabpanel" id="inst-pip" aria-labelledby="tab-inst-pip">
+      <h3>2. pip</h3>
+      <div class="code" data-name="pip"><div class="code-head"><span>terminal · pip</span></div><pre><code>python -m venv .venv
 # Windows: .venv\Scripts\activate
 . .venv/bin/activate
 pip install "mrcd[service] @ git+https://github.com/oratorIA-ProyectoTesis/MRCD@v0.4.0"
 mrcd serve</code></pre></div>
-        <p>El comando <code>mrcd</code> fija <code>OMP_NUM_THREADS=4</code> si no está definido: el texto del ASR en CPU depende de ese valor y solo tiene efecto antes de importar numpy.</p>
-      </article>
-      <article class="card">
-        <h3>3. Desde el código</h3>
-        <div class="code"><pre><code>git clone https://github.com/oratorIA-ProyectoTesis/MRCD
+      <p>El comando <code>mrcd</code> fija <code>OMP_NUM_THREADS=4</code> si no está definido: el texto del ASR en CPU depende de ese valor y solo tiene efecto antes de importar numpy.</p>
+    </div>
+    <div class="panel" role="tabpanel" id="inst-src" aria-labelledby="tab-inst-src">
+      <h3>3. Desde el código</h3>
+      <div class="code" data-name="desde el código"><div class="code-head"><span>terminal · git clone</span></div><pre><code>git clone https://github.com/oratorIA-ProyectoTesis/MRCD
 cd MRCD
 python -m venv .venv
 . .venv/bin/activate
 pip install -e ".[service,dev]"
 mrcd serve
 pytest -q</code></pre></div>
-      </article>
     </div>
-    <h3>Primer análisis desde la terminal</h3>
-    <div class="code"><pre><code>mrcd sample sample_es.wav        # escribe el audio de muestra incluido
+  </div>
+  <h3>Primer análisis desde la terminal</h3>
+  <div class="code" data-name="primer análisis"><div class="code-head"><span>terminal · mrcd analyze</span></div><pre><code>mrcd sample sample_es.wav        # escribe el audio de muestra incluido
 mrcd analyze sample_es.wav --include-text</code></pre></div>
-  </div>
 </section>
 
-<section id="descargas" aria-labelledby="descargas-t">
-  <div class="wrap">
-    <h2 id="descargas-t">Descargas</h2>
-    <p>Versión 0.4.0 (<a href="https://github.com/oratorIA-ProyectoTesis/MRCD/releases/tag/v0.4.0">página de la versión</a>). El paquete no está en PyPI. Verifica cada archivo con <code>SHA256SUMS.txt</code>.</p>
-    <div class="grid">
-      <article class="card">
-        <h3>Paquetes Python</h3>
-        <ul>
-          <li><a href="https://github.com/oratorIA-ProyectoTesis/MRCD/releases/download/v0.4.0/mrcd-0.4.0-py3-none-any.whl">mrcd-0.4.0-py3-none-any.whl</a> (703 661 bytes)<br><code>sha256 e02bede0627ff28b31983f49f823abe384c6a8f02bb98485eb5a17786eb38be5</code></li>
-          <li><a href="https://github.com/oratorIA-ProyectoTesis/MRCD/releases/download/v0.4.0/mrcd-0.4.0.tar.gz">mrcd-0.4.0.tar.gz</a> (880 669 bytes)<br><code>sha256 e872783514a31ce145677ac8978c5276943ab105c4129fbf26cb5fd0df18e981</code></li>
-          <li><a href="https://github.com/oratorIA-ProyectoTesis/MRCD/releases/download/v0.4.0/SHA256SUMS.txt">SHA256SUMS.txt</a></li>
-        </ul>
-        <div class="code"><pre><code>pip install https://github.com/oratorIA-ProyectoTesis/MRCD/releases/download/v0.4.0/mrcd-0.4.0-py3-none-any.whl</code></pre></div>
-      </article>
-      <article class="card">
-        <h3>Imágenes Docker</h3>
-        <p>Docker Hub: <a href="https://hub.docker.com/r/rivacortezf/mrcd">rivacortezf/mrcd</a> (etiquetas 0.4.0, latest, 0.4.0-cuda, latest-cuda).</p>
-        <div class="code"><pre><code>docker pull rivacortezf/mrcd:0.4.0
+<section class="sec" id="descargas" aria-labelledby="descargas-t">
+  <p class="secno"><span>10 / Descargas</span><span>C</span></p>
+  <h2 id="descargas-t">Descargas</h2>
+  <p class="measure">Versión 0.4.0 (<a href="https://github.com/oratorIA-ProyectoTesis/MRCD/releases/tag/v0.4.0">página de la versión</a>). El paquete no está en PyPI. Verifica cada archivo con <code>SHA256SUMS.txt</code>.</p>
+  <h3>Paquetes Python</h3>
+  <div class="table-wrap">
+    <table class="stack">
+      <caption class="visually-hidden">Archivos de la versión 0.4.0 con tamaño y sha256</caption>
+      <thead><tr><th scope="col">Archivo</th><th scope="col">Tamaño</th><th scope="col">sha256</th></tr></thead>
+      <tbody>
+        <tr><td data-label="Archivo"><a href="https://github.com/oratorIA-ProyectoTesis/MRCD/releases/download/v0.4.0/mrcd-0.4.0-py3-none-any.whl">mrcd-0.4.0-py3-none-any.whl</a></td><td data-label="Tamaño" class="num">703 661 bytes</td><td data-label="sha256"><code class="hash">e02bede0627ff28b31983f49f823abe384c6a8f02bb98485eb5a17786eb38be5</code></td></tr>
+        <tr><td data-label="Archivo"><a href="https://github.com/oratorIA-ProyectoTesis/MRCD/releases/download/v0.4.0/mrcd-0.4.0.tar.gz">mrcd-0.4.0.tar.gz</a></td><td data-label="Tamaño" class="num">880 669 bytes</td><td data-label="sha256"><code class="hash">e872783514a31ce145677ac8978c5276943ab105c4129fbf26cb5fd0df18e981</code></td></tr>
+        <tr><td data-label="Archivo"><a href="https://github.com/oratorIA-ProyectoTesis/MRCD/releases/download/v0.4.0/SHA256SUMS.txt">SHA256SUMS.txt</a></td><td data-label="Tamaño" class="na">—</td><td data-label="sha256" class="na">sumas de los archivos de la versión</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="code" data-name="pip install (wheel)"><div class="code-head"><span>terminal · pip install wheel</span></div><pre><code>pip install https://github.com/oratorIA-ProyectoTesis/MRCD/releases/download/v0.4.0/mrcd-0.4.0-py3-none-any.whl</code></pre></div>
+  <h3>Imágenes Docker</h3>
+  <p>Docker Hub: <a href="https://hub.docker.com/r/rivacortezf/mrcd">rivacortezf/mrcd</a> (etiquetas 0.4.0, latest, 0.4.0-cuda, latest-cuda).</p>
+  <div class="code" data-name="docker pull"><div class="code-head"><span>terminal · docker pull</span></div><pre><code>docker pull rivacortezf/mrcd:0.4.0
 docker pull ghcr.io/oratoria-proyectotesis/mrcd:0.4.0</code></pre></div>
-      </article>
-      <article class="card">
-        <h3>Checkpoint del modelo</h3>
-        <p>El checkpoint <code>ckpt_audio_text.pt</code> no está incluido en ninguna descarga (ni en los paquetes, ni en las imágenes, ni en la versión). Se entrega a pedido a la autora de correspondencia, Ely Cortez Flores (<code>u202215313@upc.edu.pe</code>), solo para investigación no comercial. El motor verifica su sha256 (<code>87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669</code>) antes de cargarlo. Sin el checkpoint el servicio arranca y <code>/v1/health</code> responde, pero el análisis no se ejecuta.</p>
-      </article>
-    </div>
-  </div>
+  <div class="note"><p><span class="k">Checkpoint del modelo</span>El checkpoint <code>ckpt_audio_text.pt</code> no está incluido en ninguna descarga (ni en los paquetes, ni en las imágenes, ni en la versión). Se entrega a pedido a la autora de correspondencia, Ely Cortez Flores (<code>u202215313@upc.edu.pe</code>), solo para investigación no comercial. El motor verifica su sha256 (<code class="hash">87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669</code>) antes de cargarlo. Sin el checkpoint el servicio arranca y <code>/v1/health</code> responde, pero el análisis no se ejecuta.</p></div>
 </section>
 
-<section id="arquitectura" aria-labelledby="arquitectura-t">
-  <div class="wrap">
-    <h2 id="arquitectura-t">Componentes y arquitectura</h2>
-    <p>Un solo proceso local. El servicio serializa el trabajo en un hilo de motor, porque el motor no es seguro entre hilos; el audio se decodifica en memoria.</p>
-    <div class="diagram" role="list" aria-label="Flujo de una petición">
-      <div class="node" role="listitem"><b>Tu aplicación</b><small>cualquier lenguaje: HTTP en bucle local, o la biblioteca de Python</small></div>
-      <div class="edge" aria-hidden="true">WAV 16 kHz mono PCM16, o lotes PCM en una sesión incremental</div>
-      <div class="node" role="listitem"><b>Servicio <code>mrcd.service</code></b><small>FastAPI + uvicorn · <code>/v1/jobs</code>, <code>/v1/sessions</code>, <code>/v1/health</code>, <code>/v1/schema</code> · página y Swagger solo en bucle local</small></div>
-      <div class="edge" aria-hidden="true">opciones validadas, cola con prioridades, un hilo de motor</div>
-      <div class="node" role="listitem"><b>Analizador</b><small>valida el audio, arma el documento del contrato v1, procedencia y advertencias; nunca codifica una ausencia como 0</small></div>
-      <div class="edge" aria-hidden="true">audio en memoria</div>
-      <div class="node" role="listitem"><b>Motor <code>DisfluencyEngine</code></b><small>Silero VAD · rasgos acústicos (pYIN, energía) · ASR faster-whisper small en fragmentos de 8 s · clasificador de fusión audio + texto (checkpoint de 75 144 parámetros, sha256 fijado)</small></div>
-      <div class="edge" aria-hidden="true">ventanas de 3 s con paso de 0,5 s</div>
-      <div class="node" role="listitem"><b>Perfil de decisión <code>o2026_11</code></b><small>muletilla y prolongación por segmento con los pipelines de la campaña O (artefactos JSON con sha256); repetición por ventanas</small></div>
-      <div class="edge" aria-hidden="true">documento JSON</div>
-      <div class="node" role="listitem"><b>Resultado <code>mrcd.analysis/v1</code></b><small>eventos por clase, resumen, modalidades, procedencia, advertencias</small></div>
+<section class="sec" id="api" aria-labelledby="api-t">
+  <p class="secno"><span>11 / API y contrato</span><span>C</span></p>
+  <h2 id="api-t">API y contrato</h2>
+  <p class="measure">Documentación interactiva: <a id="swagger-link" href="http://127.0.0.1:8765/docs">Swagger en /docs</a> (disponible cuando el servicio corre en bucle local). Esquema: <code>GET /v1/schema</code>.</p>
+  <div class="table-wrap">
+    <table class="endpoints stack">
+      <caption class="visually-hidden">Rutas del servicio</caption>
+      <thead><tr><th scope="col">Ruta</th><th scope="col">Uso</th></tr></thead>
+      <tbody>
+        <tr><td class="full">POST /v1/jobs</td><td class="full">Cuerpo: WAV 16 kHz mono PCM16 (mínimo 13 s, máximo 600 s). Responde 202 con el trabajo. Parámetros: <code>include_text</code>, <code>decision</code>, <code>include_out_of_scope</code>, <code>decision_profile</code>.</td></tr>
+        <tr><td class="full">GET /v1/jobs/{id}</td><td class="full">Estado del trabajo (<code>queued</code>, <code>running</code>, <code>completed</code>, <code>failed</code>) y el resultado al terminar.</td></tr>
+        <tr><td class="full">POST /v1/sessions</td><td class="full">Abre una sesión incremental (servicio con <code>--incremental</code>). Devuelve el identificador y un token.</td></tr>
+        <tr><td class="full">PUT /v1/sessions/{id}/audio/{seq}</td><td class="full">Envía un lote PCM16 con <code>X-Offset-Samples</code>; el ASR decodifica fragmentos mientras grabas.</td></tr>
+        <tr><td class="full">POST /v1/sessions/{id}/close</td><td class="full">Cierra con <code>total_samples</code>, <code>wav_sha256</code> y <code>last_seq</code>; luego <code>GET /v1/sessions/{id}</code> trae el resultado.</td></tr>
+        <tr><td class="full">GET /v1/health</td><td class="full">Estado del servicio, motores cargados y si las sesiones están activas.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Anatomía de un evento</h3>
+  <div class="anat needs-js">
+    <div class="code" data-name="evento JSON"><div class="code-head"><span id="anat-name">evento del resultado de la muestra</span></div><pre><code id="anat-code">Se muestra al cargar la página.</code></pre></div>
+    <ol class="notes" id="anat-notes" aria-label="Campos del evento">
+      <li data-n="1" tabindex="0"><span class="pin">1</span><span><code>class</code>: una de las tres clases evaluadas, <code>filler_word</code>, <code>prolongation</code> o <code>repetition</code>.</span></li>
+      <li data-n="2" tabindex="0"><span class="pin">2</span><span><code>start_s</code>, <code>end_s</code>, <code>interval_semantics</code>: intervalo de decisión del motor en segundos, no un límite marcado por una persona.</span></li>
+      <li data-n="3" tabindex="0"><span class="pin">3</span><span><code>score</code>: puntaje no calibrado; ordena la evidencia, no es una probabilidad de acierto.</span></li>
+      <li data-n="4" tabindex="0"><span class="pin">4</span><span><code>n_windows</code>: ventanas de análisis del evento (ventanas de 3 s con paso de 0,5 s).</span></li>
+      <li data-n="5" tabindex="0"><span class="pin">5</span><span><code>modalities_used</code>: evidencia usada, acústica y texto del ASR.</span></li>
+      <li data-n="6" tabindex="0"><span class="pin">6</span><span><code>text</code>: texto del ASR; solo vuelve si lo pides con <code>include_text=true</code>.</span></li>
+    </ol>
+  </div>
+  <h3>Petición</h3>
+  <div class="code" data-name="curl"><div class="code-head"><span>terminal · curl</span></div><pre><code>curl -s -X POST --data-binary @sample_es.wav -H "Content-Type: audio/wav" \
+  "http://127.0.0.1:8765/v1/jobs?include_text=true"
+# → 202 {"schema_version": "mrcd.job/v1", "job_id": "…", "status": "queued", …}
+curl -s http://127.0.0.1:8765/v1/jobs/&lt;job_id&gt;</code></pre></div>
+  <h3>Respuesta (extracto real del audio de muestra)</h3>
+  <div class="code" data-name="respuesta JSON"><div class="code-head"><span>respuesta.json · extracto</span></div><pre><code id="api-example">Se muestra al cargar la página.</code></pre></div>
+  <p class="measure">Los errores usan el mismo documento con <code>status: "failed"</code> y un <code>error</code> estructurado (<code>code</code>, <code>message</code>, <code>retryable</code>, <code>details</code>), por ejemplo <code>audio_too_short</code> (422) o <code>unsupported_sample_rate</code> (415).</p>
+</section>
+
+<section class="sec" id="integracion" aria-labelledby="integracion-t">
+  <p class="secno"><span>12 / Integración</span><span>C</span></p>
+  <h2 id="integracion-t">Integración en tu proyecto</h2>
+  <div class="tabs">
+    <div class="tablist" role="tablist" aria-label="Formas de integración" hidden>
+      <button type="button" role="tab" id="tab-int-python" aria-controls="int-python" aria-selected="true">Python</button>
+      <button type="button" role="tab" id="tab-int-ts" aria-controls="int-ts" aria-selected="false" tabindex="-1">JavaScript o TypeScript</button>
+      <button type="button" role="tab" id="tab-int-http" aria-controls="int-http" aria-selected="false" tabindex="-1">Cualquier lenguaje</button>
+      <button type="button" role="tab" id="tab-int-ses" aria-controls="int-ses" aria-selected="false" tabindex="-1">Sesiones incrementales</button>
     </div>
-    <details>
-      <summary>Diagrama C4 de contexto (nivel 1, en inglés)</summary>
-      <p>Incluye la aplicación web que integra el motor en la tesis y los proveedores que esa aplicación puede usar; el análisis MRCD queda dentro del equipo local.</p>
-      <div class="c4" role="img" aria-label="Diagrama C4 de contexto: el orador y la aplicación web en el equipo local llaman al motor MRCD por HTTP de bucle local; el motor lee corpus y archivos de modelo locales; la aplicación puede usar proveedores en la nube.">
+    <div class="panel" role="tabpanel" id="int-python" aria-labelledby="tab-int-python">
+      <h3>Python</h3>
+      <p>Cliente incluido, solo biblioteca estándar.</p>
+      <div class="code" data-name="Python"><div class="code-head"><span>analizar.py</span></div><pre><code>from mrcd.client import MrcdClient
+
+client = MrcdClient("http://127.0.0.1:8765")
+doc = client.analyze("sample_es.wav", include_text=True)
+for ev in doc["events"]:
+    print(ev["class"], ev["start_s"], ev["end_s"],
+          ev["score"]["value"], "(no calibrado)")</code></pre></div>
+    </div>
+    <div class="panel" role="tabpanel" id="int-ts" aria-labelledby="tab-int-ts">
+      <h3>JavaScript o TypeScript</h3>
+      <p>Un archivo, sin dependencias: <code>clients/typescript/mrcd.ts</code>, con tipos escritos desde el esquema.</p>
+      <div class="code" data-name="TypeScript"><div class="code-head"><span>analizar.ts</span></div><pre><code>import { MrcdClient } from "./mrcd";
+
+const client = new MrcdClient("http://127.0.0.1:8765");
+const wav = await (await fetch("sample_es.wav")).arrayBuffer();
+const doc = await client.analyze(wav, { include_text: true });
+console.log(doc.summary?.counts_by_class);</code></pre></div>
+    </div>
+    <div class="panel" role="tabpanel" id="int-http" aria-labelledby="tab-int-http">
+      <h3>Cualquier lenguaje</h3>
+      <p>HTTP y JSON: envía el WAV con <code>POST /v1/jobs</code>, consulta <code>GET /v1/jobs/{id}</code> hasta <code>completed</code> o <code>failed</code>, y valida contra <code>GET /v1/schema</code>. Desde un navegador en otro origen, levanta el servicio con <code>--cors-origin https://tu-app.example</code>.</p>
+    </div>
+    <div class="panel" role="tabpanel" id="int-ses" aria-labelledby="tab-int-ses">
+      <h3>Sesiones incrementales</h3>
+      <p>Para grabaciones en vivo: envía lotes mientras grabas y el resultado llega pocos segundos después de cerrar (<span class="num">5,9 s</span> tras una sesión de 2 min, medido en CPU).</p>
+      <div class="code" data-name="sesión incremental"><div class="code-head"><span>terminal + Python · sesión incremental</span></div><pre><code>mrcd serve --incremental --device cpu --preload p0 --warmup
+
+with client.open_session() as s:
+    for pcm in lotes:      # PCM16 LE, 16 kHz, mono
+        s.send(pcm)
+    doc = s.close()</code></pre></div>
+    </div>
+  </div>
+  <p class="measure">Ejemplos completos con curl, Python y JavaScript en <a href="https://github.com/oratorIA-ProyectoTesis/MRCD/tree/HEAD/examples">examples/</a>.</p>
+</section>
+
+<section class="sec" id="arquitectura" aria-labelledby="arquitectura-t">
+  <p class="secno"><span>13 / Arquitectura</span><span>C</span></p>
+  <h2 id="arquitectura-t">Componentes y arquitectura</h2>
+  <p class="measure">Un solo proceso local. El servicio serializa el trabajo en un hilo de motor, porque el motor no es seguro entre hilos; el audio se decodifica en memoria.</p>
+  <figure class="fig">
+    <svg class="flow-h" viewBox="0 0 1100 290" role="img" aria-labelledby="flowh-t flowh-d">
+      <title id="flowh-t">Evidencia acústica y texto dentro del motor</title>
+      <desc id="flowh-d">El audio entra por dos carriles: acústico (Silero VAD y rasgos pYIN y energía) y de texto (ASR faster-whisper small en fragmentos de 8 s). Ambos convergen en el clasificador de fusión audio más texto, con ventanas de 3 s y paso de 0,5 s; el perfil de decisión o2026_11 produce los eventos del contrato mrcd.analysis/v1.</desc>
+      <defs><marker id="ah-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0 0L10 5L0 10z"/></marker></defs>
+      <text class="k" x="180" y="22">CARRIL ACÚSTICO</text>
+      <text class="k" x="180" y="196">CARRIL DE TEXTO</text>
+      <rect class="box" x="10" y="110" width="130" height="70" rx="8"/><text x="24" y="140">Audio</text><text class="s" x="24" y="162">WAV 16 kHz</text>
+      <rect class="box" x="180" y="34" width="160" height="70" rx="8"/><text x="194" y="64">Silero VAD</text><text class="s" x="194" y="86">actividad de voz</text>
+      <rect class="box" x="370" y="34" width="190" height="70" rx="8"/><text x="384" y="64">Rasgos acústicos</text><text class="s" x="384" y="86">pYIN · energía</text>
+      <rect class="box" x="180" y="208" width="380" height="70" rx="8"/><text x="194" y="238">ASR faster-whisper small</text><text class="s" x="194" y="260">fragmentos de 8 s, en tu máquina</text>
+      <rect class="box hot" x="600" y="110" width="260" height="70" rx="8"/><text x="614" y="140">Fusión audio + texto</text><text class="s" x="614" y="162">ventanas de 3 s · paso 0,5 s</text>
+      <rect class="box" x="890" y="34" width="200" height="70" rx="8"/><text x="904" y="64">Perfil de decisión</text><text class="s" x="904" y="86">o2026_11</text>
+      <rect class="box" x="890" y="208" width="200" height="70" rx="8"/><text x="904" y="238">events[]</text><text class="s" x="904" y="260">mrcd.analysis/v1</text>
+      <path class="edge" d="M140 145H160V69H178" marker-end="url(#ah-h)"/>
+      <path class="edge" d="M160 145V243H178" marker-end="url(#ah-h)"/>
+      <path class="edge" d="M340 69H368" marker-end="url(#ah-h)"/>
+      <path class="edge" d="M560 69H578V138H598" marker-end="url(#ah-h)"/>
+      <path class="edge" d="M560 243H578V152H598" marker-end="url(#ah-h)"/>
+      <path class="edge" d="M860 145H874V69H888" marker-end="url(#ah-h)"/>
+      <path class="edge" d="M990 104V206" marker-end="url(#ah-h)"/>
+    </svg>
+    <svg class="flow-v" viewBox="0 0 360 620" role="img" aria-labelledby="flowv-t flowv-d">
+      <title id="flowv-t">Evidencia acústica y texto dentro del motor (vista vertical)</title>
+      <desc id="flowv-d">El audio se divide en un carril acústico (Silero VAD, rasgos pYIN y energía) y uno de texto (ASR faster-whisper small, fragmentos de 8 s); convergen en la fusión audio más texto (ventanas de 3 s, paso de 0,5 s), pasan por el perfil o2026_11 y salen como eventos mrcd.analysis/v1.</desc>
+      <defs><marker id="ah-v" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0 0L10 5L0 10z"/></marker></defs>
+      <rect class="box" x="90" y="6" width="180" height="62" rx="8"/><text x="106" y="33">Audio</text><text class="s" x="106" y="54">WAV 16 kHz mono</text>
+      <text class="k" x="10" y="106">ACÚSTICO</text><text class="k" x="190" y="106">TEXTO</text>
+      <rect class="box" x="10" y="116" width="165" height="64" rx="8"/><text x="22" y="143">Silero VAD</text><text class="s" x="22" y="164">actividad de voz</text>
+      <rect class="box" x="10" y="208" width="165" height="64" rx="8"/><text x="22" y="235">Rasgos</text><text class="s" x="22" y="256">pYIN · energía</text>
+      <rect class="box" x="190" y="116" width="160" height="156" rx="8"/><text x="202" y="143">ASR</text><text x="202" y="165">faster-whisper</text><text x="202" y="187">small</text><text class="s" x="202" y="215">fragmentos</text><text class="s" x="202" y="235">de 8 s</text>
+      <rect class="box hot" x="20" y="318" width="320" height="66" rx="8"/><text x="36" y="346">Fusión audio + texto</text><text class="s" x="36" y="368">ventanas de 3 s · paso 0,5 s</text>
+      <rect class="box" x="20" y="430" width="320" height="66" rx="8"/><text x="36" y="458">Perfil de decisión</text><text class="s" x="36" y="480">o2026_11</text>
+      <rect class="box" x="20" y="542" width="320" height="66" rx="8"/><text x="36" y="570">events[]</text><text class="s" x="36" y="592">mrcd.analysis/v1</text>
+      <path class="edge" d="M150 68V88H92V114" marker-end="url(#ah-v)"/>
+      <path class="edge" d="M210 68V88H270V114" marker-end="url(#ah-v)"/>
+      <path class="edge" d="M92 180V206" marker-end="url(#ah-v)"/>
+      <path class="edge" d="M92 272V316" marker-end="url(#ah-v)"/>
+      <path class="edge" d="M270 272V316" marker-end="url(#ah-v)"/>
+      <path class="edge" d="M180 384V428" marker-end="url(#ah-v)"/>
+      <path class="edge" d="M180 496V540" marker-end="url(#ah-v)"/>
+    </svg>
+    <figcaption>Flujo de la evidencia dentro del motor: dos carriles, acústico y de texto, que convergen en la fusión. Solo componentes descritos en esta página; sin cifras de desempeño.</figcaption>
+  </figure>
+  <h3>Recorrido de una petición</h3>
+  <ol class="steps" aria-label="Flujo de una petición">
+    <li><b>Tu aplicación</b><small>cualquier lenguaje: HTTP en bucle local, o la biblioteca de Python · envía WAV 16 kHz mono PCM16, o lotes PCM en una sesión incremental</small></li>
+    <li><b>Servicio <code>mrcd.service</code></b><small>FastAPI + uvicorn · <code>/v1/jobs</code>, <code>/v1/sessions</code>, <code>/v1/health</code>, <code>/v1/schema</code> · página y Swagger solo en bucle local · opciones validadas, cola con prioridades, un hilo de motor</small></li>
+    <li><b>Analizador</b><small>valida el audio, arma el documento del contrato v1, procedencia y advertencias; nunca codifica una ausencia como 0 · audio en memoria</small></li>
+    <li><b>Motor <code>DisfluencyEngine</code></b><small>Silero VAD · rasgos acústicos (pYIN, energía) · ASR faster-whisper small en fragmentos de 8 s · clasificador de fusión audio + texto (checkpoint de 75 144 parámetros, sha256 fijado) · ventanas de 3 s con paso de 0,5 s</small></li>
+    <li><b>Perfil de decisión <code>o2026_11</code></b><small>muletilla y prolongación por segmento con los pipelines de la campaña O (artefactos JSON con sha256); repetición por ventanas</small></li>
+    <li><b>Resultado <code>mrcd.analysis/v1</code></b><small>documento JSON · eventos por clase, resumen, modalidades, procedencia, advertencias</small></li>
+  </ol>
+  <details class="c4-box">
+    <summary>Diagrama C4 de contexto (nivel 1, en inglés)</summary>
+    <p class="measure">Incluye la aplicación web que integra el motor en la tesis y los proveedores que esa aplicación puede usar; el análisis MRCD queda dentro del equipo local.</p>
+    <div class="c4-tools needs-js" role="group" aria-label="Ampliación del diagrama">
+      <button type="button" class="c4-z" data-z="1" aria-pressed="true">Ajustar</button>
+      <button type="button" class="c4-z" data-z="1.6" aria-pressed="false">160 %</button>
+      <button type="button" class="c4-z" data-z="2.5" aria-pressed="false">250 %</button>
+      <a href="https://github.com/oratorIA-ProyectoTesis/MRCD/blob/HEAD/docs/architecture/c4_1_context.svg">Abrir el archivo SVG ↗</a>
+    </div>
+    <div class="c4" role="img" tabindex="0" aria-label="Diagrama C4 de contexto: el orador y la aplicación web en el equipo local llaman al motor MRCD por HTTP de bucle local; el motor lee corpus y archivos de modelo locales; la aplicación puede usar proveedores en la nube.">
 <!-- C4:BEGIN -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 850" width="1200" height="850" font-family="Segoe UI, Arial, sans-serif">
 <title>C4 level 1 - System context (current: MRCD service integrated in the app on feat/mrcd-integration)</title>
@@ -498,177 +1040,151 @@ docker pull ghcr.io/oratoria-proyectotesis/mrcd:0.4.0</code></pre></div>
 <text x="20" y="820" font-size="10" fill="#555">Architecture of the inspected tree (commit in README.md). Generated by docs/architecture/c4_model.py; do not edit by hand.</text>
 </svg>
 <!-- C4:END -->
-      </div>
-    </details>
-    <p>Diagramas C4 completos, generados y verificados contra el código: <a href="https://github.com/oratorIA-ProyectoTesis/MRCD/tree/HEAD/docs/architecture">docs/architecture</a> (contexto, contenedores, componentes, código y secuencias de las sesiones).</p>
-  </div>
-</section>
-
-<section id="api" aria-labelledby="api-t">
-  <div class="wrap">
-    <h2 id="api-t">API y contrato</h2>
-    <p>Documentación interactiva: <a id="swagger-link" href="http://127.0.0.1:8765/docs">Swagger en /docs</a> (disponible cuando el servicio corre en bucle local). Esquema: <code>GET /v1/schema</code>.</p>
-    <div class="table-wrap">
-      <table class="endpoints">
-        <caption class="visually-hidden">Rutas del servicio</caption>
-        <thead><tr><th scope="col">Ruta</th><th scope="col">Uso</th></tr></thead>
-        <tbody>
-          <tr><td>POST /v1/jobs</td><td>Cuerpo: WAV 16 kHz mono PCM16 (mínimo 13 s, máximo 600 s). Responde 202 con el trabajo. Parámetros: <code>include_text</code>, <code>decision</code>, <code>include_out_of_scope</code>, <code>decision_profile</code>.</td></tr>
-          <tr><td>GET /v1/jobs/{id}</td><td>Estado del trabajo (<code>queued</code>, <code>running</code>, <code>completed</code>, <code>failed</code>) y el resultado al terminar.</td></tr>
-          <tr><td>POST /v1/sessions</td><td>Abre una sesión incremental (servicio con <code>--incremental</code>). Devuelve el identificador y un token.</td></tr>
-          <tr><td>PUT /v1/sessions/{id}/audio/{seq}</td><td>Envía un lote PCM16 con <code>X-Offset-Samples</code>; el ASR decodifica fragmentos mientras grabas.</td></tr>
-          <tr><td>POST /v1/sessions/{id}/close</td><td>Cierra con <code>total_samples</code>, <code>wav_sha256</code> y <code>last_seq</code>; luego <code>GET /v1/sessions/{id}</code> trae el resultado.</td></tr>
-          <tr><td>GET /v1/health</td><td>Estado del servicio, motores cargados y si las sesiones están activas.</td></tr>
-        </tbody>
-      </table>
     </div>
-    <h3>Petición</h3>
-    <div class="code"><pre><code>curl -s -X POST --data-binary @sample_es.wav -H "Content-Type: audio/wav" \
-  "http://127.0.0.1:8765/v1/jobs?include_text=true"
-# → 202 {"schema_version": "mrcd.job/v1", "job_id": "…", "status": "queued", …}
-curl -s http://127.0.0.1:8765/v1/jobs/&lt;job_id&gt;</code></pre></div>
-    <h3>Respuesta (extracto real del audio de muestra)</h3>
-    <div class="code"><pre><code id="api-example">Se muestra al cargar la página.</code></pre></div>
-    <p>Los errores usan el mismo documento con <code>status: "failed"</code> y un <code>error</code> estructurado (<code>code</code>, <code>message</code>, <code>retryable</code>, <code>details</code>), por ejemplo <code>audio_too_short</code> (422) o <code>unsupported_sample_rate</code> (415).</p>
-  </div>
+  </details>
+  <p class="measure">Diagramas C4 completos, generados y verificados contra el código: <a href="https://github.com/oratorIA-ProyectoTesis/MRCD/tree/HEAD/docs/architecture">docs/architecture</a> (contexto, contenedores, componentes, código y secuencias de las sesiones).</p>
 </section>
 
-<section id="integracion" aria-labelledby="integracion-t">
-  <div class="wrap">
-    <h2 id="integracion-t">Integración en tu proyecto</h2>
-    <div class="grid">
-      <article class="card">
-        <h3>Python</h3>
-        <p>Cliente incluido, solo biblioteca estándar.</p>
-        <div class="code"><pre><code>from mrcd.client import MrcdClient
-
-client = MrcdClient("http://127.0.0.1:8765")
-doc = client.analyze("sample_es.wav", include_text=True)
-for ev in doc["events"]:
-    print(ev["class"], ev["start_s"], ev["end_s"],
-          ev["score"]["value"], "(no calibrado)")</code></pre></div>
-      </article>
-      <article class="card">
-        <h3>JavaScript o TypeScript</h3>
-        <p>Un archivo, sin dependencias: <code>clients/typescript/mrcd.ts</code>, con tipos escritos desde el esquema.</p>
-        <div class="code"><pre><code>import { MrcdClient } from "./mrcd";
-
-const client = new MrcdClient("http://127.0.0.1:8765");
-const wav = await (await fetch("sample_es.wav")).arrayBuffer();
-const doc = await client.analyze(wav, { include_text: true });
-console.log(doc.summary?.counts_by_class);</code></pre></div>
-      </article>
-      <article class="card">
-        <h3>Cualquier lenguaje</h3>
-        <p>HTTP y JSON: envía el WAV con <code>POST /v1/jobs</code>, consulta <code>GET /v1/jobs/{id}</code> hasta <code>completed</code> o <code>failed</code>, y valida contra <code>GET /v1/schema</code>. Desde un navegador en otro origen, levanta el servicio con <code>--cors-origin https://tu-app.example</code>.</p>
-      </article>
-      <article class="card">
-        <h3>Sesiones incrementales</h3>
-        <p>Para grabaciones en vivo: envía lotes mientras grabas y el resultado llega pocos segundos después de cerrar (5,9 s tras una sesión de 2 min, medido en CPU).</p>
-        <div class="code"><pre><code>mrcd serve --incremental --device cpu --preload p0 --warmup
-
-with client.open_session() as s:
-    for pcm in lotes:      # PCM16 LE, 16 kHz, mono
-        s.send(pcm)
-    doc = s.close()</code></pre></div>
-      </article>
-    </div>
-    <p>Ejemplos completos con curl, Python y JavaScript en <a href="https://github.com/oratorIA-ProyectoTesis/MRCD/tree/HEAD/examples">examples/</a>.</p>
-  </div>
-</section>
-
-<section id="privacidad" aria-labelledby="privacidad-t">
-  <div class="wrap">
-    <h2 id="privacidad-t">Privacidad</h2>
-    <ul>
-      <li>El análisis completo, incluido el ASR, corre en tu equipo. Tras la descarga inicial del modelo no hay llamadas de red.</li>
-      <li>El audio se decodifica en memoria y se descarta al terminar el trabajo; nunca se escribe en disco. Los buffers de las sesiones se sobrescriben con ceros al cerrar.</li>
-      <li>El texto transcrito solo vuelve si lo pides con <code>include_text=true</code>. Los resultados se guardan en memoria, con un límite, y desaparecen al detener el proceso.</li>
-      <li>El servicio se niega a escuchar fuera del bucle local salvo con <code>--allow-non-loopback</code>. En el bucle local no tiene autenticación salvo que se defina <code>MRCD_SERVICE_TOKEN</code>; fuera de él exige un token portador (el contenedor lo hace) y no tiene TLS, así que no debe exponerse a una red sin un proxy inverso.</li>
-      <li>Esta página no carga recursos de terceros ni usa rastreadores.</li>
-    </ul>
-  </div>
-</section>
-
-<section id="reproducibilidad" aria-labelledby="reproducibilidad-t">
-  <div class="wrap">
-    <h2 id="reproducibilidad-t">Reproducibilidad</h2>
-    <ul>
-      <li>Cada respuesta registra el sha256 del checkpoint y del modelo Whisper, el perfil ASR, el perfil de decisión con el hash de sus artefactos y el entorno (incluido <code>OMP_NUM_THREADS</code>).</li>
-      <li>El checkpoint no se distribuye (a pedido, solo para investigación; ver <code>models/README.md</code>); se busca en <code>models/ckpt_audio_text.pt</code> y se verifica por sha256 antes de cargarlo.</li>
-      <li>Los protocolos de evaluación están congelados por hash (<code>PROTOCOL.sha256.json</code>) y las cifras del ASR se reprodujeron en revisiones independientes.</li>
-      <li>Más de mil pruebas automáticas (<code>pytest -q</code>) y un verificador que comprueba que los diagramas de arquitectura no contradicen el código.</li>
-    </ul>
-  </div>
-</section>
-
-<section id="resultados" aria-labelledby="resultados-t">
-  <div class="wrap">
-    <h2 id="resultados-t">Resultados</h2>
-    <p>F1 por clase entre 0,51 y 0,70, con intervalos por hablante, según clase, corpus y condición. Frente a comparadores fijos en las mismas unidades, la ganancia es modesta en muletillas (+0,036 [0,008; 0,064] frente a la regla léxica) y nula en repeticiones (−0,002 frente a la regla de una línea). Costo local: factor de tiempo real de 0,45 a 0,51 en CPU.</p>
-    <div class="note"><p><strong>Salvedad.</strong> Son resultados exploratorios. El F1 se midió sobre turnos del corpus DIHANA (telefónico, español peninsular); el perfil por defecto se entrenó con esos turnos y se aplica a segmentos separados por pausas, un cambio de dominio no medido. La ganancia externa no está demostrada (EPIC: +0,006 [−0,050; 0,068]). Estas cifras no son comparables con las de otros sistemas, que miden otra tarea, unidad o corpus.</p></div>
-  </div>
-</section>
-
-<section id="limites" aria-labelledby="limites-t">
-  <div class="wrap">
-    <h2 id="limites-t">Límites conocidos</h2>
-    <ul>
-      <li>Puntajes sin calibrar y sin concordancia interanotador: no los presentes como probabilidades ni como diagnóstico.</li>
-      <li>Validado en un solo corpus de audio con ASR; ningún corpus peruano ni estudio con usuarios.</li>
-      <li>La desambiguación contextual de formas como “este” o “bueno” no está demostrada.</li>
-      <li>Bloqueos, revisiones y pausas quedan fuera del alcance evaluado y se ocultan por defecto. El servicio analiza solo audio; el canal de video no forma parte de él.</li>
-      <li>Servicio de desarrollo: sin TLS; token portador solo fuera del bucle local (obligatorio en el contenedor).</li>
-    </ul>
-  </div>
-</section>
-
-<section id="licencia" aria-labelledby="licencia-t">
-  <div class="wrap">
-    <h2 id="licencia-t">Licencia y cita</h2>
-    <p>El código está bajo licencia MIT. La licencia MIT cubre solo el código. Los pesos del modelo (<code>ckpt_audio_text.pt</code>) no se distribuyen: se entrenaron con etiquetas derivadas de corpus con sus propias condiciones y se entregan a pedido, solo para investigación no comercial (ver <a href="#descargas">Descargas</a>; revisa <code>THIRD_PARTY_NOTICES.md</code>). El audio de muestra es voz sintética generada con espeak-ng.</p>
-    <div class="code"><pre><code>MRCD authors (2026). MRCD: motor de reconocimiento contextual mediante la fusión
+<section class="sec" id="licencia" aria-labelledby="licencia-t">
+  <p class="secno"><span>14 / Licencia y cita</span><span>C</span></p>
+  <h2 id="licencia-t">Licencia y cita</h2>
+  <p class="measure">El código está bajo licencia MIT. La licencia MIT cubre solo el código. Los pesos del modelo (<code>ckpt_audio_text.pt</code>) no se distribuyen: se entrenaron con etiquetas derivadas de corpus con sus propias condiciones y se entregan a pedido, solo para investigación no comercial (ver <a href="#descargas">Descargas</a>; revisa <code>THIRD_PARTY_NOTICES.md</code>). El audio de muestra es voz sintética generada con espeak-ng.</p>
+  <div class="code" data-name="cita"><div class="code-head"><span>cita</span></div><pre><code>MRCD authors (2026). MRCD: motor de reconocimiento contextual mediante la fusión
 multimodal para la detección de disfluencias del habla en español (versión 0.4.0)
 [software]. https://github.com/oratorIA-ProyectoTesis/MRCD</code></pre></div>
-  </div>
 </section>
+</div>
+</div>
 </main>
 <footer>
   <div class="wrap">
     <p>MRCD 0.4.0 · <a href="https://github.com/oratorIA-ProyectoTesis/MRCD">Repositorio</a> · Esta misma página la sirve el servicio en <code>http://127.0.0.1:8765/</code>.</p>
   </div>
 </footer>
+<p class="visually-hidden" id="copy-live" aria-live="polite"></p>
 
+<!-- sample-peaks: min/max of mrcd/service/web/sample_es.wav in 360 buckets, in percent of the absolute peak. Regenerate from the repository root with:
+python -c "import wave,array,json;w=wave.open('mrcd/service/web/sample_es.wav');n=w.getnframes();sr=w.getframerate();a=array.array('h',w.readframes(n));B=360;m=max(abs(x) for x in a) or 1;s=[a[i*n//B:(i+1)*n//B] for i in range(B)];print(json.dumps({'file':'sample_es.wav','rate_hz':sr,'frames':n,'duration_s':round(n/sr,3),'buckets':B,'scale':'percent of the absolute peak','min':[round(100*min(x)/m) for x in s],'max':[round(100*max(x)/m) for x in s]},separators=(',',':')))"
+-->
+<script type="application/json" id="sample-peaks">{"file":"sample_es.wav","rate_hz":16000,"frames":238461,"duration_s":14.904,"buckets":360,"scale":"percent of the absolute peak","min":[-18,-21,-65,-66,-56,-23,-32,-59,-23,-13,-21,-7,-29,-49,-42,-25,-36,-28,-8,-5,-4,-3,0,0,0,0,0,0,-31,-56,-52,-49,-37,-27,0,0,0,0,-36,-98,-84,-54,-27,-17,-34,-38,-11,-9,-7,-17,-14,-39,-20,-21,-41,-66,-44,-19,-13,-9,-38,-37,-31,-44,-19,-12,-9,-16,-14,-65,-48,-15,-12,-46,-68,-44,-1,-11,0,-10,-38,-41,-30,0,0,0,0,0,0,0,0,0,-25,-42,-20,-13,-9,-10,-46,-67,-9,-20,-85,-89,-63,-51,-34,-20,-5,0,0,0,0,-41,-35,-16,-10,-10,-24,-65,-22,-9,-75,-99,-75,-35,-25,-44,-11,-11,-12,-11,-45,-41,-29,-4,-21,-17,-39,-33,-40,-24,-40,-85,-67,-51,-43,-27,-8,-10,-18,-32,-38,-25,-34,-29,-15,-22,-47,-34,-19,-8,-10,-13,-23,-40,-15,-12,-31,-28,-20,-39,-37,-9,-20,-47,-46,-32,-21,-15,-21,-35,-31,-10,-6,-5,-4,0,0,0,0,0,0,0,0,0,-14,-30,-29,-34,-65,-63,-45,-30,-5,-20,-41,-41,-31,0,0,0,0,-29,-57,-54,-50,-45,-32,-22,0,0,0,-10,-17,-55,-79,-51,-25,-15,-11,-10,-39,-42,-8,-14,-26,-76,-76,-33,-9,-10,-39,-30,-10,-15,-37,-38,-15,-9,-39,-36,-9,-27,-36,-20,-15,-16,-34,-56,-57,-38,-18,-17,-8,-15,-49,-62,-15,-14,-9,-21,-32,-30,-15,-8,-19,-32,-64,-49,-16,-15,0,-9,-43,-39,-27,0,0,0,0,0,0,0,0,0,-28,-52,-16,-17,-20,-49,-43,-28,-7,-21,-29,-41,-54,-76,-48,-26,-21,-9,-37,-31,-40,-31,-16,-10,-11,-15,-39,-34,-1,-12,-100,-83,-48,-24,-7,-10,-35,-36,-11,-2,-16,-36,-26,-13,-23,-56,-68,-52,-30,-40,-33,-26,-14,-1,0,0,0,0,0,0,0,0,0,0],"max":[21,20,66,65,56,24,30,59,24,17,15,7,33,49,43,24,36,29,8,6,6,3,0,0,0,0,0,0,30,56,54,48,39,27,0,0,0,0,35,97,85,54,29,18,33,38,11,12,8,12,14,39,21,17,39,65,44,19,14,8,38,37,31,43,19,12,9,12,14,64,48,12,11,46,68,44,2,5,2,9,38,41,30,0,0,0,0,0,0,0,0,0,25,43,20,14,9,11,55,70,4,18,82,90,63,42,35,21,8,0,0,0,1,43,35,17,11,10,23,67,23,8,71,99,77,36,25,43,12,11,7,23,46,41,27,1,18,20,39,34,41,24,40,81,69,51,44,27,8,8,18,32,39,25,34,29,15,22,46,34,19,12,12,7,22,40,16,12,31,28,19,39,34,4,19,47,45,32,21,16,20,35,32,10,5,5,4,0,0,0,0,0,0,0,0,0,14,31,29,33,66,63,47,32,5,19,40,42,32,0,0,0,0,29,56,53,49,46,31,13,0,0,0,9,17,54,79,52,25,16,6,8,37,41,8,7,25,76,78,34,9,16,38,30,10,15,37,39,16,5,40,37,8,27,36,20,15,19,34,55,56,38,18,17,4,7,45,62,14,14,11,17,33,30,15,7,18,37,62,48,16,15,0,17,43,40,28,0,0,0,0,0,0,0,0,0,27,51,16,14,19,49,44,25,10,17,29,43,52,77,49,26,17,9,37,32,42,32,16,10,9,14,38,35,2,5,98,84,49,24,12,9,36,35,11,6,19,36,26,13,22,54,68,52,31,39,33,27,14,1,0,0,0,0,0,0,0,0,0,0]}</script>
 <script type="application/json" id="sample-result">{"schema_version":"mrcd.analysis/v1","status":"completed","generated_at":"2026-11-02T16:02:41+00:00","error":null,"request":{"audio_sha256":"357cf2696b539210a856b1f2b046efe3220e1bf6a792b4ddb7fc689b6e2d1cb3","audio_duration_s":{"available":true,"value":14.904,"unavailable_reason":null},"sample_rate_hz":{"available":true,"value":16000,"unavailable_reason":null},"channels":{"available":true,"value":1,"unavailable_reason":null},"asr_profile":"p0","head":null,"include_text":true,"output_scope":"evaluated","decision":false,"text_route":null,"decision_profile":"o2026_11"},"events":[{"id":"ev-0001","class":"filler_word","start_s":0.0,"end_s":13.02,"interval_semantics":"decision_stride_not_human_boundary","score":{"value":0.946402,"kind":"unit_pipeline_model_score","calibrated":false,"label":"uncalibrated"},"n_windows":22,"modalities_used":["acoustic","linguistic"],"text":"Buenos días. Eh, hoy les presento el proyecto. El motor, el motor escucha el audio y busca muletillas. Luego, eh, marca acá la repetición con su tiempo. Así se arma","validation":"exploratory unit-level decision (O-campaign pipeline) on an ASR segment split at pauses; interval = segment span; trained on DIHANA turns, not validated outside DIHANA","experimental":false,"in_scope":true},{"id":"ev-0002","class":"repetition","start_s":5.5,"end_s":6.0,"interval_semantics":"decision_stride_not_human_boundary","score":{"value":0.82606,"kind":"max_window_softmax_score","calibrated":false,"label":"uncalibrated"},"n_windows":1,"modalities_used":["acoustic","linguistic"],"text":"el audio y busca muletillas. Luego,","validation":null,"experimental":false,"in_scope":true},{"id":"ev-0003","class":"repetition","start_s":11.0,"end_s":11.5,"interval_semantics":"decision_stride_not_human_boundary","score":{"value":0.540322,"kind":"max_window_softmax_score","calibrated":false,"label":"uncalibrated"},"n_windows":1,"modalities_used":["acoustic","linguistic"],"text":"su tiempo. Así se arma el reporte fin.","validation":null,"experimental":false,"in_scope":true}],"summary":{"n_events":3,"events_per_minute":{"available":true,"value":12.0774,"unavailable_reason":null},"counts_by_class":{"filler_word":1,"repetition":2},"out_of_scope":{"included":false,"n_events":0,"counts_by_class":{}}},"modalities":{"acoustic":{"available":true,"reason":null},"linguistic":{"available":true,"reason":null},"kinesic_video":{"available":false,"reason":"service v1 receives audio only; no video was provided or processed"}},"provenance":{"service":{"name":"mrcd.service","contract":"mrcd.analysis/v1","contract_revision":"1.4","mrcd_version":"0.4.0"},"checkpoint":{"file":"ckpt_audio_text.pt","sha256":"87f95108a765bfacbbc092ff1b7580cfc804fea84132a9813163d928d033b669","mode":"audio_text","labels":["fluent","filler_word","prolongation","repetition","block","revision","rhetorical_pause","neutral_pause"],"checkpoint_notice":"PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"},"asr":{"profile":"p0","experimental":false,"validation":null,"initial_prompt_sha256":"bd0bddb4329c6c75e2dd7c0b21366a418cc23314f8155357401a1577853b19fa","model":{"model_size":"small","model_bin_sha256":"3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671","compute_type":"int8","device":"cpu"},"language":"es","decode":{"temperature":0.0,"beam_size":5,"condition_on_previous_text":false,"vad_filter":false,"word_timestamps":true,"chunk_s_requested":8.0},"profile_fingerprint":"f8308984aacab31949cddca3069a6a1830001869048916bac83f7d013657e658","anomalies":[]},"head":null,"config":{"window_s":3.0,"stride_s":0.5,"terminal_window":false,"span":null,"asr_chunk_s":8.0},"environment":{"omp_num_threads":"4","omp_pin_opted_out":false,"cpu_count_logical":20,"python":"3.12.13","platform":"Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.41","processor":"","faster_whisper":"1.2.1","ctranslate2":"4.8.4","numpy":"2.5.4","environment_is_pinned":true,"omp_num_threads_at_mrcd_import":"4","numpy_imported_before_mrcd":false,"set_before_numpy":true,"assigned_after_import":false,"effective":true,"cpu_threads":{"torch":1,"asr_cpu_threads_arg":0},"asr":{"model_size":"small","device":"cpu","compute_type":"int8"}},"decision_profile":{"name":"o2026_11","status":"exploratory","classes":{"filler_word":{"route":"o_campaign_unit_pipeline","unit":"ASR segment split at pauses >= 0.6 s (max 30 words)","artifact":"filler_word.json","artifact_sha256":"2a07b50c156bd8e064f6703b38c78dd85b1b853a6ad4a5e0e3be354a80858c1e","source_pickle_sha256":"787828317c87b188469f09bec03d6fd3c633e8b1af2a7d2dff84725936064c91","pipeline_version":"o-campaign/1","asr_profile_trained_on":"p0"},"prolongation":{"route":"o_campaign_unit_pipeline","unit":"ASR segment split at pauses >= 0.6 s (max 30 words)","artifact":"prolongation.json","artifact_sha256":"d6230ed2e8b930e1cd930c89b1d74769310f7068c65c3070f75faee83ab7a96a","source_pickle_sha256":"ba2f253648717a0671cf7f15d833bd466327b8f07db34ad43f471975b38f3f21","pipeline_version":"o-campaign/1","asr_profile_trained_on":"p0"},"repetition":{"route":"engine_v0_window_events"}},"calibration_claim":"none","pipelines_verified":true,"note":"product default of the service; the library default stays v0. Repetition keeps the engine decision."}},"experimental":{"active":false,"components":[]},"head_decision":null,"transcript":"Buenos días. Eh, hoy les presento el proyecto. El motor, el motor escucha el audio y busca muletillas. Luego, eh, marca acá la repetición con su tiempo. Así se arma el reporte fin. final.","warnings":[{"code":"scores_uncalibrated","message":"Scores are the maximum window softmax score of an uncalibrated model (softmax, not calibrated); they are not probabilities of correctness."},{"code":"no_human_validation","message":"Classes are window-level decisions of a model trained with weak (heuristic) supervision; agreement with human annotation has not been established."},{"code":"engine_provenance","message":"PRUEBA DE HUMO — etiquetas heurísticas, NO válida como evidencia"},{"code":"decision_profile_exploratory","message":"Decision profile o2026_11 (service default): filler_word and prolongation come from exploratory pipelines selected by nested cross-validation on DIHANA folds 1-4 (configuration unstable across folds, weak V0 baseline, no external gain demonstrated). Scores are model outputs, not calibrated probabilities. Units are ASR segments split at pauses, whereas training used DIHANA turns. Repetition keeps the engine decision. Use decision_profile=v0 to reproduce the historical output."}]}</script>
 <script>
 (() => {
   "use strict";
   const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const CLASSES = [
     { id: "filler_word", name: "Muletilla" },
     { id: "prolongation", name: "Prolongación" },
     { id: "repetition", name: "Repetición" },
   ];
   const CLASS_NAME = Object.fromEntries(CLASSES.map((c) => [c.id, c.name]));
-  const MIN_S = 13, MAX_REC_S = 120, RATE = 16000;
+  const STATE = { present: "presente", absent: "ausente", uncertain: "incierto" };
+  const MIN_S = 13, MAX_REC_S = 120, RATE = 16000, SEG_S = 1.5;
   const PAGES_ORIGIN = location.origin;
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const st = { base: null, local: false, health: null, busy: false, rec: null, audioUrl: null };
   const nf = (n, d = 2) => Number(n).toLocaleString("es-419", { minimumFractionDigits: d, maximumFractionDigits: d });
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const status = (msg) => { $("#status").textContent = msg; };
+  const readJson = (id) => { try { return JSON.parse($("#" + id).textContent); } catch (_) { return null; } };
+  const glyph = (id) => '<svg aria-hidden="true" focusable="false"><use href="#g-' + esc(id) + '"/></svg>';
+  const SAMPLE = readJson("sample-result");
+  const PEAKS = readJson("sample-peaks");
+  const player = $("#player");
 
-  /* ------------------------------------------------------------ copy buttons */
-  document.querySelectorAll(".code").forEach((box) => {
+  /* ------------------------------------------------------------ copy buttons (named, announced) */
+  const live = $("#copy-live");
+  const announce = (msg) => { live.textContent = ""; setTimeout(() => { live.textContent = msg; }, 30); };
+  function addCopy(box) {
+    if (box.querySelector(".copy")) return;
+    const name = box.dataset.name || "código";
+    let head = box.querySelector(".code-head");
+    if (!head) { head = document.createElement("div"); head.className = "code-head"; head.innerHTML = "<span>" + esc(name) + "</span>"; box.prepend(head); }
+    let btns = head.querySelector(".btns");
+    if (!btns) { btns = document.createElement("div"); btns.className = "btns"; head.appendChild(btns); }
     const b = document.createElement("button");
     b.type = "button"; b.className = "copy"; b.textContent = "Copiar";
-    b.setAttribute("aria-label", "Copiar el código");
+    b.setAttribute("aria-label", "Copiar " + name);
     b.addEventListener("click", async () => {
-      try { await navigator.clipboard.writeText(box.querySelector("pre").innerText); b.textContent = "Copiado"; }
-      catch (_) { b.textContent = "Selecciona y copia"; }
+      try { await navigator.clipboard.writeText(box.querySelector("pre").innerText); b.textContent = "Copiado"; announce("Copiado: " + name); }
+      catch (_) { b.textContent = "Selecciona y copia"; announce("No se pudo copiar " + name + "; selecciona el texto y cópialo."); }
       setTimeout(() => (b.textContent = "Copiar"), 1800);
     });
-    box.appendChild(b);
-  });
+    btns.appendChild(b);
+  }
+  $$(".code").forEach(addCopy);
+
+  /* ------------------------------------------------------------ resize bookkeeping */
+  const resizers = new Map();
+  const ro = "ResizeObserver" in window ? new ResizeObserver((entries) => entries.forEach((en) => (resizers.get(en.target) || []).forEach((f) => f()))) : null;
+  function observeResize(el, f) { if (!ro) return; if (!resizers.has(el)) { resizers.set(el, []); ro.observe(el); } resizers.get(el).push(f); }
+
+  /* ------------------------------------------------------------ waveform and instrument */
+  function peaksOf(pcm, buckets = 360) {
+    const n = pcm.length; let m = 1;
+    for (let i = 0; i < n; i++) { const v = Math.abs(pcm[i]); if (v > m) m = v; }
+    const lo = [], hi = [];
+    for (let b = 0; b < buckets; b++) {
+      let a = 0, z = 0; const s = Math.floor((b * n) / buckets), e = Math.max(s + 1, Math.floor(((b + 1) * n) / buckets));
+      for (let i = s; i < e && i < n; i++) { if (pcm[i] < a) a = pcm[i]; if (pcm[i] > z) z = pcm[i]; }
+      lo.push(Math.round((100 * a) / m)); hi.push(Math.round((100 * z) / m));
+    }
+    return { duration_s: n / RATE, min: lo, max: hi };
+  }
+  function waveSvg(p) {
+    const B = p.max.length; let d = "M0 50";
+    for (let i = 0; i < B; i++) d += "L" + (i + 0.5) + " " + (50 - Math.max(0.8, p.max[i]) / 2).toFixed(1);
+    for (let i = B - 1; i >= 0; i--) d += "L" + (i + 0.5) + " " + (50 - Math.min(-0.8, p.min[i]) / 2).toFixed(1);
+    return '<svg viewBox="0 0 ' + B + ' 100" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="' + d + 'Z"/></svg>';
+  }
+  const evLabel = (e) => (CLASS_NAME[e.class] || e.class) + ", de " + nf(e.start_s) + " a " + nf(e.end_s) + " s (intervalo de decisión del motor), puntaje " + nf(e.score.value) + " no calibrado" + (e.decision ? ", decisión " + STATE[e.decision.state] : "");
+  /** Hero and "Qué es" figure: the sample waveform with the engine's events, all read from the embedded data. */
+  function drawInst(el, opts) {
+    if (!el || !PEAKS) return;
+    const dur = PEAKS.duration_s, evs = (SAMPLE && SAMPLE.events) || [];
+    const pct = (t) => Math.max(0, Math.min(100, (100 * t) / dur));
+    const tag = opts.interactive ? "button" : "span";
+    let marks = "", bands = "", segs = "";
+    for (const e of evs) {
+      const a = Number(e.start_s) || 0, b = Number(e.end_s) || 0, L = pct(a), W = Math.max(0.6, pct(b) - L);
+      const cv = "--c:var(--c-" + esc(e.class) + ")", lay = opts.layered ? " qe-l" : "";
+      const attrs = opts.interactive ? ' type="button" data-start="' + a + '" aria-label="' + esc((e.id ? e.id + ": " : "") + evLabel(e) + ". Escuchar desde ese momento.") + '"' : "";
+      if (b - a > SEG_S) {
+        segs += "<" + tag + ' class="seg' + lay + '" data-cls="' + esc(e.class) + '" style="' + cv + ";left:" + L + "%;width:" + W + '%"' + attrs + '><span class="br"></span><span class="t"><b>' + esc(e.id || "") + " · " + esc(CLASS_NAME[e.class] || e.class) + "</b> · intervalo de decisión " + nf(a) + "–" + nf(b) + " s (segmento del ASR, no un instante)</span></" + tag + ">";
+      } else {
+        bands += '<span class="band' + lay + '" data-cls="' + esc(e.class) + '" style="' + cv + ";left:" + L + "%;width:" + W + '%"></span>';
+        marks += "<" + tag + ' class="mk' + lay + '" data-cls="' + esc(e.class) + '" style="' + cv + ";left:" + (L + W / 2) + '%"' + attrs + ">" + glyph(e.class) + '<span class="id">' + esc(e.id || "") + "</span></" + tag + ">";
+      }
+    }
+    el.innerHTML = '<div class="inst-marks">' + marks + '</div><div class="inst-wave"><span class="mid"></span>' + waveSvg(PEAKS) + bands +
+      (opts.interactive ? '<span class="inst-ph" hidden></span>' : "") + '</div><div class="inst-segs">' + segs + '</div><div class="axis" data-dur="' + dur + '" aria-hidden="true"></div>';
+    if (opts.interactive) $$("[data-start]", el).forEach((b) => b.addEventListener("click", () => playSample(Number(b.dataset.start))));
+    // segment labels sit under their bracket: the row takes the height of the tallest label
+    const fit = () => { const s = el.querySelector(".inst-segs"); if (s) s.style.minHeight = Math.max(0, ...$$(".seg", s).map((x) => x.offsetHeight)) + 6 + "px"; };
+    fit(); observeResize(el, fit);
+  }
+  const isSample = () => /sample_es\.wav$/.test(player.currentSrc || player.getAttribute("src") || "");
+  function playSample(t) {
+    if (!isSample()) player.src = "sample_es.wav";
+    const go = () => { try { player.currentTime = t; } catch (_) { /* not seekable yet */ } player.play().catch(() => {}); };
+    if (player.readyState >= 1) go(); else { player.addEventListener("loadedmetadata", go, { once: true }); player.load(); }
+  }
+  function playFrom(t) { try { player.currentTime = t; } catch (_) { /* not ready */ } player.play().catch(() => {}); }
+
+  /* axes: the label step follows the real width */
+  function layoutAxis(ax) {
+    const dur = Number(ax.dataset.dur), w = ax.clientWidth;
+    if (!dur || !w) return;
+    const step = [1, 2, 5, 10, 15, 30, 60, 120].find((s) => (w * s) / dur >= 64) || 300;
+    let h = "";
+    for (let t = 0; t <= dur + 1e-6; t += step) {
+      const f = t / dur, cls = t === 0 ? "first" : f > 0.96 ? "last" : "";
+      h += '<span class="' + cls + '" style="left:' + 100 * f + '%">' + t + " s</span>";
+    }
+    ax.innerHTML = h;
+  }
+  function axes(root) { $$(".axis", root).forEach((ax) => { layoutAxis(ax); observeResize(ax, () => layoutAxis(ax)); }); }
 
   /* ------------------------------------------------------------ audio helpers */
   function wavFromPcm(pcm) {
@@ -819,7 +1335,7 @@ multimodal para la detección de disfluencias del habla en español (versión 0.
         status("Enviando " + label + "…");
         doc = await runJob(wav);
       }
-      render(doc, { source: label, elapsed: (performance.now() - t0) / 1000 });
+      render(doc, { source: label, elapsed: (performance.now() - t0) / 1000, peaks: peaksOf(pcm) });
       status(doc.status === "completed" ? "Listo en " + nf((performance.now() - t0) / 1000, 1) + " s." : "El análisis terminó con error.");
     } catch (e) { showError(e); }
     finally { setBusy(false); }
@@ -828,12 +1344,12 @@ multimodal para la detección de disfluencias del habla en español (versión 0.
   /* ------------------------------------------------------------ rendering */
   const measure = (m, unit, d = 2) => m && m.available ? nf(m.value, d) + (unit ? " " + unit : "") : '<span class="na">no disponible: ' + esc((m && m.unavailable_reason) || "sin motivo") + "</span>";
   const modality = (m) => m && m.available ? "disponible" : '<span class="na">no disponible: ' + esc((m && m.reason) || "sin motivo") + "</span>";
-  const STATE = { present: "presente", absent: "ausente", uncertain: "incierto" };
+  const noticeOf = (doc) => doc && doc.provenance && doc.provenance.checkpoint && doc.provenance.checkpoint.checkpoint_notice;
   function showError(e) {
     const doc = e && e.doc;
     const box = $("#result");
     if (doc && doc.error) { render(doc, {}); }
-    else box.innerHTML = '<div class="note err"><p><strong>No se pudo completar.</strong> ' + esc(e && e.message ? e.message : e) + "</p></div>";
+    else box.innerHTML = '<div class="note err"><p><span class="k">No se pudo completar</span>' + esc(e && e.message ? e.message : e) + "</p></div>";
     status("Error: " + (doc && doc.error ? doc.error.code : (e && e.message) || e));
   }
   function render(doc, meta) {
@@ -843,61 +1359,121 @@ multimodal para la detección de disfluencias del habla en español (versión 0.
       ? doc.request.audio_duration_s.value
       : Math.max(1, ...(doc.events || []).map((e) => Number(e.end_s) || 0))) || 1);
     let h = "";
-    if (meta.precomputed) h += '<div class="note info"><p><strong>Resultado real precalculado</strong> del audio de muestra. ' + esc(meta.precomputed) + "</p></div>";
+    const notice = noticeOf(doc);
+    if (meta.precomputed) h += '<div class="note info"><p><span class="k">Resultado real precalculado</span>Del audio de muestra. ' + esc(meta.precomputed) + "</p>" +
+      (notice ? '<p class="mono" style="font-size:.85rem">Checkpoint: ' + esc(notice) + "</p>" : "") + "</div>";
+    else if (notice) h += '<div class="note"><p><span class="k">Checkpoint</span>' + esc(notice) + "</p></div>";
     if (doc.status === "failed") {
       const er = doc.error || {};
-      h += '<div class="note err"><p><strong>' + esc(er.code || "failed") + "</strong>: " + esc(er.message || "") + "</p>" +
+      h += '<div class="note err"><p><span class="k">' + esc(er.code || "failed") + "</span>" + esc(er.message || "") + "</p>" +
         (er.details && Object.keys(er.details).length ? "<p><code>" + esc(JSON.stringify(er.details)) + "</code></p>" : "") + "</div>";
     } else {
       const s = doc.summary || {};
-      h += '<div class="kpis">' +
-        '<div class="kpi"><b>' + measure(doc.request.audio_duration_s, "s", 1) + "</b><span>duración</span></div>" +
-        '<div class="kpi"><b>' + esc(s.n_events ?? "–") + "</b><span>eventos en el alcance evaluado</span></div>" +
-        '<div class="kpi"><b>' + measure(s.events_per_minute, "", 1) + "</b><span>eventos por minuto</span></div>" +
-        CLASSES.map((c) => '<div class="kpi"><b>' + esc(Number((s.counts_by_class || {})[c.id]) || 0) + "</b><span>" + c.name.toLowerCase() + "</span></div>").join("") +
-        "</div>";
-      h += '<h3 id="tl-title">Línea de tiempo por clase</h3><p style="margin:.2rem 0 .6rem;color:var(--muted);font-size:.9rem">Cada barra es un evento; su ancho es el intervalo de decisión del motor, no un límite marcado por una persona. Al pulsarla, el audio salta a ese momento. Rayado: decisión incierta.</p>';
-      h += '<div class="timeline" role="group" aria-labelledby="tl-title">';
+      const counts = s.counts_by_class || {};
+      h += '<dl class="kpis">' +
+        "<div><dt>Duración</dt><dd>" + measure(doc.request.audio_duration_s, "s", 1) + "</dd></div>" +
+        "<div><dt>Eventos en el alcance evaluado</dt><dd>" + esc(s.n_events ?? "–") + "</dd></div>" +
+        "<div><dt>Eventos por minuto</dt><dd>" + measure(s.events_per_minute, "", 1) + "</dd></div>" +
+        CLASSES.map((c) => '<div style="--c:var(--c-' + c.id + ')"><dt>' + glyph(c.id) + c.name + "</dt><dd>" + esc(Number(counts[c.id]) || 0) + "</dd></div>").join("") +
+        "</dl>";
+      h += '<h3 id="tl-title">Línea de tiempo por clase</h3><p class="tl-help" id="tl-help">Cada marca es un evento; su ancho es el intervalo de decisión del motor, no un límite marcado por una persona. Los intervalos largos se dibujan como corchete de segmento. Punteado: decisión incierta. Teclado: <kbd>←</kbd> <kbd>→</kbd> evento anterior o siguiente, <kbd>Inicio</kbd> <kbd>Fin</kbd>, <kbd>Enter</kbd> escucha, <kbd>J</kbd> <kbd>K</kbd> retrocede o avanza 1 s.</p>';
+      h += '<div class="timeline" role="group" aria-labelledby="tl-title" aria-describedby="tl-help">';
+      if (meta.peaks) h += '<div class="tl-row"><div class="tl-label mono">Onda</div><div class="tl-track tl-wave">' + waveSvg(meta.peaks) + '<span class="tl-playhead" hidden></span></div></div>';
       for (const c of CLASSES) {
         const evs = (doc.events || []).filter((e) => e.class === c.id);
-        h += '<div class="tl-row"><div class="tl-label"><span class="swatch" style="background:var(--c-' + c.id + ')"></span>' + c.name + ' <span class="na">(' + evs.length + ")</span></div>" +
-          '<div class="tl-track" data-track>' + evs.map((e) => {
+        h += '<div class="tl-row" style="--c:var(--c-' + c.id + ')"><div class="tl-label">' + glyph(c.id) + c.name + ' <span class="na">(' + evs.length + ")</span></div>" +
+          '<div class="tl-track" data-track>' + evs.map((e, k) => {
             const t0 = Number(e.start_s) || 0, t1 = Number(e.end_s) || 0;
             const left = Math.max(0, Math.min(100, (100 * t0) / dur)), width = Math.max(0.8, (100 * (t1 - t0)) / dur);
-            const label = c.name + ", de " + nf(e.start_s) + " a " + nf(e.end_s) + " s, puntaje " + nf(e.score.value) + " no calibrado" + (e.decision ? ", decisión " + STATE[e.decision.state] : "");
-            return '<button type="button" class="tl-ev" data-start="' + t0 + '" data-state="' + esc(e.decision ? e.decision.state : "") + '" style="left:' + left + "%;width:" + Math.min(width, 100 - left) + "%;background:var(--c-" + c.id + ')" title="' + esc(label) + '" aria-label="' + esc(label) + '"></button>';
+            const id = e.id || c.id + "-" + k;
+            return '<button type="button" tabindex="-1" class="tl-ev' + (t1 - t0 > SEG_S ? " seg-ev" : "") + '" data-ev="' + esc(id) + '" data-start="' + t0 + '" data-state="' + esc(e.decision ? e.decision.state : "") + '" style="left:' + left + "%;width:" + Math.min(width, 100 - left) + '%" title="' + esc(evLabel(e)) + '" aria-label="' + esc(evLabel(e)) + '"></button>';
           }).join("") + '<span class="tl-playhead" hidden></span></div></div>';
       }
-      const step = dur > 60 ? 10 : dur > 20 ? 5 : 2;
-      h += '<div class="tl-axis" aria-hidden="true">';
-      for (let t = 0; t <= dur + 1e-6; t += step) h += '<span style="left:' + (100 * t) / dur + '%">' + t + " s</span>";
-      h += "</div></div>";
-      h += '<div class="table-wrap"><table><caption class="visually-hidden">Eventos detectados</caption><thead><tr><th scope="col">Clase</th><th scope="col">Inicio</th><th scope="col">Fin</th><th scope="col">Puntaje (no calibrado)</th>' +
+      h += '<div class="axis" data-dur="' + dur + '" aria-hidden="true"></div></div>';
+      h += '<div class="table-wrap"><table class="stack"><caption class="visually-hidden">Eventos detectados</caption><thead><tr><th scope="col">Clase</th><th scope="col">Inicio</th><th scope="col">Fin</th><th scope="col">Puntaje (no calibrado)</th>' +
         (doc.request.decision ? '<th scope="col">Decisión (experimental)</th>' : "") + (doc.request.include_text ? '<th scope="col">Texto</th>' : "") + "</tr></thead><tbody>";
-      if (!(doc.events || []).length) h += '<tr><td colspan="6" class="na">Sin eventos en el alcance evaluado.</td></tr>';
-      for (const e of doc.events || []) {
-        h += "<tr><td>" + esc(CLASS_NAME[e.class] || e.class) + (e.experimental ? ' <span class="pill">experimental</span>' : "") + '</td><td class="num">' + nf(e.start_s) + ' s</td><td class="num">' + nf(e.end_s) + ' s</td><td class="num">' + nf(e.score.value) + "</td>" +
-          (doc.request.decision ? "<td>" + (e.decision ? STATE[e.decision.state] + ' <span class="na">[' + nf(e.decision.lo) + "; " + nf(e.decision.hi) + "]</span>" : '<span class="na">no disponible</span>') + "</td>" : "") +
-          (doc.request.include_text ? "<td>" + (e.text ? esc(e.text) : '<span class="na">sin texto</span>') + "</td>" : "") + "</tr>";
-      }
+      if (!(doc.events || []).length) h += '<tr><td colspan="6" class="na full">Sin eventos en el alcance evaluado.</td></tr>';
+      (doc.events || []).forEach((e) => {
+        const k = (doc.events || []).filter((x) => x.class === e.class).indexOf(e);
+        const id = e.id || e.class + "-" + k;
+        h += '<tr data-ev="' + esc(id) + '" style="--c:var(--c-' + esc(e.class) + ')"><td data-label="Clase"><span><button type="button" class="row-play" data-start="' + (Number(e.start_s) || 0) + '">' + glyph(e.class) + "<span>" + esc(CLASS_NAME[e.class] || e.class) + (e.experimental ? " †" : "") + '<span class="visually-hidden">, escuchar desde ' + nf(e.start_s) + " s</span></span></button>" + (e.experimental ? ' <span class="na">† experimental</span>' : "") + '</span></td><td data-label="Inicio" class="num">' + nf(e.start_s) + ' s</td><td data-label="Fin" class="num">' + nf(e.end_s) + ' s</td><td data-label="Puntaje" class="num"><span>' + nf(e.score.value) + ' <span class="na">no calibrado</span></span></td>' +
+          (doc.request.decision ? '<td data-label="Decisión"><span>' + (e.decision ? STATE[e.decision.state] + ' <span class="na">[' + nf(e.decision.lo) + "; " + nf(e.decision.hi) + "]</span>" : '<span class="na">no disponible</span>') + "</span></td>" : "") +
+          (doc.request.include_text ? '<td data-label="Texto">' + (e.text ? esc(e.text) : '<span class="na">sin texto</span>') + "</td>" : "") + "</tr>";
+      });
       h += "</tbody></table></div>";
       if (doc.transcript) h += "<h3>Transcripción</h3><p>" + esc(doc.transcript) + "</p>";
       const m = doc.modalities || {};
-      h += "<h3>Modalidades</h3><ul><li>Acústica: " + modality(m.acoustic) + "</li><li>Texto del ASR: " + modality(m.linguistic) + "</li><li>Video: " + modality(m.kinesic_video) + "</li></ul>";
+      h += '<h3>Modalidades</h3><ul class="ruled"><li>Acústica: ' + modality(m.acoustic) + "</li><li>Texto del ASR: " + modality(m.linguistic) + "</li><li>Video: " + modality(m.kinesic_video) + "</li></ul>";
       const oos = s.out_of_scope;
       if (oos && oos.n_events) h += "<p>Clases fuera del alcance evaluado detectadas y ocultas: " + esc(Object.entries(oos.counts_by_class).map(([k, v]) => k + " = " + v).join(", ")) + ". No se cuentan en los totales.</p>";
     }
-    if ((doc.warnings || []).length) h += '<details><summary>Advertencias del servicio (' + doc.warnings.length + ', en inglés)</summary><ul>' + doc.warnings.map((w) => "<li><code>" + esc(w.code) + "</code>: " + esc(w.message) + "</li>").join("") + "</ul></details>";
-    h += '<details><summary>JSON crudo (' + esc(doc.schema_version) + ")</summary><pre>" + esc(JSON.stringify(doc, null, 2)) + "</pre></details>";
+    if ((doc.warnings || []).length) h += "<details><summary>Advertencias del servicio (" + doc.warnings.length + ', en inglés)</summary><ul class="ruled">' + doc.warnings.map((w) => "<li><code>" + esc(w.code) + "</code>: " + esc(w.message) + "</li>").join("") + "</ul></details>";
+    h += "<details><summary>JSON crudo (" + esc(doc.schema_version) + ')</summary><div class="code" data-name="resultado JSON"><div class="code-head"><span>resultado.json · ' + esc(doc.schema_version) + '</span><div class="btns"><button type="button" class="json-fmt" aria-pressed="true">Legible</button></div></div><pre><code class="json-out"></code></pre></div></details>';
     box.innerHTML = h;
-    box.querySelectorAll(".tl-ev").forEach((b) => b.addEventListener("click", () => {
-      const p = $("#player"); p.currentTime = Number(b.dataset.start); p.play().catch(() => {});
-    }));
+
+    const out = box.querySelector(".json-out");
+    if (out) out.textContent = JSON.stringify(doc, null, 2);
+    const fmt = box.querySelector(".json-fmt");
+    if (fmt) fmt.addEventListener("click", () => {
+      const pretty = fmt.getAttribute("aria-pressed") !== "true";
+      fmt.setAttribute("aria-pressed", String(pretty));
+      out.textContent = pretty ? JSON.stringify(doc, null, 2) : JSON.stringify(doc);
+    });
+    $$(".code", box).forEach(addCopy);
+    $$(".row-play", box).forEach((b) => b.addEventListener("click", () => playFrom(Number(b.dataset.start))));
+    wireTimeline(box);
+    linkEvents(box);
+    axes(box);
   }
-  $("#player").addEventListener("timeupdate", () => {
-    const p = $("#player"); if (!p.duration) return;
-    document.querySelectorAll(".tl-playhead").forEach((ph) => { ph.hidden = false; ph.style.left = (100 * p.currentTime) / p.duration + "%"; });
+  /* keyboard: one tab stop, arrows between events in time order, Home/End, Enter plays, J/K -/+ 1 s */
+  function wireTimeline(box) {
+    const tl = box.querySelector(".timeline"); if (!tl) return;
+    const evs = $$(".tl-ev", tl).sort((a, b) => Number(a.dataset.start) - Number(b.dataset.start));
+    if (!evs.length) return;
+    let cur = 0;
+    const set = (i, focus) => { cur = i; evs.forEach((b, j) => { b.tabIndex = j === i ? 0 : -1; }); if (focus) evs[i].focus(); };
+    set(0, false);
+    evs.forEach((b, i) => {
+      b.addEventListener("click", () => { set(i, false); playFrom(Number(b.dataset.start)); });
+      b.addEventListener("focus", () => set(i, false));
+    });
+    tl.addEventListener("keydown", (e) => {
+      if (!e.target.classList || !e.target.classList.contains("tl-ev")) return;
+      let i = null;
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") i = Math.min(evs.length - 1, cur + 1);
+      else if (e.key === "ArrowLeft" || e.key === "ArrowUp") i = Math.max(0, cur - 1);
+      else if (e.key === "Home") i = 0;
+      else if (e.key === "End") i = evs.length - 1;
+      else if (e.key === "j" || e.key === "J" || e.key === "k" || e.key === "K") {
+        e.preventDefault();
+        const d = e.key.toLowerCase() === "j" ? -1 : 1;
+        try { player.currentTime = Math.max(0, Math.min(player.duration || Infinity, player.currentTime + d)); } catch (_) { /* not ready */ }
+        status("Audio en " + nf(player.currentTime || 0, 1) + " s");
+        return;
+      }
+      if (i !== null) { e.preventDefault(); set(i, true); }
+    });
+  }
+  /* table row <-> timeline mark, both ways */
+  function linkEvents(box) {
+    const all = $$("[data-ev]", box);
+    const hl = (id, on) => all.forEach((el) => { if (el.dataset.ev === id) el.classList.toggle("hl", on); });
+    all.forEach((el) => {
+      ["mouseenter", "focusin"].forEach((t) => el.addEventListener(t, () => hl(el.dataset.ev, true)));
+      ["mouseleave", "focusout"].forEach((t) => el.addEventListener(t, () => hl(el.dataset.ev, false)));
+    });
+  }
+  player.addEventListener("timeupdate", () => {
+    if (!player.duration) return;
+    const f = (100 * player.currentTime) / player.duration + "%";
+    $$(".tl-playhead").forEach((ph) => { ph.hidden = false; ph.style.left = f; });
+    const hp = $("#hero-inst .inst-ph");
+    if (hp) { hp.hidden = !isSample(); hp.style.left = f; }
   });
+  const heroPlay = $("#hero-play");
+  const syncHero = () => { const on = !player.paused && isSample(); heroPlay.setAttribute("aria-pressed", String(on)); heroPlay.querySelector(".t").textContent = on ? "Pausar" : "Escuchar"; heroPlay.firstElementChild.textContent = on ? "❚❚" : "▶"; };
+  ["play", "pause", "ended", "emptied"].forEach((t) => player.addEventListener(t, syncHero));
+  heroPlay.addEventListener("click", () => { if (!player.paused && isSample()) player.pause(); else playSample(isSample() && player.currentTime < (player.duration || 0) ? player.currentTime : 0); });
 
   /* ------------------------------------------------------------ actions */
   function setBusy(b) {
@@ -910,7 +1486,7 @@ multimodal para la detección de disfluencias del habla en español (versión 0.
     try {
       status("Leyendo la muestra…");
       const buf = await (await fetch("sample_es.wav")).arrayBuffer();
-      $("#player").src = "sample_es.wav";
+      player.src = "sample_es.wav";
       const { pcm, wav } = await fileToPcm(buf);
       await analyzePcm(pcm, wav, "la muestra");
     } catch (e) { showError(e); }
@@ -922,7 +1498,7 @@ multimodal para la detección de disfluencias del habla en español (versión 0.
       status("Leyendo " + f.name + "…");
       const { pcm, wav, converted } = await fileToPcm(await f.arrayBuffer());
       if (st.audioUrl) URL.revokeObjectURL(st.audioUrl);
-      st.audioUrl = URL.createObjectURL(new Blob([wav], { type: "audio/wav" })); $("#player").src = st.audioUrl;
+      st.audioUrl = URL.createObjectURL(new Blob([wav], { type: "audio/wav" })); player.src = st.audioUrl;
       await analyzePcm(pcm, wav, f.name + (converted ? " (convertido a 16 kHz mono en tu navegador)" : ""));
     } catch (e) { showError(e.name === "EncodingError" ? "El navegador no pudo decodificar ese archivo." : e); }
     $("#file").value = "";
@@ -960,35 +1536,41 @@ multimodal para la detección de disfluencias del habla en español (versión 0.
     $("#rec-panel").hidden = true;
     const pcm = concat(rec.parts), wav = wavFromPcm(pcm);
     if (st.audioUrl) URL.revokeObjectURL(st.audioUrl);
-    st.audioUrl = URL.createObjectURL(new Blob([wav], { type: "audio/wav" })); $("#player").src = st.audioUrl;
+    st.audioUrl = URL.createObjectURL(new Blob([wav], { type: "audio/wav" })); player.src = st.audioUrl;
     if (pcm.length / RATE < MIN_S) { setBusy(false); if (rec.session) rec.session.send(new Int16Array(0)); showError("Grabaste " + nf(pcm.length / RATE, 1) + " s; el motor necesita al menos " + MIN_S + " s."); return; }
     if (!rec.session) { setBusy(false); return analyzePcm(pcm, wav, "la grabación"); }
     try {
       if (rec.pendingN) rec.session.send(concat(rec.pending));
       const t0 = performance.now();
       const doc = await rec.session.close(wav);
-      render(doc, { source: "la grabación", elapsed: (performance.now() - t0) / 1000 });
+      render(doc, { source: "la grabación", elapsed: (performance.now() - t0) / 1000, peaks: peaksOf(pcm) });
     } catch (e) { showError(e); }
     finally { setBusy(false); }
   }
 
   /* ------------------------------------------------------------ where am I? */
+  const LOOPBACK = ["127.0.0.1", "localhost", "[::1]"];
+  function svcRead(where, state) { $("#svc-read").innerHTML = "Servicio local · " + esc(where) + " · <b>" + esc(state) + "</b>"; }
   async function probe(base) {
-    const target = new URL("v1/health", base).href;
+    const target = new URL("v1/health", base);
+    // this page's own CSP only lets it connect to its origin and to loopback addresses
+    if (target.origin !== location.origin && !LOOPBACK.includes(target.hostname)) return { ok: false, kind: "csp" };
     try {
-      const r = await fetch(target, { cache: "no-store" });
+      const r = await fetch(target.href, { cache: "no-store" });
+      if (r.status === 401 || r.status === 403) return { ok: false, kind: "token", status: r.status };
       const h = await asJson(r);
       if (!r.ok || !h || !h.contract) return { ok: false, kind: "not-mrcd", status: r.status };
       return { ok: true, health: h };
     } catch (_) {
       let reachable = false;
-      try { await fetch(target, { mode: "no-cors", cache: "no-store" }); reachable = true; } catch (_) { /* unreachable or blocked */ }
+      try { await fetch(target.href, { mode: "no-cors", cache: "no-store" }); reachable = true; } catch (_) { /* unreachable or blocked */ }
       return { ok: false, kind: reachable ? "cors" : "network" };
     }
   }
   function connected(base, h, local) {
     st.base = base; st.health = h; st.local = local;
     $("#mode-dot").classList.add("on");
+    svcRead(new URL(base).host, "conectado · " + h.contract);
     const inc = $("#opt-inc");
     inc.disabled = !h.incremental;
     $("#opt-inc-wrap").title = h.incremental ? "" : "El servicio no se levantó con --incremental.";
@@ -1000,32 +1582,40 @@ multimodal para la detección de disfluencias del habla en español (versión 0.
     setBusy(false);
   }
   function corsCommands() {
-    return '<div class="code"><pre><code>mrcd serve --cors-origin ' + esc(PAGES_ORIGIN) + "\n# o con Docker:\ndocker run --rm -e MRCD_SERVICE_TOKEN=... -p 127.0.0.1:8765:8765 -v models:/models:ro ghcr.io/oratoria-proyectotesis/mrcd:0.4.0 --cors-origin " + esc(PAGES_ORIGIN) + "</code></pre></div>";
+    return '<div class="code" data-name="comando con CORS"><div class="code-head"><span>terminal · permitir este origen</span></div><pre><code>mrcd serve --cors-origin ' + esc(PAGES_ORIGIN) + "\n# o con Docker:\ndocker run --rm -e MRCD_SERVICE_TOKEN=... -p 127.0.0.1:8765:8765 -v models:/models:ro ghcr.io/oratoria-proyectotesis/mrcd:0.4.0 --cors-origin " + esc(PAGES_ORIGIN) + "</code></pre></div>";
   }
   async function connectExternal() {
     let base = $("#svc-url").value.trim();
     if (!/^https?:\/\//.test(base)) base = "http://" + base;
     if (!base.endsWith("/")) base += "/";
+    let where = base, p;
     $("#connect-help").innerHTML = "<p>Conectando…</p>";
-    const p = await probe(base);
+    try { where = new URL(base).host; svcRead(where, "conectando…"); p = await probe(base); } catch (_) { p = { ok: false, kind: "invalid" }; }
     if (p.ok) { connected(base, p.health, false); $("#connect-help").innerHTML = ""; return; }
-    let msg;
-    if (p.kind === "cors") msg = '<div class="note err"><p><strong>El servicio responde, pero no autoriza este origen (CORS).</strong> Reinícialo permitiendo <code>' + esc(PAGES_ORIGIN) + "</code>:</p>" + corsCommands() + "</div>";
-    else if (p.kind === "not-mrcd") msg = '<div class="note err"><p>En esa dirección responde algo que no es un servicio MRCD (HTTP ' + esc(p.status) + ").</p></div>";
-    else msg = '<div class="note err"><p><strong>No hubo respuesta.</strong> Hay dos causas posibles:</p><ol>' +
+    let msg, state;
+    if (p.kind === "csp") { state = "bloqueado por la política de la página (CSP)"; msg = '<div class="note err"><p><span class="k">Dirección no permitida (CSP)</span>Esta página solo puede conectarse a tu propio equipo: <code>127.0.0.1</code>, <code>localhost</code> o <code>[::1]</code>. Su política de seguridad de contenido bloquea cualquier otra dirección.</p></div>'; }
+    else if (p.kind === "invalid") { state = "dirección no válida"; msg = '<div class="note err"><p><span class="k">Dirección no válida</span>Escribe una dirección como <code>http://127.0.0.1:8765</code>.</p></div>'; }
+    else if (p.kind === "token") { state = "pide un token"; msg = '<div class="note err"><p><span class="k">El servicio pide autenticación (HTTP ' + esc(p.status) + ")</span>Se levantó con un token portador (<code>MRCD_SERVICE_TOKEN</code>) y esta página no envía tokens. Abre la página que sirve tu servicio, <a href=\"" + esc(base) + "\">" + esc(base) + "</a>, o usa los clientes de la sección Integración.</p></div>"; }
+    else if (p.kind === "cors") { state = "no autoriza este origen (CORS)"; msg = '<div class="note err"><p><span class="k">El servicio responde, pero no autoriza este origen (CORS)</span>Reinícialo permitiendo <code>' + esc(PAGES_ORIGIN) + "</code>:</p>" + corsCommands() + "</div>"; }
+    else if (p.kind === "not-mrcd") { state = "no es un servicio MRCD"; msg = '<div class="note err"><p><span class="k">No es un servicio MRCD</span>En esa dirección responde algo que no es un servicio MRCD (HTTP ' + esc(p.status) + ").</p></div>"; }
+    else {
+      state = "sin respuesta";
+      msg = '<div class="note err"><p><span class="k">No hubo respuesta</span>Hay dos causas posibles:</p><ol>' +
       "<li>El servicio no está levantado en esa dirección. Compruébalo con <code>curl " + esc(base) + "v1/health</code>.</li>" +
       "<li>El navegador bloqueó el acceso de una página pública a tu red local (Chrome y Edge aplican la restricción de red privada y pueden pedir permiso de “acceso a la red local”; Safari puede bloquear contenido http desde https). Si aparece un aviso de permiso, acéptalo. El servicio ya responde a esa verificación cuando se levanta con <code>--cors-origin</code>:</li></ol>" +
       corsCommands() + "<p>Alternativa que siempre funciona: abre <a href=\"" + esc(base) + "\">" + esc(base) + "</a>, la misma página servida por tu servicio.</p></div>";
+    }
+    svcRead(where, state);
     $("#connect-help").innerHTML = msg;
+    $$("#connect-help .code").forEach(addCopy);
   }
   $("#btn-connect").addEventListener("click", connectExternal);
 
   function showPrecomputed() {
-    let doc = null;
-    try { doc = JSON.parse($("#sample-result").textContent); } catch (_) { doc = null; }
+    const doc = SAMPLE;
     if (!doc) return null;
     const env = doc.provenance && doc.provenance.environment;
-    render(doc, { precomputed: "Calculado con mrcd " + esc(doc.provenance.service.mrcd_version) + " (" + esc(doc.generated_at.slice(0, 10)) + "), perfil de decisión " + esc(doc.request.decision_profile) + ", OMP_NUM_THREADS=" + esc((env && (env.omp_num_threads || (env.asr && env.asr.omp_num_threads))) || "4") + ", con include_text=true." });
+    render(doc, { precomputed: "Calculado con mrcd " + doc.provenance.service.mrcd_version + " (" + doc.generated_at.slice(0, 10) + "), perfil de decisión " + doc.request.decision_profile + ", OMP_NUM_THREADS=" + ((env && (env.omp_num_threads || (env.asr && env.asr.omp_num_threads))) || "4") + ", con include_text=true.", peaks: PEAKS });
     return doc;
   }
   function apiExample(doc) {
@@ -1040,12 +1630,155 @@ multimodal para la detección de disfluencias del habla en español (versión 0.
     };
     $("#api-example").textContent = JSON.stringify(ex, null, 2).replace(/\n}$/, ',\n  "…": "provenance, transcript, experimental y demás campos del contrato"\n}');
   }
+  /* anatomy of one event: values read from the embedded result, never rewritten by hand */
+  const PIN = { class: 1, start_s: 2, end_s: 2, interval_semantics: 2, score: 3, n_windows: 4, modalities_used: 5, text: 6 };
+  function anatomy(doc) {
+    const ev = doc && doc.events && (doc.events.find((e) => e.class === "repetition") || doc.events[0]);
+    if (!ev) return;
+    $("#anat-name").textContent = "evento " + (ev.id || "") + " del resultado de la muestra";
+    const keys = Object.keys(ev);
+    const lines = keys.map((k, i) => {
+      const n = PIN[k];
+      return '<span class="ln"' + (n ? ' data-n="' + n + '"' : "") + ">  " + esc(JSON.stringify(k)) + ": " + esc(JSON.stringify(ev[k])) + (i < keys.length - 1 ? "," : "") + (n ? '<span class="pin" aria-hidden="true">' + n + "</span>" : "") + "</span>";
+    });
+    $("#anat-code").innerHTML = "{\n" + lines.join("") + "}";
+    const notes = $$("#anat-notes li");
+    const on = (n, v) => { $$('#anat-code .ln[data-n="' + n + '"]').forEach((l) => l.classList.toggle("on", v)); notes.forEach((li) => li.classList.toggle("on", v && li.dataset.n === n)); };
+    notes.forEach((li) => { ["mouseenter", "focus"].forEach((t) => li.addEventListener(t, () => on(li.dataset.n, true))); ["mouseleave", "blur"].forEach((t) => li.addEventListener(t, () => on(li.dataset.n, false))); });
+    $$("#anat-code .ln[data-n]").forEach((l) => { l.addEventListener("mouseenter", () => on(l.dataset.n, true)); l.addEventListener("mouseleave", () => on(l.dataset.n, false)); });
+  }
+  /* read text vs ASR transcript: word-level LCS, differing words underlined */
+  function compareTexts(doc) {
+    const asr = doc && doc.transcript; if (!asr) return;
+    const readEl = $("#read-text q"), read = readEl.textContent;
+    const norm = (w) => w.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
+    const A = read.split(/\s+/).filter(Boolean), B = asr.split(/\s+/).filter(Boolean);
+    const a = A.map(norm), b = B.map(norm);
+    const L = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
+    for (let i = a.length - 1; i >= 0; i--) for (let j = b.length - 1; j >= 0; j--) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    const inA = new Array(a.length).fill(false), inB = new Array(b.length).fill(false);
+    for (let i = 0, j = 0; i < a.length && j < b.length;) { if (a[i] === b[j]) { inA[i] = inB[j] = true; i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++; }
+    const mark = (W, keep) => W.map((w, i) => (keep[i] ? esc(w) : '<mark class="diff">' + esc(w) + "</mark>")).join(" ");
+    readEl.innerHTML = mark(A, inA);
+    $("#asr-text").innerHTML = "<q>" + mark(B, inB) + "</q>";
+  }
+  function fillSample(doc) {
+    const counts = (doc && doc.summary && doc.summary.counts_by_class) || null;
+    if (counts) $$("[data-count]").forEach((b) => { const n = Number(counts[b.dataset.count]) || 0; b.textContent = n + (n === 1 ? " evento" : " eventos"); });
+    const notice = noticeOf(doc);
+    if (notice) { const p = $("#hero-notice"); p.querySelector(".v").textContent = notice; p.hidden = false; }
+  }
+
+  /* ------------------------------------------------------------ "Qué es": each class appears on the figure as the reader reaches it */
+  function reveal() {
+    const items = $$(".classes li[data-cls]");
+    const show = (cls) => $$('#qe-inst .qe-l[data-cls="' + cls + '"]').forEach((x) => x.classList.add("seen"));
+    if (reduceMotion.matches || !("IntersectionObserver" in window)) { items.forEach((li) => show(li.dataset.cls)); return; }
+    const io = new IntersectionObserver((entries) => entries.forEach((en) => { if (en.isIntersecting) { show(en.target.dataset.cls); io.unobserve(en.target); } }), { rootMargin: "0px 0px -35% 0px" });
+    items.forEach((li) => io.observe(li));
+  }
+
+  /* ------------------------------------------------------------ navigation: index panel, scroll-spy, progress */
+  const tocBtn = $("#toc-btn"), toc = $("#indice"), tocCur = $("#toc-cur");
+  const panelMode = () => getComputedStyle(tocBtn).display !== "none";
+  function openToc(open, focusFirst) {
+    toc.classList.toggle("open", open);
+    tocBtn.setAttribute("aria-expanded", String(open));
+    if (open && focusFirst) (toc.querySelector("a[aria-current]") || toc.querySelector("a")).focus();
+  }
+  tocBtn.addEventListener("click", () => openToc(!toc.classList.contains("open"), true));
+  toc.addEventListener("click", (e) => { if (e.target.closest("a") && panelMode()) openToc(false, false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && toc.classList.contains("open")) { openToc(false, false); tocBtn.focus(); } });
+  document.addEventListener("click", (e) => { if (toc.classList.contains("open") && !toc.contains(e.target) && !tocBtn.contains(e.target)) openToc(false, false); });
+  $("#skip-toc").addEventListener("click", (e) => {
+    e.preventDefault();
+    if (panelMode()) openToc(true, true);
+    else (toc.querySelector("a[aria-current]") || toc.querySelector("a")).focus();
+  });
+  const tocLinks = $$("#indice a[href^='#']");
+  const destLinks = $$(".dest a[data-ch]");
+  function setCurrent(id) {
+    let ch = null;
+    tocLinks.forEach((a) => {
+      if (a.getAttribute("href") === "#" + id) { a.setAttribute("aria-current", "location"); ch = a.dataset.ch; tocCur.textContent = a.dataset.ch + " · " + a.querySelector(".n").textContent + " " + a.lastChild.textContent; }
+      else a.removeAttribute("aria-current");
+    });
+    destLinks.forEach((a) => { if (ch === a.dataset.ch && (ch !== "A" || id === "pruebalo")) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
+  }
+  const sections = tocLinks.map((a) => document.getElementById(a.getAttribute("href").slice(1))).filter(Boolean);
+  if ("IntersectionObserver" in window) {
+    const visible = new Set();
+    const spy = new IntersectionObserver((entries) => {
+      entries.forEach((en) => (en.isIntersecting ? visible.add(en.target) : visible.delete(en.target)));
+      const first = sections.find((s) => visible.has(s));
+      if (first) setCurrent(first.id);
+    }, { rootMargin: "-20% 0px -60% 0px" });
+    sections.forEach((s) => spy.observe(s));
+  }
+  setCurrent("inicio");
+  const bar = $("#progress-bar");
+  let ticking = false;
+  const progress = () => { ticking = false; const max = document.documentElement.scrollHeight - innerHeight; bar.style.transform = "scaleX(" + (max > 0 ? Math.min(1, scrollY / max) : 0) + ")"; };
+  if (!reduceMotion.matches) { addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(progress); } }, { passive: true }); progress(); }
+
+  /* ------------------------------------------------------------ tabs: arrows, Home/End, the hash names the panel */
+  function tabs() {
+    const sets = $$(".tabs").map((t) => {
+      const list = t.querySelector(".tablist"), btns = $$('[role="tab"]', list);
+      const panels = btns.map((b) => document.getElementById(b.getAttribute("aria-controls")));
+      list.hidden = false; t.classList.add("tabbed");
+      const select = (i, focus, push) => {
+        btns.forEach((b, j) => { const on = j === i; b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1; panels[j].hidden = !on; });
+        if (focus) btns[i].focus();
+        if (push) history.replaceState(null, "", "#" + panels[i].id);
+      };
+      btns.forEach((b, i) => b.addEventListener("click", () => select(i, false, true)));
+      list.addEventListener("keydown", (e) => {
+        const i = btns.indexOf(document.activeElement); if (i < 0) return;
+        let n = null;
+        if (e.key === "ArrowRight") n = (i + 1) % btns.length;
+        else if (e.key === "ArrowLeft") n = (i - 1 + btns.length) % btns.length;
+        else if (e.key === "Home") n = 0;
+        else if (e.key === "End") n = btns.length - 1;
+        if (n !== null) { e.preventDefault(); select(n, true, true); }
+      });
+      return { panels, select };
+    });
+    const fromHash = (initial) => sets.forEach((s) => {
+      const i = s.panels.findIndex((p) => "#" + p.id === location.hash);
+      if (i >= 0) { s.select(i, false, false); s.panels[i].scrollIntoView(); }
+      else if (initial) s.select(0, false, false);
+    });
+    fromHash(true);
+    addEventListener("hashchange", () => fromHash(false));
+  }
+
+  /* ------------------------------------------------------------ C4: fit or zoom, drag to pan */
+  function c4() {
+    const box = $(".c4"); if (!box) return;
+    $$(".c4-z").forEach((b) => b.addEventListener("click", () => { box.style.setProperty("--z", b.dataset.z); $$(".c4-z").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); }));
+    let drag = null;
+    box.addEventListener("pointerdown", (e) => { if (e.pointerType !== "mouse" || e.button !== 0) return; drag = { x: e.clientX, y: e.clientY, l: box.scrollLeft, t: box.scrollTop }; box.classList.add("drag"); });
+    addEventListener("pointermove", (e) => { if (!drag) return; box.scrollLeft = drag.l - (e.clientX - drag.x); box.scrollTop = drag.t - (e.clientY - drag.y); });
+    addEventListener("pointerup", () => { drag = null; box.classList.remove("drag"); });
+  }
+
+  tabs();
+  c4();
+  drawInst($("#hero-inst"), { interactive: true });
+  drawInst($("#qe-inst"), { interactive: false, layered: true });
+  axes(document);
+  reveal();
+  fillSample(SAMPLE);
+  compareTexts(SAMPLE);
+  anatomy(SAMPLE);
+  apiExample(SAMPLE);
 
   (async () => {
-    const pre = (() => { try { return JSON.parse($("#sample-result").textContent); } catch (_) { return null; } })();
-    apiExample(pre);
+    svcRead("esta página", "comprobando…");
     const here = location.protocol.startsWith("http") ? await probe(new URL(".", location.href).href) : { ok: false };
     if (here.ok) { connected(new URL(".", location.href).href, here.health, true); return; }
+    svcRead("127.0.0.1:8765", "no conectado");
     $("#mode-text").innerHTML = "<p><strong>Estás viendo la página publicada.</strong> Abajo tienes un resultado real precalculado del audio de muestra. Para analizar tu propio audio, levanta el servicio en tu equipo (ver <a href=\"#instalacion\">Instalación</a>) con <code>--cors-origin " + esc(PAGES_ORIGIN) + "</code> y conéctalo, o abre directamente <code>http://127.0.0.1:8765/</code>.</p>";
     $("#connect-panel").hidden = false;
     $("#opt-inc").disabled = true;
