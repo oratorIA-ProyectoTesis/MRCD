@@ -584,7 +584,7 @@ with client.open_session() as s:
       <li>El análisis completo, incluido el ASR, corre en tu equipo. Tras la descarga inicial del modelo no hay llamadas de red.</li>
       <li>El audio se decodifica en memoria y se descarta al terminar el trabajo; nunca se escribe en disco. Los buffers de las sesiones se sobrescriben con ceros al cerrar.</li>
       <li>El texto transcrito solo vuelve si lo pides con <code>include_text=true</code>. Los resultados se guardan en memoria, con un límite, y desaparecen al detener el proceso.</li>
-      <li>El servicio se niega a escuchar fuera del bucle local salvo con <code>--allow-non-loopback</code>, y no tiene autenticación: no lo expongas a una red.</li>
+      <li>El servicio se niega a escuchar fuera del bucle local salvo con <code>--allow-non-loopback</code>. En el bucle local no tiene autenticación salvo que se defina <code>MRCD_SERVICE_TOKEN</code>; fuera de él exige un token portador (el contenedor lo hace) y no tiene TLS, así que no debe exponerse a una red sin un proxy inverso.</li>
       <li>Esta página no carga recursos de terceros ni usa rastreadores.</li>
     </ul>
   </div>
@@ -618,7 +618,7 @@ with client.open_session() as s:
       <li>Validado en un solo corpus de audio con ASR; ningún corpus peruano ni estudio con usuarios.</li>
       <li>La desambiguación contextual de formas como “este” o “bueno” no está demostrada.</li>
       <li>Bloqueos, revisiones y pausas quedan fuera del alcance evaluado y se ocultan por defecto. El servicio analiza solo audio; el canal de video no forma parte de él.</li>
-      <li>Servicio de desarrollo: sin autenticación ni TLS, pensado para el bucle local.</li>
+      <li>Servicio de desarrollo: sin TLS; token portador solo fuera del bucle local (obligatorio en el contenedor).</li>
     </ul>
   </div>
 </section>
